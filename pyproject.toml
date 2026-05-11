@@ -65,6 +65,44 @@ Issues = "https://github.com/Unclecheng-li/VulnClaw/issues"
 [project.scripts]
 vulnclaw = "vulnclaw.cli.main:app"
 
+[tool.hatch.build]
+exclude = [
+    "/frontend/node_modules",
+    "/frontend/dist",
+    "/.test-tmp",
+    "/.pytest_cache",
+    "/dist",
+    "/build",
+    "**/__pycache__",
+    "**/*.pyc",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["vulnclaw"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/vulnclaw",
+    "/frontend",
+    "/tests",
+    "/scripts",
+    "/README.md",
+    "/README_EN.md",
+    "/LICENSE",
+    "/CONTRIBUTING.md",
+    "/pyproject.toml",
+]
+exclude = [
+    "/frontend/node_modules",
+    "/frontend/dist",
+    "/.test-tmp",
+    "/.pytest_cache",
+    "/dist",
+    "/build",
+    "**/__pycache__",
+    "**/*.pyc",
+]
+
 [tool.ruff]
 line-length = 100
 target-version = "py310"
