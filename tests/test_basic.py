@@ -1,4 +1,4 @@
-"""VulnClaw basic integration tests — verify package-level imports and version."""
+"""VulnClaw basic integration tests: verify imports and version."""
 
 import pytest
 
@@ -6,11 +6,11 @@ import pytest
 def test_import_vulnclaw():
     """Test that the main package can be imported."""
     import vulnclaw
-    assert vulnclaw.__version__ == "0.2.7"
+    assert vulnclaw.__version__ == "0.2.8"
 
 
 def test_all_submodules_importable():
-    """Test that all submodules can be imported."""
+    """Test that all major submodules can be imported."""
     import vulnclaw.config.schema
     import vulnclaw.config.settings
     import vulnclaw.agent.context
@@ -32,6 +32,7 @@ def test_all_submodules_importable():
 def test_no_import_errors():
     """Verify no module raises on import."""
     import importlib
+
     modules = [
         "vulnclaw",
         "vulnclaw.config.schema",

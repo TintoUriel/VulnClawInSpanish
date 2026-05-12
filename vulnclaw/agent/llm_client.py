@@ -228,7 +228,6 @@ async def call_llm_auto(agent: Any, system_prompt: str, round_context: str) -> s
                 tool_summary_parts.append(f"结构化结果: {structured}")
         if skipped_info:
             tool_summary_parts.append(f"⚠️ 本轮跳过: {'; '.join(skipped_info)}")
-        agent.context.add_assistant_message(" | ".join(tool_summary_parts))
 
         try:
             kwargs["messages"] = messages

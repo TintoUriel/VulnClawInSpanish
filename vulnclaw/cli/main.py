@@ -200,6 +200,20 @@ def _run_repl() -> None:
                     console.print("[-] No MCP tools available")
                 continue
 
+            elif cmd_lower.startswith("report"):
+                report_target = user_input[len("report"):].strip() or current_target
+                if not report_target:
+                    console.print("[!] Set a target first with [bold]target <host>[/] or run [bold]report <host>[/].")
+                    continue
+
+                report_path = _generate_report_for_target(
+                    report_target,
+                    current_session=agent.session_state if agent.session_state.target == report_target else None,
+                    report_format=config.session.report_format,
+                )
+                console.print(f"[+] Report generated: [bold]{report_path}[/]")
+                continue
+
             elif cmd_lower.startswith("persistent"):
                 # Persistent pentest mode from REPL
                 explicit_target = user_input[len("persistent"):].strip()
@@ -275,18 +289,25 @@ def _run_repl() -> None:
                         )
 
                     asyncio.run(_run_persistent())
+                    if auto_report and not all_cycle_results:
+                        partial_report = _generate_report_for_target(
+                            persistent_target,
+                            current_session=agent.session_state,
+                            report_format=config.session.report_format,
+                        )
+                        console.print(f"[+] Partial report: {partial_report}")
                 except KeyboardInterrupt:
                     console.print("\n[!] User interrupted persistent pentest")
                     if agent.session_state.findings:
                         try:
-                            from vulnclaw.report.generator import generate_report
-                            final_report = generate_report(
-                                agent.session_state,
+                            final_report = _generate_report_for_target(
+                                persistent_target,
+                                current_session=agent.session_state,
                                 report_format=config.session.report_format,
                             )
                             console.print(f"[+] Final report: {final_report}")
-                        except Exception:
-                            pass
+                        except Exception as exc:
+                            console.print(f"[!] Failed to generate final report: {exc}")
 
                 # Summary
                 tf = len(agent.session_state.findings)
@@ -413,6 +434,7 @@ def _print_help() -> None:
   [cyan]target <host>[/]      Set the active target
   [cyan]status[/]             Show current status
   [cyan]tools[/]              List available MCP tools
+  [cyan]report <host>[/]      Generate a report from the current/selected target
   [cyan]think[/]              Toggle thinking visibility
   [cyan]think on/off[/]       Explicitly show or hide thinking
   [cyan]persistent[/]         Start persistent testing for the current target
@@ -452,6 +474,35 @@ def _print_status(agent, mcp_manager, target, phase, config) -> None:
         title="Current Status",
         border_style="green",
     ))
+
+
+def _generate_report_for_target(
+    target: str,
+    *,
+    current_session=None,
+    report_format: str = "markdown",
+) -> str:
+    """Generate a report for a target using the best available source data."""
+    from vulnclaw.report.generator import generate_report, generate_report_from_target_state
+    from vulnclaw.target_state.store import load_target_state
+    from vulnclaw.agent.context import SessionState
+
+    if current_session is not None and (
+        current_session.findings
+        or current_session.executed_steps
+        or current_session.notes
+    ):
+        path = generate_report(current_session, report_format=report_format)
+        return str(path)
+
+    state = load_target_state(target)
+    if state:
+        path = generate_report_from_target_state(state)
+        return str(path)
+
+    session = SessionState(target=target)
+    path = generate_report(session, report_format=report_format)
+    return str(path)
 
 
 async def _run_cli_orchestrated_task(

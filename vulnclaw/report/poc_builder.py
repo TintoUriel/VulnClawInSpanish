@@ -55,6 +55,15 @@ _VULN_TYPE_ALIASES: dict[str, str] = {
 }
 
 
+def _sanitize_filename_component(value: str, max_length: int = 40) -> str:
+    sanitized = re.sub(r'[<>:"/\\|?*]+', "_", value or "")
+    sanitized = re.sub(r"\s+", "_", sanitized).strip(" ._")
+    sanitized = re.sub(r"_+", "_", sanitized)
+    if not sanitized:
+        sanitized = "finding"
+    return sanitized[:max_length]
+
+
 def _normalize_vuln_type(vuln_type: str) -> str:
     normalized = (vuln_type or "").strip().lower().replace("-", " ").replace("/", " ")
     compact = re.sub(r"\s+", " ", normalized)
@@ -108,13 +117,13 @@ def generate_pocs(session: SessionState, output_dir: Path) -> list[Path]:
     generated: list[Path] = []
 
     for i, finding in enumerate(session.findings, 1):
-        safe_name = finding.title.replace(" ", "_").replace("/", "_")[:40]
-        cve_suffix = f"_{finding.cve}" if finding.cve else ""
+        safe_name = _sanitize_filename_component(finding.title)
+        cve_suffix = f"_{_sanitize_filename_component(finding.cve, max_length=24)}" if finding.cve else ""
         filename = f"poc_{i:02d}_{safe_name}{cve_suffix}.py"
         target = _extract_target(finding, session.target or "")
         content = _build_poc_content(finding, target=target, filename=filename)
 
-        output_path = output_dir / filename
+        output_path = _next_available_poc_path(output_dir, filename)
         output_path.write_text(content, encoding="utf-8")
         generated.append(output_path)
         finding.poc_script = str(output_path)
@@ -141,4 +150,19 @@ def generate_single_poc(
         target=_extract_target(finding, target),
         filename=f"poc_{_normalize_vuln_type(vuln_type or 'custom')}.py",
     )
+
+
+def _next_available_poc_path(output_dir: Path, filename: str) -> Path:
+    """Return a writable PoC path, avoiding collisions with existing locked files."""
+    base = output_dir / filename
+    if not base.exists():
+        return base
+
+    stem = base.stem
+    suffix = base.suffix
+    for idx in range(1, 1000):
+        candidate = output_dir / f"{stem}_{idx:02d}{suffix}"
+        if not candidate.exists():
+            return candidate
+    return output_dir / f"{stem}_{datetime.now().strftime('%Y%m%d_%H%M%S_%f')}{suffix}"
 

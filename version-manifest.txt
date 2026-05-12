@@ -1,0 +1,14 @@
+VERSION=0.2.8
+
+# VulnClaw versioned file manifest
+# Keep these files in sync when bumping a release version.
+# Excludes generated artifacts such as dist/, .test-tmp/, __pycache__/, and local runtime output.
+
+pyproject.toml
+vulnclaw/__init__.py
+vulnclaw/web/app.py
+README.md
+README_EN.md
+VulnClaw_升级开发需求文档.md
+tests/test_basic.py
+tests/test_release_workflow.py

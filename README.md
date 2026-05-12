@@ -8,7 +8,7 @@
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://www.python.org/)
 [![OpenAI Compatible](https://img.shields.io/badge/API-OpenAI_Compatible-green)](https://platform.openai.com/)
 [![MCP](https://img.shields.io/badge/Toolchain-MCP-orange)](https://modelcontextprotocol.io/)
-[![PyPI](https://img.shields.io/badge/PyPI-v0.2.7-blueviolet)](https://pypi.org/project/vulnclaw/)
+[![PyPI](https://img.shields.io/badge/PyPI-v0.2.8-blueviolet)](https://pypi.org/project/vulnclaw/)
 [![Security](https://img.shields.io/badge/Scope-Authorized_Only-red)](#-安全声明)
 <br>
 
@@ -530,7 +530,7 @@ vulnclaw config set session.show_thinking false # 隐藏推理过程（也可在
 | v0.1.2   | 3 个 CTF 专项 Skill + 3 个现有 Skill 更新 + 触发词扩展 | ✅ 已完成  |
 | v0.1.3   | 四维信息收集模型 + RECON_MIN_ROUNDS + 维度完成度自检 + 社工条件触发 + osint-recon Skill | ✅ 已完成 |
 | v0.1.4   | 渗透问题诊断修复（findings 解析 / 信息收集推进 / 摘要过滤 / nmap 安全阀） | ✅ 已完成 |
-| **v0.2.7** | **当前版本：目标级成果继承、target state 治理能力与架构文档同步** | ✅ **当前** |
+| **v0.2.8** | **当前版本：目标级成果继承、target state 治理能力与架构文档同步** | ✅ **当前** |
 | v0.3     | 逆向能力（IDA Pro）— Skill 已就绪                       | 📋 Skill ✅ |
 | v0.4     | 知识库增强（ChromaDB 向量检索 + 语义 Skill 调度）       | 📋         |
 | v1.0     | 正式发布（PyPI + 文档 + CI/CD）                         | 📋         |

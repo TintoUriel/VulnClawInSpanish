@@ -144,6 +144,20 @@ class TestReportGenerator:
         content = Path(output).read_text(encoding="utf-8")
         assert "VulnClaw" in content
 
+    def test_report_prefers_llm_attack_summary_when_generated_from_session(self, tmp_path, monkeypatch):
+        from vulnclaw.report.generator import generate_report
+
+        session = self._make_session()
+        monkeypatch.setattr(
+            "vulnclaw.report.generator._generate_attack_summary_from_session",
+            lambda session: "这是通过 VulnClaw 对接的 LLM 生成的攻击路径摘要。",
+        )
+
+        output = str(tmp_path / "report_llm_summary.md")
+        generate_report(session, output)
+        content = Path(output).read_text(encoding="utf-8")
+        assert "这是通过 VulnClaw 对接的 LLM 生成的攻击路径摘要。" in content
+
     def test_report_with_recon_data(self, tmp_path):
         from vulnclaw.report.generator import generate_report
         from vulnclaw.agent.context import SessionState, PentestPhase
@@ -272,6 +286,28 @@ class TestReportGenerator:
         assert "PoC" in content
 
 
+    def test_persistent_cycle_report_prefers_llm_attack_summary(self, tmp_path, monkeypatch):
+        from vulnclaw.report.generator import generate_persistent_cycle_report
+
+        session = self._make_session()
+        monkeypatch.setattr(
+            "vulnclaw.report.generator._generate_attack_summary_from_session",
+            lambda session: "?? persistent cycle ? LLM ???????",
+        )
+
+        output = generate_persistent_cycle_report(
+            session=session,
+            cycle_num=1,
+            total_findings=3,
+            new_findings=1,
+            total_steps=12,
+            rounds_per_cycle=100,
+            output_path=str(tmp_path / "cycle_llm.md"),
+        )
+        content = Path(output).read_text(encoding="utf-8")
+        assert "?? persistent cycle ? LLM ???????" in content
+
+
 # ── poc_builder.py ───────────────────────────────────────────────────
 
 class TestPoCBuilder:
@@ -397,6 +433,48 @@ class TestPoCBuilder:
         content = paths[0].read_text(encoding="utf-8")
         assert 'target = "https://victim.local/download?file=../../etc/passwd"' in content
         assert "../../../etc/passwd" in content
+
+    def test_generate_pocs_sanitizes_windows_unsafe_title(self, tmp_path):
+        from vulnclaw.report.poc_builder import generate_pocs
+        from vulnclaw.agent.context import SessionState, VulnerabilityFinding
+
+        session = SessionState(target="https://example.com")
+        session.add_finding(
+            VulnerabilityFinding(
+                title='[已确认] **ThinkPHP:RCE?** / 唯一标识符',
+                severity="Critical",
+                vuln_type="RCE",
+            )
+        )
+
+        paths = generate_pocs(session, tmp_path / "pocs")
+        assert len(paths) == 1
+        assert paths[0].exists()
+        assert "*" not in paths[0].name
+        assert ":" not in paths[0].name
+        assert "?" not in paths[0].name
+
+    def test_generate_pocs_avoids_existing_filename_collision(self, tmp_path):
+        from vulnclaw.report.poc_builder import generate_pocs
+        from vulnclaw.agent.context import SessionState, VulnerabilityFinding
+
+        pocs_dir = tmp_path / "pocs"
+        pocs_dir.mkdir(parents=True, exist_ok=True)
+        (pocs_dir / "poc_01_SQL_Injection.py").write_text("old", encoding="utf-8")
+
+        session = SessionState(target="https://example.com")
+        session.add_finding(
+            VulnerabilityFinding(
+                title="SQL Injection",
+                severity="Critical",
+                vuln_type="SQLi",
+            )
+        )
+
+        paths = generate_pocs(session, pocs_dir)
+        assert len(paths) == 1
+        assert paths[0].name != "poc_01_SQL_Injection.py"
+        assert paths[0].exists()
 
 
     def test_poc_empty_findings(self, tmp_path):

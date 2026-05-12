@@ -211,6 +211,30 @@ class TestCLI:
         assert result.exit_code == 0
         assert "Report generated" in result.output or result.output
 
+    def test_repl_report_command_uses_current_session_or_target_state(self, runner, monkeypatch):
+        from vulnclaw.cli.main import app
+        import vulnclaw.cli.main as cli_main
+        import vulnclaw.mcp.lifecycle as lifecycle_mod
+        from vulnclaw.config.schema import VulnClawConfig
+
+        config = VulnClawConfig()
+        config.llm.api_key = "test-key"
+
+        monkeypatch.setattr(cli_main, "load_config", lambda: config)
+        monkeypatch.setattr(lifecycle_mod.MCPLifecycleManager, "start_enabled_servers", lambda self: 0)
+        monkeypatch.setattr(lifecycle_mod.MCPLifecycleManager, "stop_all", lambda self: None)
+        monkeypatch.setattr(cli_main, "_generate_report_for_target", lambda target, **kwargs: "C:/tmp/report.md")
+
+        result = runner.invoke(
+            app,
+            [],
+            input="target https://example.com\nreport https://example.com\nexit\n",
+        )
+
+        assert result.exit_code == 0
+        assert "Report generated" in result.output
+        assert "report.md" in result.output
+
     def test_run_uses_shared_orchestrator(self, runner, monkeypatch):
         from vulnclaw.cli.main import app
         import vulnclaw.cli.main as cli_main
@@ -259,6 +283,57 @@ class TestCLI:
 
         result = runner.invoke(app, ["persistent", "https://example.com", "--cycles", "1", "--rounds", "1"])
         assert result.exit_code == 0
+
+    def test_repl_persistent_interrupt_generates_final_report(self, runner, monkeypatch):
+        from vulnclaw.cli.main import app
+        import vulnclaw.cli.main as cli_main
+        import vulnclaw.agent.core as agent_core
+        import vulnclaw.mcp.lifecycle as lifecycle_mod
+        from vulnclaw.agent.context import SessionState, VulnerabilityFinding
+        from vulnclaw.config.schema import VulnClawConfig
+
+        config = VulnClawConfig()
+        config.llm.api_key = "test-key"
+
+        monkeypatch.setattr(cli_main, "load_config", lambda: config)
+        monkeypatch.setattr(lifecycle_mod.MCPLifecycleManager, "start_enabled_servers", lambda self: 0)
+        monkeypatch.setattr(lifecycle_mod.MCPLifecycleManager, "stop_all", lambda self: None)
+
+        state = SessionState(target="https://example.com")
+        finding = VulnerabilityFinding(title="SQLi", severity="High", vuln_type="SQLi")
+        state.add_finding(finding)
+
+        def fake_apply(agent, target: str, snapshot_id=None):
+            agent.context.state = state
+            return type(
+                "Restore",
+                (),
+                {
+                    "restored": True,
+                    "target": state.target,
+                    "phase": state.phase.value,
+                    "snapshot_id": snapshot_id or "",
+                    "resume_strategy": "",
+                    "resume_reason": "",
+                },
+            )()
+
+        async def fake_persistent_pentest(self, user_input: str, target=None, **kwargs):
+            raise KeyboardInterrupt()
+
+        monkeypatch.setattr(cli_main, "apply_target_state_to_agent", fake_apply)
+        monkeypatch.setattr(agent_core.AgentCore, "persistent_pentest", fake_persistent_pentest)
+        monkeypatch.setattr(cli_main, "_generate_report_for_target", lambda target, **kwargs: "C:/tmp/final.md")
+
+        result = runner.invoke(
+            app,
+            [],
+            input="persistent https://example.com\nexit\n",
+        )
+
+        assert result.exit_code == 0
+        assert "Final report" in result.output
+        assert "final.md" in result.output
     def test_target_state_list_and_clear(self, runner, monkeypatch, tmp_path):
         from vulnclaw.cli.main import app
         import vulnclaw.target_state.store as store_mod

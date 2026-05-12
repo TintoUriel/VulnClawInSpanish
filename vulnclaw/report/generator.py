@@ -237,6 +237,10 @@ def generate_report(
     generate_pocs(session, pocs_dir)
 
     from vulnclaw.report.filter import ReportContentFilter
+    if not llm_attack_summary:
+        llm_attack_summary = _generate_attack_summary_from_session(session)
+        if llm_attack_summary:
+            print("[*] LLM attack summary generated for report section 4")
     filtered_summary = ReportContentFilter.filter(llm_attack_summary) if llm_attack_summary else ""
 
     context = {
@@ -455,6 +459,66 @@ CYCLE_REPORT_TEMPLATE = """\
 """
 
 
+def _generate_attack_summary_from_session(session: SessionState) -> str:
+    """Generate a readable attack-path summary using VulnClaw's configured LLM."""
+    try:
+        from openai import OpenAI
+        from vulnclaw.agent.think_filter import strip_think_tags
+        from vulnclaw.config.settings import load_config
+
+        config = load_config()
+        if not config.llm.api_key:
+            return ""
+
+        client = OpenAI(
+            api_key=config.llm.api_key,
+            base_url=config.llm.base_url,
+        )
+
+        steps = session.executed_steps[-40:] if session.executed_steps else []
+        notes = session.notes[-25:] if session.notes else []
+        findings = session.findings[-20:] if session.findings else []
+
+        steps_text = "\n".join(f"{idx + 1}. {step}" for idx, step in enumerate(steps)) if steps else "No step records"
+        notes_text = "\n".join(f"- {note}" for note in notes) if notes else "No key observations"
+        findings_text = (
+            "\n".join(
+                f"- [{finding.severity}] {finding.title} | Evidence: {(finding.evidence or '')[:200]}"
+                for finding in findings
+            )
+            if findings
+            else "No findings"
+        )
+
+        prompt = (
+            f"Target: {session.target or 'unknown'}\n"
+            f"Phase: {getattr(session.phase, 'value', str(session.phase))}\n\n"
+            f"=== Executed Steps ===\n{steps_text}\n\n"
+            f"=== Key Observations ===\n{notes_text}\n\n"
+            f"=== Findings ===\n{findings_text}\n\n"
+            "Please write a readable Chinese attack-path summary. Requirements:\n"
+            "1. Clearly explain how the testing progressed, not generic filler.\n"
+            "2. Mention URLs, paths, parameters, stack, and verification actions when available.\n"
+            "3. Explicitly call out false positives or findings that failed to reproduce.\n"
+            "4. Output 2-5 short natural-language paragraphs only. No markdown headings. No thinking tags.\n"
+            "5. Do not invent steps that were never executed.\n"
+        )
+
+        response = client.chat.completions.create(
+            model=config.llm.model,
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=min(config.llm.max_tokens, 1200),
+            temperature=0.2,
+        )
+        if response and response.choices:
+            raw = response.choices[0].message.content or ""
+            return strip_think_tags(raw).strip()
+    except Exception as exc:
+        print(f"[!] LLM attack summary generation failed: {exc}")
+        return ""
+    return ""
+
+
 def generate_persistent_cycle_report(
     session: SessionState,
     cycle_num: int,
@@ -540,6 +604,8 @@ def generate_persistent_cycle_report(
     # ★ 攻击路径摘要（过滤 LLM 原始输出中的 think 标签 / 调试标记）
     step_summary = session.get_step_summary()
     from vulnclaw.report.filter import ReportContentFilter
+    if not llm_attack_summary:
+        llm_attack_summary = _generate_attack_summary_from_session(session)
     filtered_summary = ReportContentFilter.filter(llm_attack_summary) if llm_attack_summary else ""
 
     context = {

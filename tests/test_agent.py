@@ -1245,6 +1245,98 @@ class TestAgentCoreLoop:
         assert "Status: 200" in result
 
     @pytest.mark.asyncio
+    async def test_llm_client_does_not_persist_tool_summary_as_assistant_history(self, monkeypatch):
+        from vulnclaw.agent import llm_client
+
+        class DummyLoop:
+            def run_in_executor(self, executor, func):
+                return func()
+
+        class DummyToolCall:
+            id = "tool_1"
+            function = type("Fn", (), {"name": "navigate", "arguments": '{"url":"https://example.com"}'})()
+
+        class DummyMessage:
+            tool_calls = [DummyToolCall()]
+            content = ""
+
+        class DummyChoice:
+            message = DummyMessage()
+
+        class DummyResponse:
+            choices = [DummyChoice()]
+
+        class DummyFollowupMessage:
+            tool_calls = []
+            content = "followup ok"
+
+        class DummyFollowupChoice:
+            message = DummyFollowupMessage()
+
+        class DummyFollowupResponse:
+            choices = [DummyFollowupChoice()]
+
+        calls = [DummyResponse(), DummyFollowupResponse()]
+
+        class DummyClient:
+            class chat:
+                class completions:
+                    @staticmethod
+                    def create(**kwargs):
+                        return calls.pop(0)
+
+        saved_messages: list[str] = []
+
+        class DummyContext:
+            @staticmethod
+            def get_messages():
+                return []
+
+            @staticmethod
+            def add_assistant_message(text):
+                saved_messages.append(text)
+
+        class DummyConfig:
+            llm = type(
+                "LLM",
+                (),
+                {"model": "test-model", "max_tokens": 1000, "temperature": 0.1, "provider": "openai", "reasoning_effort": "high"},
+            )()
+
+        class DummyAgent:
+            context = DummyContext()
+            config = DummyConfig()
+
+            @staticmethod
+            def _get_client():
+                return DummyClient()
+
+            @staticmethod
+            def _build_openai_tools():
+                return [{"function": {"name": "navigate"}}]
+
+        async def fake_handle_tool_calls_with_results(agent, message):
+            return (
+                [
+                    {
+                        "tool_call": DummyToolCall(),
+                        "tool_call_id": "tool_1",
+                        "content": "[tool:navigate] navigated",
+                        "structured_content": {"url": "https://example.com", "status": "ok"},
+                    }
+                ],
+                [],
+            )
+
+        monkeypatch.setattr(llm_client, "handle_tool_calls_with_results", fake_handle_tool_calls_with_results)
+        monkeypatch.setattr(llm_client, "extract_response", lambda message: message.content)
+        monkeypatch.setattr(llm_client.asyncio, "get_event_loop", lambda: DummyLoop())
+
+        result = await llm_client.call_llm_auto(DummyAgent(), "sys", "round")
+        assert result == "followup ok"
+        assert saved_messages == ["followup ok"]
+
+    @pytest.mark.asyncio
     async def test_auto_pentest_stops_on_done_signal(self, monkeypatch):
         agent = self._make_agent()
         from vulnclaw.agent import loop_controller
