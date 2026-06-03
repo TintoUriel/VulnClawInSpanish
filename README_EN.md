@@ -414,16 +414,21 @@ vulnclaw config provider --list    # list all providers
 vulnclaw config provider minimax   # one-command switch
 ```
 
-| Provider     | Command                  | Default Model     |
-| ------------ | ------------------------ | ---------------- |
-| OpenAI      | `provider openai`        | gpt-4o           |
-| MiniMax     | `provider minimax`       | MiniMax-M2.7     |
-| DeepSeek    | `provider deepseek`       | deepseek-chat    |
-| Zhipu GLM   | `provider zhipu`         | glm-4-plus       |
-| Moonshot    | `provider moonshot`      | moonshot-v1-128k |
-| Qwen        | `provider qwen`         | qwen-max         |
-| SiliconFlow | `provider siliconflow`   | DeepSeek-V3      |
-| Custom      | `provider custom`        | manual           |
+| Provider     | Command                  | Default Model          |
+| ------------ | ------------------------ | ---------------------- |
+| OpenAI      | `provider openai`        | gpt-4o                 |
+| MiniMax     | `provider minimax`       | MiniMax-M3             |
+| DeepSeek    | `provider deepseek`      | deepseek-v4-pro        |
+| Zhipu GLM   | `provider zhipu`         | glm-4.7                |
+| Kimi        | `provider moonshot`      | kimi-k2.6              |
+| Qwen        | `provider qwen`          | qwen3-max              |
+| SiliconFlow | `provider siliconflow`   | DeepSeek-V4-Flash      |
+| Doubao      | `provider doubao`        | Doubao-Seed-2.0-Pro    |
+| Baichuan    | `provider baichuan`      | Baichuan4-Turbo        |
+| StepFun     | `provider stepfun`       | step-3.5-flash         |
+| SenseTime   | `provider sensetime`     | SenseNova-6.7-Flash-Lite |
+| Yi          | `provider yi`            | yi-lightning           |
+| Custom      | `provider custom`        | manual                 |
 
 ---
 

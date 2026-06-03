@@ -417,16 +417,21 @@ vulnclaw config provider --list    # 查看所有提供商
 vulnclaw config provider minimax   # 一键切换
 ```
 
-| 提供商      | 命令                   | 默认模型         |
-| ----------- | ---------------------- | ---------------- |
-| OpenAI      | `provider openai`      | gpt-4o           |
-| MiniMax     | `provider minimax`     | MiniMax-M2.7     |
-| DeepSeek    | `provider deepseek`    | deepseek-chat    |
-| 智谱 GLM    | `provider zhipu`       | glm-4-plus       |
-| Moonshot    | `provider moonshot`    | moonshot-v1-128k |
-| 通义千问    | `provider qwen`        | qwen-max         |
-| SiliconFlow | `provider siliconflow` | DeepSeek-V3      |
-| 自定义      | `provider custom`      | 手动填写         |
+| 提供商      | 命令                   | 默认模型              |
+| ----------- | ---------------------- | --------------------- |
+| OpenAI      | `provider openai`      | gpt-4o                |
+| MiniMax     | `provider minimax`     | MiniMax-M3            |
+| DeepSeek    | `provider deepseek`    | deepseek-v4-pro       |
+| 智谱 GLM    | `provider zhipu`       | glm-4.7               |
+| Kimi        | `provider moonshot`    | kimi-k2.6             |
+| 通义千问    | `provider qwen`        | qwen3-max             |
+| SiliconFlow | `provider siliconflow` | DeepSeek-V4-Flash     |
+| 豆包        | `provider doubao`      | Doubao-Seed-2.0-Pro   |
+| 百川        | `provider baichuan`    | Baichuan4-Turbo       |
+| 阶跃星辰    | `provider stepfun`     | step-3.5-flash        |
+| 商汤        | `provider sensetime`   | SenseNova-6.7-Flash-Lite |
+| 零一万物    | `provider yi`          | yi-lightning          |
+| 自定义      | `provider custom`      | 手动填写              |
 
 ---
 
