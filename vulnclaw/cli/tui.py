@@ -18,7 +18,7 @@ from rich.table import Table
 from rich.text import Text
 
 from vulnclaw.config.settings import apply_provider_preset, list_providers, load_config, save_config
-from vulnclaw.i18n import init_i18n, _
+from vulnclaw.i18n import _, init_i18n
 from vulnclaw.target_state.store import get_target_state_preview, list_target_snapshots
 
 # Initialize i18n with config

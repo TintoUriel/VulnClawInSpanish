@@ -9,21 +9,21 @@ from typing import Any, Optional
 
 class I18nLoader:
     """Load and manage translations."""
-    
+
     def __init__(self, lang: str = "zh") -> None:
         self.lang = lang
         self.translations: dict[str, str] = {}
         self._load_translations()
-    
+
     def _get_lang_dir(self) -> str:
         """Get the directory containing language files."""
         return os.path.join(os.path.dirname(__file__))
-    
+
     def _load_translations(self) -> None:
         """Load translations from JSON file."""
         lang_file = os.path.join(self._get_lang_dir(), f"{self.lang}.json")
         fallback_file = os.path.join(self._get_lang_dir(), "en.json")
-        
+
         try:
             with open(lang_file, "r", encoding="utf-8") as f:
                 self.translations = json.load(f)
@@ -33,7 +33,7 @@ class I18nLoader:
                     self.translations = json.load(f)
             except Exception:
                 self.translations = {}
-    
+
     def t(self, key: str, **kwargs: Any) -> str:
         """Translate a key to current language.
         
@@ -51,7 +51,7 @@ class I18nLoader:
             except KeyError:
                 pass
         return text
-    
+
     @staticmethod
     def detect_language() -> str:
         """Detect language from environment or config.
@@ -65,14 +65,14 @@ class I18nLoader:
         lang_env = os.environ.get("VULNCLAW_LANG", "").lower()
         if lang_env in ("zh", "en"):
             return lang_env
-        
+
         # Check system LANG
         system_lang = os.environ.get("LANG", "").lower()
         if system_lang.startswith("zh"):
             return "zh"
         elif system_lang.startswith("en"):
             return "en"
-        
+
         # Default to Chinese for this project
         return "zh"
 
