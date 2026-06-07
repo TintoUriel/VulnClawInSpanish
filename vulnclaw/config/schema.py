@@ -208,6 +208,10 @@ class SessionConfig(BaseModel):
     persistent_auto_report: bool = Field(
         default=True, description="Auto-generate report after each cycle"
     )
+    # Language configuration
+    language: str = Field(
+        default="auto", description="UI language: auto, zh, en"
+    )
 
 
 class VulnClawConfig(BaseModel):

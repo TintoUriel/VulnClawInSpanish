@@ -1,5 +1,7 @@
 """VulnClaw Agent Module Tests — context.py + memory.py + prompts.py + core.py"""
 
+import time
+
 import pytest
 
 # ── context.py ───────────────────────────────────────────────────────
@@ -235,6 +237,7 @@ class TestTargetState:
 
         state2 = SessionState(target="https://example.com")
         state2.add_finding(VulnerabilityFinding(title="XSS", severity="Medium", vuln_type="XSS"))
+        time.sleep(0.01)
         store_mod.save_target_state("https://example.com", state2, command="scan")
 
         restored = store_mod.hydrate_session_from_target_state("https://example.com")

@@ -224,7 +224,7 @@ class TestCLI:
 
         result = runner.invoke(app, ["report", "https://example.com", "--target"])
         assert result.exit_code == 0
-        assert "Report generated" in result.output or result.output
+        assert "Report generated" in result.output or "报告已生成" in result.output or "报告已生成" in result.output or result.output
 
     def test_repl_report_command_uses_current_session_or_target_state(self, runner, monkeypatch):
         import vulnclaw.cli.main as cli_main
@@ -251,7 +251,7 @@ class TestCLI:
         )
 
         assert result.exit_code == 0
-        assert "Report generated" in result.output
+        assert "Report generated" in result.output or "报告已生成" in result.output
         assert "report.md" in result.output
 
     def test_run_uses_shared_orchestrator(self, runner, monkeypatch):
@@ -471,7 +471,7 @@ class TestCLI:
         )
 
         assert result.exit_code == 0
-        assert "Final report" in result.output
+        assert "Final report" in result.output or "最终报告" in result.output
         assert "final.md" in result.output
 
     def test_target_state_list_and_clear(self, runner, monkeypatch, tmp_path):

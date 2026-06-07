@@ -18,7 +18,22 @@ from rich.table import Table
 from rich.text import Text
 
 from vulnclaw.config.settings import apply_provider_preset, list_providers, load_config, save_config
+from vulnclaw.i18n import _, init_i18n
 from vulnclaw.target_state.store import get_target_state_preview, list_target_snapshots
+
+# Initialize i18n with config
+_config_holder = [None]
+
+
+def _init_tui_i18n() -> None:
+    """Initialize i18n for TUI with config language setting."""
+    config = load_config()
+    _config_holder[0] = config
+    session_lang = getattr(config.session, "language", "auto") if config else "auto"
+    init_i18n(lang=session_lang if session_lang != "auto" else None, config=config)
+
+
+_init_tui_i18n()
 
 CheckMode = Literal["quick", "standard", "deep", "continuous"]
 TaskCommand = Literal["recon", "run", "scan", "persistent"]
@@ -60,7 +75,7 @@ class TuiTargetOverview:
     findings_count: int = 0
     verified_count: int = 0
     pending_count: int = 0
-    constraints_summary: str = "未记录"
+    constraints_summary: str = "Not recorded"
     violations_count: int = 0
     last_command: str = ""
     error: str = ""
@@ -108,53 +123,62 @@ class TuiTaskDraft:
 TaskLauncher = Callable[[TuiTaskDraft], None]
 
 
-MODES: dict[CheckMode, TuiMode] = {
-    "quick": TuiMode(
-        key="quick",
-        label="快速摸底",
-        command="recon",
-        description="只做信息收集和基础风险识别，适合第一次了解目标。",
-        allow_actions=("recon",),
-        block_actions=("exploit", "persistent", "post_exploitation"),
-    ),
-    "standard": TuiMode(
-        key="standard",
-        label="标准检查",
-        command="run",
-        description="信息收集 + 风险发现，默认推荐，不主动做高风险验证。",
-        allow_actions=("recon", "scan"),
-        block_actions=("post_exploitation",),
-    ),
-    "deep": TuiMode(
-        key="deep",
-        label="深度验证",
-        command="scan",
-        description="更深入地验证风险，需要再次确认授权范围。",
-        allow_actions=("recon", "scan", "exploit"),
-        needs_extra_confirm=True,
-    ),
-    "continuous": TuiMode(
-        key="continuous",
-        label="持续检查",
-        command="persistent",
-        description="多轮持续运行，适合靶场或长期观察目标。",
-        allow_actions=("recon", "scan"),
-        block_actions=("post_exploitation",),
-        needs_extra_confirm=True,
-    ),
-}
+def _build_modes() -> dict[CheckMode, TuiMode]:
+    """Build MODES dict with translated labels and descriptions."""
+    return {
+        "quick": TuiMode(
+            key="quick",
+            label=_("tui.mode_quick"),
+            command="recon",
+            description=_("tui.mode_quick_desc"),
+            allow_actions=("recon",),
+            block_actions=("exploit", "persistent", "post_exploitation"),
+        ),
+        "standard": TuiMode(
+            key="standard",
+            label=_("tui.mode_standard"),
+            command="run",
+            description=_("tui.mode_standard_desc"),
+            allow_actions=("recon", "scan"),
+            block_actions=("post_exploitation",),
+        ),
+        "deep": TuiMode(
+            key="deep",
+            label=_("tui.mode_deep"),
+            command="scan",
+            description=_("tui.mode_deep_desc"),
+            allow_actions=("recon", "scan", "exploit"),
+            needs_extra_confirm=True,
+        ),
+        "continuous": TuiMode(
+            key="continuous",
+            label=_("tui.mode_continuous"),
+            command="persistent",
+            description=_("tui.mode_continuous_desc"),
+            allow_actions=("recon", "scan"),
+            block_actions=("post_exploitation",),
+            needs_extra_confirm=True,
+        ),
+    }
 
-MENU_ITEMS = {
-    "1": "设置授权目标",
-    "2": "选择检查模式",
-    "3": "设置测试范围",
-    "4": "开始授权安全检查",
-    "5": "查看历史状态摘要",
-    "6": "生成目标报告",
-    "7": "环境诊断入口",
-    "8": "模型/API 配置",
-    "q": "退出",
-}
+
+def _build_menu_items() -> dict[str, str]:
+    """Build MENU_ITEMS dict with translated labels."""
+    return {
+        "1": _("tui.menu_set_target"),
+        "2": _("tui.menu_select_mode"),
+        "3": _("tui.menu_set_scope"),
+        "4": _("tui.menu_start"),
+        "5": _("tui.menu_history"),
+        "6": _("tui.menu_report"),
+        "7": _("tui.menu_diagnostic"),
+        "8": _("tui.menu_config"),
+        "q": _("tui.menu_exit"),
+    }
+
+
+MODES: dict[CheckMode, TuiMode] = _build_modes()
+MENU_ITEMS: dict[str, str] = _build_menu_items()
 
 
 def render_tui_home(state: TuiState | None = None, *, width: int = 110) -> str:
@@ -207,11 +231,8 @@ def build_dashboard(config, state: TuiState) -> Group:
     api_ready = bool(getattr(config.llm, "api_key", ""))
     overview = build_target_overview(state.target)
 
-    title = Text("VulnClaw TUI 工作台", style="bold cyan")
-    subtitle = Text(
-        "面向授权安全测试的终端图形化入口：先确认目标和边界，再启动检查。",
-        style="dim",
-    )
+    title = Text(_("tui.title"), style="bold cyan")
+    subtitle = Text(_("tui.desc"), style="dim")
     header = Panel(
         Align.left(Group(title, subtitle)),
         border_style="cyan",
@@ -224,35 +245,35 @@ def build_dashboard(config, state: TuiState) -> Group:
     status.add_column(ratio=1)
     status.add_column(ratio=1)
     status.add_row(
-        _metric_panel("授权目标", state.target or "未设置", "yellow" if not state.target else "green"),
-        _metric_panel("检查模式", f"{mode.label} / {mode.command}", "cyan"),
-        _metric_panel("AI 模型", f"{provider} · {model}", "green" if api_ready else "yellow"),
+        _metric_panel(_("tui.authorized_target"), state.target or _("tui.target_not_set"), "yellow" if not state.target else "green"),
+        _metric_panel(_("tui.check_mode"), f"{mode.label} / {mode.command}", "cyan"),
+        _metric_panel(_("tui.ai_model"), f"{provider} · {model}", "green" if api_ready else "yellow"),
     )
 
     scope_table = Table(box=box.SIMPLE_HEAVY, expand=True, show_header=True)
-    scope_table.add_column("测试范围", style="bold")
-    scope_table.add_column("当前值")
-    scope_table.add_row("仅测试主机", state.only_host or "由目标自动推断 / 未限制")
-    scope_table.add_row("仅测试端口", state.only_port or "未限制")
-    scope_table.add_row("仅测试路径", state.only_path or "未限制")
-    scope_table.add_row("排除主机", state.blocked_host or "未设置")
-    scope_table.add_row("排除路径", state.blocked_path or "未设置")
-    scope_table.add_row("允许动作", ", ".join(_effective_allow_actions(state)) or "未设置")
-    scope_table.add_row("禁止动作", ", ".join(_effective_block_actions(state)) or "未设置")
+    scope_table.add_column(_("tui.test_scope"), style="bold")
+    scope_table.add_column(_("tui.current_value"))
+    scope_table.add_row(_("tui.only_host"), state.only_host or _("tui.only_host_default"))
+    scope_table.add_row(_("tui.only_port"), state.only_port or _("tui.only_port_default"))
+    scope_table.add_row(_("tui.only_path"), state.only_path or _("tui.only_path_default"))
+    scope_table.add_row(_("tui.blocked_host"), state.blocked_host or _("tui.blocked_host_default"))
+    scope_table.add_row(_("tui.blocked_path"), state.blocked_path or _("tui.blocked_path_default"))
+    scope_table.add_row(_("tui.allowed_actions"), ", ".join(_effective_allow_actions(state)) or _("tui.not_set"))
+    scope_table.add_row(_("tui.blocked_actions"), ", ".join(_effective_block_actions(state)) or _("tui.not_set"))
 
     overview_table = Table(box=box.SIMPLE_HEAVY, expand=True, show_header=True)
-    overview_table.add_column("工作台概览", style="bold")
-    overview_table.add_column("当前状态")
-    overview_table.add_row("模型密钥", "已配置" if api_ready else "未配置")
-    overview_table.add_row("历史沿用", "开启" if state.resume else "关闭")
-    overview_table.add_row("目标历史", _format_target_history_line(overview))
-    overview_table.add_row("风险概览", _format_findings_line(overview))
-    overview_table.add_row("持久约束", overview.constraints_summary)
-    overview_table.add_row("约束拦截", f"{overview.violations_count} 次")
+    overview_table.add_column(_("tui.workbench_overview"), style="bold")
+    overview_table.add_column(_("tui.current_status"))
+    overview_table.add_row(_("tui.model_key"), _("tui.model_key_configured") if api_ready else _("tui.model_key_not_configured"))
+    overview_table.add_row(_("tui.history_resume"), _("tui.history_resume_on") if state.resume else _("tui.history_resume_off"))
+    overview_table.add_row(_("tui.target_history"), _format_target_history_line(overview))
+    overview_table.add_row(_("tui.risk_overview"), _format_findings_line(overview))
+    overview_table.add_row(_("tui.persistent_constraints"), overview.constraints_summary)
+    overview_table.add_row(_("tui.constraints_violations"), f"{overview.violations_count} {_('tui.times')}")
     if overview.last_command:
-        overview_table.add_row("上次命令", overview.last_command)
+        overview_table.add_row(_("tui.last_command"), overview.last_command)
     if overview.error:
-        overview_table.add_row("历史读取", overview.error)
+        overview_table.add_row(_("tui.history_error"), overview.error)
 
     menu = Table(box=box.MINIMAL_HEAVY_HEAD, expand=True, show_header=False)
     menu.add_column("Key", style="bold cyan", width=6)
@@ -262,9 +283,9 @@ def build_dashboard(config, state: TuiState) -> Group:
 
     command_preview = _draft_from_state(state).command_line
     footer = Panel(
-        f"[bold]命令预览[/]\n{command_preview}\n\n"
-        "[dim]原有 CLI / REPL 仍是默认入口；TUI 仅在显式运行 vulnclaw tui 时启用。[/]",
-        title="启动前确认",
+        f"[bold]{_('tui.command_preview')}\n{command_preview}\n\n"
+        f"[dim]{_('tui.cli_note')}[/]",
+        title=_("tui.confirm_title"),
         border_style="green" if state.target else "yellow",
         box=box.ROUNDED,
     )
@@ -272,9 +293,9 @@ def build_dashboard(config, state: TuiState) -> Group:
     return Group(
         header,
         status,
-        Panel(overview_table, title="运行概览", border_style="blue", box=box.ROUNDED),
-        Panel(scope_table, title="安全边界", border_style="green", box=box.ROUNDED),
-        Panel(menu, title="操作菜单", border_style="cyan", box=box.ROUNDED),
+        Panel(overview_table, title=_("tui.overview_title"), border_style="blue", box=box.ROUNDED),
+        Panel(scope_table, title=_("tui.boundary_title"), border_style="green", box=box.ROUNDED),
+        Panel(menu, title=_("tui.menu_title"), border_style="cyan", box=box.ROUNDED),
         footer,
     )
 
@@ -299,12 +320,12 @@ def run_tui(
             return
 
         choice = Prompt.ask(
-            "选择操作",
+            _("tui.select_action"),
             choices=list(MENU_ITEMS.keys()),
             default="1" if not state.target else "4",
         )
         if choice == "q":
-            screen.print("[dim]已退出 VulnClaw TUI。[/]")
+            screen.print(_("tui.exited"))
             return
         if choice == "1":
             _prompt_target(state)
@@ -320,7 +341,7 @@ def run_tui(
             _generate_target_report(screen, state)
         elif choice == "7":
             screen.print(build_runtime_diagnostic_panel(config))
-            Prompt.ask("按 Enter 返回", default="")
+            Prompt.ask(_("tui.press_enter"), default="")
         elif choice == "8":
             config = _prompt_llm_config(screen, config)
 
@@ -428,8 +449,8 @@ def build_runtime_diagnostic_panel(config) -> Panel:
     """Render the runtime diagnostic panel used by menu item 7."""
     diagnostic = build_runtime_diagnostic(config)
     table = Table(box=box.SIMPLE_HEAVY, expand=True, show_header=True)
-    table.add_column("检查项", style="bold")
-    table.add_column("状态")
+    table.add_column(_("tui.diagnostic_item"), style="bold")
+    table.add_column(_("tui.diagnostic_status"))
     table.add_row("Python", diagnostic.python_version)
     table.add_row("Node.js", diagnostic.node_version)
     table.add_row("npx", diagnostic.npx_status)
@@ -437,7 +458,7 @@ def build_runtime_diagnostic_panel(config) -> Panel:
     table.add_row("nmap", diagnostic.nmap_status)
     table.add_row("LLM Provider", diagnostic.provider)
     table.add_row("LLM Model", diagnostic.model)
-    table.add_row("API Key", "已配置" if diagnostic.api_key_configured else "未配置")
+    table.add_row("API Key", _("tui.model_key_configured") if diagnostic.api_key_configured else _("tui.model_key_not_configured"))
     table.add_row(
         "MCP Services",
         (
@@ -451,11 +472,8 @@ def build_runtime_diagnostic_panel(config) -> Panel:
     if diagnostic.mcp_error:
         table.add_row("MCP Error", diagnostic.mcp_error)
 
-    footer = (
-        "\n[dim]这是一份 TUI 内联诊断摘要；需要完整细节时仍可运行 "
-        "[bold]vulnclaw doctor[/]。[/]"
-    )
-    return Panel(Group(table, Text.from_markup(footer)), title="环境诊断", border_style="cyan")
+    footer = _("tui.diagnostic_footer")
+    return Panel(Group(table, Text.from_markup(footer)), title=_("tui.diagnostic_title"), border_style="cyan")
 
 
 def _command_version(command: str, *args: str) -> str:
@@ -492,36 +510,36 @@ def _safe_int(value: object) -> int:
 
 def _format_target_history_line(overview: TuiTargetOverview) -> str:
     if not overview.target:
-        return "未选择目标"
+        return _("tui.no_target")
     if overview.error:
-        return "读取失败"
+        return _("tui.read_error_short")
     if not overview.has_history:
-        return "暂无历史"
-    return f"{overview.snapshot_count} 个快照 / 阶段 {overview.phase}"
+        return _("tui.no_history")
+    return f"{overview.snapshot_count} {_('tui.snapshots')} / {_('tui.phase')} {overview.phase}"
 
 
 def _format_findings_line(overview: TuiTargetOverview) -> str:
     if not overview.has_history:
-        return "暂无风险记录"
+        return _("tui.no_findings")
     return (
-        f"{overview.findings_count} 个风险 "
-        f"(已验证 {overview.verified_count} / 待处理 {overview.pending_count})"
+        f"{overview.findings_count} {_('tui.risks')}"
+        f"({_('tui.verified')} {overview.verified_count} / {_('tui.pending')} {overview.pending_count})"
     )
 
 
 def _format_constraints_summary(raw: object) -> str:
     if not isinstance(raw, dict) or not raw:
-        return "未记录"
+        return _("tui.constraints_not_recorded")
 
     parts: list[str] = []
     mapping = [
-        ("allowed_hosts", "限定主机"),
-        ("allowed_ports", "限定端口"),
-        ("allowed_paths", "限定路径"),
-        ("blocked_hosts", "排除主机"),
-        ("blocked_paths", "排除路径"),
-        ("allowed_actions", "允许动作"),
-        ("blocked_actions", "禁止动作"),
+        ("allowed_hosts", _("tui.allowed_hosts")),
+        ("allowed_ports", _("tui.allowed_ports")),
+        ("allowed_paths", _("tui.allowed_paths")),
+        ("blocked_hosts", _("tui.blocked_hosts")),
+        ("blocked_paths", _("tui.blocked_paths")),
+        ("allowed_actions", _("tui.allowed_actions")),
+        ("blocked_actions", _("tui.blocked_actions")),
     ]
     for key, label in mapping:
         value = raw.get(key)
@@ -531,9 +549,9 @@ def _format_constraints_summary(raw: object) -> str:
             parts.append(f"{label}: {value}")
 
     if raw.get("strict_mode"):
-        parts.append("严格模式")
+        parts.append(_("tui.strict_mode"))
 
-    return "；".join(parts) if parts else "未记录"
+    return "；".join(parts) if parts else _("tui.constraints_not_recorded")
 
 
 def _effective_allow_actions(state: TuiState) -> tuple[str, ...]:
@@ -608,24 +626,24 @@ def build_command_preview_args(draft: TuiTaskDraft) -> list[str]:
 
 
 def _prompt_target(state: TuiState) -> None:
-    state.target = Prompt.ask("输入已授权目标 URL / 域名 / IP", default=state.target).strip()
+    state.target = Prompt.ask(_("tui.enter_target"), default=state.target).strip()
 
 
 def _prompt_mode(state: TuiState) -> None:
     choices = list(MODES.keys())
-    table = Table(title="检查模式", box=box.SIMPLE)
+    table = Table(title=_("tui.check_mode"), box=box.SIMPLE)
     table.add_column("Key", style="bold cyan")
-    table.add_column("名称")
-    table.add_column("说明")
+    table.add_column(_("tui.name"))
+    table.add_column(_("tui.description"))
     for key in choices:
         mode = MODES[key]
         table.add_row(key, mode.label, mode.description)
     Console().print(table)
-    state.mode = Prompt.ask("选择模式", choices=choices, default=state.mode)  # type: ignore[assignment]
+    state.mode = Prompt.ask(_("tui.select_mode"), choices=choices, default=state.mode)  # type: ignore[assignment]
 
 
 def _prompt_llm_config(screen: Console, config):
-    provider_table = Table(title="可用模型提供商", box=box.SIMPLE)
+    provider_table = Table(title=_("tui.available_providers"), box=box.SIMPLE)
     provider_table.add_column("Provider", style="bold cyan")
     provider_table.add_column("Default Model")
     provider_table.add_column("Base URL")
@@ -639,7 +657,7 @@ def _prompt_llm_config(screen: Console, config):
     screen.print(provider_table)
 
     provider = Prompt.ask(
-        "选择 Provider（留空保持当前）",
+        _("tui.select_provider"),
         default=config.llm.provider,
     ).strip()
     if provider and provider != config.llm.provider:
@@ -647,8 +665,8 @@ def _prompt_llm_config(screen: Console, config):
 
     base_url = Prompt.ask("Base URL", default=config.llm.base_url).strip()
     model = Prompt.ask("Model", default=config.llm.model).strip()
-    current_key = "已配置，留空保持不变" if config.llm.api_key else "未配置"
-    api_key = Prompt.ask("API Key（留空保持不变）", default="").strip()
+    current_key = _("tui.api_key_configured") if config.llm.api_key else _("tui.api_key_not_configured")
+    api_key = Prompt.ask(_("tui.enter_api_key"), default="").strip()
 
     if base_url:
         config.llm.base_url = base_url
@@ -663,78 +681,78 @@ def _prompt_llm_config(screen: Console, config):
             f"Provider: [bold]{config.llm.provider}[/]\n"
             f"Base URL: [dim]{config.llm.base_url}[/]\n"
             f"Model: [dim]{config.llm.model}[/]\n"
-            f"API Key: {'已更新' if api_key else current_key}",
-            title="模型/API 配置已保存",
+            f"API Key: {_('tui.updated') if api_key else current_key}",
+            title=_("tui.config_saved"),
             border_style="green",
         )
     )
-    Prompt.ask("按 Enter 返回", default="")
+    Prompt.ask(_("tui.press_enter"), default="")
     return config
 
 
 def _prompt_scope(state: TuiState) -> None:
-    state.only_host = Prompt.ask("仅测试主机", default=state.only_host).strip()
+    state.only_host = Prompt.ask(_("tui.enter_only_host"), default=state.only_host).strip()
     while True:
-        state.only_port = Prompt.ask("仅测试端口", default=state.only_port).strip()
+        state.only_port = Prompt.ask(_("tui.enter_only_port"), default=state.only_port).strip()
         try:
             _parse_optional_port(state.only_port)
             break
         except ValueError as exc:
             Console().print(f"[red]{exc}[/]")
-    state.only_path = Prompt.ask("仅测试路径", default=state.only_path).strip()
-    state.blocked_host = Prompt.ask("排除主机", default=state.blocked_host).strip()
-    state.blocked_path = Prompt.ask("排除路径", default=state.blocked_path).strip()
+    state.only_path = Prompt.ask(_("tui.enter_only_path"), default=state.only_path).strip()
+    state.blocked_host = Prompt.ask(_("tui.enter_blocked_host"), default=state.blocked_host).strip()
+    state.blocked_path = Prompt.ask(_("tui.enter_blocked_path"), default=state.blocked_path).strip()
     state.allow_actions = _parse_action_csv(
         Prompt.ask(
-            "允许动作（逗号分隔，留空使用模式默认值）",
+            _("tui.enter_allowed_actions"),
             default=",".join(state.allow_actions),
         )
     )
     state.block_actions = _parse_action_csv(
         Prompt.ask(
-            "禁止动作（逗号分隔，留空使用模式默认值）",
+            _("tui.enter_blocked_actions"),
             default=",".join(state.block_actions),
         )
     )
-    state.resume = Confirm.ask("沿用目标历史上下文", default=state.resume)
+    state.resume = Confirm.ask(_("tui.resume_history"), default=state.resume)
 
 
 def _confirm_and_launch(state: TuiState, launcher: TaskLauncher) -> None:
     if not state.target.strip():
-        Console().print("[yellow]请先设置授权目标。[/]")
-        Prompt.ask("按 Enter 返回", default="")
+        Console().print(_("tui.please_set_target"))
+        Prompt.ask(_("tui.press_enter"), default="")
         return
 
     mode = MODES[state.mode]
     if mode.needs_extra_confirm:
         ok = Confirm.ask(
-            f"{mode.label} 可能执行更深入或多轮验证。确认目标和范围均已授权？",
+            _("tui.confirm_deep_mode", mode=mode.label),
             default=False,
         )
         if not ok:
             return
 
     draft = _draft_from_state(state)
-    Console().print(_build_task_summary_panel(draft, title="即将启动"))
-    if Confirm.ask("开始授权安全检查", default=False):
+    Console().print(_build_task_summary_panel(draft, title=_("tui.launch_summary")))
+    if Confirm.ask(_("tui.start_check"), default=False):
         launcher(draft)
-        Prompt.ask("任务已返回，按 Enter 回到 TUI", default="")
+        Prompt.ask(_("tui.task_returned"), default="")
 
 
 def _build_task_summary_panel(draft: TuiTaskDraft, *, title: str = "启动摘要") -> Panel:
     lines = [
-        f"目标: [bold]{draft.target}[/]",
-        f"命令: [bold]{draft.command}[/]",
-        f"沿用历史: {'是' if draft.resume else '否'}",
-        f"仅测试主机: {draft.only_host or '未限制'}",
-        f"仅测试端口: {draft.only_port if draft.only_port is not None else '未限制'}",
-        f"仅测试路径: {draft.only_path or '未限制'}",
-        f"排除主机: {draft.blocked_host or '未设置'}",
-        f"排除路径: {draft.blocked_path or '未设置'}",
-        f"允许动作: {', '.join(draft.allow_actions) or '未设置'}",
-        f"禁止动作: {', '.join(draft.block_actions) or '未设置'}",
+        f"{_('tui.target')}: [bold]{draft.target}[/]",
+        f"{_('tui.command')}: [bold]{draft.command}[/]",
+        f"{_('tui.resume_history')}: {_('tui.yes') if draft.resume else _('tui.no')}",
+        f"{_('tui.only_host')}: {draft.only_host or _('tui.unrestricted')}",
+        f"{_('tui.only_port')}: {draft.only_port if draft.only_port is not None else _('tui.unrestricted')}",
+        f"{_('tui.only_path')}: {draft.only_path or _('tui.unrestricted')}",
+        f"{_('tui.blocked_host')}: {draft.blocked_host or _('tui.not_set')}",
+        f"{_('tui.blocked_path')}: {draft.blocked_path or _('tui.not_set')}",
+        f"{_('tui.allowed_actions')}: {', '.join(draft.allow_actions) or _('tui.not_set')}",
+        f"{_('tui.blocked_actions')}: {', '.join(draft.block_actions) or _('tui.not_set')}",
         "",
-        "[bold]可复制命令[/]",
+        f"[bold]{_('tui.copyable_command')}[/]",
         draft.command_line,
     ]
     return Panel("\n".join(lines), title=title, border_style="yellow", box=box.ROUNDED)
@@ -742,39 +760,39 @@ def _build_task_summary_panel(draft: TuiTaskDraft, *, title: str = "启动摘要
 
 def _show_target_history(screen: Console, state: TuiState) -> None:
     if not state.target.strip():
-        screen.print("[yellow]请先设置授权目标。[/]")
-        Prompt.ask("按 Enter 返回", default="")
+        screen.print(_("tui.please_set_target"))
+        Prompt.ask(_("tui.press_enter"), default="")
         return
 
     preview = get_target_state_preview(state.target)
     snapshots = list_target_snapshots(state.target)
     if preview is None:
-        screen.print(Panel("还没有该目标的历史状态。", title="历史状态", border_style="yellow"))
+        screen.print(Panel(_("tui.no_history_for_target"), title=_("tui.history_status"), border_style="yellow"))
     else:
         screen.print(
             Panel(
-                f"目标: [bold]{preview.get('target', state.target)}[/]\n"
-                f"阶段: [bold]{preview.get('phase', 'unknown')}[/]\n"
-                f"风险数: [bold]{preview.get('findings_count', 0)}[/]\n"
-                f"快照数: [bold]{len(snapshots)}[/]",
-                title="历史状态",
+                f"{_('tui.target')}: [bold]{preview.get('target', state.target)}[/]\n"
+                f"{_('tui.phase')}: [bold]{preview.get('phase', 'unknown')}[/]\n"
+                f"{_('tui.findings_count')}: [bold]{preview.get('findings_count', 0)}[/]\n"
+                f"{_('tui.snapshot_count')}: [bold]{len(snapshots)}[/]",
+                title=_("tui.history_status"),
                 border_style="cyan",
             )
         )
-    Prompt.ask("按 Enter 返回", default="")
+    Prompt.ask(_("tui.press_enter"), default="")
 
 
 def _generate_target_report(screen: Console, state: TuiState) -> None:
     if not state.target.strip():
-        screen.print("[yellow]请先设置授权目标。[/]")
-        Prompt.ask("按 Enter 返回", default="")
+        screen.print(_("tui.please_set_target"))
+        Prompt.ask(_("tui.press_enter"), default="")
         return
 
     from vulnclaw.cli.main import _generate_report_for_target
 
     report_path = _generate_report_for_target(state.target)
-    screen.print(Panel(report_path, title="报告已生成", border_style="green"))
-    Prompt.ask("按 Enter 返回", default="")
+    screen.print(Panel(report_path, title=_("tui.report_generated"), border_style="green"))
+    Prompt.ask(_("tui.press_enter"), default="")
 
 
 def _default_launcher(draft: TuiTaskDraft) -> None:
