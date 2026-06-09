@@ -21,6 +21,8 @@ async def auto_pentest(
     target: str | None = None,
     max_rounds: int = 15,
     on_step: Callable[[int, AgentResult], None] | None = None,
+    *,
+    stream_sink: Any = None,
 ) -> list[AgentResult]:
     results: list[AgentResult] = []
 
@@ -48,7 +50,7 @@ async def auto_pentest(
         round_context = agent._build_round_context(round_num, max_rounds)
 
         try:
-            response_text = await call_llm_auto(agent, system_prompt, round_context)
+            response_text = await call_llm_auto(agent, system_prompt, round_context, stream_sink=stream_sink)
             result.output = response_text
             agent.context.add_assistant_message(f"[Round {round_num} 分析] {response_text}")
             agent._finding_parser.parse(response_text)

@@ -1631,7 +1631,7 @@ class TestAgentCoreLoop:
         agent = self._make_agent()
         from vulnclaw.agent import loop_controller
 
-        async def _fake_call_llm_auto(agent_obj, system_prompt, round_context):
+        async def _fake_call_llm_auto(agent_obj, system_prompt, round_context, **kwargs):
             return "本轮未发现新漏洞，准备总结。\n[DONE]"
 
         monkeypatch.setattr(loop_controller, "call_llm_auto", _fake_call_llm_auto)
@@ -1653,7 +1653,7 @@ class TestAgentCoreLoop:
         ]
         call_idx = 0
 
-        async def _fake_call_llm_auto(agent_obj, system_prompt, round_context):
+        async def _fake_call_llm_auto(agent_obj, system_prompt, round_context, **kwargs):
             nonlocal call_idx
             text = round_responses[call_idx]
             call_idx += 1
@@ -1675,7 +1675,7 @@ class TestAgentCoreLoop:
         agent = self._make_agent()
         from vulnclaw.agent import loop_controller
 
-        async def _fake_call_llm_auto(agent_obj, system_prompt, round_context):
+        async def _fake_call_llm_auto(agent_obj, system_prompt, round_context, **kwargs):
             # Same wording every round, with an attack-path keyword
             return "尝试 sql注入测试，使用 UNION SELECT，未成功。"
 
@@ -1693,7 +1693,7 @@ class TestAgentCoreLoop:
         agent = self._make_agent()
         from vulnclaw.agent import loop_controller
 
-        async def _fake_call_llm_auto(agent_obj, system_prompt, round_context):
+        async def _fake_call_llm_auto(agent_obj, system_prompt, round_context, **kwargs):
             return "信息收集完成，切换到漏洞利用。\nphase: exploitation"
 
         monkeypatch.setattr(loop_controller, "call_llm_auto", _fake_call_llm_auto)
@@ -1739,7 +1739,7 @@ class TestAgentCoreLoop:
         agent = self._make_agent()
         from vulnclaw.agent import loop_controller
 
-        async def _fake_call_llm_auto(agent_obj, system_prompt, round_context):
+        async def _fake_call_llm_auto(agent_obj, system_prompt, round_context, **kwargs):
             return "访问 https://victim.local/admin 访问失败，连接超时。"
 
         monkeypatch.setattr(loop_controller, "call_llm_auto", _fake_call_llm_auto)

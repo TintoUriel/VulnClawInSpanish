@@ -68,6 +68,65 @@ from vulnclaw.target_state.store import (
     rollback_target_state,
 )
 
+# === Stream Output Renderer ===
+# 放在文件顶部 imports 之后，app 定义之前
+
+
+class TerminalStreamSink:
+    """CLI terminal stream renderer.
+
+    Implements StreamSink protocol for real-time terminal output.
+    """
+
+    def __init__(self, console: "Console", show_thinking: bool = False) -> None:
+        """Initialize the terminal sink.
+
+        Args:
+            console: Rich Console instance
+            show_thinking: Whether to show thinking content
+        """
+        self._console = console
+        self._show_thinking = show_thinking
+        self._status_printed = False
+        self._in_thinking = False
+
+    def on_status(self, message: str) -> None:
+        """Display status message like 'Thinking...'."""
+        self._console.print(f"[dim]{message}[/dim] ", end="", soft_wrap=True)
+        self._status_printed = True
+
+    def on_thinking_token(self, token: str) -> None:
+        """Receive thinking token."""
+        if self._show_thinking:
+            # Print thinking with dim italic style
+            self._console.print(f"[dim i]{token}[/]", end="", soft_wrap=True)
+
+    def on_content_token(self, token: str) -> None:
+        """Receive content token."""
+        # If we printed status and now getting content, move to new line
+        if self._status_printed and not self._in_thinking:
+            self._status_printed = False
+        self._console.print(token, end="", soft_wrap=True)
+
+    def on_tool_call(self, tool_name: str, args: str) -> None:
+        """Display tool call notification."""
+        self._console.print()
+        self._console.print(f"[bold cyan]→ 调用工具: {tool_name}[/] {args[:100]}")
+        self._status_printed = False
+
+    def on_tool_result(self, result_summary: str) -> None:
+        """Display tool result summary."""
+        self._console.print()
+        if len(result_summary) > 200:
+            result_summary = result_summary[:200] + "..."
+        self._console.print(f"[dim]→ 工具结果: {result_summary}[/]")
+
+    def on_stream_end(self) -> None:
+        """Handle stream end."""
+        if self._status_printed:
+            self._status_printed = False
+        self._console.print()
+
 app = typer.Typer(
     name="vulnclaw",
     help="VulnClaw - AI-powered penetration testing CLI (run 'vulnclaw tui' for the TUI workbench)",
@@ -324,6 +383,7 @@ def _run_repl() -> None:
                 try:
 
                     async def _run_persistent():
+                        sink = TerminalStreamSink(console, config.session.show_thinking)
                         return await agent.persistent_pentest(
                             user_input=persistent_prompt,
                             target=persistent_target,
@@ -332,6 +392,7 @@ def _run_repl() -> None:
                             auto_report=auto_report,
                             on_cycle_step=_on_persistent_step,
                             on_cycle_complete=_on_persistent_cycle,
+                            stream_sink=sink,
                         )
 
                     asyncio.run(_run_persistent())
@@ -400,6 +461,7 @@ def _run_repl() -> None:
                     console.print()
 
                     async def _run_auto():
+                        sink = TerminalStreamSink(console, config.session.show_thinking)
                         async def call():
                             def on_step(round_num, result):
                                 nonlocal current_target, current_phase
@@ -417,6 +479,7 @@ def _run_repl() -> None:
                                 target=current_target,
                                 max_rounds=config.session.max_rounds,
                                 on_step=on_step,
+                                stream_sink=sink,
                             )
 
                         async def after_result(results):
@@ -456,8 +519,9 @@ def _run_repl() -> None:
                 else:
                     # Single-turn chat
                     async def _run_agent():
+                        sink = TerminalStreamSink(console, config.session.show_thinking)
                         async def call():
-                            return await agent.chat(user_input, target=current_target)
+                            return await agent.chat(user_input, target=current_target, stream_sink=sink)
 
                         async def after_result(result):
                             nonlocal current_target, current_phase
@@ -723,6 +787,7 @@ def run(
 
     async def _run():
         async def runner(agent, shared_config):
+            sink = TerminalStreamSink(console, shared_config.session.show_thinking)
             return await agent.auto_pentest(
                 prompt,
                 target=target,
@@ -732,6 +797,7 @@ def run(
                     if res.output
                     else None
                 ),
+                stream_sink=sink,
             )
 
         result = await _run_cli_orchestrated_task(
@@ -851,6 +917,7 @@ def persistent(
 
     async def _run():
         async def runner(agent, _config):
+            sink = TerminalStreamSink(console, _config.session.show_thinking)
             return await agent.persistent_pentest(
                 user_input=prompt,
                 target=target,
@@ -859,6 +926,7 @@ def persistent(
                 auto_report=auto_report,
                 on_cycle_step=_on_cycle_step,
                 on_cycle_complete=_on_cycle_complete,
+                stream_sink=sink,
             )
 
         return await _run_cli_orchestrated_task(
@@ -949,7 +1017,8 @@ def recon(
 
     async def _run():
         async def runner(agent, _config):
-            result = await agent.chat(prompt, target=target)
+            sink = TerminalStreamSink(console, _config.session.show_thinking)
+            result = await agent.chat(prompt, target=target, stream_sink=sink)
             if result and result.output:
                 console.print(result.output)
             return result
@@ -1009,7 +1078,8 @@ def scan(
 
     async def _run():
         async def runner(agent, _config):
-            result = await agent.chat(prompt, target=target)
+            sink = TerminalStreamSink(console, _config.session.show_thinking)
+            result = await agent.chat(prompt, target=target, stream_sink=sink)
             if result and result.output:
                 console.print(result.output)
             return result
@@ -1072,7 +1142,8 @@ def exploit(
 
     async def _run():
         async def runner(agent, _config):
-            result = await agent.chat(prompt, target=target)
+            sink = TerminalStreamSink(console, _config.session.show_thinking)
+            result = await agent.chat(prompt, target=target, stream_sink=sink)
             if result and result.output:
                 console.print(result.output)
             return result
