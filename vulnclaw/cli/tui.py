@@ -758,6 +758,7 @@ def _confirm_and_launch(state: TuiState, launcher: TaskLauncher) -> None:
     draft = _draft_from_state(state)
     Console().print(_build_task_summary_panel(draft, title=_("tui.launch_summary")))
     if Confirm.ask(_("tui.start_check"), default=False):
+        Console().print(_("tui.enter_task_mode"))
         launcher(draft)
         Prompt.ask(_("tui.task_returned"), default="")
 

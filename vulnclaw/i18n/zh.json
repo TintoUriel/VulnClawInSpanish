@@ -212,6 +212,7 @@
   "tui.launch_summary": "即将启动",
   "tui.start_check": "开始授权安全检查",
   "tui.task_returned": "任务已返回，按 Enter 回到 TUI",
+  "tui.enter_task_mode": "[dim][*] 进入安全检查模式，按 Ctrl+C 中断。[/]",
   "tui.yes": "是",
   "tui.no": "否",
   "tui.unrestricted": "未限制",

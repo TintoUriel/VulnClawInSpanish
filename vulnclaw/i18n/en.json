@@ -212,6 +212,7 @@
   "tui.launch_summary": "Launch Summary",
   "tui.start_check": "Start authorized security check",
   "tui.task_returned": "Task returned, press Enter to go back to TUI",
+  "tui.enter_task_mode": "[dim][*] Entering security check mode. Press Ctrl+C to interrupt.[/]",
   "tui.yes": "Yes",
   "tui.no": "No",
   "tui.unrestricted": "Unrestricted",
