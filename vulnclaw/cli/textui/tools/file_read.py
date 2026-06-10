@@ -7,19 +7,20 @@ from pathlib import Path
 from typing import Any
 
 from vulnclaw.cli.textui.tools.base import BaseTool, ToolResult, ToolStatus
+from vulnclaw.i18n import _
 
 
 class FileReadTool(BaseTool):
     """Read a file from the local filesystem."""
 
     name = "read_file"
-    description = "读取本地文件的内容"
+    description = _("tui.tool.file_read.description")
     input_schema: dict[str, Any] = {
         "type": "object",
         "properties": {
             "path": {
                 "type": "string",
-                "description": "文件路径",
+                "description": _("tui.tool.file_read.input_desc"),
             },
         },
         "required": ["path"],
@@ -28,7 +29,7 @@ class FileReadTool(BaseTool):
     async def run(self, inputs: dict[str, Any]) -> ToolResult:
         path_str = inputs.get("path", "")
         if not path_str:
-            return ToolResult(status=ToolStatus.ERROR, error="未提供文件路径")
+            return ToolResult(status=ToolStatus.ERROR, error=_("tui.tool.file_read.no_path"))
 
         start = time.monotonic()
         try:
@@ -36,13 +37,13 @@ class FileReadTool(BaseTool):
             if not file_path.exists():
                 return ToolResult(
                     status=ToolStatus.ERROR,
-                    error=f"文件不存在: {path_str}",
+                    error=_("tui.tool.file_read.not_found", path=path_str),
                     duration_s=round(time.monotonic() - start, 2),
                 )
             if not file_path.is_file():
                 return ToolResult(
                     status=ToolStatus.ERROR,
-                    error=f"不是文件: {path_str}",
+                    error=_("tui.tool.file_read.not_file", path=path_str),
                     duration_s=round(time.monotonic() - start, 2),
                 )
 

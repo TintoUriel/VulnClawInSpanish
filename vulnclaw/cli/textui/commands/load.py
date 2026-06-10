@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from vulnclaw.i18n import _
+
 
 class LoadCommand:
     """Load chat history for a specific target."""
@@ -19,17 +21,17 @@ class LoadCommand:
             targets = store.list_targets()
 
             if not targets:
-                chat_pane.add_system_message("[dim]没有找到保存的历史记录[/]")
+                chat_pane.add_system_message(_("tui.command.load.no_history"))
                 return
 
             lines = [
-                "[bold]可用的历史记录:[/]",
+                _("tui.command.load.available"),
                 "",
             ]
             for t, ts in targets:
                 lines.append(f"  [cyan]{t}[/]  — {ts}")
             lines.append("")
-            lines.append("[dim]使用 /load <目标> 加载对应的聊天记录[/]")
+            lines.append(_("tui.command.load.hint"))
             chat_pane.add_system_message("\n".join(lines))
         else:
             chat_pane._load_history(target)

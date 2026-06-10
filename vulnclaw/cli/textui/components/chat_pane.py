@@ -20,6 +20,7 @@ from textual.containers import Vertical, VerticalScroll
 from textual.message import Message
 from textual.widgets import ListItem, ListView, Static
 
+from vulnclaw.i18n import _
 from vulnclaw.cli.textui.components.chat_input import ChatInput
 from vulnclaw.cli.textui.components.message_widgets import (
     AssistantText,
@@ -184,7 +185,8 @@ class ChatPane(Vertical):
 
     def add_assistant_text(self, text: str) -> AssistantText:
         """Add an assistant text message (supports streaming)."""
-        msg = AssistantText(text)
+        render_mode = self._state.config.session.render_mode
+        msg = AssistantText(text, render_mode=render_mode)
         self._mount_message(msg)
         self._messages.append(msg)
         self._current_assistant = msg
@@ -419,8 +421,9 @@ class ChatPane(Vertical):
         if cmd_name is None:
             # Unknown command
             self.add_system_message(
-                f"[red]未知命令: {command_line.split()[0]}[/]\n"
-                f"[dim]输入 /help 查看可用命令[/]"
+                _("tui.component.chat_pane.unknown_command").format(
+                    cmd=command_line.split()[0]
+                )
             )
         return cmd_name
 
@@ -441,7 +444,7 @@ class ChatPane(Vertical):
             # Check for cancellation request
             if self._cancel_requested:
                 if round_idx > 0:
-                    self.add_system_message("[dim]操作已中断[/]")
+                    self.add_system_message(_("tui.component.chat_pane.operation_cancelled"))
                 return
             # Use the pre-detected tool support flag
             has_tools = self._tools_supported
@@ -450,7 +453,7 @@ class ChatPane(Vertical):
             # Subsequent rounds skip this to avoid visual gaps — the tool
             # execution result area already signals the ongoing analysis.
             if round_idx == 0:
-                thinking = self.add_system_message("[dim]思考中...[/]")
+                thinking = self.add_system_message(_("tui.component.chat_pane.thinking"))
             else:
                 thinking = None
 
@@ -515,7 +518,7 @@ class ChatPane(Vertical):
                 )
             except Exception as exc:
                 _remove_thinking()
-                assistant.append(f"\n\n[red]错误: {exc}[/]")
+                assistant.append(_("tui.component.chat_pane.error_format").format(exc=exc))
                 self._scroll_to_bottom()
                 break
 
@@ -529,7 +532,7 @@ class ChatPane(Vertical):
 
                 tool = self._tool_registry.get(name)
                 if tool is None:
-                    tool_msg.update_status("error", error=f"未知工具: {name}")
+                    tool_msg.update_status("error", error=_("tui.component.chat_pane.unknown_tool").format(name=name))
                     continue
 
                 result = await tool.run(args)
@@ -569,13 +572,13 @@ class ChatPane(Vertical):
 
                 # Allow cancellation between tool executions
                 if self._cancel_requested:
-                    self.add_system_message("[dim]操作已中断[/]")
+                    self.add_system_message(_("tui.component.chat_pane.operation_cancelled"))
                     return
 
             # Continue the loop for the next round (with tool results in messages)
         else:
             # Max rounds reached without breaking
-            self.add_system_message("[dim]已达到最大工具调用轮次上限[/]")
+            self.add_system_message(_("tui.component.chat_pane.max_rounds_reached"))
 
     # ------------------------------------------------------------------
     # History management
@@ -624,11 +627,11 @@ class ChatPane(Vertical):
         store = get_history_store()
         data = store.load(target)
         if not data:
-            self.add_system_message(f"[dim]没有找到目标 '{target}' 的聊天记录[/]")
+            self.add_system_message(_("tui.component.chat_pane.no_history_for_target").format(target=target))
             return
 
         self.clear_messages()
-        self.add_system_message(f"[dim]已加载目标 '{target}' 的聊天记录 ({len(data)} 条消息)[/]")
+        self.add_system_message(_("tui.component.chat_pane.loaded_history").format(target=target, count=len(data)))
 
         # Replay history messages
         for msg_data in data:

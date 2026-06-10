@@ -7,6 +7,8 @@ from textual.containers import Horizontal
 from textual.message import Message
 from textual.widgets import Input, Static
 
+from vulnclaw.i18n import _
+
 
 class InputBar(Horizontal):
     """Bottom input bar with natural language prompt."""
@@ -46,7 +48,7 @@ class InputBar(Horizontal):
     def compose(self) -> ComposeResult:
         yield Static(" > ", classes="input-prefix")
         yield Input(
-            placeholder="输入自然语言指令 (例如: 扫描 192.168.1.1 的 80 端口)...",
+            placeholder=_("tui.widget.input_bar.placeholder"),
             id="nl-input",
         )
 

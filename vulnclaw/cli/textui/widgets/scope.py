@@ -5,6 +5,8 @@ from __future__ import annotations
 from rich.table import Table
 from textual.widgets import Static
 
+from vulnclaw.i18n import _
+
 
 class ScopePanel(Static):
     """Panel showing boundary constraints configuration."""
@@ -65,15 +67,15 @@ class ScopePanel(Static):
 
     def _refresh(self) -> None:
         table = Table.grid(expand=True)
-        table.add_column("约束", ratio=1)
-        table.add_column("值", ratio=3)
+        table.add_column(_("tui.widget.scope.column_constraint"), ratio=1)
+        table.add_column(_("tui.widget.scope.column_value"), ratio=3)
 
-        table.add_row("仅允许主机", self._val(self._only_host))
-        table.add_row("仅允许端口", self._val(self._only_port))
-        table.add_row("仅允许路径", self._val(self._only_path))
-        table.add_row("禁止主机", self._val(self._blocked_host))
-        table.add_row("禁止路径", self._val(self._blocked_path))
-        table.add_row("允许操作", self._val(self._allow_actions))
-        table.add_row("禁止操作", self._val(self._block_actions))
+        table.add_row(_("tui.widget.scope.only_allow_host"), self._val(self._only_host))
+        table.add_row(_("tui.widget.scope.only_allow_port"), self._val(self._only_port))
+        table.add_row(_("tui.widget.scope.only_allow_path"), self._val(self._only_path))
+        table.add_row(_("tui.widget.scope.blocked_host"), self._val(self._blocked_host))
+        table.add_row(_("tui.widget.scope.blocked_path"), self._val(self._blocked_path))
+        table.add_row(_("tui.widget.scope.allow_actions"), self._val(self._allow_actions))
+        table.add_row(_("tui.widget.scope.block_actions"), self._val(self._block_actions))
 
         self.update(table)

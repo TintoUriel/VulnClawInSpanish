@@ -17,6 +17,7 @@ from vulnclaw.cli.textui.services.llm import LlmService
 from vulnclaw.cli.textui.tools.registry import ToolRegistry
 from vulnclaw.cli.textui.agent.context import ContextBuilder
 from vulnclaw.cli.textui.agent.permission import PermissionModel, PermissionDecision
+from vulnclaw.i18n import _
 
 
 class AgentLoop:
@@ -83,19 +84,19 @@ class AgentLoop:
             # Permission check
             decision = self._permission.check(name, args)
             if decision == PermissionDecision.DENY:
-                full_text += f"\n[[red]拒绝: {name} 不允许执行[/]]"
+                full_text += _("tui.agent.loop.denied", name=name)
                 return
 
             if decision == PermissionDecision.ASK and self.on_confirm:
                 confirmed = await self.on_confirm(name)
                 if not confirmed:
-                    full_text += f"\n[[yellow]已取消: {name}[/]]"
+                    full_text += _("tui.agent.loop.cancelled", name=name)
                     return
 
             # Execute tool
             tool = self._tools.get(name)
             if tool is None:
-                full_text += f"\n[[red]未知工具: {name}[/]]"
+                full_text += _("tui.agent.loop.unknown_tool", name=name)
                 return
 
             tool_id = ""
@@ -132,7 +133,8 @@ class AgentLoop:
 
             # Re-call LLM with tool result
             if self.on_text:
-                await self.on_text(f"\n\n[[{result.status.value.upper()}] {name} 执行{'成功' if result.status.value == 'done' else '失败'}]\n\n")
+                exec_result = _("tui.agent.loop.success") if result.status.value == "done" else _("tui.agent.loop.failure")
+                await self.on_text(_("tui.agent.loop.execution_result", status=result.status.value.upper(), name=name, result=exec_result))
 
             # Stream another response after tool result
             await self._llm.stream_chat(

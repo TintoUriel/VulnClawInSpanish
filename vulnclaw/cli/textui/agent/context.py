@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import Any
 
+from vulnclaw.i18n import _
+
 
 class ContextBuilder:
     """Build OpenAI-compatible message arrays from chat history.
@@ -14,11 +16,7 @@ class ContextBuilder:
     """
 
     def __init__(self, system_prompt: str | None = None) -> None:
-        self._system_prompt = system_prompt or (
-            "你是 VulnClaw，一个 AI 驱动的渗透测试辅助工具。\n"
-            "你可以帮助用户进行安全分析、漏洞检测和渗透测试。\n"
-            "请用中文回答用户的问题。"
-        )
+        self._system_prompt = system_prompt or _("tui.agent.context.system_prompt")
 
     def build(
         self,

@@ -22,6 +22,7 @@ from textual.containers import Vertical
 from textual.screen import Screen
 from textual.widgets import Static
 
+from vulnclaw.i18n import _
 from vulnclaw.cli.textui.components.chat_pane import ChatPane
 from vulnclaw.cli.textui.components.chat_input import ChatInput
 from vulnclaw.cli.textui.commands.registry import CommandRegistry
@@ -40,9 +41,9 @@ class MainScreen(Screen):
     """Main screen — single chat interface with command dispatch."""
 
     BINDINGS = [
-        Binding("ctrl+c", "interrupt_or_quit", "中断/退出", priority=True),
-        Binding("q", "quit", "退出"),
-        Binding("ctrl+l", "focus_input", "聚焦输入"),
+        Binding("ctrl+c", "interrupt_or_quit", _("tui.screen.main.binding_interrupt"), priority=True),
+        Binding("q", "quit", _("tui.screen.main.binding_quit")),
+        Binding("ctrl+l", "focus_input", _("tui.screen.main.binding_focus_input")),
     ]
 
     DEFAULT_CSS = """
@@ -83,14 +84,29 @@ class MainScreen(Screen):
         save_cmd = SaveCommand()
         exit_cmd = ExitCommand()
 
-        self._cmd_registry.register("help", "显示帮助信息", help_cmd.run)
-        self._cmd_registry.register("sc", "打开扫描配置面板", sc_cmd.run)
-        self._cmd_registry.register("config", "查看当前配置", config_cmd.run)
-        self._cmd_registry.register("clear", "清除聊天记录", clear_cmd.run)
-        self._cmd_registry.register("load", "加载聊天记录", load_cmd.run)
-        self._cmd_registry.register("save", "保存聊天记录", save_cmd.run)
-        self._cmd_registry.register("exit", "退出程序", exit_cmd.run)
-        self._cmd_registry.register("quit", "退出程序", exit_cmd.run)
+        self._cmd_registry.register(
+            "help", _("tui.screen.main.help_desc"),
+            help_cmd.run,
+            usage="/help [command]",
+            detail=_("tui.screen.main.help_detail"),
+        )
+        self._cmd_registry.register(
+            "sc", _("tui.screen.main.sc_desc"),
+            sc_cmd.run,
+            usage="/sc  或  /sc show  |  /sc run  |  /sc --key value",
+            detail=_("tui.screen.main.sc_detail"),
+        )
+        self._cmd_registry.register(
+            "config", _("tui.screen.main.config_desc"),
+            config_cmd.run,
+            usage="/config  |  /config llm set ...  |  /config render on|off  |  /config popup-mode embed|separate",
+            detail=_("tui.screen.main.config_detail"),
+        )
+        self._cmd_registry.register("clear", _("tui.screen.main.clear_desc"), clear_cmd.run)
+        self._cmd_registry.register("load", _("tui.screen.main.load_desc"), load_cmd.run)
+        self._cmd_registry.register("save", _("tui.screen.main.save_desc"), save_cmd.run)
+        self._cmd_registry.register("exit", _("tui.screen.main.exit_desc"), exit_cmd.run)
+        self._cmd_registry.register("quit", _("tui.screen.main.quit_desc"), exit_cmd.run)
 
     def compose(self) -> ComposeResult:
         """Compose the main screen."""
@@ -101,7 +117,7 @@ class MainScreen(Screen):
                 id="chat-pane",
             )
         yield Static(
-            "  [dim]输入 / 查看命令  |  Tab 补全  |  Ctrl+C 退出  |  /help 查看帮助[/]",
+            _("tui.screen.main.hint_bar"),
             id="hint-bar",
         )
 
@@ -115,7 +131,7 @@ class MainScreen(Screen):
 
         # Show welcome message
         self._chat_pane.add_system_message(
-            "[dim]欢迎使用 VulnClaw! 输入 /help 查看可用命令[/]"
+            _("tui.screen.main.welcome")
         )
 
         # Load history for current target if set
@@ -129,18 +145,24 @@ class MainScreen(Screen):
         except Exception:
             chat_pane = None
 
+        now = time.monotonic()
+
         if chat_pane is not None and chat_pane.is_busy:
+            if now - self._last_ctrl_c < 3.0:
+                # Double Ctrl+C while busy → force quit
+                self.app.exit()
+                return
+            self._last_ctrl_c = now
             chat_pane.cancel_current()
-            self.notify("操作已中断", timeout=2)
+            self.notify(_("tui.screen.main.cancelled_notify"), timeout=3)
             return
 
         # Idle — require double Ctrl+C within 3 seconds
-        now = time.monotonic()
         if now - self._last_ctrl_c < 3.0:
             self.app.exit()
         else:
             self._last_ctrl_c = now
-            self.notify("再按一次 Ctrl+C 退出程序", timeout=3)
+            self.notify(_("tui.screen.main.quit_notify"), timeout=3)
 
     def action_quit(self) -> None:
         """Quit the application."""
@@ -157,8 +179,8 @@ class MainScreen(Screen):
     def on_chat_pane_execute_request(self, event: ChatPane.ExecuteRequest) -> None:
         """Handle execution request from chat pane."""
         self._state.update_from_dict(event.config)
-        self._chat_pane.add_system_message("[green]✓ 任务已启动[/]")
-        self.app.notify("任务已启动", timeout=3)
+        self._chat_pane.add_system_message(_("tui.screen.main.task_started_msg"))
+        self.app.notify(_("tui.screen.main.task_started_notify"), timeout=3)
 
     def on_chat_pane_load_history_request(self, event: ChatPane.LoadHistoryRequest) -> None:
         """Handle history load request."""

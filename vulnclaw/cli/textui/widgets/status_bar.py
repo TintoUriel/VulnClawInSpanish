@@ -6,6 +6,8 @@ from rich.table import Table
 from rich.text import Text
 from textual.widgets import Static
 
+from vulnclaw.i18n import _
+
 
 class StatusBar(Static):
     """Status bar displaying target, mode, and model status in a row."""
@@ -62,7 +64,7 @@ class StatusBar(Static):
         mode_style = mode_styles.get(self._mode, "white")
         mode_text = Text(self._mode.upper(), style=mode_style)
 
-        model_label = self._model or "未知"
+        model_label = self._model or _("tui.widget.status_bar.unknown_model")
         provider_label = f"[{self._provider}] " if self._provider else ""
         model_text = Text(f"{provider_label}{model_label}", style="bold" if self._model else "dim")
 

@@ -6,6 +6,8 @@ from rich.table import Table
 from rich.text import Text
 from textual.widgets import Static
 
+from vulnclaw.i18n import _
+
 
 class ToolPanel(Static):
     """Panel displaying tool call status in a tree-like table."""
@@ -52,9 +54,9 @@ class ToolPanel(Static):
             return
 
         table = Table.grid(expand=True)
-        table.add_column("工具", ratio=2)
-        table.add_column("状态", ratio=1)
-        table.add_column("结果", ratio=3)
+        table.add_column(_("tui.widget.tool_panel.column_tool"), ratio=2)
+        table.add_column(_("tui.widget.tool_panel.column_status"), ratio=1)
+        table.add_column(_("tui.widget.tool_panel.column_result"), ratio=3)
 
         for tool in self._tools[-10:]:
             info = tool["info"]

@@ -7,19 +7,20 @@ import time
 from typing import Any
 
 from vulnclaw.cli.textui.tools.base import BaseTool, ToolResult, ToolStatus
+from vulnclaw.i18n import _
 
 
 class BashTool(BaseTool):
     """Execute a shell command and capture its output."""
 
     name = "bash"
-    description = "在 Windows 上执行 PowerShell 命令并获取输出（注意：系统为 Windows，使用 PowerShell 语法，不支持 uname、$(...) 等 Linux/bash 命令）"
+    description = _("tui.tool.bash.description")
     input_schema: dict[str, Any] = {
         "type": "object",
         "properties": {
             "command": {
                 "type": "string",
-                "description": "要执行的 shell 命令",
+                "description": _("tui.tool.bash.input_desc"),
             },
         },
         "required": ["command"],
@@ -30,7 +31,7 @@ class BashTool(BaseTool):
         if not command:
             return ToolResult(
                 status=ToolStatus.ERROR,
-                error="未提供命令",
+                error=_("tui.tool.bash.no_command"),
             )
 
         start = time.monotonic()
@@ -53,7 +54,7 @@ class BashTool(BaseTool):
                 return ToolResult(
                     status=ToolStatus.ERROR,
                     output=output[:10000],
-                    error=f"退出码 {proc.returncode}",
+                    error=_("tui.tool.bash.exit_code", code=proc.returncode),
                     duration_s=round(duration, 2),
                 )
 
@@ -65,7 +66,7 @@ class BashTool(BaseTool):
         except asyncio.TimeoutError:
             return ToolResult(
                 status=ToolStatus.ERROR,
-                error="命令执行超时 (300s)",
+                error=_("tui.tool.bash.timeout"),
                 duration_s=round(time.monotonic() - start, 2),
             )
         except Exception as exc:

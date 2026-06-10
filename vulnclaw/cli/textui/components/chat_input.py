@@ -14,6 +14,8 @@ Key design decisions:
 
 from __future__ import annotations
 
+from vulnclaw.i18n import _
+
 from textual.app import ComposeResult
 from textual.containers import Horizontal
 from textual.message import Message
@@ -96,7 +98,7 @@ class ChatInput(Horizontal):
     def compose(self) -> ComposeResult:
         yield Static(">")
         yield Input(
-            placeholder="输入 / 查看命令，或直接输入消息...",
+            placeholder=_("tui.component.chat_input.placeholder"),
             id="chat-input-field",
         )
 

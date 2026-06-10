@@ -13,6 +13,7 @@ from openai import AsyncOpenAI, APIError
 
 from vulnclaw.cli.tui import MODES
 from vulnclaw.config.settings import load_config
+from vulnclaw.i18n import _
 
 
 class LlmService:
@@ -48,7 +49,7 @@ class LlmService:
         model = self._get_model()
 
         test_messages: list[dict[str, Any]] = [
-            {"role": "user", "content": "测试"}
+            {"role": "user", "content": _("tui.service.llm.test_msg")}
         ]
         test_tools = self._build_tool_defs()
 
@@ -142,8 +143,7 @@ class LlmService:
                 )
             ):
                 await on_text(
-                    "[dim]当前模型不支持工具调用（可能启用了思考模式），"
-                    "已降级为纯文本模式...[/]\n\n"
+                    _("tui.service.llm.tool_fallback")
                 )
                 return await self.stream_chat(
                     messages=messages,
@@ -152,7 +152,7 @@ class LlmService:
                     tools=None,
                     _is_retry=True,
                 )
-            await on_text(f"\n\n[red]LLM API 错误: {exc}[/]")
+            await on_text(_("tui.service.llm.api_error", exc=exc))
             return
 
         current_tool_name = ""
@@ -235,7 +235,7 @@ class LlmService:
             return {
                 "name": "Windows",
                 "shell": "PowerShell",
-                "syntax_hint": "不要使用 uname、$(...) 等 Linux/bash 专属命令。",
+                "syntax_hint": _("tui.service.llm.syntax_hint"),
             }
         if system == "linux":
             return {
@@ -273,13 +273,11 @@ class LlmService:
     def _build_system_prompt(self) -> str:
         """Build the system prompt used for every chat turn."""
         os_info = self._os_info
-        return (
-            "你是 VulnClaw，一个 AI 驱动的渗透测试辅助工具。"
-            "你可以帮助用户进行安全分析、漏洞检测和渗透测试。"
-            "你可以使用各种工具来执行任务。"
-            f"注意：当前系统为 {os_info['name']}，执行命令时请使用 "
-            f"{os_info['shell']} 语法。{os_info['syntax_hint']}"
-            "请用中文回答用户的问题。"
+        return _(
+            "tui.service.llm.system_prompt",
+            os=os_info["name"],
+            shell=os_info["shell"],
+            hint=os_info["syntax_hint"],
         )
 
     def _build_tool_defs(self) -> list[dict[str, Any]]:
@@ -290,13 +288,13 @@ class LlmService:
                 "type": "function",
                 "function": {
                     "name": "bash",
-                    "description": f"在 {os_info['name']} 上执行 {os_info['shell']} 命令",
+                    "description": _("tui.service.llm.tool_desc_bash", os=os_info["name"], shell=os_info["shell"]),
                     "parameters": {
                         "type": "object",
                         "properties": {
                             "command": {
                                 "type": "string",
-                                "description": "要执行的 shell 命令",
+                                "description": _("tui.service.llm.input_desc_command"),
                             },
                         },
                         "required": ["command"],
@@ -307,13 +305,13 @@ class LlmService:
                 "type": "function",
                 "function": {
                     "name": "read_file",
-                    "description": "读取文件的内容",
+                    "description": _("tui.service.llm.tool_desc_read"),
                     "parameters": {
                         "type": "object",
                         "properties": {
                             "path": {
                                 "type": "string",
-                                "description": "文件路径",
+                                "description": _("tui.service.llm.input_desc_path"),
                             },
                         },
                         "required": ["path"],
@@ -324,13 +322,13 @@ class LlmService:
                 "type": "function",
                 "function": {
                     "name": "web_fetch",
-                    "description": "从 URL 获取内容",
+                    "description": _("tui.service.llm.tool_desc_fetch"),
                     "parameters": {
                         "type": "object",
                         "properties": {
                             "url": {
                                 "type": "string",
-                                "description": "要获取的 URL",
+                                "description": _("tui.service.llm.input_desc_url"),
                             },
                         },
                         "required": ["url"],

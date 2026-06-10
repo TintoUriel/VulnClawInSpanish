@@ -2,7 +2,7 @@
 
 Each class renders a different type of chat message:
 - UserMessage:  ``> {user text}``
-- AssistantText: streamable assistant response
+- AssistantText: streamable assistant response (supports Markdown rendering)
 - ToolCallMessage: tool execution with dynamic status updates
 - FormOperation: diff-style form field change record
 - SystemMessage: feedback / notification messages
@@ -12,6 +12,10 @@ from __future__ import annotations
 
 from typing import Any
 
+from vulnclaw.i18n import _
+
+from rich.markdown import Markdown
+from rich.markup import escape
 from textual.app import ComposeResult
 from textual.containers import Vertical
 from textual.reactive import reactive
@@ -42,7 +46,20 @@ class UserMessage(Static):
 
 
 class AssistantText(Static):
-    """Assistant response text — supports streaming ``append()``."""
+    """Assistant response text — supports streaming ``append()``.
+
+    When *render_mode* is ``"markdown"``, text is rendered via
+    ``rich.markdown.Markdown`` for a richer display.  Partial /
+    incomplete Markdown is handled gracefully — if rendering fails,
+    the raw (escaped) text is shown as a fallback.
+
+    Parameters
+    ----------
+    text:
+        Initial text content.
+    render_mode:
+        ``"plain"`` (default, raw text) or ``"markdown"`` (Rich Markdown).
+    """
 
     DEFAULT_CSS = """
     AssistantText {
@@ -51,15 +68,32 @@ class AssistantText(Static):
     }
     """
 
-    def __init__(self, text: str = "", **kwargs) -> None:
+    def __init__(self, text: str = "", render_mode: str = "plain", **kwargs) -> None:
         super().__init__(text, **kwargs)
         self._full_text = text
         self._reasoning: str = ""
+        self._render_mode = render_mode
 
     def append(self, chunk: str) -> None:
         """Append text chunk for streaming response."""
         self._full_text += chunk
-        self.update(self._full_text)
+        self._refresh()
+
+    def _refresh(self) -> None:
+        """Re-render the current text according to the active render mode."""
+        if self._render_mode == "markdown":
+            try:
+                md = Markdown(self._full_text)
+                self.update(md)
+                return
+            except Exception:
+                pass  # fall through to escaped-plain fallback
+        self.update(escape(self._full_text))
+
+    def set_render_mode(self, mode: str) -> None:
+        """Change render mode and refresh the display immediately."""
+        self._render_mode = mode
+        self._refresh()
 
 
 # ── Clickable toggle ────────────────────────────────────────────────
@@ -208,9 +242,9 @@ class FormOperation(Vertical):
 
     def compose(self) -> ComposeResult:
         yield Static(f"[bold blue]• {self._form_type}[/][dim]({self._field})[/]")
-        yield Static(f"  [dim]原值:[/] {self._old_value}")
-        yield Static(f"  [dim]新值:[/] {self._new_value}")
-        yield Static("[green]  ✓ 已更新[/]")
+        yield Static(f"  [dim]{_('tui.component.message_widgets.old_value')}:[/] {self._old_value}")
+        yield Static(f"  [dim]{_('tui.component.message_widgets.new_value')}:[/] {self._new_value}")
+        yield Static(_("tui.component.message_widgets.updated"))
 
 
 # ── System message ──────────────────────────────────────────────────

@@ -193,6 +193,10 @@ def _overlay_env(config: VulnClawConfig) -> VulnClawConfig:
             config.session.max_rounds = int(v)
     if v := os.environ.get("VULNCLAW_SESSION_SHOW_THINKING"):
         config.session.show_thinking = v.lower() in ("1", "true", "yes", "on")
+    if v := os.environ.get("VULNCLAW_SESSION_RENDER_MODE"):
+        config.session.render_mode = v
+    if v := os.environ.get("VULNCLAW_SESSION_POPUP_MODE"):
+        config.session.popup_mode = v
 
     # ── Safety ───────────────────────────────────────────────────────
     if v := os.environ.get("VULNCLAW_SAFETY_PYTHON_EXECUTE_ENABLED"):

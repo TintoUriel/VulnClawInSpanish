@@ -2,6 +2,8 @@
 
 Provides a floating modal panel for configuring scan targets,
 boundary constraints, mode, and action filters.
+
+Supports responsive sizing and optional dark overlay background.
 """
 
 from __future__ import annotations
@@ -13,6 +15,7 @@ from textual.containers import Horizontal, Vertical
 from textual.screen import ModalScreen
 from textual.widgets import Button, Input, Label, RadioButton, RadioSet, Static
 
+from vulnclaw.i18n import _
 from vulnclaw.cli.tui import MODES
 
 
@@ -21,24 +24,26 @@ class ScanConfigScreen(ModalScreen[dict[str, Any] | None]):
 
     Returns a dict of config values when the user clicks
     "执行任务" or "保存配置", or ``None`` when cancelled.
+
+    Parameters
+    ----------
+    initial:
+        Initial form values keyed by field name.
     """
 
     BINDINGS = [
-        ("escape", "dismiss_modal", "关闭"),
+        ("escape", "dismiss_modal", _("tui.component.scan_config.close_button")),
     ]
-
-    def action_dismiss_modal(self) -> None:
-        """Close the config modal."""
-        self.dismiss(None)
 
     DEFAULT_CSS = """
     ScanConfigScreen {
         align: center middle;
-        background: rgba(0, 0, 0, 0.7);
     }
 
     #sc-panel {
-        width: 70;
+        min-width: 40;
+        width: 80%;
+        max-width: 80;
         height: auto;
         max-height: 90%;
         border: thick $secondary;
@@ -55,8 +60,11 @@ class ScanConfigScreen(ModalScreen[dict[str, Any] | None]):
 
     #sc-body {
         height: auto;
+        max-height: 60vh;
         overflow-y: auto;
+        overflow-x: hidden;
         padding: 0 1;
+        scrollbar-gutter: stable;
     }
 
     .sc-section {
@@ -71,7 +79,8 @@ class ScanConfigScreen(ModalScreen[dict[str, Any] | None]):
     }
 
     .sc-section > Input {
-        margin: 0 0 0 0;
+        margin: 0 0 1 0;
+        width: 1fr;
     }
 
     #sc-mode {
@@ -91,70 +100,78 @@ class ScanConfigScreen(ModalScreen[dict[str, Any] | None]):
     }
     """
 
-    def __init__(self, initial: dict[str, Any] | None = None, **kwargs) -> None:
+    def __init__(
+        self,
+        initial: dict[str, Any] | None = None,
+        **kwargs,
+    ) -> None:
         super().__init__(**kwargs)
         self._initial = initial or {}
 
+    def action_dismiss_modal(self) -> None:
+        """Close the config modal (ESC)."""
+        self.dismiss(None)
+
     def compose(self) -> ComposeResult:
         with Vertical(id="sc-panel"):
-            yield Static("安全扫描配置", id="sc-title")
+            yield Static(_("tui.component.scan_config.title"), id="sc-title")
 
             with Vertical(id="sc-body"):
                 # ── Target ──
                 with Vertical(classes="sc-section"):
-                    yield Static("目标设置", classes="sc-section-title")
+                    yield Static(_("tui.component.scan_config.target_section"), classes="sc-section-title")
                     yield Input(
                         value=self._initial.get("target", ""),
-                        placeholder="目标地址 (IP/域名/URL)",
+                        placeholder=_("tui.component.scan_config.target_placeholder"),
                         id="sc-target",
                     )
 
                 # ── Boundary constraints ──
                 with Vertical(classes="sc-section"):
-                    yield Static("边界约束", classes="sc-section-title")
+                    yield Static(_("tui.component.scan_config.boundary_section"), classes="sc-section-title")
                     yield Input(
                         value=self._initial.get("only_host", ""),
-                        placeholder="仅允许主机 (例如 192.168.1.0/24)",
+                        placeholder=_("tui.component.scan_config.only_host_placeholder"),
                         id="sc-only-host",
                     )
                     yield Input(
                         value=self._initial.get("only_port", ""),
-                        placeholder="仅允许端口 (例如 80,443)",
+                        placeholder=_("tui.component.scan_config.only_port_placeholder"),
                         id="sc-only-port",
                     )
                     yield Input(
                         value=self._initial.get("only_path", ""),
-                        placeholder="仅允许路径 (例如 /api,/admin)",
+                        placeholder=_("tui.component.scan_config.only_path_placeholder"),
                         id="sc-only-path",
                     )
                     yield Input(
                         value=self._initial.get("blocked_host", ""),
-                        placeholder="禁止主机 (例如 10.0.0.0/8)",
+                        placeholder=_("tui.component.scan_config.blocked_host_placeholder"),
                         id="sc-blocked-host",
                     )
                     yield Input(
                         value=self._initial.get("blocked_path", ""),
-                        placeholder="禁止路径 (例如 /logout,/private)",
+                        placeholder=_("tui.component.scan_config.blocked_path_placeholder"),
                         id="sc-blocked-path",
                     )
 
                 # ── Actions ──
                 with Vertical(classes="sc-section"):
-                    yield Static("操作限制", classes="sc-section-title")
+                    yield Static(_("tui.component.scan_config.actions_section"), classes="sc-section-title")
                     yield Input(
                         value=self._initial.get("allow_actions", ""),
-                        placeholder="允许操作 (逗号分隔, 例如 recon,scan)",
+                        placeholder=_("tui.component.scan_config.allow_actions_placeholder"),
                         id="sc-allow-actions",
                     )
                     yield Input(
                         value=self._initial.get("block_actions", ""),
-                        placeholder="禁止操作 (逗号分隔, 例如 exploit)",
+                        placeholder=_("tui.component.scan_config.block_actions_placeholder"),
                         id="sc-block-actions",
                     )
 
                 # ── Mode ──
                 with Vertical(classes="sc-section"):
-                    yield Static("检查模式", classes="sc-section-title")
+                    yield Static(_("tui.component.scan_config.mode_section"), classes="sc-section-title")
                     current_mode = self._initial.get("mode", "standard")
                     yield RadioSet(
                         *[
@@ -169,9 +186,9 @@ class ScanConfigScreen(ModalScreen[dict[str, Any] | None]):
 
             # ── Buttons ──
             with Horizontal(id="sc-actions"):
-                yield Button("执行任务", id="sc-execute", variant="primary")
-                yield Button("保存配置", id="sc-save")
-                yield Button("关闭", id="sc-close")
+                yield Button(_("tui.component.scan_config.execute_button"), id="sc-execute", variant="primary")
+                yield Button(_("tui.component.scan_config.save_button"), id="sc-save")
+                yield Button(_("tui.component.scan_config.close_button"), id="sc-close")
 
     def on_button_pressed(self, event: Button.Pressed) -> None:
         """Handle button clicks."""
@@ -183,7 +200,7 @@ class ScanConfigScreen(ModalScreen[dict[str, Any] | None]):
 
         try:
             config = self._collect_config()
-        except Exception as exc:
+        except Exception:
             self.dismiss(None)
             return
 

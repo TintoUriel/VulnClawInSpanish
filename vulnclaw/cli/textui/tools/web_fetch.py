@@ -8,19 +8,20 @@ from typing import Any
 import httpx
 
 from vulnclaw.cli.textui.tools.base import BaseTool, ToolResult, ToolStatus
+from vulnclaw.i18n import _
 
 
 class WebFetchTool(BaseTool):
     """Fetch content from a URL via HTTP GET."""
 
     name = "web_fetch"
-    description = "从 URL 获取内容"
+    description = _("tui.tool.web_fetch.description")
     input_schema: dict[str, Any] = {
         "type": "object",
         "properties": {
             "url": {
                 "type": "string",
-                "description": "要获取的 URL",
+                "description": _("tui.tool.web_fetch.input_desc"),
             },
         },
         "required": ["url"],
@@ -29,7 +30,7 @@ class WebFetchTool(BaseTool):
     async def run(self, inputs: dict[str, Any]) -> ToolResult:
         url = inputs.get("url", "")
         if not url:
-            return ToolResult(status=ToolStatus.ERROR, error="未提供 URL")
+            return ToolResult(status=ToolStatus.ERROR, error=_("tui.tool.web_fetch.no_url"))
 
         start = time.monotonic()
         try:
@@ -41,7 +42,7 @@ class WebFetchTool(BaseTool):
                     return ToolResult(
                         status=ToolStatus.ERROR,
                         output=f"HTTP {resp.status_code}",
-                        error=f"请求失败: {resp.status_code} {resp.reason_phrase}",
+                        error=_("tui.tool.web_fetch.request_failed", status=resp.status_code, reason=resp.reason_phrase),
                         duration_s=round(duration, 2),
                     )
 
@@ -53,7 +54,7 @@ class WebFetchTool(BaseTool):
         except httpx.TimeoutException:
             return ToolResult(
                 status=ToolStatus.ERROR,
-                error="请求超时",
+                error=_("tui.tool.web_fetch.timeout"),
                 duration_s=round(time.monotonic() - start, 2),
             )
         except Exception as exc:

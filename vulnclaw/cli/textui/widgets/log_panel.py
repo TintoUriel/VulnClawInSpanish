@@ -5,6 +5,8 @@ from __future__ import annotations
 from textual.reactive import reactive
 from textual.widgets import Static
 
+from vulnclaw.i18n import _
+
 
 class LogPanel(Static):
     """Panel wrapping a RichLog for streaming LLM output display."""
@@ -44,4 +46,4 @@ class LogPanel(Static):
 
     def _refresh(self) -> None:
         display = self.content[-5000:] if len(self.content) > 5000 else self.content
-        self.update(display or "[dim]等待输出...[/]")
+        self.update(display or _("tui.widget.log_panel.waiting_output"))

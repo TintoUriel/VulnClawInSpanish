@@ -212,6 +212,15 @@ class SessionConfig(BaseModel):
     language: str = Field(
         default="auto", description="UI language: auto, zh, en"
     )
+    # Display configuration
+    render_mode: str = Field(
+        default="plain",
+        description="Message display mode: plain (raw text) or markdown (rendered)",
+    )
+    popup_mode: str = Field(
+        default="embed",
+        description="Popup display mode: embed (in-terminal) or separate (new window)",
+    )
 
 
 class VulnClawConfig(BaseModel):

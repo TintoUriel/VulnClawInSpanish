@@ -400,7 +400,7 @@ def build_target_overview(target: str) -> TuiTargetOverview:
         return TuiTargetOverview(
             target=normalized,
             has_history=False,
-            error=f"读取失败: {exc}",
+            error=_("tui.cli.tui.read_failed", exc=exc),
         )
 
     if preview is None:
@@ -464,7 +464,7 @@ def build_runtime_diagnostic(config) -> TuiRuntimeDiagnostic:
             provider=provider,
             model=model,
             api_key_configured=api_key_configured,
-            mcp_error=f"MCP 诊断失败: {exc}",
+            mcp_error=_("tui.cli.tui.mcp_diag_failed", exc=exc),
         )
 
 
@@ -600,9 +600,9 @@ def _parse_optional_port(value: str) -> int | None:
     try:
         port = int(value)
     except ValueError as exc:
-        raise ValueError("端口必须是 1-65535 之间的数字") from exc
+        raise ValueError(_("tui.cli.tui.invalid_port_range")) from exc
     if port < 1 or port > 65535:
-        raise ValueError("端口必须是 1-65535 之间的数字")
+        raise ValueError(_("tui.cli.tui.invalid_port_range"))
     return port
 
 
@@ -763,7 +763,7 @@ def _confirm_and_launch(state: TuiState, launcher: TaskLauncher) -> None:
         Prompt.ask(_("tui.task_returned"), default="")
 
 
-def _build_task_summary_panel(draft: TuiTaskDraft, *, title: str = "启动摘要") -> Panel:
+def _build_task_summary_panel(draft: TuiTaskDraft, *, title: str = "") -> Panel:
     lines = [
         f"{_('tui.target')}: [bold]{draft.target}[/]",
         f"{_('tui.command')}: [bold]{draft.command}[/]",
