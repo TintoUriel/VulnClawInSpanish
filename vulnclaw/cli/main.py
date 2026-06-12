@@ -1874,14 +1874,8 @@ def tui(
         "--once",
         help="Render the TUI dashboard once and exit (useful for smoke tests).",
     ),
-    popup_mode: Optional[str] = typer.Option(
-        None,
-        "--popup-mode",
-        help="Popup display mode: embed (in-terminal) or separate (new window).",
-    ),
 ) -> None:
     """Open the terminal UI workbench."""
-    from vulnclaw.cli.textui import TEXTUAL_AVAILABLE, VULNCLAW_TUI_LEGACY
     from vulnclaw.cli.tui import (
         MODES,
         build_state_from_options,
@@ -1893,12 +1887,6 @@ def tui(
     if mode not in MODES:
         err_console.print("[!] Unknown TUI mode. Use one of: quick, standard, deep, continuous")
         raise typer.Exit(1)
-
-    if popup_mode is not None:
-        if popup_mode not in ("embed", "separate"):
-            err_console.print("[!] --popup-mode must be 'embed' or 'separate'")
-            raise typer.Exit(1)
-        os.environ["VULNCLAW_SESSION_POPUP_MODE"] = popup_mode
 
     state = build_state_from_options(
         target=target or "",
@@ -1923,26 +1911,7 @@ def tui(
         console.out(render_tui_home(state), end="")
         return
 
-    # Try Textual TUI first, fall back to Rich TUI
-    if TEXTUAL_AVAILABLE and not VULNCLAW_TUI_LEGACY:
-        from vulnclaw.cli.textui.app import run_textual_app
-
-        run_textual_app(
-            target=state.target,
-            mode=state.mode,
-            only_host=state.only_host,
-            only_port=state.only_port,
-            only_path=state.only_path,
-            blocked_host=state.blocked_host,
-            blocked_path=state.blocked_path,
-            allow_actions=state.allow_actions,
-            block_actions=state.block_actions,
-            resume=state.resume,
-        )
-    else:
-        if VULNCLAW_TUI_LEGACY:
-            console.print(_("tui.cli.main.use_legacy_tui"))
-        run_tui(once=once, initial_state=state)
+    run_tui(once=once, initial_state=state)
 
 
 @app.command()

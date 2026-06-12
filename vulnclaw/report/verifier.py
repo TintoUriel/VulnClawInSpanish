@@ -13,7 +13,6 @@
 from __future__ import annotations
 
 import subprocess
-import sys
 import tempfile
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -372,8 +371,8 @@ except Exception as e:
 class VerifierExecutor:
     """执行 PoC 验证并判定结果."""
 
-    # Python 解释器路径 — 使用当前解释器确保跨平台兼容
-    PYTHON_CMD = sys.executable or "python"
+    # Python 解释器路径
+    PYTHON_CMD = "python"
 
     @classmethod
     def execute_poc(cls, poc_code: str, timeout: int = 30) -> tuple[int, str]:
