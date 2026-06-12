@@ -9,7 +9,7 @@ from typing import Any, Callable
 from vulnclaw.agent.constraint_policy import validate_phase_transition
 from vulnclaw.agent.context import PentestPhase
 from vulnclaw.agent.ctf_mode import update_ctf_state
-from vulnclaw.agent.llm_client import call_llm_auto, call_llm_auto_stream
+from vulnclaw.agent.llm_client import call_llm_auto
 from vulnclaw.agent.runtime_state import AgentResult, PersistentCycleResult
 
 RECON_MIN_ROUNDS = 8
@@ -21,9 +21,8 @@ async def auto_pentest(
     target: str | None = None,
     max_rounds: int = 15,
     on_step: Callable[[int, AgentResult], None] | None = None,
-    on_token: Callable[[str], None] | None = None,
-    on_tool_call: Callable[[dict], None] | None = None,
-    on_tool_result: Callable[[dict], None] | None = None,
+    *,
+    stream_sink: Any = None,
 ) -> list[AgentResult]:
     results: list[AgentResult] = []
 
@@ -51,15 +50,7 @@ async def auto_pentest(
         round_context = agent._build_round_context(round_num, max_rounds)
 
         try:
-            if on_token is not None:
-                response_text = await call_llm_auto_stream(
-                    agent, system_prompt, round_context,
-                    on_token=on_token,
-                    on_tool_call=on_tool_call,
-                    on_tool_result=on_tool_result,
-                )
-            else:
-                response_text = await call_llm_auto(agent, system_prompt, round_context)
+            response_text = await call_llm_auto(agent, system_prompt, round_context, stream_sink=stream_sink)
             result.output = response_text
             agent.context.add_assistant_message(f"[Round {round_num} 分析] {response_text}")
             agent._finding_parser.parse(response_text)

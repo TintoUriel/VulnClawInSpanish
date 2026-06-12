@@ -114,14 +114,3 @@ def _(key: str, **kwargs: Any) -> str:
     if _translator is None:
         init_i18n()
     return _translator.t(key, **kwargs)
-
-
-def set_language(lang: str) -> None:
-    """Switch the global translator to a new language at runtime.
-
-    All future ``_()`` calls will use the new language.
-    Already-resolved strings on existing widgets are **not**
-    automatically updated — callers should recompose the UI.
-    """
-    global _translator
-    _translator = I18nLoader(lang)

@@ -80,11 +80,4 @@ CLAUDE.md
 # Local docs / local-only artifacts
 docs/
 .test-tmp/
-
-# Analysis / memory files
-TUI_ANALYSIS.md
-TEXTUAL_TUI_PLAN.md
-
-# Runtime log dumps
-[0-9]
 版本号文件.png

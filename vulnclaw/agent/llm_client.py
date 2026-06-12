@@ -6,7 +6,7 @@ import asyncio
 import inspect
 import json
 import sys
-from typing import Any, Callable, Optional, Protocol, runtime_checkable
+from typing import Any, Optional, Protocol, runtime_checkable
 
 from vulnclaw.agent.tool_call_manager import (
     handle_tool_calls,
@@ -196,155 +196,16 @@ async def call_llm(
     return _prepend_retry_notice(extract_response(choice.message), retry_attempts)
 
 
-async def call_llm_auto_stream(
+async def call_llm_auto(
     agent: Any,
     system_prompt: str,
     round_context: str,
-    on_token: Callable[[str], None] | None = None,
-    on_tool_call: Callable[[dict], None] | None = None,
-    on_tool_result: Callable[[dict], None] | None = None,
+    *,
+    stream_sink: Optional["StreamSink"] = None,
 ) -> str:
-    """Call the LLM in auto-pentest mode with streaming token output."""
-    client = agent._get_client()
-
-    messages = [{"role": "system", "content": system_prompt}]
-    messages.extend(agent.context.get_messages())
-    messages.append({"role": "user", "content": round_context})
-    tools = agent._build_openai_tools()
-
-    kwargs = build_chat_completion_kwargs(agent, messages, tools)
-    kwargs["stream"] = True
-    kwargs["stream_options"] = {"include_usage": False}
-
-    loop = asyncio.get_running_loop()
-    retry_attempts = 0
-
-    while True:
-        try:
-            full_content: list[str] = []
-            reasoning_content: list[str] = []
-            tool_call_deltas: dict[int, dict] = {}
-
-            def _do_stream() -> None:
-                nonlocal retry_attempts
-                try:
-                    response = client.chat.completions.create(**kwargs)
-                    for chunk in response:
-                        if len(chunk.choices) == 0:
-                            continue
-                        delta = chunk.choices[0].delta
-                        if delta is None:
-                            continue
-
-                        # Reasoning content (thinking mode models)
-                        rc = getattr(delta, "reasoning_content", None)
-                        if rc:
-                            reasoning_content.append(rc)
-
-                        if delta.content:
-                            full_content.append(delta.content)
-                            if on_token:
-                                on_token(delta.content)
-
-                        if delta.tool_calls:
-                            for tc_delta in delta.tool_calls:
-                                idx = tc_delta.index
-                                if idx not in tool_call_deltas:
-                                    tool_call_deltas[idx] = {
-                                        "id": tc_delta.id or "",
-                                        "type": "function",
-                                        "function": {"name": "", "arguments": ""},
-                                    }
-                                if tc_delta.id:
-                                    tool_call_deltas[idx]["id"] = tc_delta.id
-                                if tc_delta.function:
-                                    if tc_delta.function.name:
-                                        tool_call_deltas[idx]["function"]["name"] += tc_delta.function.name
-                                    if tc_delta.function.arguments:
-                                        tool_call_deltas[idx]["function"]["arguments"] += tc_delta.function.arguments
-                except Exception as exc:
-                    raise exc
-
-            await loop.run_in_executor(None, _do_stream)
-
-            response_text = "".join(full_content)
-
-            if tool_call_deltas and on_tool_call:
-                for tc in tool_call_deltas.values():
-                    if on_tool_call:
-                        on_tool_call(tc)
-
-            if tool_call_deltas:
-
-                reconstructed_calls = []
-                for tc in tool_call_deltas.values():
-                    reconstructed_calls.append({
-                        "id": tc["id"],
-                        "type": tc["type"],
-                        "function": {
-                            "name": tc["function"]["name"],
-                            "arguments": tc["function"]["arguments"],
-                        },
-                    })
-
-                rc_text = "".join(reasoning_content)
-                assistant_msg: dict[str, Any] = {
-                    "role": "assistant",
-                    "content": response_text or "",
-                    "tool_calls": reconstructed_calls,
-                }
-                if rc_text:
-                    assistant_msg["reasoning_content"] = rc_text
-                messages.append(assistant_msg)
-
-                tool_results, skipped_info = await handle_tool_calls_with_results(agent, reconstructed_calls)
-
-                for tr in tool_results:
-                    if isinstance(tr, dict) and "tool_call_id" in tr:
-                        messages.append({
-                            "role": "tool",
-                            "tool_call_id": tr["tool_call_id"],
-                            "content": tr.get("content", ""),
-                        })
-                        if on_tool_result:
-                            on_tool_result(tr)
-
-                tool_summary = _format_tool_results_fallback(tool_results, skipped_info)
-                kwargs["messages"] = messages
-                kwargs["stream"] = False
-                kwargs.pop("stream_options", None)
-
-                try:
-                    response2, _ = await _call_with_persistent_retries(
-                        agent,
-                        lambda: client.chat.completions.create(**kwargs),
-                        "工具总结(流式)",
-                    )
-                    final_text = extract_response(response2.choices[0].message)
-                    agent.context.add_assistant_message(final_text)
-                    return _prepend_retry_notice(final_text, retry_attempts)
-                except Exception:
-                    agent.context.add_assistant_message(tool_summary)
-                    return _prepend_retry_notice(tool_summary, retry_attempts)
-
-            agent.context.add_assistant_message(response_text)
-            return _prepend_retry_notice(response_text, retry_attempts)
-
-        except asyncio.CancelledError:
-            raise
-        except KeyboardInterrupt:
-            raise
-        except Exception as exc:
-            error_text = str(exc).lower()
-            if _is_non_retriable_llm_error(error_text):
-                raise
-            retry_attempts += 1
-            print(f"[!] 流式 LLM 连接异常，第 {retry_attempts} 次重连尝试中... ({exc})", file=sys.stdout, flush=True)
-            await asyncio.sleep(5)
-
-
-async def call_llm_auto(agent: Any, system_prompt: str, round_context: str) -> str:
     """Call the LLM in auto-pentest mode with round context appended."""
+    if stream_sink is not None:
+        return await call_llm_auto_stream(agent, system_prompt, round_context, stream_sink)
 
     client = agent._get_client()
 
@@ -374,8 +235,7 @@ async def call_llm_auto(agent: Any, system_prompt: str, round_context: str) -> s
                 continue
             executed_tcs.append(tc["tool_call"])
 
-        rc = getattr(choice.message, "reasoning_content", None)
-        assistant_msg: dict[str, Any] = {
+        assistant_msg = {
             "role": "assistant",
             "content": choice.message.content or "",
             "tool_calls": [
@@ -390,8 +250,6 @@ async def call_llm_auto(agent: Any, system_prompt: str, round_context: str) -> s
                 for tc in executed_tcs
             ],
         }
-        if rc:
-            assistant_msg["reasoning_content"] = rc
         messages.append(assistant_msg)
 
         for tool_result in tool_results:
