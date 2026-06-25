@@ -1,4 +1,4 @@
-VERSION=0.3.1
+VERSION=0.3.2
 
 # VulnClaw versioned file manifest
 # Keep these files in sync when bumping a release version.
