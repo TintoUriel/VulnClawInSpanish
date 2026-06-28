@@ -440,6 +440,7 @@ def _run_repl() -> None:
                 try:
 
                     async def _run_persistent():
+                        await mcp_manager._preinit_chrome_devtools()
                         sink = TerminalStreamSink(console, config.session.show_thinking)
                         return await agent.persistent_pentest(
                             user_input=persistent_prompt,
@@ -538,6 +539,7 @@ def _run_repl() -> None:
                     # 默认走目标驱动 solve 引擎；engine=rounds 时回退到旧固定轮数循环
                     if getattr(config.session, "engine", "solve") == "solve":
                         async def _run_auto():
+                            await mcp_manager._preinit_chrome_devtools()
                             sink = TerminalStreamSink(console, config.session.show_thinking)
 
                             async def call():
@@ -631,6 +633,7 @@ def _run_repl() -> None:
                 else:
                     # Single-turn chat
                     async def _run_agent():
+                        await mcp_manager._preinit_chrome_devtools()
                         sink = TerminalStreamSink(console, config.session.show_thinking)
                         async def call():
                             return await agent.chat(user_input, target=current_target, stream_sink=sink)

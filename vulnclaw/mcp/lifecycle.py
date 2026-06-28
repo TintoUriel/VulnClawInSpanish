@@ -253,7 +253,21 @@ class MCPLifecycleManager:
                         started += 1
                 except Exception as e:
                     self.registry.set_server_error(name, str(e), error_type="startup_error")
+        # 如果事件循环在跑，后台预初始化 chrome-devtools session（在主协程入口也会跑）
+        try:
+            loop = asyncio.get_running_loop()
+            if "chrome-devtools" in self.config.mcp.servers and self.config.mcp.servers["chrome-devtools"].enabled:
+                loop.create_task(self._preinit_chrome_devtools())
+        except RuntimeError:
+            pass
         return started
+
+    async def _preinit_chrome_devtools(self) -> None:
+        """预初始化 chrome-devtools: 提前建 session + 发现工具."""
+        try:
+            await self._get_or_create_persistent_stdio_session("chrome-devtools")
+        except BaseException:
+            pass
 
     def _start_server(self, name: str, config: MCPServerConfig) -> bool:
         """Start a single MCP server.
@@ -753,6 +767,21 @@ class MCPLifecycleManager:
             with suppress(Exception):
                 await cm.__aexit__(None, None, None)
             raise
+
+        # 发现并注册真实工具名，替换 KNOWN_TOOLS 硬编码的假名
+        try:
+            result = await asyncio.wait_for(session.list_tools(), timeout=10)
+            tool_defs = self._normalize_mcp_tools(getattr(result, "tools", []) or [])
+            if tool_defs:
+                self._register_runtime_tools(server_name, tool_defs)
+        except BaseException:
+            pass
+
+        # 关闭旧 context_manager，避免 GC 回收时 cancel scope 跨 task 冲突
+        old_cm = client_meta.get("context_manager") if isinstance(client_meta, dict) else None
+        if old_cm is not None and old_cm is not cm:
+            with suppress(Exception):
+                await old_cm.__aexit__(None, None, None)
 
         self._mcp_clients[server_name] = {
             "kind": "persistent-stdio",
