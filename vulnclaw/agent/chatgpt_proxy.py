@@ -161,12 +161,14 @@ def chat_to_responses(payload: dict[str, Any]) -> dict[str, Any]:
                 conv_tools.append(t)
         responses["tools"] = conv_tools
 
-    if payload.get("temperature") is not None:
-        responses["temperature"] = payload["temperature"]
-    if payload.get("max_tokens") is not None:
-        responses["max_output_tokens"] = payload["max_tokens"]
-    if payload.get("max_completion_tokens") is not None:
-        responses["max_output_tokens"] = payload["max_completion_tokens"]
+    # The ChatGPT backend rejects sampling / limit params with HTTP 400
+    # ("Unsupported parameter: temperature / top_p / max_output_tokens"), so we
+    # do NOT forward them. It does accept a `reasoning` object — map the chat
+    # `reasoning_effort` onto it.
+    if isinstance(payload.get("reasoning"), dict):
+        responses["reasoning"] = payload["reasoning"]
+    elif payload.get("reasoning_effort"):
+        responses["reasoning"] = {"effort": payload["reasoning_effort"]}
     return responses
 
 

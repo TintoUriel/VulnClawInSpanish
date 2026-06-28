@@ -33,6 +33,7 @@ def test_chat_to_responses_maps_roles_tools_and_params():
         "tools": [{"type": "function", "function": {"name": "f", "description": "d", "parameters": {}}}],
         "temperature": 0.3,
         "max_tokens": 128,
+        "reasoning_effort": "high",
     }
     r = cp.chat_to_responses(req)
     assert r["instructions"] == "be terse"
@@ -44,8 +45,12 @@ def test_chat_to_responses_maps_roles_tools_and_params():
     ]
     assert r["input"][3]["call_id"] == "c1"
     assert r["tools"][0] == {"type": "function", "name": "f", "description": "d", "parameters": {}}
-    assert r["temperature"] == 0.3
-    assert r["max_output_tokens"] == 128
+    # The ChatGPT backend rejects sampling/limit params — they must NOT be sent.
+    assert "temperature" not in r
+    assert "max_output_tokens" not in r
+    assert "top_p" not in r
+    # reasoning_effort is mapped onto the accepted `reasoning` object.
+    assert r["reasoning"] == {"effort": "high"}
     # The ChatGPT backend requires streaming + store=false.
     assert r["stream"] is True
     assert r["store"] is False
