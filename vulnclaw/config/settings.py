@@ -103,6 +103,9 @@ def set_config_value(key: str, value: str) -> None:
     """Set a nested config value using dot notation.
 
     Example: set_config_value("llm.api_key", "sk-xxx")
+
+    Supports traversal through both Pydantic model attributes *and* plain dict
+    nodes (e.g. ``mcp.servers.chrome-devtools.enabled``).
     """
     config = load_config()
     parts = key.split(".")
@@ -111,21 +114,28 @@ def set_config_value(key: str, value: str) -> None:
         obj = obj[part] if isinstance(obj, dict) else getattr(obj, part)
     field_name = parts[-1]
 
-    # Type coercion based on field annotation
-    model_fields = getattr(type(obj), "model_fields", {})
-    if field_name in model_fields:
-        field_info = model_fields[field_name]
-        annotation = field_info.annotation
-        if annotation is int:
-            value = int(value)
-        elif annotation is float:
-            value = float(value)
-        elif annotation is bool:
-            value = value.lower() in ("true", "1", "yes")
-
     if isinstance(obj, dict):
+        # Dict node — infer type from the existing value if present
+        existing = obj.get(field_name)
+        if isinstance(existing, bool):
+            value = value.lower() in ("true", "1", "yes")
+        elif isinstance(existing, int):
+            value = int(value)
+        elif isinstance(existing, float):
+            value = float(value)
         obj[field_name] = value
     else:
+        # Pydantic model node — use field annotation for type coercion
+        model_fields = getattr(type(obj), "model_fields", {})
+        if field_name in model_fields:
+            field_info = model_fields[field_name]
+            annotation = field_info.annotation
+            if annotation is int:
+                value = int(value)
+            elif annotation is float:
+                value = float(value)
+            elif annotation is bool:
+                value = value.lower() in ("true", "1", "yes")
         setattr(obj, field_name, value)
     save_config(config)
 
