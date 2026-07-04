@@ -796,6 +796,10 @@ vulnclaw config set session.show_thinking false # 隐藏推理过程（也可在
 
 ## 安全声明
 
+**公开 Alpha 阶段**：VulnClaw 是面向已授权安全测试、CTF、实验环境与可控研究场景的公开
+Alpha 软件，不应作为生产环境的安全控制手段或授权机制。使用前请阅读
+[SECURITY.md](SECURITY.md)。
+
 VulnClaw 仅用于**已授权的安全测试**。使用本工具前，请确保：
 
 1. 你已获得目标系统的**明确授权**

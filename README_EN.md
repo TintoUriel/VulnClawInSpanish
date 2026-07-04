@@ -642,6 +642,12 @@ Config file location: `~/.vulnclaw/config.yaml`.
 
 ## Security Notice
 
+**Public alpha:** VulnClaw is public alpha software for authorized security
+testing, CTFs, labs, and controlled research. It is not a production security
+control or a replacement for human authorization, scoping, review, or
+reporting. See [SECURITY.md](SECURITY.md) before using or reporting security
+issues.
+
 VulnClaw is intended **solely for authorized security testing**. Before using this tool, ensure:
 
 1. You have **explicit authorization** for the target system

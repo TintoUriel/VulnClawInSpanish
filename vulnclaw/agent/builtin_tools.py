@@ -16,6 +16,23 @@ from typing import Any
 from urllib.parse import urlparse
 
 from vulnclaw.agent.constraint_policy import validate_tool_action
+from vulnclaw.agent.network_scan import (
+    attach_network_scan_to_session,
+    build_nmap_command,
+    build_nmap_plan,
+    deescalate_nmap_argv,
+    nmap_failure_needs_deescalation,
+    nmap_has_raw_socket_access,
+    parse_nmap_xml_structured,
+    summarize_network_scan,
+    target_is_private_literal,
+    without_privileged_nmap_args,
+)
+from vulnclaw.intel.tools import (
+    INTEL_TOOL_NAMES,
+    dispatch_intel_tool,
+    intel_tool_schemas,
+)
 
 BLOCKED_PATTERNS: list[str] = [
     r"os\.\s*system\s*\(",
@@ -87,6 +104,9 @@ async def execute_mcp_tool(agent: Any, tool_name: str, args: dict[str, Any]) -> 
                     detail=json.dumps(args, ensure_ascii=False)[:500],
                 )
             return f"[constraint_violation] {tool_violation}"
+
+    if tool_name in INTEL_TOOL_NAMES:
+        return await dispatch_intel_tool(agent, tool_name, args)
 
     if tool_name == "python_execute":
         return await execute_python(agent, args)
@@ -410,6 +430,10 @@ def build_openai_tools(mcp_manager: Any) -> list[dict[str, Any]]:
                             "type": "integer",
                             "description": "扫描速度模板 0-5（默认4），数字越大越快但越容易被检测",
                         },
+                        "profile": {
+                            "type": "string",
+                            "description": "可选网络扫描画像：adaptive/fast/thorough/stealth。画像会联动调整端口、速度、服务探测与安全脚本。",
+                        },
                     },
                     "required": ["target"],
                 },
@@ -635,6 +659,8 @@ def build_openai_tools(mcp_manager: Any) -> list[dict[str, Any]]:
         }
     )
 
+    tools.extend(intel_tool_schemas())
+
     if mcp_manager:
         for schema in mcp_manager.get_tool_schemas():
             tools.append(
@@ -671,7 +697,7 @@ async def execute_nmap(agent: Any, args: dict[str, Any]) -> str:
         if ips:
             ip = ips[0][4][0]
             is_reserved, reason = is_reserved_ip(ip)
-            if is_reserved:
+            if is_reserved and not target_is_private_literal(target):
                 return (
                     f"[SKIP] 目标 {target} 解析到保留/内网地址 ({reason}, IP: {ip})\n"
                     f"跳过 nmap 扫描。建议直接通过 Web 指纹、目录枚举等方法收集信息，"
@@ -683,6 +709,7 @@ async def execute_nmap(agent: Any, args: dict[str, Any]) -> str:
     scan_type = args.get("scan_type", "top_ports")
     custom_ports = args.get("ports", "")
     timing = int(args.get("timing", 4))
+    profile = str(args.get("profile", "") or "").strip().lower()
 
     nmap_cmd = shutil.which("nmap")
     if not nmap_cmd:
@@ -697,27 +724,61 @@ async def execute_nmap(agent: Any, args: dict[str, Any]) -> str:
     if not nmap_cmd:
         return "[!] nmap 未安装或不在 PATH 中。请确认 nmap 已安装并加入系统 PATH。"
 
-    cmd = [nmap_cmd, "-v" if scan_type == "full" else "-q", f"-T{max(0, min(5, timing))}"]
-    if scan_type == "top_ports":
-        cmd.extend(["--top-ports", "100", "-oX", "-"])
-    elif scan_type == "syn":
-        cmd.extend(["-sS", "-oX", "-"])
-    elif scan_type == "tcp":
-        cmd.extend(["-sT", "-oX", "-"])
-    elif scan_type == "service":
-        cmd.extend(["-sV", "-oX", "-"])
-    elif scan_type == "os":
-        cmd.extend(["-O", "-oX", "-"])
-    elif scan_type == "vuln":
-        cmd.extend(["--script", "vuln", "-oX", "-"])
-    elif scan_type == "full":
-        cmd.extend(["-sS", "-O", "-sV", "--script", "default,safe", "-oX", "-"])
+    if profile:
+        plan = build_nmap_plan(
+            profile=profile,
+            scan_type=str(scan_type or ""),
+            ports=str(custom_ports or ""),
+            timing=timing,
+            prior_recon=getattr(getattr(agent, "session_state", None), "recon_data", {}),
+        )
+        privileged = nmap_has_raw_socket_access()
+        cmd = build_nmap_command(nmap_cmd, target, plan, privileged=privileged)
+        deescalated_note = (
+            ""
+            if privileged or plan.args == without_privileged_nmap_args(plan.args)
+            else "[i] 非管理员权限运行：已跳过操作系统指纹识别（-O），SYN 扫描降级为 connect 扫描（-sT）。\n"
+        )
     else:
-        cmd.extend(["-sV", "-oX", "-"])
+        plan = None
+        privileged = nmap_has_raw_socket_access()
+        deescalated_note = ""
+        cmd = [nmap_cmd, "-v" if scan_type == "full" else "-q", f"-T{max(0, min(5, timing))}"]
+        if scan_type == "top_ports":
+            cmd.extend(["--top-ports", "100", "-oX", "-"])
+        elif scan_type == "syn":
+            cmd.extend(["-sS" if privileged else "-sT", "-oX", "-"])
+            if not privileged:
+                deescalated_note = "[i] 非管理员权限运行：使用 connect 扫描（-sT）代替 SYN 扫描（-sS）。\n"
+        elif scan_type == "tcp":
+            cmd.extend(["-sT", "-oX", "-"])
+        elif scan_type == "service":
+            cmd.extend(["-sV", "-oX", "-"])
+        elif scan_type == "os":
+            if privileged:
+                cmd.extend(["-O", "-oX", "-"])
+            else:
+                cmd.extend(["-sV", "-oX", "-"])
+                deescalated_note = (
+                    "[i] 非管理员权限运行：操作系统指纹识别（-O）不可用，改用服务探测（-sV）。\n"
+                )
+        elif scan_type == "vuln":
+            cmd.extend(["--script", "vuln", "-oX", "-"])
+        elif scan_type == "full":
+            if privileged:
+                cmd.extend(["-sS", "-O", "-sV", "--script", "default,safe", "-oX", "-"])
+            else:
+                cmd.extend(["-sT", "-sV", "--script", "default,safe", "-oX", "-"])
+                deescalated_note = (
+                    "[i] 非管理员权限运行：已跳过操作系统指纹识别（-O），"
+                    "SYN 扫描降级为 connect 扫描（-sT）。\n"
+                )
+        else:
+            cmd.extend(["-sV", "-oX", "-"])
 
-    if custom_ports:
-        cmd.extend(["-p", custom_ports])
-    cmd.append(target)
+        if custom_ports:
+            cmd.extend(["-p", custom_ports])
+        cmd.append(target)
 
     try:
         kwargs: dict[str, Any] = {
@@ -733,6 +794,17 @@ async def execute_nmap(agent: Any, args: dict[str, Any]) -> str:
             startupinfo.wShowWindow = subprocess.SW_HIDE
             kwargs["startupinfo"] = startupinfo
         result = subprocess.run(cmd, **kwargs)
+        if (
+            result.returncode != 0
+            and not result.stdout
+            and nmap_failure_needs_deescalation(result.stderr or "")
+        ):
+            fallback_cmd = deescalate_nmap_argv(cmd)
+            if fallback_cmd != cmd:
+                fallback = subprocess.run(fallback_cmd, **kwargs)
+                if fallback.returncode == 0 or fallback.stdout:
+                    result = fallback
+                    deescalated_note = "[i] 权限错误后已使用非特权 nmap 参数重试。\n"
     except subprocess.TimeoutExpired:
         return "[!] nmap 扫描超时（120秒），请减少扫描范围或使用更快的 timing"
     except PermissionError:
@@ -742,7 +814,20 @@ async def execute_nmap(agent: Any, args: dict[str, Any]) -> str:
 
     if result.returncode != 0 and not result.stdout:
         return f"[!] nmap 扫描失败（{result.returncode}）: {result.stderr[:500]}"
-    return parse_nmap_xml(result.stdout or result.stderr, target)
+    output = result.stdout or result.stderr
+    human_summary = parse_nmap_xml(output, target)
+    structured = parse_nmap_xml_structured(output, target)
+    if getattr(agent, "session_state", None) is not None:
+        attach_network_scan_to_session(
+            agent.session_state,
+            structured,
+            profile=profile or str(scan_type or "top_ports"),
+            safe_probes=profile != "vuln",
+        )
+    if profile:
+        network_summary = summarize_network_scan(structured)
+        return f"{deescalated_note}{human_summary}\n\n{network_summary}"
+    return f"{deescalated_note}{human_summary}"
 
 
 def is_reserved_ip(ip: str) -> tuple[bool, str]:

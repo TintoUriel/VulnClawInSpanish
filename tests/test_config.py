@@ -266,3 +266,74 @@ class TestSettingsLoad:
         assert config.session.plugin_runtime_enabled is False
         assert config.session.plugin_max_requests_per_target == 7
         assert config.session.evidence_min_report_level == "L2"
+
+    def test_env_var_api_keys_list(self, monkeypatch):
+        """VULNCLAW_LLM_API_KEYS (comma-separated) populates the key list."""
+        from vulnclaw.config.settings import load_config
+
+        monkeypatch.setenv("VULNCLAW_LLM_API_KEYS", "k1, k2 ,k3")
+        config = load_config()
+        assert config.llm.api_keys == ["k1", "k2", "k3"]
+
+    def test_env_var_repl_parallel_overrides(self, monkeypatch):
+        """VULNCLAW_SESSION_REPL_PARALLEL_* overrides session fan-out defaults."""
+        from vulnclaw.config.settings import load_config
+
+        monkeypatch.setenv("VULNCLAW_SESSION_REPL_PARALLEL_ENABLED", "false")
+        monkeypatch.setenv("VULNCLAW_SESSION_REPL_PARALLEL_AGENTS", "2")
+        monkeypatch.setenv("VULNCLAW_SESSION_REPL_PARALLEL_DEPTH", "2")
+        monkeypatch.setenv("VULNCLAW_SESSION_REPL_PARALLEL_WORKER_ROUNDS", "4")
+        monkeypatch.setenv("VULNCLAW_SESSION_REPL_PARALLEL_SURFACE_LIMIT", "9")
+
+        config = load_config()
+
+        assert config.session.repl_parallel_enabled is False
+        assert config.session.repl_parallel_agents == 2
+        assert config.session.repl_parallel_depth == 2
+        assert config.session.repl_parallel_worker_rounds == 4
+        assert config.session.repl_parallel_surface_limit == 9
+
+    def test_set_config_value_api_keys_from_string(self, monkeypatch, tmp_path):
+        """set_config_value('llm.api_keys', 'a,b') stores a parsed list."""
+        import vulnclaw.config.settings as settings_mod
+
+        monkeypatch.setattr(settings_mod, "CONFIG_FILE", tmp_path / "config.yaml")
+        monkeypatch.setattr(settings_mod, "CONFIG_DIR", tmp_path)
+        settings_mod.set_config_value("llm.api_keys", "a, b ,c")
+        config = settings_mod.load_config()
+        assert config.llm.api_keys == ["a", "b", "c"]
+
+    def test_set_config_value_repl_parallel_fields(self, monkeypatch, tmp_path):
+        """set_config_value coerces REPL parallel session fields."""
+        import vulnclaw.config.settings as settings_mod
+
+        monkeypatch.setattr(settings_mod, "CONFIG_FILE", tmp_path / "config.yaml")
+        monkeypatch.setattr(settings_mod, "CONFIG_DIR", tmp_path)
+
+        settings_mod.set_config_value("session.repl_parallel_enabled", "false")
+        settings_mod.set_config_value("session.repl_parallel_agents", "2")
+        settings_mod.set_config_value("session.repl_parallel_worker_rounds", "4")
+
+        config = settings_mod.load_config()
+        assert config.session.repl_parallel_enabled is False
+        assert config.session.repl_parallel_agents == 2
+        assert config.session.repl_parallel_worker_rounds == 4
+
+    def test_strip_defaults_drops_empty_api_keys(self):
+        from vulnclaw.config.settings import _strip_defaults
+
+        raw = {"llm": {"api_keys": [], "model": "gpt-4o", "provider": "openai"}}
+        _strip_defaults(raw)
+        assert "api_keys" not in raw["llm"]
+
+    def test_save_load_roundtrips_api_keys(self, monkeypatch, tmp_path):
+        import vulnclaw.config.settings as settings_mod
+        from vulnclaw.config.schema import VulnClawConfig
+
+        monkeypatch.setattr(settings_mod, "CONFIG_FILE", tmp_path / "config.yaml")
+        monkeypatch.setattr(settings_mod, "CONFIG_DIR", tmp_path)
+        config = VulnClawConfig()
+        config.llm.api_keys = ["x1", "x2"]
+        settings_mod.save_config(config)
+        reloaded = settings_mod.load_config()
+        assert reloaded.llm.api_keys == ["x1", "x2"]

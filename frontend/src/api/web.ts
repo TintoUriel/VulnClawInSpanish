@@ -3,6 +3,9 @@ import type {
   ConstraintAuditView,
   ConfigUpdateRequest,
   MCPDiagnosticsView,
+  ProviderModelsRequest,
+  ProviderModelsResponse,
+  ProvidersView,
   ReportListItem,
   ReportContentView,
   TargetPreviewView,
@@ -103,6 +106,17 @@ export function getConstraintAudit(): Promise<ConstraintAuditView> {
 
 export function updateConfig(payload: ConfigUpdateRequest): Promise<ConfigView> {
   return requestJson<ConfigView>("/api/config", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
+
+export function getProviders(): Promise<ProvidersView> {
+  return requestJson<ProvidersView>("/api/providers");
+}
+
+export function fetchProviderModels(payload: ProviderModelsRequest): Promise<ProviderModelsResponse> {
+  return requestJson<ProviderModelsResponse>("/api/provider-models", {
     method: "POST",
     body: JSON.stringify(payload),
   });

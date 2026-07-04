@@ -31,6 +31,29 @@ export interface ConfigUpdateRequest {
   python_execute_audit_enabled?: boolean;
 }
 
+export interface ProviderPresetView {
+  id: string;
+  label: string;
+  base_url: string;
+  default_model: string;
+}
+
+export interface ProvidersView {
+  providers: ProviderPresetView[];
+}
+
+export interface ProviderModelsRequest {
+  provider?: string;
+  base_url?: string;
+}
+
+export interface ProviderModelsResponse {
+  base_url: string;
+  models: string[];
+  has_api_key: boolean;
+  detail: string;
+}
+
 export interface TargetView {
   target: string;
   schema_version: number;

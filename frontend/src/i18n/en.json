@@ -495,6 +495,12 @@
   "settings.model_hint": "Use the model name configured for your backend.",
   "settings.base_url": "Base URL",
   "settings.base_url_hint": "Leave blank to use the backend default.",
+  "settings.custom_endpoint": "Custom endpoint…",
+  "settings.custom_model": "Custom model…",
+  "settings.refresh_models": "Refresh models",
+  "settings.loading_models": "Loading…",
+  "settings.models_loaded": "Loaded {count} models",
+  "settings.no_models": "No models returned. Save your API key, then refresh.",
 
   "settings.max_rounds": "Max rounds",
   "settings.rounds_per_cycle": "Rounds per cycle",

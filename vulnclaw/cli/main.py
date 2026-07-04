@@ -49,6 +49,7 @@ from vulnclaw import __version__
 from vulnclaw.agent.constraint_policy import validate_action_constraints
 from vulnclaw.agent.input_analysis import extract_task_constraints
 from vulnclaw.agent.think_filter import format_think_tags, strip_think_tags
+from vulnclaw.cli.manual import available_topics, render_manual
 from vulnclaw.config.settings import (
     apply_provider_preset,
     list_providers,
@@ -1344,6 +1345,188 @@ def scan(
     asyncio.run(_run())
 
 
+@app.command("network-scan")
+def network_scan(
+    target: Optional[str] = typer.Argument(
+        None, help="目标主机/IP/CIDR，默认使用当前连接的 Wi-Fi 子网"
+    ),
+    profile: str = typer.Option(
+        "adaptive",
+        "--profile",
+        help="网络扫描画像：adaptive、fast、thorough、stealth",
+    ),
+    ports: Optional[str] = typer.Option(None, "--ports", help="端口范围，如 80,443,1-1000"),
+    max_rounds: int = typer.Option(
+        0, "--max-rounds", help="Agent 后续跟进轮数（0=使用配置默认值）"
+    ),
+    parallel_agents: int = typer.Option(
+        1,
+        "--parallel-agents",
+        min=1,
+        help="在已发现的攻击面上并行派生的子 Agent 数量（1 表示不启用并行）",
+    ),
+    parallel_depth: int = typer.Option(
+        1,
+        "--parallel-depth",
+        min=1,
+        help="子 Agent 攻击面发现的有界波次数",
+    ),
+    worker_rounds: int = typer.Option(
+        3,
+        "--worker-rounds",
+        min=1,
+        help="每个子 Agent worker 的执行轮数",
+    ),
+    surface_limit: int = typer.Option(
+        20,
+        "--surface-limit",
+        min=1,
+        help="用于子 Agent 并行派生的最大攻击面数量",
+    ),
+    safe_probes: bool = typer.Option(
+        True,
+        "--safe-probes/--no-safe-probes",
+        help="nmap 扫描后默认仅执行非破坏性的验证探测",
+    ),
+    prompt: Optional[str] = typer.Option(
+        None, "--prompt", help="Custom natural language prompt (overrides auto-generated prompt)"
+    ),
+    only_port: Optional[int] = typer.Option(
+        None, "--only-port", help="Restrict testing to a single port"
+    ),
+    only_host: Optional[str] = typer.Option(
+        None, "--only-host", help="Restrict testing to a single host"
+    ),
+    blocked_host: Optional[str] = typer.Option(
+        None, "--blocked-host", help="Explicitly blocked host"
+    ),
+    allow_actions: Optional[str] = typer.Option(
+        None, "--allow-actions", help="Comma-separated allowed actions"
+    ),
+    block_actions: Optional[str] = typer.Option(
+        None, "--block-actions", help="Comma-separated blocked actions"
+    ),
+    resume: bool = typer.Option(True, "--resume/--no-resume", help="Resume previous target state"),
+    snapshot: Optional[str] = typer.Option(
+        None, "--snapshot", help="Resume from a specific target snapshot id"
+    ),
+) -> None:
+    """运行基于 nmap 的网络扫描，并对薄弱环节进行跟进。"""
+    normalized_profile = profile.strip().lower()
+    if normalized_profile not in {"adaptive", "fast", "thorough", "stealth"}:
+        err_console.print("[!] profile 必须是以下之一: adaptive, fast, thorough, stealth")
+        raise typer.Exit(1)
+
+    detected_wifi = None
+    scan_target = target.strip() if target else ""
+    if not scan_target:
+        from vulnclaw.agent.network_scan import detect_connected_wifi_target
+
+        try:
+            detected_wifi = detect_connected_wifi_target()
+            scan_target = detected_wifi.cidr
+        except RuntimeError as exc:
+            err_console.print(f"[!] {exc}")
+            raise typer.Exit(1)
+
+    port_hint = f" limited to ports {ports}" if ports else ""
+    follow_up = (
+        "Then prioritize weak links and perform safe, non-destructive verification probes only."
+        if safe_probes
+        else "Then summarize weak links without running follow-up probes."
+    )
+    task_prompt = prompt if prompt else (
+        f"Perform an authorized {normalized_profile} network scan against {scan_target}{port_hint}. "
+        f"Use the nmap_scan tool with profile={normalized_profile}"
+        f"{f' and ports={ports}' if ports else ''}. "
+        f"{follow_up} Record open services and candidate weak-link findings in target state. "
+        "Do not brute force credentials, run destructive payloads, or perform post-exploitation."
+    )
+    task_prompt = _append_cli_constraints_compat(
+        task_prompt,
+        only_port,
+        only_host,
+        None,
+        blocked_host,
+        None,
+    )
+
+    effective_allow_actions = allow_actions
+    effective_block_actions = block_actions
+    if safe_probes and not allow_actions and not block_actions:
+        effective_allow_actions = "recon,scan"
+    task_prompt = _append_action_constraints(
+        task_prompt, effective_allow_actions, effective_block_actions
+    )
+
+    violation = validate_action_constraints("scan", extract_task_constraints(task_prompt))
+    if violation is not None:
+        err_console.print(f"[!] {violation}")
+        raise typer.Exit(1)
+
+    console.print(
+        Panel(
+            f"目标: [bold]{scan_target}[/]\n"
+            + (
+                f"Wi-Fi 接口: [bold]{detected_wifi.interface}[/] ({detected_wifi.address})\n"
+                if detected_wifi
+                else ""
+            )
+            +
+            f"画像: [bold]{normalized_profile}[/]\n"
+            f"端口: [bold]{ports or '画像默认'}[/]\n"
+            f"跟进策略: [bold]{'安全探测' if safe_probes else '仅摘要'}[/]\n"
+            f"并行 Agent 数: [bold]{parallel_agents}[/]"
+            + (
+                f"（深度 {parallel_depth}，每个 worker {worker_rounds} 轮）"
+                if parallel_agents > 1
+                else ""
+            ),
+            title="网络扫描",
+            border_style="cyan",
+        )
+    )
+
+    async def _run():
+        async def runner(agent, _config):
+            sink = TerminalStreamSink(console, _config.session.show_thinking)
+            rounds = max_rounds if max_rounds > 0 else _config.session.max_rounds
+            if parallel_agents > 1:
+                from vulnclaw.agent.parallel_agents import run_parallel_pentest
+
+                def agent_factory():
+                    return agent.__class__(_config, getattr(agent, "mcp_manager", None))
+
+                return await run_parallel_pentest(
+                    agent,
+                    agent_factory=agent_factory,
+                    user_input=task_prompt,
+                    target=scan_target,
+                    discovery_rounds=rounds,
+                    worker_rounds=worker_rounds,
+                    max_agents=parallel_agents,
+                    max_depth=parallel_depth,
+                    surface_limit=surface_limit,
+                    stream_sink=sink,
+                )
+            return await agent.auto_pentest(
+                task_prompt,
+                target=scan_target,
+                max_rounds=rounds,
+                stream_sink=sink,
+            )
+
+        await _run_cli_orchestrated_task(
+            command="network-scan",
+            target=scan_target,
+            resume=resume,
+            snapshot=snapshot,
+            runner=runner,
+        )
+
+    asyncio.run(_run())
+
+
 @app.command()
 def exploit(
     target: str = typer.Argument(..., help="Target host/IP/URL"),
@@ -1418,6 +1601,12 @@ def report(
     target_mode: bool = typer.Option(
         False, "--target", help="Interpret argument as target and generate report from target state"
     ),
+    pdf: bool = typer.Option(
+        False, "--pdf", help="Also export the report to PDF (requires the vulnclaw[pdf] extra)"
+    ),
+    pdf_out: str = typer.Option(
+        "", "--pdf-out", help="PDF output path (default: the report path with a .pdf suffix)"
+    ),
 ) -> None:
     """Generate a report from a session file or target state."""
     if target_mode:
@@ -1427,12 +1616,68 @@ def report(
         if not state:
             err_console.print(f"[!] Target state not found: {session}")
             raise typer.Exit(1)
-        generate_report_from_target_state(state)
+        report_path = generate_report_from_target_state(state)
     else:
         from vulnclaw.report.generator import generate_report_from_file
 
-        generate_report_from_file(session)
-    console.print("[+] Report generated")
+        report_path = generate_report_from_file(session)
+    console.print(f"[+] Report generated: {report_path}")
+
+    if pdf:
+        from pathlib import Path
+
+        from vulnclaw.report.pdf_exporter import export_pdf
+
+        out = Path(pdf_out) if pdf_out else Path(report_path).with_suffix(".pdf")
+        try:
+            markdown = Path(report_path).read_text(encoding="utf-8")
+            export_pdf(markdown, out, title="VulnClaw Report")
+        except RuntimeError as exc:
+            err_console.print(f"[!] {exc}")
+            raise typer.Exit(1) from exc
+        console.print(f"[+] PDF exported: {out}")
+
+
+def _print_cli_manual(topic: Optional[str], output_format: str) -> None:
+    """Print the packaged CLI manual, normalizing user-facing errors."""
+    try:
+        console.out(render_manual(output_format, topic), end="")
+    except ValueError as exc:
+        err_console.print(f"[!] {exc}")
+        err_console.print(f"    Available topics: {', '.join(available_topics())}")
+        raise typer.Exit(1) from exc
+
+
+@app.command("manual")
+def manual_command(
+    topic: Optional[str] = typer.Argument(
+        None, help="Optional manual topic, e.g. run, solve, network-scan, config"
+    ),
+    output_format: str = typer.Option(
+        "text",
+        "--format",
+        "-f",
+        help="Output format: text, markdown, man",
+    ),
+) -> None:
+    """Print the full VulnClaw CLI manual."""
+    _print_cli_manual(topic, output_format)
+
+
+@app.command("man")
+def man_command(
+    topic: Optional[str] = typer.Argument(
+        None, help="Optional manual topic, e.g. run, solve, network-scan, config"
+    ),
+    output_format: str = typer.Option(
+        "text",
+        "--format",
+        "-f",
+        help="Output format: text, markdown, man",
+    ),
+) -> None:
+    """Alias for 'vulnclaw manual'."""
+    _print_cli_manual(topic, output_format)
 
 
 # 鈹€鈹€ Config sub-command group 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
@@ -2256,8 +2501,29 @@ def _extract_target_from_input(user_input: str) -> Optional[str]:
 
 
 @app.callback(invoke_without_command=True)
-def main(ctx: typer.Context) -> None:
+def main(
+    ctx: typer.Context,
+    version: bool = typer.Option(
+        False,
+        "--version",
+        help="Show version and exit.",
+        is_eager=True,
+    ),
+    show_manual: bool = typer.Option(
+        False,
+        "--man",
+        "--manual",
+        help="Show the full CLI manual and exit.",
+        is_eager=True,
+    ),
+) -> None:
     """Open the classic CLI/REPL by default."""
+    if version:
+        console.print(__version__)
+        raise typer.Exit()
+    if show_manual:
+        _print_cli_manual(None, "text")
+        raise typer.Exit()
     if ctx.invoked_subcommand is None:
         _run_repl()
 
@@ -2419,7 +2685,7 @@ def web(
     ),
 ) -> None:
     """Run the local Web UI."""
-    if host != "127.0.0.1":
+    if not _is_loopback_bind_host(host):
         if not allow_remote:
             err_console.print(
                 "[!] Refusing to bind the Web UI to a non-local address without --allow-remote."
@@ -2463,6 +2729,19 @@ def web(
     from vulnclaw.web.app import create_app
 
     uvicorn.run(create_app(), host=host, port=port, log_level="info")
+
+
+def _is_loopback_bind_host(host: str) -> bool:
+    """Return True when a requested bind host is loopback-only."""
+    normalized = host.strip().strip("[]").lower()
+    if normalized in {"localhost", "127.0.0.1", "::1"}:
+        return True
+    try:
+        import ipaddress
+
+        return ipaddress.ip_address(normalized).is_loopback
+    except ValueError:
+        return False
 
 
 if __name__ == "__main__":

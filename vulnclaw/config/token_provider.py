@@ -372,11 +372,15 @@ def _resolve_oauth_token(llm: Any) -> str:
 def resolve_llm_token(llm: Any) -> str:
     """Return the effective bearer token / API key for the configured auth mode.
 
-    ``static`` returns ``llm.api_key`` (possibly empty, preserving legacy
-    behaviour); ``oauth`` returns a valid access token, refreshing if needed.
+    ``static`` returns the primary key from ``llm.api_keys``/``llm.api_key``
+    (possibly empty, preserving legacy behaviour); ``oauth`` returns a valid
+    access token, refreshing if needed.
     """
     mode = str(_get(llm, "auth_mode") or "static").strip().lower()
     if mode in ("", "static"):
+        primary_key = getattr(llm, "primary_key", None)
+        if callable(primary_key):
+            return str(primary_key() or "")
         return str(_get(llm, "api_key") or "")
     if mode == "oauth":
         return _resolve_oauth_token(llm)
@@ -386,12 +390,15 @@ def resolve_llm_token(llm: Any) -> str:
 def has_llm_credentials(llm: Any) -> bool:
     """Whether usable credentials are configured, without minting a token.
 
-    ``static`` requires a non-empty ``api_key``; ``oauth`` requires stored
-    tokens. This is a cheap pre-flight check — it does NOT validate that the
-    credential actually works.
+    ``static`` requires a non-empty ``api_key``/``api_keys``; ``oauth``
+    requires stored tokens. This is a cheap pre-flight check — it does NOT
+    validate that the credential actually works.
     """
     mode = str(_get(llm, "auth_mode") or "static").strip().lower()
     if mode in ("", "static"):
+        primary_key = getattr(llm, "primary_key", None)
+        if callable(primary_key):
+            return bool(primary_key())
         return bool(_get(llm, "api_key"))
     if mode == "oauth":
         bundle = load_oauth_tokens()

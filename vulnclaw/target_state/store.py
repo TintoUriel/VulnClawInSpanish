@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 import shutil
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -17,6 +18,7 @@ from vulnclaw.target_state.planner import (
 )
 
 TARGET_STATE_SCHEMA_VERSION = 2
+SNAPSHOT_ID_PATTERN = re.compile(r"^[A-Za-z0-9_.-]{1,160}$")
 
 
 @dataclass
@@ -48,8 +50,20 @@ def _snapshot_dir(target: str) -> Path:
     return _target_dir(target) / "snapshots"
 
 
+def _snapshot_path(target: str, snapshot_id: str) -> Path | None:
+    """Return a safe snapshot path, or None for invalid snapshot ids."""
+    if not SNAPSHOT_ID_PATTERN.fullmatch(snapshot_id):
+        return None
+    return _snapshot_dir(target) / f"{snapshot_id}.json"
+
+
 def load_target_state(target: str, snapshot_id: Optional[str] = None) -> Optional[dict[str, Any]]:
-    path = _snapshot_dir(target) / f"{snapshot_id}.json" if snapshot_id else _target_path(target)
+    if snapshot_id:
+        path = _snapshot_path(target, snapshot_id)
+        if path is None:
+            return None
+    else:
+        path = _target_path(target)
     if not path.exists():
         return None
     raw = json.loads(path.read_text(encoding="utf-8"))

@@ -495,6 +495,12 @@
   "settings.model_hint": "使用后端配置的模型名称。",
   "settings.base_url": "Base URL",
   "settings.base_url_hint": "留空使用后端默认值。",
+  "settings.custom_endpoint": "自定义端点…",
+  "settings.custom_model": "自定义模型…",
+  "settings.refresh_models": "刷新模型列表",
+  "settings.loading_models": "加载中…",
+  "settings.models_loaded": "已加载 {count} 个模型",
+  "settings.no_models": "未返回任何模型。请先保存 API 密钥，然后刷新。",
 
   "settings.max_rounds": "最大轮数",
   "settings.rounds_per_cycle": "每周期轮数",

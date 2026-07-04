@@ -1,11 +1,19 @@
 import { useQuery } from "@tanstack/react-query";
-import { getConfig, getConstraintAudit, getMcpDiagnostics, getReportContent, getReports, getTarget, getTargetDiff, getTargetPreview, getTargetSnapshots, getTargets, getTasks } from "../api/web";
+import { getConfig, getConstraintAudit, getMcpDiagnostics, getProviders, getReportContent, getReports, getTarget, getTargetDiff, getTargetPreview, getTargetSnapshots, getTargets, getTasks } from "../api/web";
 
 export function useConfigQuery() {
   return useQuery({
     queryKey: ["config"],
     queryFn: getConfig,
     staleTime: 30_000,
+  });
+}
+
+export function useProvidersQuery() {
+  return useQuery({
+    queryKey: ["providers"],
+    queryFn: getProviders,
+    staleTime: 300_000,
   });
 }
 

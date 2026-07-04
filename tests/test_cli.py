@@ -28,8 +28,50 @@ class TestCLI:
         from vulnclaw.cli.main import app
 
         result = runner.invoke(app, ["--version"])
-        # Typer may return exit code 0 or 2 depending on version
-        assert __version__ in result.output or result.exit_code in (0, 2)
+        assert result.exit_code == 0
+        assert __version__ in result.output
+
+    def test_cli_manual_command(self, runner):
+        from vulnclaw.cli.main import app
+
+        result = runner.invoke(app, ["manual"])
+
+        assert result.exit_code == 0
+        assert "VULNCLAW(1)" in result.output
+        assert "COMMON TASK FLAGS" in result.output
+        assert "--only-port" in result.output
+        assert "network-scan" in result.output
+        assert "--parallel-agents" in result.output
+
+    def test_cli_manual_topic_markdown(self, runner):
+        from vulnclaw.cli.main import app
+
+        result = runner.invoke(app, ["manual", "network-scan", "--format", "markdown"])
+
+        assert result.exit_code == 0
+        assert "### `network-scan`" in result.output
+        assert "`--safe-probes / --no-safe-probes`" in result.output
+        assert "### `run`" not in result.output
+
+    def test_cli_man_alias_and_root_flag(self, runner):
+        from vulnclaw.cli.main import app
+
+        alias_result = runner.invoke(app, ["man", "config"])
+        root_result = runner.invoke(app, ["--man"])
+
+        assert alias_result.exit_code == 0
+        assert "CONFIG" in alias_result.output
+        assert "llm.api_keys" in alias_result.output
+        assert root_result.exit_code == 0
+        assert "VULNCLAW(1)" in root_result.output
+
+    def test_cli_manual_rejects_unknown_topic(self, runner):
+        from vulnclaw.cli.main import app
+
+        result = runner.invoke(app, ["manual", "does-not-exist"])
+
+        assert result.exit_code == 1
+        assert "unknown manual topic" in result.output
 
     def test_cli_init(self, runner):
         from vulnclaw.cli.main import app

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
-import { updateConfig } from "../api/web";
+import { fetchProviderModels, updateConfig } from "../api/web";
 import { SectionCard } from "../components/SectionCard";
-import { useConfigQuery, useMcpDiagnosticsQuery } from "../hooks/queries";
+import { useConfigQuery, useMcpDiagnosticsQuery, useProvidersQuery } from "../hooks/queries";
 import { useT, type TFunction } from "../i18n";
 import { formatActionLabel, formatActionList, formatMcpExecutionMode, formatMcpHealth } from "../utils/taskLabels";
 import { loadUiPreferences, saveUiPreferences, type UiPreferences } from "../utils/preferences";
@@ -51,10 +51,14 @@ export function SettingsPage({ initialSection = "basic", onOpenAdvanced }: Setti
   const PYTHON_MODES = useMemo(() => buildPythonModes(t), [t]);
   const configQuery = useConfigQuery();
   const mcpQuery = useMcpDiagnosticsQuery();
+  const providersQuery = useProvidersQuery();
   const [activeSection, setActiveSection] = useState<SettingsSection>(initialSection);
   const [provider, setProvider] = useState("openai");
   const [model, setModel] = useState("");
   const [baseUrl, setBaseUrl] = useState("");
+  const [models, setModels] = useState<string[]>([]);
+  const [modelsLoading, setModelsLoading] = useState(false);
+  const [modelsHint, setModelsHint] = useState<string | null>(null);
   const [outputDir, setOutputDir] = useState("");
   const [maxRounds, setMaxRounds] = useState(15);
   const [persistentRounds, setPersistentRounds] = useState(100);
@@ -118,6 +122,47 @@ export function SettingsPage({ initialSection = "basic", onOpenAdvanced }: Setti
     : activeSection === "boundary"
       ? t("settings.save_boundary")
       : t("settings.save_settings");
+
+  const providers = providersQuery.data?.providers ?? [];
+  const presetBaseUrls = providers.filter((preset) => preset.base_url);
+  const isPresetBaseUrl = presetBaseUrls.some((preset) => preset.base_url === baseUrl);
+  const currentPreset = providers.find((preset) => preset.id === provider);
+  const modelOptions = Array.from(
+    new Set([...models, model, currentPreset?.default_model ?? ""].filter(Boolean)),
+  );
+  const isKnownModel = modelOptions.includes(model);
+
+  function onProviderChange(id: string) {
+    setProvider(id);
+    const preset = providers.find((item) => item.id === id);
+    if (preset && id !== "custom") {
+      setBaseUrl(preset.base_url);
+      setModel(preset.default_model);
+    }
+    setModels([]);
+    setModelsHint(null);
+  }
+
+  async function handleRefreshModels() {
+    setModelsLoading(true);
+    setModelsHint(null);
+    try {
+      const res = await fetchProviderModels({ provider, base_url: baseUrl });
+      setModels(res.models);
+      if (res.models.length && !model) {
+        setModel(res.models[0]);
+      }
+      setModelsHint(
+        res.models.length
+          ? t("settings.models_loaded", { count: String(res.models.length) })
+          : res.detail || t("settings.no_models"),
+      );
+    } catch (err) {
+      setModelsHint(err instanceof Error ? err.message : t("settings.no_models"));
+    } finally {
+      setModelsLoading(false);
+    }
+  }
 
   function saveLocalPreferences() {
     saveUiPreferences({
@@ -247,19 +292,68 @@ export function SettingsPage({ initialSection = "basic", onOpenAdvanced }: Setti
             <div className="form-grid">
               <label className="field">
                 <span>{t("settings.provider")}</span>
-                <input value={provider} onChange={(event) => setProvider(event.target.value)} />
+                <select value={provider} onChange={(event) => onProviderChange(event.target.value)}>
+                  {providers.length === 0 && <option value={provider}>{provider}</option>}
+                  {providers.map((preset) => (
+                    <option key={preset.id} value={preset.id}>{preset.label}</option>
+                  ))}
+                </select>
                 <small>{t("settings.provider_hint")}</small>
               </label>
               <label className="field">
-                <span>{t("settings.model_field")}</span>
-                <input value={model} onChange={(event) => setModel(event.target.value)} />
-                <small>{t("settings.model_hint")}</small>
-              </label>
-              <label className="field field-wide">
                 <span>{t("settings.base_url")}</span>
-                <input value={baseUrl} onChange={(event) => setBaseUrl(event.target.value)} />
+                <select
+                  value={isPresetBaseUrl ? baseUrl : "__custom__"}
+                  onChange={(event) => {
+                    setBaseUrl(event.target.value === "__custom__" ? "" : event.target.value);
+                    setModels([]);
+                    setModelsHint(null);
+                  }}
+                >
+                  {presetBaseUrls.map((preset) => (
+                    <option key={preset.id} value={preset.base_url}>{preset.label}</option>
+                  ))}
+                  <option value="__custom__">{t("settings.custom_endpoint")}</option>
+                </select>
+                {!isPresetBaseUrl && (
+                  <input
+                    value={baseUrl}
+                    onChange={(event) => setBaseUrl(event.target.value)}
+                    placeholder="https://host/v1"
+                  />
+                )}
                 <small>{t("settings.base_url_hint")}</small>
               </label>
+              <div className="field field-wide">
+                <span>{t("settings.model_field")}</span>
+                <div className="settings-model-row">
+                  <select
+                    value={isKnownModel ? model : "__custom__"}
+                    onChange={(event) => setModel(event.target.value === "__custom__" ? "" : event.target.value)}
+                  >
+                    {modelOptions.map((option) => (
+                      <option key={option} value={option}>{option}</option>
+                    ))}
+                    <option value="__custom__">{t("settings.custom_model")}</option>
+                  </select>
+                  <button
+                    type="button"
+                    className="secondary-btn"
+                    onClick={handleRefreshModels}
+                    disabled={modelsLoading}
+                  >
+                    {modelsLoading ? t("settings.loading_models") : t("settings.refresh_models")}
+                  </button>
+                </div>
+                {!isKnownModel && (
+                  <input
+                    value={model}
+                    onChange={(event) => setModel(event.target.value)}
+                    placeholder="model-name"
+                  />
+                )}
+                <small>{modelsHint ?? t("settings.model_hint")}</small>
+              </div>
             </div>
           )}
 

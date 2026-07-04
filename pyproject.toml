@@ -57,6 +57,10 @@ web = [
 kb = [
     "chromadb>=0.4.0",
 ]
+pdf = [
+    # Optional: render reports to PDF via report.pdf_exporter.
+    "reportlab>=4.0",
+]
 
 [project.urls]
 Homepage = "https://github.com/Unclecheng-li/VulnClaw"

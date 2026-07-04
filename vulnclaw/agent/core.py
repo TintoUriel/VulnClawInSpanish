@@ -62,6 +62,9 @@ class AgentCore:
         self.mcp_manager = mcp_manager
         self.context = ContextManager()
         self._client = None
+        # Failover key pool: prefer llm.api_keys, else the single llm.api_key.
+        self._key_pool = config.llm.key_pool()
+        self._key_index = 0
         self.runtime = RuntimeState()
         self._reset_runtime_state()
         # Optional KB retriever — lazily initialized on first use
@@ -228,6 +231,24 @@ class AgentCore:
         except Exception:
             pass
 
+    def _current_api_key(self) -> str:
+        """Return the static API key currently selected from the failover pool."""
+        if self._key_pool:
+            return self._key_pool[self._key_index]
+        return self.config.llm.api_key
+
+    def rotate_api_key(self) -> bool:
+        """Advance to the next key in the failover pool.
+
+        Invalidates the cached client so the next call rebuilds with the new
+        key. Returns False (no-op) when there is nothing to rotate to.
+        """
+        if len(self._key_pool) <= 1:
+            return False
+        self._key_index = (self._key_index + 1) % len(self._key_pool)
+        self._client = None
+        return True
+
     def _get_client(self):
         """Lazy-initialize OpenAI client with dynamic credential resolution.
 
@@ -261,7 +282,13 @@ class AgentCore:
                     raise RuntimeError("请安装 openai 包: pip install openai")
             return self._client
 
-        token = resolve_llm_token(llm)
+        auth_mode = str(getattr(llm, "auth_mode", "") or "static").strip().lower()
+        if auth_mode in ("", "static"):
+            # Respect the failover rotation index rather than always resolving
+            # the primary key, so rotate_api_key() actually switches keys.
+            token = self._current_api_key()
+        else:
+            token = resolve_llm_token(llm)
         if self._client is None:
             try:
                 self._client = make_openai_client(

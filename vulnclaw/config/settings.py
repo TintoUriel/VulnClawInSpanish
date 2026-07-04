@@ -136,6 +136,12 @@ def set_config_value(key: str, value: str) -> None:
                 value = float(value)
             elif annotation is bool:
                 value = value.lower() in ("true", "1", "yes")
+            elif getattr(annotation, "__origin__", None) is list:
+                # Accept a list as-is, or split a comma/newline-separated string.
+                if isinstance(value, str):
+                    value = [p.strip() for p in value.replace("\n", ",").split(",") if p.strip()]
+                else:
+                    value = list(value)
         setattr(obj, field_name, value)
     save_config(config)
 
@@ -199,6 +205,10 @@ def _overlay_env(config: VulnClawConfig) -> VulnClawConfig:
     # ── LLM ──────────────────────────────────────────────────────────
     if v := os.environ.get("VULNCLAW_LLM_API_KEY"):
         config.llm.api_key = v
+    if v := os.environ.get("VULNCLAW_LLM_API_KEYS"):
+        keys = [k.strip() for k in v.split(",") if k.strip()]
+        if keys:
+            config.llm.api_keys = keys
     if v := os.environ.get("VULNCLAW_LLM_BASE_URL"):
         config.llm.base_url = v
     if v := os.environ.get("VULNCLAW_LLM_MODEL"):
@@ -233,6 +243,20 @@ def _overlay_env(config: VulnClawConfig) -> VulnClawConfig:
             config.session.max_rounds = int(v)
     if v := os.environ.get("VULNCLAW_SESSION_SHOW_THINKING"):
         config.session.show_thinking = v.lower() in ("1", "true", "yes", "on")
+    if v := os.environ.get("VULNCLAW_SESSION_REPL_PARALLEL_ENABLED"):
+        config.session.repl_parallel_enabled = v.lower() in ("1", "true", "yes", "on")
+    if v := os.environ.get("VULNCLAW_SESSION_REPL_PARALLEL_AGENTS"):
+        with suppress(ValueError):
+            config.session.repl_parallel_agents = int(v)
+    if v := os.environ.get("VULNCLAW_SESSION_REPL_PARALLEL_DEPTH"):
+        with suppress(ValueError):
+            config.session.repl_parallel_depth = int(v)
+    if v := os.environ.get("VULNCLAW_SESSION_REPL_PARALLEL_WORKER_ROUNDS"):
+        with suppress(ValueError):
+            config.session.repl_parallel_worker_rounds = int(v)
+    if v := os.environ.get("VULNCLAW_SESSION_REPL_PARALLEL_SURFACE_LIMIT"):
+        with suppress(ValueError):
+            config.session.repl_parallel_surface_limit = int(v)
     if v := os.environ.get("VULNCLAW_SESSION_STALE_ROUNDS_THRESHOLD"):
         with suppress(ValueError):
             config.session.stale_rounds_threshold = int(v)
@@ -306,6 +330,8 @@ def _strip_defaults(raw: dict) -> None:
     # Keep it simple — just strip known default values
     if raw.get("llm", {}).get("api_key") == "":
         raw["llm"].pop("api_key", None)
+    if raw.get("llm", {}).get("api_keys") == []:
+        raw["llm"].pop("api_keys", None)
     # Don't strip base_url/model if provider is set — they may be provider-specific
     # Only strip if still at OpenAI defaults
     if raw.get("llm", {}).get("provider") == "openai":

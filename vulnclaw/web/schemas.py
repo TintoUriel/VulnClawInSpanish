@@ -4,21 +4,48 @@ from __future__ import annotations
 
 from datetime import datetime
 from typing import Any, Literal, Optional
+from urllib.parse import urlsplit
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 TaskCommand = Literal["run", "recon", "scan", "exploit", "persistent"]
 TaskStatus = Literal["pending", "restoring", "running", "completed", "failed", "stopped"]
+PythonExecuteMode = Literal["safe", "lab", "trusted-local"]
+
+
+def _validate_http_base_url(value: str | None) -> str | None:
+    """Validate an OpenAI-compatible HTTP(S) base URL from the Web UI."""
+    if value is None:
+        return None
+    normalized = value.strip().rstrip("/")
+    if not normalized:
+        return ""
+    parsed = urlsplit(normalized)
+    if parsed.scheme not in {"http", "https"}:
+        raise ValueError("base_url must use http or https")
+    if not parsed.netloc or not parsed.hostname:
+        raise ValueError("base_url must include a host")
+    if parsed.username or parsed.password:
+        raise ValueError("base_url must not include credentials")
+    if parsed.query or parsed.fragment:
+        raise ValueError("base_url must not include query strings or fragments")
+    return normalized
 
 
 class TaskOptions(BaseModel):
-    max_rounds: Optional[int] = Field(default=None, description="Override for autonomous rounds")
-    rounds_per_cycle: Optional[int] = Field(
-        default=None, description="Persistent mode rounds per cycle"
+    max_rounds: Optional[int] = Field(
+        default=None, ge=1, le=100, description="Override for autonomous rounds"
     )
-    max_cycles: Optional[int] = Field(default=None, description="Persistent mode max cycles")
-    cve: Optional[str] = Field(default=None, description="Exploit command CVE hint")
-    cmd: Optional[str] = Field(default=None, description="Exploit command execution hint")
+    rounds_per_cycle: Optional[int] = Field(
+        default=None, ge=1, le=1000, description="Persistent mode rounds per cycle"
+    )
+    max_cycles: Optional[int] = Field(
+        default=None, ge=0, le=1000, description="Persistent mode max cycles"
+    )
+    cve: Optional[str] = Field(default=None, max_length=64, description="Exploit command CVE hint")
+    cmd: Optional[str] = Field(
+        default=None, max_length=512, description="Exploit command execution hint"
+    )
     only_port: Optional[int] = Field(
         default=None,
         ge=1,
@@ -26,26 +53,30 @@ class TaskOptions(BaseModel):
         description="Restrict task scope to a single port",
     )
     only_host: Optional[str] = Field(
-        default=None, description="Restrict task scope to a single host"
+        default=None, max_length=253, description="Restrict task scope to a single host"
     )
     only_path: Optional[str] = Field(
-        default=None, description="Restrict task scope to a single path"
+        default=None, max_length=2048, description="Restrict task scope to a single path"
     )
-    blocked_host: Optional[str] = Field(default=None, description="Explicitly blocked host")
-    blocked_path: Optional[str] = Field(default=None, description="Explicitly blocked path")
+    blocked_host: Optional[str] = Field(
+        default=None, max_length=253, description="Explicitly blocked host"
+    )
+    blocked_path: Optional[str] = Field(
+        default=None, max_length=2048, description="Explicitly blocked path"
+    )
     allow_actions: Optional[list[str]] = Field(
-        default=None, description="Explicit allow-list for task actions"
+        default=None, max_length=20, description="Explicit allow-list for task actions"
     )
     block_actions: Optional[list[str]] = Field(
-        default=None, description="Explicit block-list for task actions"
+        default=None, max_length=20, description="Explicit block-list for task actions"
     )
 
 
 class TaskCreateRequest(BaseModel):
     command: TaskCommand
-    target: str
+    target: str = Field(min_length=1, max_length=2048)
     resume: bool = True
-    snapshot_id: Optional[str] = None
+    snapshot_id: Optional[str] = Field(default=None, max_length=160)
     options: TaskOptions = Field(default_factory=TaskOptions)
 
 
@@ -166,9 +197,9 @@ class TargetStateDiffView(BaseModel):
 
 
 class ReportGenerateRequest(BaseModel):
-    target: str
-    output_path: Optional[str] = None
-    report_format: str = "markdown"
+    target: str = Field(min_length=1, max_length=2048)
+    output_path: Optional[str] = Field(default=None, max_length=1024)
+    report_format: Literal["markdown", "html"] = "markdown"
 
 
 class ConfigView(BaseModel):
@@ -188,18 +219,51 @@ class ConfigView(BaseModel):
 
 
 class ConfigUpdateRequest(BaseModel):
-    provider: Optional[str] = None
-    model: Optional[str] = None
-    base_url: Optional[str] = None
-    output_dir: Optional[str] = None
-    max_rounds: Optional[int] = None
-    persistent_rounds_per_cycle: Optional[int] = None
-    persistent_max_cycles: Optional[int] = None
+    provider: Optional[str] = Field(default=None, min_length=1, max_length=64)
+    model: Optional[str] = Field(default=None, min_length=1, max_length=160)
+    base_url: Optional[str] = Field(default=None, max_length=512)
+    output_dir: Optional[str] = Field(default=None, min_length=1, max_length=1024)
+    max_rounds: Optional[int] = Field(default=None, ge=1, le=100)
+    persistent_rounds_per_cycle: Optional[int] = Field(default=None, ge=1, le=1000)
+    persistent_max_cycles: Optional[int] = Field(default=None, ge=0, le=1000)
     show_thinking: Optional[bool] = None
     python_execute_enabled: Optional[bool] = None
-    python_execute_mode: Optional[str] = None
-    python_execute_max_lines: Optional[int] = None
+    python_execute_mode: Optional[PythonExecuteMode] = None
+    python_execute_max_lines: Optional[int] = Field(default=None, ge=1, le=500)
     python_execute_audit_enabled: Optional[bool] = None
+
+    @field_validator("base_url")
+    @classmethod
+    def validate_base_url(cls, value: str | None) -> str | None:
+        return _validate_http_base_url(value)
+
+
+class ProviderPresetView(BaseModel):
+    id: str
+    label: str
+    base_url: str
+    default_model: str
+
+
+class ProvidersView(BaseModel):
+    providers: list[ProviderPresetView] = Field(default_factory=list)
+
+
+class ProviderModelsRequest(BaseModel):
+    provider: Optional[str] = Field(default=None, min_length=1, max_length=64)
+    base_url: Optional[str] = Field(default=None, max_length=512)
+
+    @field_validator("base_url")
+    @classmethod
+    def validate_base_url(cls, value: str | None) -> str | None:
+        return _validate_http_base_url(value)
+
+
+class ProviderModelsResponse(BaseModel):
+    base_url: str
+    models: list[str] = Field(default_factory=list)
+    has_api_key: bool = False
+    detail: str = ""
 
 
 class ReportContentView(BaseModel):

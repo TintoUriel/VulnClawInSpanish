@@ -556,6 +556,17 @@ code {
   min-height: 120px;
 }
 
+.settings-model-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.settings-model-row select {
+  flex: 1;
+  min-width: 0;
+}
+
 .diagnostics-grid {
   display: grid;
   gap: 12px;

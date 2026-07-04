@@ -4,10 +4,16 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from vulnclaw.web.schemas import ConfigUpdateRequest, ReportGenerateRequest, TaskCreateRequest
+from vulnclaw.web.schemas import (
+    ConfigUpdateRequest,
+    ProviderModelsRequest,
+    ReportGenerateRequest,
+    TaskCreateRequest,
+)
 from vulnclaw.web.services.config_service import get_public_config, update_public_config
 from vulnclaw.web.services.constraint_audit_service import get_constraint_audit
 from vulnclaw.web.services.mcp_service import get_mcp_diagnostics
+from vulnclaw.web.services.provider_service import fetch_models, get_provider_presets
 from vulnclaw.web.services.report_service import (
     generate_target_report,
     list_reports,
@@ -31,6 +37,7 @@ from vulnclaw.web.task_manager import WebTaskManager
 try:
     from fastapi import FastAPI, HTTPException
     from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
+    from starlette.middleware.base import BaseHTTPMiddleware
 
     FASTAPI_AVAILABLE = True
 except ImportError:  # pragma: no cover - exercised in CLI dry-run and tests
@@ -39,6 +46,7 @@ except ImportError:  # pragma: no cover - exercised in CLI dry-run and tests
     FileResponse = None  # type: ignore[assignment]
     JSONResponse = None  # type: ignore[assignment]
     StreamingResponse = None  # type: ignore[assignment]
+    BaseHTTPMiddleware = object  # type: ignore[assignment,misc]
     FASTAPI_AVAILABLE = False
 
 
@@ -58,7 +66,7 @@ def resolve_web_index() -> Path:
 
 def resolve_web_asset(path: str) -> Path:
     """Resolve a frontend asset path from dist or fallback static dir."""
-    normalized = path.lstrip("/").strip()
+    normalized = path.replace("\\", "/").lstrip("/").strip()
     if not normalized:
         return resolve_web_index()
 
@@ -79,6 +87,7 @@ def create_app():
         )
 
     app = FastAPI(title="VulnClaw Web UI", version="0.3.2")
+    app.add_middleware(SecurityHeadersMiddleware)
 
     @app.get("/api/health")
     async def health():
@@ -99,6 +108,14 @@ def create_app():
     @app.post("/api/config")
     async def config_update(request: ConfigUpdateRequest):
         return update_public_config(request).model_dump(mode="json")
+
+    @app.get("/api/providers")
+    async def providers_view():
+        return get_provider_presets().model_dump(mode="json")
+
+    @app.post("/api/provider-models")
+    async def provider_models_view(request: ProviderModelsRequest):
+        return fetch_models(request).model_dump(mode="json")
 
     @app.get("/api/tasks")
     async def tasks():
@@ -221,6 +238,8 @@ def create_app():
             )
         except FileNotFoundError as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
+        except PermissionError as exc:
+            raise HTTPException(status_code=403, detail=str(exc)) from exc
         return {"status": "ok", "path": path}
 
     @app.get("/")
@@ -234,3 +253,26 @@ def create_app():
         return FileResponse(resolve_web_asset(full_path))
 
     return app
+
+
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    """Add conservative browser security headers for the local Web UI."""
+
+    async def dispatch(self, request, call_next):
+        response = await call_next(request)
+        response.headers.setdefault("X-Content-Type-Options", "nosniff")
+        response.headers.setdefault("X-Frame-Options", "DENY")
+        response.headers.setdefault("Referrer-Policy", "no-referrer")
+        response.headers.setdefault(
+            "Content-Security-Policy",
+            "default-src 'self'; "
+            "script-src 'self'; "
+            "style-src 'self' 'unsafe-inline'; "
+            "img-src 'self' data: blob:; "
+            "connect-src 'self'; "
+            "frame-src 'self' about: data: blob:; "
+            "frame-ancestors 'none'; "
+            "base-uri 'self'; "
+            "form-action 'self'",
+        )
+        return response
