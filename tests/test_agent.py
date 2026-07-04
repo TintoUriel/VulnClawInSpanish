@@ -768,6 +768,15 @@ class TestAgentCore:
         assert context is not None
         assert "逆向" in context or "reverse" in context.lower()
 
+    def test_skill_context_explicit_slash_skill_selector(self):
+        agent = self._make_agent()
+        context = agent._get_active_skill_context(
+            user_input="Use VulnClaw skill secknowledge-skill. test this target"
+        )
+        assert context is not None
+        assert "SRC" in context
+        assert "GAARM" in context
+
     def test_build_openai_tools_includes_skill_ref(self):
         """Tools should include load_skill_reference."""
         agent = self._make_agent()

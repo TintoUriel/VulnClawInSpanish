@@ -8,7 +8,7 @@ import asyncio
 import os
 import sys
 import time
-from typing import Optional
+from typing import Any, Optional
 
 
 def _configure_windows_console() -> None:
@@ -258,6 +258,78 @@ async def _run_repl_agent_call(agent, *, call, after_result) -> None:
     await run_repl_call(call=call, after_result=after_result)
 
 
+def _make_repl_prompt_session() -> Any:
+    """Build a prompt_toolkit session with the skill palette, or None if unavailable.
+
+    Returns None when stdin is not a TTY (pipes, CI, ``--once`` smoke tests) or
+    prompt_toolkit cannot attach, so the REPL falls back to plain input.
+    """
+    debug = bool(os.environ.get("VULNCLAW_DEBUG_INPUT"))
+    try:
+        if not sys.stdin.isatty():
+            if debug:
+                console.print("[dim](slash palette off: stdin is not a TTY)[/]")
+            return None
+        from prompt_toolkit import PromptSession
+
+        from vulnclaw.cli.tui import build_repl_slash_completer
+
+        session = PromptSession(
+            completer=build_repl_slash_completer(),
+            complete_while_typing=True,
+        )
+
+        # `complete_while_typing` reopens the menu on insertion but not on
+        # deletion, so backspacing to a bare '/' leaves it closed. Re-trigger
+        # completion on any change while the line still starts with '/'.
+        def _reopen_palette_on_edit(buff: Any) -> None:
+            if buff.complete_state is None and buff.text.startswith("/"):
+                buff.start_completion(select_first=False)
+
+        session.default_buffer.on_text_changed += _reopen_palette_on_edit
+
+        if debug:
+            console.print("[dim](slash palette on)[/]")
+        return session
+    except Exception as exc:
+        # Surface the reason instead of silently dropping to plain input.
+        from rich.markup import escape as _esc
+
+        console.print(f"[yellow](slash palette unavailable: {_esc(str(exc))})[/]")
+        return None
+
+
+def _read_repl_line(
+    pt_session: Any,
+    target: Optional[str],
+    phase: str,
+    auto_mode: bool,
+) -> str:
+    """Read one REPL line, using the slash palette when a session is available."""
+    if pt_session is None:
+        prompt_parts = []
+        if target:
+            prompt_parts.append(f"[bold cyan]{target}[/]")
+        prompt_parts.append(f"[dim]{phase}[/]")
+        if auto_mode:
+            prompt_parts.append("[bold yellow]AUTO[/]")
+        prompt_str = " | ".join(prompt_parts) if prompt_parts else "vulnclaw"
+        return console.input(f"vulnclaw {prompt_str}> ")
+
+    import html as _html
+
+    from prompt_toolkit.formatted_text import HTML
+
+    parts = []
+    if target:
+        parts.append(f"<ansicyan><b>{_html.escape(target)}</b></ansicyan>")
+    parts.append(f"<ansibrightblack>{_html.escape(phase)}</ansibrightblack>")
+    if auto_mode:
+        parts.append("<ansiyellow><b>AUTO</b></ansiyellow>")
+    body = " | ".join(parts) if parts else "vulnclaw"
+    return pt_session.prompt(HTML(f"vulnclaw {body}<b>&gt; </b>"))
+
+
 def _run_repl() -> None:
     """Run the interactive REPL loop."""
     from vulnclaw.agent.core import AgentCore
@@ -298,19 +370,16 @@ def _run_repl() -> None:
     _last_ctrlc_time = 0.0
     last_auto_input: str = ""
 
+    # Interactive slash palette: skills under '/', flag skills under '/.'.
+    # Falls back to plain input when there is no TTY (pipes, CI smoke tests).
+    _pt_session = _make_repl_prompt_session()
+
     while True:
         try:
-            # Build prompt string
-            prompt_parts = []
-            if current_target:
-                prompt_parts.append(f"[bold cyan]{current_target}[/]")
-            prompt_parts.append(f"[dim]{current_phase}[/]")
-            if auto_mode_active:
-                prompt_parts.append("[bold yellow]AUTO[/]")
-            prompt_str = " | ".join(prompt_parts) if prompt_parts else "vulnclaw"
-
-            # Read input
-            user_input = console.input(f"vulnclaw {prompt_str}> ").strip()
+            # Read input (slash palette when interactive, plain prompt otherwise)
+            user_input = _read_repl_line(
+                _pt_session, current_target, current_phase, auto_mode_active
+            ).strip()
 
             if not user_input:
                 if last_auto_input:
@@ -318,6 +387,25 @@ def _run_repl() -> None:
                     console.print(f"[dim]↻ Resuming auto pentest: {last_auto_input[:60]}...[/]")
                 else:
                     continue
+
+            # Handle slash commands: '/' selects a skill, '/.' a flag skill.
+            if user_input.startswith("/"):
+                from vulnclaw.cli.tui import dispatch_repl_slash
+
+                result = dispatch_repl_slash(user_input)
+                if result.kind == "message":
+                    console.print(result.text)
+                    continue
+                if result.kind == "target":
+                    current_target, current_phase, restored_loaded = _prepare_repl_target(
+                        agent, result.value, current_target, current_phase
+                    )
+                    if restored_loaded:
+                        console.print(_("cli.target_restored", target=current_target))
+                    console.print(_("cli.target_set", target=current_target))
+                    continue
+                # result.kind == "run": fall through with the rewritten prompt.
+                user_input = result.text
 
             # Handle built-in commands
             cmd_lower = user_input.lower()

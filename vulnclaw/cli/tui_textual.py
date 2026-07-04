@@ -83,6 +83,8 @@ def _dispatch(session: dict[str, Any], text: str) -> str | None:
     handler = _SLASH_HANDLERS.get(cmd)
     if handler:
         return handler(session, args)
+    if _tui.dispatch_skill_slash_command(cmd, args, session):
+        return session.get("_action")
     return None
 
 
@@ -843,7 +845,11 @@ class DashboardScreen(Screen):
         elif text.startswith("/"):
             word = text.lstrip("/")
             if " " not in word:
-                palette.show_commands(word)
+                palette.show_commands(
+                    word,
+                    entries=_tui.build_slash_palette_entries(),
+                    completion_prefix="/",
+                )
                 return
         palette.hide_palette()
 
