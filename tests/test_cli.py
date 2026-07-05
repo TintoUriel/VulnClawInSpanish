@@ -1000,8 +1000,9 @@ class TestCLI:
         assert "API Key: 已更新" in output
 
     def test_config_tui_escape_exits_without_saving(self, monkeypatch):
-        import vulnclaw.cli.tui as tui_mod
         from rich.console import Console as RichConsole
+
+        import vulnclaw.cli.tui as tui_mod
         from vulnclaw.config.schema import VulnClawConfig
 
         answers = iter(["llm", "\x1b"])
