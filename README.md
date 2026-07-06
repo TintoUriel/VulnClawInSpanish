@@ -10,6 +10,7 @@
 [![MCP](https://img.shields.io/badge/Toolchain-MCP-orange)](https://modelcontextprotocol.io/)
 [![PyPI](https://img.shields.io/badge/PyPI-v0.3.2-blueviolet)](https://pypi.org/project/vulnclaw/)
 [![Security](https://img.shields.io/badge/Scope-Authorized_Only-red)](#-安全声明)
+[![AtomGitStars](https://atomgit.com/Unclecheng-li/VulnClaw/star/badge.svg)](https://atomgit.com/Unclecheng-li/VulnClaw)
 <br>
 
 🌐 **English version**: [`README_EN.md`](README_EN.md)
