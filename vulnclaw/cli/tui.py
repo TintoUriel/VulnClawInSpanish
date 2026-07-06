@@ -2023,6 +2023,67 @@ def _prompt_env_value(
     return result
 
 
+def _prompt_secret_text_value(screen: Console, label: str, current: str) -> str:
+    """Prompt for a secret value without putting the current secret in the input buffer."""
+    status = _mask_secret(current)
+    raw = _config_prompt_ask(screen, f"{label} [{status}]", default="")
+    if raw == "!clear":
+        return ""
+    return current if raw == "" else raw
+
+
+def _prompt_secret_list_value(screen: Console, label: str, current: list[str]) -> list[str]:
+    """Prompt for comma-separated secrets without printing existing values."""
+    status = _mask_key_list(current)
+    raw = _config_prompt_ask(screen, f"{label} [{status}]", default="")
+    if raw == "!clear":
+        return []
+    if not raw:
+        return current
+    return _split_csv_items(raw)
+
+
+def _render_model_choices(screen: Console, models: list[str], current: str) -> None:
+    table = Table(title="Available Models", box=box.ROUNDED, border_style=C_BORDER_SUBTLE)
+    table.add_column("#", style=f"bold {C_PRIMARY}", width=4)
+    table.add_column("Model", style=C_TEXT)
+    for idx, model in enumerate(models, 1):
+        marker = " *" if model == current else ""
+        table.add_row(str(idx), f"{model}{marker}")
+    screen.print(table)
+
+
+def _prompt_model_value(screen: Console, config) -> str:
+    """Prompt for an LLM model, showing provider models when credentials can fetch them."""
+    current = config.llm.model
+    models: list[str] = []
+    base_url = config.llm.base_url
+    api_key = config.llm.primary_key()
+
+    if base_url and api_key:
+        screen.print(f"[{C_MUTED}]{_('tui.fetching_models')}[/]")
+        models = fetch_provider_models(base_url, api_key)
+
+    if models:
+        _render_model_choices(screen, models, current)
+        raw = _config_prompt_ask(screen, f"Model [current: {current}]", default="")
+        if not raw:
+            return current
+        if raw.isdigit():
+            idx = int(raw)
+            if 1 <= idx <= len(models):
+                return models[idx - 1]
+            screen.print(f"[{C_WARNING}]Model number out of range; using '{raw}' as a custom model id.[/]")
+        return raw
+
+    if base_url and api_key:
+        screen.print(f"[{C_WARNING}]No models returned; enter a model id manually.[/]")
+    raw = _config_prompt_ask(screen, f"Model [current: {current}]", default="")
+    if raw == "!clear":
+        return ""
+    return current if raw == "" else raw
+
+
 def _render_config_summary(screen: Console, config) -> None:
     """Render a compact summary of the editable config sections."""
     llm = Table(title="LLM", box=box.ROUNDED, border_style=C_BORDER_SUBTLE)
@@ -2108,20 +2169,20 @@ def _edit_llm_config(screen: Console, config):
         config = apply_provider_preset(config, provider)
 
     config.llm.base_url = _prompt_text_value(screen, "Base URL", config.llm.base_url)
-    config.llm.model = _prompt_text_value(screen, "Model", config.llm.model)
     config.llm.auth_mode = _prompt_choice_value(
         screen, "Auth mode", ["static", "oauth"], config.llm.auth_mode
     )
-    config.llm.api_keys = _prompt_list_value(
+    config.llm.api_keys = _prompt_secret_list_value(
         screen,
         "API keys (comma-separated, !clear to empty)",
         config.llm.api_keys,
     )
-    config.llm.api_key = _prompt_text_value(
+    config.llm.api_key = _prompt_secret_text_value(
         screen,
         "Single API key fallback (!clear to empty)",
         config.llm.api_key,
     )
+    config.llm.model = _prompt_model_value(screen, config)
     config.llm.chatgpt_auto_proxy = _prompt_bool_value(
         screen, "ChatGPT auto-proxy", config.llm.chatgpt_auto_proxy
     )

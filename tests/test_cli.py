@@ -1027,6 +1027,57 @@ class TestCLI:
         assert saved == []
         assert "Discarded changes." in screen.export_text()
 
+    def test_config_tui_llm_editor_shows_models_for_selected_provider(self, monkeypatch):
+        from rich.console import Console as RichConsole
+
+        import vulnclaw.cli.tui as tui_mod
+        from vulnclaw.config.schema import VulnClawConfig
+
+        config = VulnClawConfig()
+        config.llm.api_key = "sk-test"
+        answers = iter(
+            [
+                "deepseek",
+                "",
+                "static",
+                "",
+                "",
+                "deepseek-reasoner",
+                "n",
+                "",
+                "",
+                "",
+                "",
+            ]
+        )
+        fetched = []
+        screen = RichConsole(
+            file=io.StringIO(),
+            record=True,
+            width=100,
+            force_terminal=False,
+            color_system=None,
+        )
+
+        monkeypatch.setattr(
+            tui_mod, "_read_config_prompt_raw", lambda *args, **kwargs: next(answers)
+        )
+        monkeypatch.setattr(
+            tui_mod,
+            "fetch_provider_models",
+            lambda base_url, api_key: fetched.append((base_url, api_key))
+            or ["deepseek-chat", "deepseek-reasoner"],
+        )
+
+        updated = tui_mod._edit_llm_config(screen, config)
+        output = screen.export_text()
+
+        assert fetched == [("https://api.deepseek.com", "sk-test")]
+        assert "deepseek-chat" in output
+        assert "deepseek-reasoner" in output
+        assert updated.llm.provider == "deepseek"
+        assert updated.llm.model == "deepseek-reasoner"
+
 
 class TestClassicReplSlashPalette:
     """Classic `vulnclaw` REPL: '/' skill palette and '/.' flag-skill wiring."""
