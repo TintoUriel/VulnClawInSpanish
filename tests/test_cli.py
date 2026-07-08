@@ -1035,6 +1035,32 @@ class TestCLI:
             session["_nl_text"]
             == "Use VulnClaw skill hackerone. https://hackerone.com/example"
         )
+        # The scope link stands in as the target so the launched subprocess
+        # records a real target rather than the "<target>" placeholder.
+        assert session["state"].target == "https://hackerone.com/example"
+
+    def test_self_discovering_skill_keeps_preset_target(self, monkeypatch):
+        import vulnclaw.cli.tui as tui_mod
+
+        monkeypatch.setattr(
+            tui_mod,
+            "load_skill_by_name",
+            lambda name: {"name": name, "requires_target": False},
+        )
+        session = {
+            "state": tui_mod.TuiState(target="https://preset.example"),
+            "_message": "",
+            "_prompt": None,
+        }
+
+        handled = tui_mod.dispatch_skill_slash_command(
+            "hackerone", "https://hackerone.com/example", session
+        )
+
+        assert handled is True
+        assert session["_action"] == "launch"
+        # An already-set target is respected, not overwritten by the args.
+        assert session["state"].target == "https://preset.example"
 
     def test_tui_runtime_diagnostic_panel_renders_environment_summary(self, monkeypatch):
         import vulnclaw.cli.tui as tui_mod
