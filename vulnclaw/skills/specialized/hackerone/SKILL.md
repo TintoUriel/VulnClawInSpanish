@@ -105,3 +105,8 @@ requires_target: false
 
 多个 finding 时，每个独立成节；附可参数化的 Python PoC（requests 库）。
 提醒用户：报告仅供其在 HackerOne 上 **人工提交**，本 Skill 不自动上报。
+
+## 参考文档
+
+- `references/hackerone-report-and-scope.md` — scope 解析参考（asset type ↔ API enum、
+  eligibility 三态、粘贴表形状）、program rules 强制清单、HackerOne 提交格式报告模板。
