@@ -448,6 +448,20 @@ class TestCryptoTools:
         assert result["success"] is True
         assert result["result"] == "NsScTf.php"
 
+    def test_base64_decode_urlsafe(self):
+        from vulnclaw.skills.crypto_tools import execute
+
+        result = execute("base64_decode", "SGVsbG8_d29ybGQ")
+        assert result["success"] is True
+        assert result["result"] == "Hello?world"
+
+    def test_base64_decode_rejects_invalid_input(self):
+        from vulnclaw.skills.crypto_tools import execute
+
+        result = execute("base64_decode", "!!!!")
+        assert result["success"] is False
+        assert "Base64 解码失败" in result["error"]
+
     def test_base64_encode(self):
         from vulnclaw.skills.crypto_tools import execute
 

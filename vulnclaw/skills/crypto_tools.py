@@ -123,24 +123,17 @@ def _base64_encode(input_str: str, **_) -> dict:
 
 @_register("base64_decode", "decode", "Base64 解码", ["input"])
 def _base64_decode(input_str: str, **_) -> dict:
+    cleaned = input_str.strip()
+    missing_padding = len(cleaned) % 4
+    padded = cleaned + ("=" * (4 - missing_padding) if missing_padding else "")
+    decoder_kwargs = {"altchars": b"-_"} if any(char in cleaned for char in "-_") else {}
     try:
-        # Handle URL-safe base64 too
-        cleaned = input_str.strip()
-        # Add padding if missing
-        missing_padding = len(cleaned) % 4
-        if missing_padding:
-            cleaned += "=" * (4 - missing_padding)
-        decoded = base64.b64decode(cleaned).decode("utf-8", errors="replace")
+        decoded = base64.b64decode(padded, validate=True, **decoder_kwargs).decode(
+            "utf-8", errors="replace"
+        )
         return {"success": True, "result": decoded}
     except Exception as e:
-        # Try URL-safe base64
-        try:
-            decoded = base64.urlsafe_b64decode(
-                cleaned + "=" * (4 - missing_padding if missing_padding else 0)
-            )
-            return {"success": True, "result": decoded.decode("utf-8", errors="replace")}
-        except Exception:
-            return {"success": False, "result": "", "error": f"Base64 解码失败: {e}"}
+        return {"success": False, "result": "", "error": f"Base64 解码失败: {e}"}
 
 
 @_register("base32_encode", "encode", "Base32 编码", ["input"])
