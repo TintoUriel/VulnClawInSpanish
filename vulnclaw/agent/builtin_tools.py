@@ -33,6 +33,12 @@ from vulnclaw.agent.network_scan import (
     without_privileged_nmap_args,
 )
 from vulnclaw.agent.roles import role_tool_violation, tool_allowed_for_role
+
+# 修改者: Nyaecho
+# 修改时间: 2026-07-08
+# 修改原因: 消除 V1 违规 — infer_port_from_url 已移至 config/url_utils.py，
+#          此处重新导出以保持向后兼容。
+from vulnclaw.config.url_utils import infer_port_from_url  # noqa: F401 — re-export
 from vulnclaw.intel.tools import (
     INTEL_TOOL_NAMES,
     dispatch_intel_tool,
@@ -362,21 +368,6 @@ def infer_ports_from_nmap_args(args: dict[str, Any]) -> list[int]:
     if scan_type == "top_ports":
         return []
     return []
-
-
-def infer_port_from_url(url: str) -> int | None:
-    """Infer request port from URL."""
-    try:
-        parsed = urlparse(url)
-    except Exception:
-        return None
-    if parsed.port:
-        return parsed.port
-    if parsed.scheme == "https":
-        return 443
-    if parsed.scheme == "http":
-        return 80
-    return None
 
 
 def build_openai_tools(mcp_manager: Any, *, active_role: str | None = None) -> list[dict[str, Any]]:

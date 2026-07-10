@@ -9,7 +9,11 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Optional
 
-from vulnclaw.agent.context import PentestPhase, SessionState
+# 修改者: Nyaecho
+# 修改时间: 2026-07-08
+# 修改原因: 消除 V3 违规 — 叶子类型已移至 config/domain_models.py。
+from vulnclaw.agent.context import SessionState
+from vulnclaw.config.domain_models import PentestPhase
 from vulnclaw.config.settings import TARGETS_DIR, ensure_dirs
 from vulnclaw.run_context import RunContext, atomic_write_json
 from vulnclaw.target_state.planner import (
@@ -712,10 +716,12 @@ def _merge_target_state(existing: dict[str, Any], current: dict[str, Any]) -> di
     )
     merged["findings"] = _merge_findings(existing.get("findings", []), current.get("findings", []))
 
-    existing_steps = existing.get("executed_steps", [])
-    current_steps = current.get("executed_steps", [])
-    merged["executed_steps"] = existing_steps + [
-        step for step in current_steps if step not in existing_steps
+    # [P18 修改] 合并 step_records，不再合并 executed_steps
+    # executed_steps 在序列化时会自动从 step_records 生成
+    existing_records = existing.get("step_records", [])
+    current_records = current.get("step_records", [])
+    merged["step_records"] = existing_records + [
+        record for record in current_records if record not in existing_records
     ]
 
     existing_notes = existing.get("notes", [])

@@ -3,7 +3,10 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any
 
-from vulnclaw.agent.context import PentestPhase
+# 修改者: Nyaecho
+# 修改时间: 2026-07-08
+# 修改原因: 消除 V3 违规 — 叶子类型已移至 config/domain_models.py。
+from vulnclaw.config.domain_models import PentestPhase
 
 
 def build_resume_plan(raw: dict[str, Any]) -> dict[str, Any]:

@@ -381,6 +381,7 @@ def _sse_server_config(name: str = "burp") -> MCPServerConfig:
 
 class TestStreamableHttp:
     def test_attach_success_registers_known_tools(self, monkeypatch):
+        import vulnclaw.mcp._probe_mixin as _probe_mod
         import vulnclaw.mcp.lifecycle as _mod
 
         m = _manager()
@@ -391,6 +392,8 @@ class TestStreamableHttp:
         # Ensure SDK availability checks pass even when mcp package not installed
         monkeypatch.setattr(_mod, "ClientSession", object)
         monkeypatch.setattr(_mod, "streamablehttp_client", object)
+        monkeypatch.setattr(_probe_mod, "ClientSession", object)
+        monkeypatch.setattr(_probe_mod, "streamablehttp_client", object)
         monkeypatch.setattr(m, "_check_http_reachable", lambda url, timeout: True)
 
         assert m._start_server("chrome-devtools", cfg) is True
@@ -464,6 +467,7 @@ class TestStreamableHttp:
 
 class TestSseMcp:
     def test_burp_attach_success_registers_runtime_tools(self, monkeypatch):
+        import vulnclaw.mcp._probe_mixin as _probe_mod
         import vulnclaw.mcp.lifecycle as _mod
 
         m = _manager()
@@ -473,6 +477,8 @@ class TestSseMcp:
 
         monkeypatch.setattr(_mod, "ClientSession", object)
         monkeypatch.setattr(_mod, "sse_client", object)
+        monkeypatch.setattr(_probe_mod, "ClientSession", object)
+        monkeypatch.setattr(_probe_mod, "sse_client", object)
         monkeypatch.setattr(m, "_check_http_reachable", lambda url, timeout: True)
         monkeypatch.setattr(
             m,

@@ -9,7 +9,11 @@ from __future__ import annotations
 import json
 from typing import Any
 
-from vulnclaw.agent.context import SessionState, VulnerabilityFinding
+# 修改者: Nyaecho
+# 修改时间: 2026-07-08
+# 修改原因: 消除 V4 违规 — 叶子类型已移至 config/domain_models.py。
+from vulnclaw.agent.context import SessionState
+from vulnclaw.config.domain_models import VulnerabilityFinding
 from vulnclaw.plugins.result import PluginFinding, PluginResult, RiskLevel
 
 # 插件风险等级 → 漏洞严重度（与 VulnerabilityFinding.severity 取值对齐）

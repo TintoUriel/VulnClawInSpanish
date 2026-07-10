@@ -311,7 +311,10 @@ def deduplicate_report_findings(findings: list, threshold: float = 0.75) -> list
     Returns:
         去重后的列表，保持首次出现顺序。
     """
-    from vulnclaw.agent.finding_similarity import deduplicate_findings
+    # 修改者: Nyaecho
+    # 修改时间: 2026-07-08
+    # 修改原因: V2 修复 — 从 config/finding_similarity 导入，消除 report→agent 依赖。
+    from vulnclaw.config.finding_similarity import deduplicate_findings
 
     return deduplicate_findings(findings, threshold=threshold)
 

@@ -2,57 +2,29 @@
 
 from __future__ import annotations
 
-from vulnclaw.agent.context import PentestPhase, TaskConstraints
+# 修改者: Nyaecho
+# 修改时间: 2026-07-08
+# 修改原因: 消除 V2/V3/V4 违规 — 叶子类型已移至 config/domain_models.py，
+#          此处从 config 导入并重新导出共享策略函数。
+from vulnclaw.config.domain_models import (
+    PHASE_TO_ACTION,
+    PentestPhase,
+    TaskConstraints,
+    normalize_action_name,
+    validate_action_constraints,
+)
 
-PHASE_TO_ACTION: dict[PentestPhase, str] = {
-    PentestPhase.RECON: "recon",
-    PentestPhase.VULN_DISCOVERY: "scan",
-    PentestPhase.EXPLOITATION: "exploit",
-    PentestPhase.POST_EXPLOITATION: "post_exploitation",
-    PentestPhase.REPORTING: "report",
-}
-
-
-def normalize_action_name(action: str) -> str:
-    """Normalize action aliases into a shared policy namespace."""
-    lowered = (action or "").strip().lower()
-    aliases = {
-        "run": "run",
-        "recon": "recon",
-        "scan": "scan",
-        "exploit": "exploit",
-        "post": "post_exploitation",
-        "post_exploitation": "post_exploitation",
-        "report": "report",
-        "reporting": "report",
-        "persistent": "persistent",
-    }
-    return aliases.get(lowered, lowered)
-
-
-def validate_action_constraints(action: str, constraints: TaskConstraints) -> str | None:
-    """Return a constraint violation message when a task action is out of scope."""
-    if constraints.is_empty():
-        return None
-
-    normalized = normalize_action_name(action)
-    allowed = [normalize_action_name(item) for item in constraints.allowed_actions]
-    blocked = [normalize_action_name(item) for item in constraints.blocked_actions]
-
-    # Composite commands (run, persistent) include all phases;
-    # fine-grained enforcement happens inside the loop via phase/tool checks.
-    if normalized in ("run", "persistent"):
-        if normalized in blocked:
-            return f"constraint_violation: command '{normalized}' is blocked by task constraints"
-        return None
-
-    if allowed and normalized not in allowed:
-        return f"constraint_violation: command '{normalized}' is outside allowed actions [{', '.join(allowed)}]"
-
-    if normalized in blocked:
-        return f"constraint_violation: command '{normalized}' is blocked by task constraints"
-
-    return None
+# Re-export for backward compatibility
+__all__ = [
+    "PHASE_TO_ACTION",
+    "PentestPhase",
+    "TaskConstraints",
+    "normalize_action_name",
+    "validate_action_constraints",
+    "validate_phase_transition",
+    "validate_tool_action",
+    "infer_tool_action",
+]
 
 
 def validate_phase_transition(

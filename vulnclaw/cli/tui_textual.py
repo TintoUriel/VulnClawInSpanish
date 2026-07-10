@@ -25,6 +25,7 @@ from textual.widgets import Input, ListItem, ListView, RichLog, Static
 import vulnclaw.cli.tui as _tui
 
 # [新增] 2026-06-10 Nyaecho - 自然语言驱动 / 响应式侧边栏: 新增颜色常量和动作辅助函数导入
+# [修改] 2026-07-08 Nyaecho - 修改原因：新增 @ skill 引用相关函数导入
 from vulnclaw.cli.tui import (
     C_ACCENT,
     C_ERROR,
@@ -41,8 +42,11 @@ from vulnclaw.cli.tui import (
     _effective_block_actions,
     _parse_action_csv,
     _parse_optional_port,
+    build_at_palette_entries,
     build_dashboard,
     build_runtime_diagnostic,
+    expand_at_skills,
+    find_at_context,
     rebuild_translations,
 )
 from vulnclaw.config.settings import (
@@ -649,7 +653,8 @@ def _h_diag(session: dict[str, Any], args: str) -> str | None:
 @_register_handler("config")
 @_register_handler("cfg")
 def _h_config(session: dict[str, Any], args: str) -> str | None:
-    # [修改] 重构 config 流程: 选择提供商 → 输入 API Key → 获取模型列表 → 选择/输入模型
+    # [修改] 2026-07-08 Nyaecho - 修改原因：custom 提供商新增 Base URL 输入步骤
+    # 流程：选择提供商 → (custom) 输入 Base URL → 输入 API Key → 获取模型列表 → 选择/输入模型
     config = session["config"]
     providers = [item["provider"] for item in list_providers()]
     cur = config.llm.provider
@@ -659,7 +664,20 @@ def _h_config(session: dict[str, Any], args: str) -> str | None:
         if v and v != cur:
             config = apply_provider_preset(config, v)
             session["config"] = config
-        # 流程变更：选择提供商后先输入 API Key
+        # custom 提供商需要先输入 Base URL
+        if v == "custom":
+            _set_prompt(session, "input",
+                       _("tui.prompt_enter_baseurl", url=session["config"].llm.base_url or ""),
+                       on_baseurl)
+        else:
+            # 非 custom：直接输入 API Key
+            ks = _("tui.api_key_configured") if session["config"].llm.api_key else _("tui.api_key_not_configured")
+            _set_prompt(session, "input", _("tui.prompt_enter_apikey", status=ks), on_apikey)
+
+    def on_baseurl(v):
+        if v:
+            session["config"].llm.base_url = v.strip()
+        # 输入完 Base URL 后继续输入 API Key
         ks = _("tui.api_key_configured") if session["config"].llm.api_key else _("tui.api_key_not_configured")
         _set_prompt(session, "input", _("tui.prompt_enter_apikey", status=ks), on_apikey)
 
@@ -668,7 +686,7 @@ def _h_config(session: dict[str, Any], args: str) -> str | None:
             session["config"].llm.api_key = v.strip()
         base_url = session["config"].llm.base_url
         api_key = session["config"].llm.api_key
-        # custom 提供商或缺少 base_url 时跳过获取，直接手动输入
+        # 缺少 base_url 或 api_key 时跳过获取，直接手动输入
         if not base_url or not api_key:
             _set_prompt(session, "input", _("tui.prompt_enter_model_fallback", model=session["config"].llm.model), on_model_input, session["config"].llm.model)
             return
@@ -765,11 +783,14 @@ def _h_continue(session: dict[str, Any], args: str) -> str | None:
 
 class DashboardScreen(Screen):
 
+    # [修改] 2026-07-08 Nyaecho - 修改原因：添加上下键优先级绑定，用于 CommandPalette 导航
     BINDINGS = [
         Binding("ctrl+c", "quit_app", "Quit", show=False),
         Binding("tab", "palette_tab", "", show=False),
         Binding("escape", "palette_esc", "", show=False),
         Binding("ctrl+shift+c", "copy_output", "Copy log", show=False),
+        Binding("up", "cursor_up", "", show=False, priority=True),
+        Binding("down", "cursor_down", "", show=False, priority=True),
     ]
 
     def __init__(self, session: dict[str, Any]):
@@ -812,6 +833,47 @@ class DashboardScreen(Screen):
         dash = build_dashboard(self._s["config"], state)
         self.query_one("#dashboard").update(dash)
 
+    # [新增] 2026-07-08 Nyaecho - 修改原因：支持上下键导航 CommandPalette 和 SecondaryPopup
+    def action_cursor_up(self) -> None:
+        """Move highlight up in CommandPalette or SecondaryPopup."""
+        # 优先处理 SecondaryPopup 中的 ListView
+        popup = self.query_one(SecondaryPopup)
+        if popup.has_class("open"):
+            try:
+                lv = popup.query_one("#popup-list", ListView)
+                if lv.index is not None and lv.index > 0:
+                    lv.index -= 1
+            except Exception:
+                pass
+            return
+        # 处理 CommandPalette
+        p = self.query_one(CommandPalette)
+        if p.has_class("open") and p._commands:
+            if p.index is None:
+                p.index = 0
+            elif p.index > 0:
+                p.index -= 1
+
+    def action_cursor_down(self) -> None:
+        """Move highlight down in CommandPalette or SecondaryPopup."""
+        # 优先处理 SecondaryPopup 中的 ListView
+        popup = self.query_one(SecondaryPopup)
+        if popup.has_class("open"):
+            try:
+                lv = popup.query_one("#popup-list", ListView)
+                if lv.index is not None and lv.index < len(lv.query_children(ListItem)) - 1:
+                    lv.index += 1
+            except Exception:
+                pass
+            return
+        # 处理 CommandPalette
+        p = self.query_one(CommandPalette)
+        if p.has_class("open") and p._commands:
+            if p.index is None:
+                p.index = 0
+            elif p.index < len(p._commands) - 1:
+                p.index += 1
+
     def _set_bar(self, text: str = "", style: str = "") -> None:
         # [修改] 2026-06-10 Nyaecho - 状态栏消息4秒自动消失: msg_id 计数器防止旧定时器错误清除新消息
         self._bar_msg_id += 1
@@ -831,10 +893,12 @@ class DashboardScreen(Screen):
 
     # ── Input events ──
 
+    # [修改] 2026-07-08 Nyaecho - 修改原因：新增任意位置 @ skill 引用补全支持
     def on_input_changed(self, event: Input.Changed) -> None:
         if self._completing:
             return
         text = event.value or ""
+        cursor = event.input.cursor_position
         palette = self.query_one(CommandPalette)
         if text.startswith("/."):
             word = text[2:]
@@ -851,21 +915,31 @@ class DashboardScreen(Screen):
                     completion_prefix="/",
                 )
                 return
+        # 检测任意位置的 @
+        ctx = find_at_context(text, cursor)
+        if ctx is not None:
+            _, word = ctx
+            palette.show_commands(
+                word,
+                entries=build_at_palette_entries(word),
+                completion_prefix="@",
+            )
+            return
         palette.hide_palette()
 
     def on_input_submitted(self, event: Input.Submitted) -> None:
         text = (event.value or "").strip()
         palette = self.query_one(CommandPalette)
 
-        if palette.has_class("open"):
+        # [修改] 2026-07-08 Nyaecho - 修改原因：Enter 键选择 CommandPalette 高亮项（不提交），焦点保持在输入框
+        if palette.has_class("open") and palette.selected is not None:
             cmd = palette.selected
-            if cmd:
-                self._completing = True
-                self.query_one("#cmd-input").value = palette.completion_prefix + cmd + " "
-                self.query_one("#cmd-input").action_end()
-                self._completing = False
+            self._completing = True
+            self.query_one("#cmd-input").value = palette.completion_prefix + cmd + " "
+            self.query_one("#cmd-input").action_end()
+            self._completing = False
             palette.hide_palette()
-            return
+            return  # 选择高亮项，不提交
 
         prompt = self._s.get("_prompt")
         if prompt is not None:
@@ -898,15 +972,16 @@ class DashboardScreen(Screen):
                     self.app.recompose()
                     return
         elif text:
-            # [新增] 2026-06-10 Nyaecho - TUI自然语言驱动: 无斜杠前缀的纯文本直接作为NL prompt启动
+            # [修改] 2026-07-08 Nyaecho - 修改原因：提交时展开 @ skill 引用为完整 prompt
             state = self._s["state"]
             if not state.target.strip():
                 self._set_bar(_("tui.please_set_target"), C_WARNING)
             else:
+                expanded = expand_at_skills(text)
                 self._s["_launch"] = False
-                self._s["_nl_history"] = text
+                self._s["_nl_history"] = text  # 保留原始输入用于 /continue
                 draft = _draft_from_state(state)
-                self._start_execution(draft, nl_text=text)
+                self._start_execution(draft, nl_text=expanded)
                 return
 
         self._refresh_dash()
@@ -940,6 +1015,8 @@ class DashboardScreen(Screen):
         p = self.query_one(CommandPalette)
         if p.has_class("open"):
             p.hide_palette()
+            # [修改] 2026-07-08 Nyaecho - 修改原因：关闭 CommandPalette 后焦点回到输入框
+            self.query_one("#cmd-input").focus()
         elif self._s.get("_prompt") is not None:
             _cancel_prompt(self._s)
             self._set_bar("")
@@ -1104,16 +1181,7 @@ class DashboardScreen(Screen):
         if config:
             self._s["config"] = config
 
-    def on_key(self, event: Key) -> None:
-        p = self.query_one(CommandPalette)
-        if not p.has_class("open"):
-            return
-        if event.key == "up":
-            p.action_cursor_up()
-            event.stop()
-        elif event.key == "down":
-            p.action_cursor_down()
-            event.stop()
+    # [删除] 2026-07-08 Nyaecho - 修改原因：上下键由 Input key_bindings 处理，不再需要 on_key 拦截
 
     # ── Prompt state machine ──
 
@@ -1362,17 +1430,17 @@ CSS = """
     overflow-y: auto;
     scrollbar-size: 0 0;
     border: solid #fab283;
-    background: transparent;
+    background: $surface;
 }
 #cmd-palette.open {
     display: block;
 }
 #cmd-palette ListItem {
-    background: transparent;
+    background: $surface;
 }
 #cmd-palette ListItem.-highlight {
     color: #fab283;
-    background: transparent;
+    background: $surface-lighten-1;
 }
 #cmd-palette ListItem.-highlight Static {
     color: #fab283;

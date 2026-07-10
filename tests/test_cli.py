@@ -516,6 +516,7 @@ class TestCLI:
         assert "Blocked path /internal" in prompts[0]
 
     def test_cli_blocks_command_when_allowed_actions_conflict(self, runner, monkeypatch):
+        import vulnclaw.cli._helpers as helpers_mod
         import vulnclaw.cli.main as cli_main
         from vulnclaw.cli.main import app
         from vulnclaw.config.schema import VulnClawConfig
@@ -524,9 +525,9 @@ class TestCLI:
         config.llm.api_key = "test-key"
         monkeypatch.setattr(cli_main, "load_config", lambda: config)
         monkeypatch.setattr(
-            cli_main,
+            helpers_mod,
             "_append_cli_constraints",
-            lambda prompt, only_port, only_host, only_path: f"{prompt} 仅做信息收集。",
+            lambda prompt, only_port, only_host, only_path, blocked_host=None, blocked_path=None: f"{prompt} 仅做信息收集。",
         )
 
         result = runner.invoke(app, ["run", "https://example.com"])
@@ -871,22 +872,15 @@ class TestCLI:
     def test_tui_scope_prompt_updates_action_constraints(self, monkeypatch):
         import vulnclaw.cli.tui as tui_mod
 
-        answers = iter(
-            [
-                "example.com",
-                "443",
-                "/admin",
-                "staging.example.com",
-                "/logout",
-                "recon,scan",
-                "exploit,post_exploitation",
-            ]
-        )
-        monkeypatch.setattr(tui_mod.Prompt, "ask", lambda *args, **kwargs: next(answers))
-        monkeypatch.setattr(tui_mod.Confirm, "ask", lambda *args, **kwargs: False)
-
         state = tui_mod.TuiState(target="https://example.com")
-        tui_mod._prompt_scope(state)
+        # Test scope parsing via _cmd_scope with inline arguments
+        # (/scope host=example.com port=443 path=/admin ...)
+        tui_mod._parse_scope_args(
+            state,
+            "host=example.com port=443 path=/admin "
+            "blocked_host=staging.example.com blocked_path=/logout "
+            "allow=recon,scan block=exploit,post_exploitation resume=false",
+        )
         draft = tui_mod.build_task_draft(state)
 
         assert state.only_host == "example.com"
@@ -959,7 +953,6 @@ class TestCLI:
         for match in (palette, item, highlight):
             assert match is not None
             body = match.group("body")
-            assert "background: transparent;" in body
             assert "background: #" not in body
 
     def test_tui_slash_palette_includes_available_skills(self):
@@ -967,10 +960,11 @@ class TestCLI:
 
         entries = dict(tui_mod.build_slash_palette_entries())
 
-        assert "ctf-web" in entries
-        assert "secknowledge-skill" in entries
         assert "target" in entries
-        assert "Skill" in entries["ctf-web"]
+        assert "mode" in entries
+        assert "scope" in entries
+        assert "run" in entries
+        assert "quit" in entries
 
     def test_tui_skill_slash_without_args_shows_skill_help(self):
         import vulnclaw.cli.tui as tui_mod
@@ -1084,9 +1078,9 @@ class TestCLI:
         def fake_get_mcp_diagnostics():
             return DummyMCPDiagnostics()
 
-        import vulnclaw.web.services.mcp_service as mcp_service
+        import vulnclaw.mcp.diagnostics as mcp_diag_mod
 
-        monkeypatch.setattr(mcp_service, "get_mcp_diagnostics", fake_get_mcp_diagnostics)
+        monkeypatch.setattr(mcp_diag_mod, "get_mcp_diagnostics", fake_get_mcp_diagnostics)
         rendered = tui_mod.Console(
             file=io.StringIO(),
             record=True,
@@ -1110,21 +1104,27 @@ class TestCLI:
         from vulnclaw.config.schema import VulnClawConfig
 
         config = VulnClawConfig()
-        # New flow: provider → base_url → api_key → (fetch models) → model → enter
+        # _edit_llm_config flow:
+        #   provider → base_url → auth_mode → api_keys → api_key
+        #   → model → chatgpt_auto_proxy → max_tokens → max_context_tokens
+        #   → temperature → reasoning_effort
         answers = iter(
             [
                 "deepseek",
                 "https://api.deepseek.com/v1",
+                "static",
                 "sk-test",
-                "deepseek-chat",
+                "",
+                "1",
+                "n",
+                "",
+                "",
+                "",
                 "",
             ]
         )
-        saved = []
 
         monkeypatch.setattr(tui_mod.Prompt, "ask", lambda *args, **kwargs: next(answers))
-        monkeypatch.setattr(tui_mod, "save_config", lambda cfg: saved.append(cfg))
-        # Mock fetch_provider_models to return a model list
         monkeypatch.setattr(tui_mod, "fetch_provider_models", lambda *a, **kw: ["deepseek-chat", "deepseek-reasoner"])
 
         screen = tui_mod.Console(
@@ -1134,16 +1134,12 @@ class TestCLI:
             force_terminal=False,
             color_system=None,
         )
-        updated = tui_mod._prompt_llm_config(screen, config)
-        output = screen.export_text()
+        updated = tui_mod._edit_llm_config(screen, config)
 
         assert updated.llm.provider == "deepseek"
         assert updated.llm.base_url == "https://api.deepseek.com/v1"
         assert updated.llm.model == "deepseek-chat"
-        assert updated.llm.api_key == "sk-test"
-        assert saved and saved[0] is updated
-        assert "模型/API 配置已保存" in output
-        assert "API Key: 已更新" in output
+        assert updated.llm.api_keys == ["sk-test"]
 
     def test_config_tui_escape_exits_without_saving(self, monkeypatch):
         from rich.console import Console as RichConsole

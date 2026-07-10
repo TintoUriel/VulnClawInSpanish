@@ -6,7 +6,11 @@ import re
 from datetime import datetime
 from pathlib import Path
 
-from vulnclaw.agent.context import SessionState, VulnerabilityFinding
+# 修改者: Nyaecho
+# 修改时间: 2026-07-08
+# 修改原因: 消除 V2 违规 — 叶子类型已移至 config/domain_models.py。
+from vulnclaw.agent.context import SessionState
+from vulnclaw.config.domain_models import VulnerabilityFinding
 from vulnclaw.report.verifier import PoCGenerator
 
 PYTHON_POC_TEMPLATE = '''\

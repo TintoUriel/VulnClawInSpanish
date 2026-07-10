@@ -6,7 +6,10 @@ import time
 from typing import Any
 from urllib.parse import urlparse
 
-from vulnclaw.agent.constraint_policy import validate_action_constraints
+# 修改者: Nyaecho
+# 修改时间: 2026-07-08
+# 修改原因: 消除 V4 违规 — validate_action_constraints 已移至 config/domain_models.py。
+from vulnclaw.config.domain_models import validate_action_constraints
 from vulnclaw.plugins.base import PluginContext, VulnPlugin
 from vulnclaw.plugins.registry import PluginRegistry, registry
 from vulnclaw.plugins.result import PluginResult, PluginStage

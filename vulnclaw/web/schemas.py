@@ -290,35 +290,10 @@ class ReportContentView(BaseModel):
     content: str
 
 
-class MCPServiceView(BaseModel):
-    name: str
-    enabled: bool
-    priority: int
-    transport_type: str
-    execution_mode: str
-    health_status: str
-    attach_attempted: bool = False
-    attach_succeeded: bool = False
-    running: bool
-    can_execute: bool
-    tool_count: int = 0
-    tools: list[str] = Field(default_factory=list)
-    error: Optional[str] = None
-    last_error_type: Optional[str] = None
-    started_at: Optional[str] = None
-    description: str = ""
-    call_count: int = 0
-    success_count: int = 0
-    failure_count: int = 0
-
-
-class MCPDiagnosticsView(BaseModel):
-    total_services: int = 0
-    running_services: int = 0
-    local_services: int = 0
-    placeholder_services: int = 0
-    tool_count: int = 0
-    services: list[MCPServiceView] = Field(default_factory=list)
+# 修改者: Nyaecho
+# 修改时间: 2026-07-08
+# 修改原因: V6 修复 — MCP 视图模型已移至 mcp/schemas.py，此处重新导出以保持兼容。
+from vulnclaw.mcp.schemas import MCPDiagnosticsView, MCPServiceView  # noqa: F401, E402
 
 
 class ConstraintAuditEventView(BaseModel):

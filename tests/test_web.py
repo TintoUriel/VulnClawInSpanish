@@ -787,7 +787,7 @@ class TestWebServices:
         agent = DummyAgent()
         called: list[str] = []
 
-        def fake_apply(agent_obj, target, snapshot_id=None):
+        def fake_apply(agent_obj, target, snapshot_id=None, run_context=None, target_model=None):
             called.append(f"restore:{target}:{snapshot_id}")
             return type(
                 "Restore",

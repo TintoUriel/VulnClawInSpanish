@@ -7,11 +7,7 @@ is a structured stub so the dispatch path is testable end-to-end.
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Awaitable, Callable
-
-if TYPE_CHECKING:
-    from vulnclaw.agent.agent_context import AgentContext
-
+from typing import Any, Awaitable, Callable
 
 # Read-only tools the constraint policy may treat as passive: no egress to the
 # target, no host-changing action.
@@ -322,7 +318,11 @@ def _build_handlers() -> dict[str, Callable[[Any, dict[str, Any]], Awaitable[str
 _HANDLERS: dict[str, Callable[[Any, dict[str, Any]], Awaitable[str]]] = _build_handlers()
 
 
-async def dispatch_intel_tool(agent: AgentContext, tool_name: str, args: dict[str, Any]) -> str:
+# 修改者: Nyaecho
+# 修改时间: 2026-07-08
+# 修改原因: V7 修复 — 将 agent 参数类型从 AgentContext 改为 Any，
+#          消除 intel/ 基础设施层对 agent/ 领域层协议的依赖。
+async def dispatch_intel_tool(agent: Any, tool_name: str, args: dict[str, Any]) -> str:
     """Route an intel tool call to its handler; structured error on unknown name."""
     if tool_name not in INTEL_TOOL_NAMES:
         return f"[intel_error] unknown intel tool: {tool_name}"

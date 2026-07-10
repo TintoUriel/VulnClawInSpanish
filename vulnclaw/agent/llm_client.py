@@ -116,6 +116,14 @@ def _is_openai_reasoning_model(provider: str, model: str) -> bool:
     return normalized.startswith(("o1", "o3", "o4", "gpt-5"))
 
 
+# 修改者: Nyaecho
+# 修改时间: 2026-07-08
+# 修改原因: V2 修复 — 核心逻辑已移至 config/llm_utils.py，此处提供向后兼容包装。
+from vulnclaw.config.llm_utils import (  # noqa: E402
+    build_chat_completion_kwargs as _build_chat_completion_kwargs_llm,
+)
+
+
 def build_chat_completion_kwargs(
     agent: AgentContext,
     messages: list[dict[str, Any]],
@@ -126,36 +134,16 @@ def build_chat_completion_kwargs(
 ) -> dict[str, Any]:
     """Build provider-compatible Chat Completions kwargs.
 
-    OpenAI reasoning/GPT-5 models reject the legacy max_tokens field and expect
-    max_completion_tokens instead. Other OpenAI-compatible providers may still
-    require the older field, so keep the switch scoped to OpenAI's newer model
-    families.
+    Backward-compatible wrapper that accepts AgentContext and delegates to
+    config/llm_utils.build_chat_completion_kwargs with agent.config.llm.
     """
-    llm = agent.config.llm
-    provider = str(getattr(llm, "provider", "") or "").lower()
-    model = str(getattr(llm, "model", "") or "")
-    token_limit = max_tokens if max_tokens is not None else getattr(llm, "max_tokens", None)
-    temp = temperature if temperature is not None else getattr(llm, "temperature", None)
-    uses_reasoning_params = _is_openai_reasoning_model(provider, model)
-
-    kwargs: dict[str, Any] = {
-        "model": model,
-        "messages": messages,
-    }
-    if token_limit is not None:
-        if uses_reasoning_params:
-            kwargs["max_completion_tokens"] = token_limit
-        else:
-            kwargs["max_tokens"] = token_limit
-    if temp is not None and not uses_reasoning_params:
-        kwargs["temperature"] = temp
-    if tools:
-        kwargs["tools"] = tools
-    if uses_reasoning_params:
-        reasoning_effort = getattr(llm, "reasoning_effort", None)
-        if reasoning_effort:
-            kwargs["reasoning_effort"] = reasoning_effort
-    return kwargs
+    return _build_chat_completion_kwargs_llm(
+        agent.config.llm,
+        messages,
+        tools,
+        max_tokens=max_tokens,
+        temperature=temperature,
+    )
 
 
 async def _call_with_persistent_retries(

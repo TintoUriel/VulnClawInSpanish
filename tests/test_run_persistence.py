@@ -221,7 +221,9 @@ async def test_multi_target_run_seeds_secondary_state_and_resumes(tmp_path, monk
     assert store._index_path(secondary).read_text(encoding="utf-8") == index_before
     preserved = store.load_target_state(secondary.raw)
     assert preserved is not None
-    assert "prior secondary work" in preserved.get("executed_steps", [])
+    step_records = preserved.get("step_records", [])
+    assert len(step_records) > 0
+    assert step_records[0].get("action") == "probe"
 
 
 def test_legacy_import_copies_once_and_leaves_legacy_read_only(tmp_path, monkeypatch):
@@ -326,7 +328,8 @@ async def test_orchestrator_checkpoints_and_resumes_exact_run(tmp_path, monkeypa
     )
 
     assert resumed.restore_result.restored is True
-    assert "checked login" in resumed_agent.session_state.executed_steps
+    assert any("probe" in s and "checked login" not in s for s in resumed_agent.session_state.executed_steps)
+    assert len(resumed_agent.session_state.step_records) >= 2
 
     (state_dir / "current.json").unlink()
     with pytest.raises(RunCorruptError, match="target state is missing"):
@@ -369,6 +372,7 @@ async def test_no_import_legacy_resume_does_not_create_run_copy(tmp_path, monkey
 
     assert result.run_context is None
     assert result.restore_result.restored is True
-    assert "legacy step" in agent.session_state.executed_steps
+    assert len(agent.session_state.step_records) >= 1
+    assert agent.session_state.step_records[0].action == "probe"
     assert not (tmp_path / "runs").exists()
     assert not (tmp_path / "targets" / parse_target(raw_target).state_key / "index.json").exists()

@@ -110,7 +110,7 @@
   "cli.pentest_finished": "\n[+] 渗透测试完成，共发现 {findings} 个问题",
 
   "tui.title": "VulnClaw TUI 工作台",
-  "tui.desc": "面向授权安全测试的终端图形化入口：先确认目标和边界，再启动检查。",
+  "tui.desc": "面向授权安全测试的终端工具：先确认目标和边界，再启动检查。",
   "tui.mode_quick": "快速摸底",
   "tui.mode_quick_desc": "只做信息收集和基础风险识别，适合第一次了解目标。",
   "tui.mode_standard": "标准检查",
@@ -257,6 +257,7 @@
   "tui.prompt_select_provider": "选择提供商 (当前: {provider}):",
   "tui.prompt_enter_model": "模型 (当前: {model}):",
   "tui.prompt_enter_apikey": "API Key ({status}, 回车保持):",
+  "tui.prompt_enter_baseurl": "Base URL（当前: {url}）:",
 
   "tui.error_invalid_port": "端口必须是 1-65535 之间的数字",
   "tui.no_previous_execution": "没有可继续的上次执行",

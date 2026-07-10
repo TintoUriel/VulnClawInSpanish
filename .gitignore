@@ -83,3 +83,6 @@ CLAUDE.md
 docs/
 .test-tmp/
 版本号文件.png
+
+# 开发中途产生的临时文件
+.projectHelp/

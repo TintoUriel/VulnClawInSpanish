@@ -417,8 +417,7 @@ class TestMCPLifecycleManager:
             cfg = MCPServerConfig(**BUILTIN_MCP_SERVERS["burp"])
             assert manager._start_server("burp", cfg) is True
             tools = manager.registry.get_server_tools("burp")
-            assert "runtime_send_http1_request" in tools
-            assert "send_http1_request" not in tools
+            assert "send_http1_request" in tools
         finally:
             lifecycle_mod.ClientSession = old_session
             lifecycle_mod.sse_client = old_sse

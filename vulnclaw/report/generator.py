@@ -9,7 +9,11 @@ from typing import Any, Optional
 
 from jinja2 import Template
 
-from vulnclaw.agent.context import SessionState, VulnerabilityFinding
+# 修改者: Nyaecho
+# 修改时间: 2026-07-08
+# 修改原因: 消除 V2 违规 — 叶子类型已移至 config/domain_models.py。
+from vulnclaw.agent.context import SessionState
+from vulnclaw.config.domain_models import VulnerabilityFinding
 
 # ── Report Template ─────────────────────────────────────────────────
 
@@ -508,8 +512,8 @@ CYCLE_REPORT_TEMPLATE = """\
 def _generate_attack_summary_from_session(session: SessionState) -> str:
     """Generate a readable attack-path summary using VulnClaw's configured LLM."""
     try:
-        from vulnclaw.agent.think_filter import strip_think_tags
         from vulnclaw.config.settings import load_config, make_openai_client
+        from vulnclaw.config.text_utils import strip_think_tags
         from vulnclaw.config.token_provider import (
             TokenResolutionError,
             has_llm_credentials,
@@ -580,14 +584,13 @@ def _generate_attack_summary_from_session(session: SessionState) -> str:
 
 def _build_report_summary_llm_kwargs(config: Any, messages: list[dict[str, Any]]) -> dict[str, Any]:
     """Build Chat Completions kwargs for report summary generation."""
-    from vulnclaw.agent.llm_client import build_chat_completion_kwargs
-
-    class _AgentShim:
-        def __init__(self, config: Any) -> None:
-            self.config = config
+    # 修改者: Nyaecho
+    # 修改时间: 2026-07-08
+    # 修改原因: V2 修复 — 直接使用 config/llm_utils，消除 AgentContext shim。
+    from vulnclaw.config.llm_utils import build_chat_completion_kwargs
 
     return build_chat_completion_kwargs(
-        _AgentShim(config),
+        config.llm,
         messages,
         max_tokens=min(config.llm.max_tokens, 1200),
         temperature=0.2,

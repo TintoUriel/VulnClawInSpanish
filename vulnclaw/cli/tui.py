@@ -11,6 +11,7 @@
 from __future__ import annotations
 
 import io
+import re
 import shutil
 import subprocess
 import sys
@@ -22,7 +23,7 @@ from typing import Any, Callable, Literal, Optional
 from rich import box
 from rich.console import Console, Group
 from rich.panel import Panel
-from rich.prompt import Confirm, Prompt
+from rich.prompt import Prompt
 from rich.table import Table
 from rich.text import Text
 
@@ -63,6 +64,76 @@ C_MUTED = "#808080"           # muted gray  – secondary / dim text
 C_TEXT = "#eeeeee"            # near-white  – body text
 C_BORDER = "#484848"          # mid-gray    – panel borders
 C_BORDER_SUBTLE = "#3c3c3c"   # dark-gray   – inner / subtle borders
+
+# ── @ skill reference boundary detection ──
+# [新增] 2026-07-08 Nyaecho - 新增 @ 符号用于 skill 资料引用，支持任意位置触发补全
+# 边界字符：空白、中英文标点、行尾、特殊符号
+SKILL_BOUNDARY_RE = re.compile(r'[\s，。；：、！？）】》,.:;!?)]}@/]')
+
+
+def _is_skill_boundary(ch: str) -> bool:
+    """Check if a character is a skill name boundary."""
+    return bool(SKILL_BOUNDARY_RE.match(ch))
+
+
+def find_at_context(text: str, cursor: int) -> tuple[str, str] | None:
+    """Find the nearest @ before cursor and extract the skill word for completion.
+
+    Returns (prefix_before_at, word) or None if no valid @ found.
+    The @ must be at start of line or preceded by a boundary character.
+    """
+    before = text[:cursor]
+    at_pos = before.rfind("@")
+    if at_pos == -1:
+        return None
+    # @ 前面必须是边界字符或行首
+    if at_pos > 0 and not _is_skill_boundary(before[at_pos - 1]):
+        return None
+    # 提取 @ 后面的 word（到光标位置）
+    word = before[at_pos + 1:]
+    # word 中不能有边界字符（说明 skill name 已输入完毕，光标在后面）
+    if SKILL_BOUNDARY_RE.search(word):
+        return None
+    return (before[:at_pos], word)
+
+
+def expand_at_skills(text: str) -> str:
+    """Expand all @skillname references in text to 'Use VulnClaw skill skillname.'.
+
+    Only expands valid skills (loaded by load_skill_by_name). Invalid @ references
+    are left unchanged.
+    """
+    if "@" not in text:
+        return text
+
+    result = []
+    i = 0
+    while i < len(text):
+        if text[i] == "@":
+            # @ 前面必须是边界字符或行首
+            if i > 0 and not _is_skill_boundary(text[i - 1]):
+                result.append(text[i])
+                i += 1
+                continue
+
+            # 提取 skill name
+            name_start = i + 1
+            name_end = name_start
+            while name_end < len(text) and not _is_skill_boundary(text[name_end]):
+                name_end += 1
+
+            skill_name = text[name_start:name_end]
+            if skill_name and load_skill_by_name(skill_name):
+                result.append(f"Use VulnClaw skill {skill_name}.")
+            else:
+                result.append(text[i:name_end])
+            i = name_end
+        else:
+            result.append(text[i])
+            i += 1
+
+    return "".join(result)
+
 
 # ── i18n boot ──
 _config_holder = [None]
@@ -340,7 +411,8 @@ def build_dashboard(config, state: TuiState) -> Group:
     footer_body.append("┃  ", style=C_MUTED)
     footer_body.append(command_preview, style=C_MUTED)
     footer_body.append("\n\n")
-    footer_body.append(_("tui.cli_note"), style=C_MUTED)
+    # [隐藏] 隐藏一个调试时文字提示
+    #footer_body.append(_("tui.cli_note"), style=C_MUTED)
 
     footer = Panel(
         footer_body,
@@ -419,6 +491,7 @@ def _run_pt_tui(session: dict[str, Any]) -> Optional[str]:
 
         return []
 
+    # [修改] 2026-07-08 Nyaecho - 修改原因：提交时展开 @ skill 引用为完整 prompt
     def _handle_input(buff: Buffer) -> bool:
         text = buff.text.strip()
         buff.text = ""
@@ -433,7 +506,12 @@ def _run_pt_tui(session: dict[str, Any]) -> Optional[str]:
             if action in ("quit", "launch"):
                 app.exit()
         elif text:
-            session["_message"] = _("tui.slash_hint")
+            # 展开 @ skill 引用后作为自然语言 prompt
+            expanded = expand_at_skills(text)
+            session["_nl_text"] = expanded
+            session["_nl_history"] = text  # 保留原始输入用于 /continue
+            session["_action"] = "launch"
+            app.exit()
         return False
 
     def _get_dashboard() -> ANSI:
@@ -442,18 +520,23 @@ def _run_pt_tui(session: dict[str, Any]) -> Optional[str]:
         console.print(build_dashboard(session["config"], session["state"]))
         return ANSI(buf.getvalue().rstrip("\n"))
 
+    # [修改] 2026-07-08 Nyaecho - 修改原因：合并 slash 和 at 两个补全器
+    from prompt_toolkit.completion import merge_completers
+
     input_buffer = Buffer(
         accept_handler=_handle_input,
         multiline=False,
         enable_history_search=False,
-        completer=_build_slash_completer(),
+        completer=merge_completers([_build_slash_completer(), _build_at_completer()]),
         complete_while_typing=True,
     )
 
     session["_palette_idx"] = 0
 
+    # [修改] 2026-07-08 Nyaecho - 修改原因：新增 "at" kind 支持任意位置的 @ skill 引用补全
     def _palette_context() -> tuple[str, str] | None:
         text = input_buffer.text
+        cursor = input_buffer.cursor_position
         if text.startswith("/."):
             word = text[2:]
             if " " in word:
@@ -464,11 +547,17 @@ def _run_pt_tui(session: dict[str, Any]) -> Optional[str]:
             if " " in word:
                 return None
             return "slash", word
+        # 检测任意位置的 @
+        ctx = find_at_context(text, cursor)
+        if ctx is not None:
+            _, word = ctx
+            return "at", word
         return None
 
     def _palette_visible() -> bool:
         return _palette_context() is not None
 
+    # [修改] 2026-07-08 Nyaecho - 修改原因：at kind 调用 build_at_palette_entries获取 skills
     def _palette_filtered() -> list[tuple[str, str]]:
         context = _palette_context()
         if context is None:
@@ -476,11 +565,18 @@ def _run_pt_tui(session: dict[str, Any]) -> Optional[str]:
         kind, word = context
         if kind == "flag":
             return [(skill.name, skill.summary) for skill in complete_flag_skills(word)]
+        if kind == "at":
+            return build_at_palette_entries(word)
         return build_slash_palette_entries(word)
 
+    # [修改] 2026-07-08 Nyaecho - 修改原因：at kind 返回 "@" 前缀
     def _palette_prefix() -> str:
         context = _palette_context()
-        return "/." if context and context[0] == "flag" else "/"
+        if context and context[0] == "flag":
+            return "/."
+        if context and context[0] == "at":
+            return "@"
+        return "/"
 
     def _palette_content() -> list[tuple[str, str]]:
         items = _palette_filtered()
@@ -772,6 +868,14 @@ def list_skill_palette_entries(prefix: str = "") -> list[tuple[str, str]]:
     return entries
 
 
+def build_at_palette_entries(prefix: str = "") -> list[tuple[str, str]]:
+    """Return palette entries for @ skill references.
+
+    [新增] 2026-07-08 Nyaecho - @ 符号用于 skill 资料引用，补全时只显示 skills。
+    """
+    return list_skill_palette_entries(prefix)
+
+
 def list_repl_palette_entries(prefix: str = "") -> list[tuple[str, str]]:
     """Classic-REPL ``/`` palette: built-in commands first, then skills.
 
@@ -788,10 +892,11 @@ def list_repl_palette_entries(prefix: str = "") -> list[tuple[str, str]]:
     return entries
 
 
+# [修改] 2026-07-08 Nyaecho - 修改原因：斜杠命令只保留内置命令，skills 改用 @ 引用
 def build_slash_palette_entries(prefix: str = "") -> list[tuple[str, str]]:
-    """Return command-palette entries for built-in commands and available skills."""
+    """Return command-palette entries for built-in slash commands only (no skills)."""
     normalized = prefix.strip().lower()
-    entries: list[tuple[str, str]] = list_skill_palette_entries(prefix)
+    entries: list[tuple[str, str]] = []
 
     for cmd, desc in SLASH_COMMANDS.items():
         if normalized and not cmd.startswith(normalized):
@@ -853,6 +958,37 @@ def _build_slash_completer() -> Any:
                     )
 
     return _SlashCompleter()
+
+
+# [新增] 2026-07-08 Nyaecho - 新增 @ 补全器，支持任意位置触发 skill 资料引用补全
+def _build_at_completer() -> Any:
+    from prompt_toolkit.completion import Completer, Completion
+
+    class _AtCompleter(Completer):
+        def get_completions(self, document, complete_event):
+            pass  # async path is used instead
+
+        async def get_completions_async(self, document, _complete_event):
+            text = document.text
+            cursor = document.cursor_position
+            ctx = find_at_context(text, cursor)
+            if ctx is None:
+                return
+
+            _, word = ctx
+            for name, desc in build_at_palette_entries(word):
+                start_position = -len(word) if word else 0
+                yield Completion(
+                    name,
+                    start_position=start_position,
+                    display=[
+                        (f"fg:{C_PRIMARY} bold", f"@{name}"),
+                        ("", "  "),
+                        (f"fg:{C_MUTED}", desc),
+                    ],
+                )
+
+    return _AtCompleter()
 
 
 def build_repl_slash_completer() -> Any:
@@ -1264,6 +1400,8 @@ def _get_language_labels() -> dict[str, str]:
 @_register_handler("config")
 @_register_handler("cfg")
 def _cmd_config(session: dict[str, Any], args: str) -> None:
+    # [修改] 2026-07-08 Nyaecho - 修改原因：custom 提供商新增 Base URL 输入步骤
+    # 流程：选择提供商 → (custom) 输入 Base URL → 输入 API Key → 获取模型列表 → 选择/输入模型
     config = session["config"]
     providers = [item["provider"] for item in list_providers()]
     current_provider = config.llm.provider
@@ -1273,7 +1411,20 @@ def _cmd_config(session: dict[str, Any], args: str) -> None:
             nonlocal config
             session["config"] = apply_provider_preset(config, value)
             config = session["config"]
-        # 流程变更：选择提供商后先输入 API Key
+        # custom 提供商需要先输入 Base URL
+        if value == "custom":
+            _set_prompt_input(session,
+                            _("tui.prompt_enter_baseurl", url=config.llm.base_url or ""),
+                            _on_baseurl)
+        else:
+            # 非 custom：直接输入 API Key
+            key_status = _("tui.api_key_configured") if config.llm.api_key else _("tui.api_key_not_configured")
+            _set_prompt_input(session, _("tui.prompt_enter_apikey", status=key_status), _on_apikey)
+
+    def _on_baseurl(value: str) -> None:
+        if value:
+            config.llm.base_url = value.strip()
+        # 输入完 Base URL 后继续输入 API Key
         key_status = _("tui.api_key_configured") if config.llm.api_key else _("tui.api_key_not_configured")
         _set_prompt_input(session, _("tui.prompt_enter_apikey", status=key_status), _on_apikey)
 
@@ -1282,7 +1433,7 @@ def _cmd_config(session: dict[str, Any], args: str) -> None:
             config.llm.api_key = value.strip()
         base_url = config.llm.base_url
         api_key = config.llm.api_key
-        # custom 提供商或缺少 base_url/api_key 时跳过获取，直接手动输入
+        # 缺少 base_url/api_key 时跳过获取，直接手动输入
         if not base_url or not api_key:
             _set_prompt_input(session, _("tui.prompt_enter_model_fallback", model=config.llm.model), _on_model_input, default=config.llm.model)
             return
@@ -1411,7 +1562,10 @@ def build_runtime_diagnostic(config) -> TuiRuntimeDiagnostic:
     nmap_status = "installed" if shutil.which("nmap") else "optional/missing"
 
     try:
-        from vulnclaw.web.services.mcp_service import get_mcp_diagnostics
+        # 修改者: Nyaecho
+        # 修改时间: 2026-07-08
+        # 修改原因: V6 修复 — 从 mcp/diagnostics 导入，消除 CLI→Web 依赖。
+        from vulnclaw.mcp.diagnostics import get_mcp_diagnostics
 
         mcp_diag = get_mcp_diagnostics()
         return TuiRuntimeDiagnostic(
@@ -1634,151 +1788,6 @@ def build_command_preview_args(draft: TuiTaskDraft, nl_text: str | None = None) 
     return args
 
 
-def _prompt_target(state: TuiState) -> None:
-    state.target = Prompt.ask(_("tui.enter_target"), default=state.target).strip()
-
-
-def _prompt_mode(state: TuiState) -> None:
-    choices = list(MODES.keys())
-    table = Table(title=_("tui.check_mode"), box=box.ROUNDED, border_style=C_BORDER_SUBTLE)
-    table.add_column("Key", style=f"bold {C_PRIMARY}")
-    table.add_column(_("tui.name"), style=C_TEXT)
-    table.add_column(_("tui.description"), style=C_MUTED)
-    for key in choices:
-        mode = MODES[key]
-        table.add_row(key, mode.label, mode.description)
-    Console().print(table)
-    state.mode = Prompt.ask(_("tui.select_mode"), choices=choices, default=state.mode)  # type: ignore[assignment]
-
-
-def _prompt_llm_config(screen: Console, config):
-    provider_table = Table(title=_("tui.available_providers"), box=box.ROUNDED, border_style=C_BORDER_SUBTLE)
-    provider_table.add_column("Provider", style=f"bold {C_PRIMARY}")
-    provider_table.add_column("Default Model", style=C_TEXT)
-    provider_table.add_column("Base URL", style=C_MUTED)
-    for item in list_providers():
-        marker = " *" if item["provider"] == config.llm.provider else ""
-        provider_table.add_row(
-            f"{item['provider']}{marker}",
-            item.get("default_model", ""),
-            item.get("base_url", ""),
-        )
-    screen.print(provider_table)
-
-    provider = Prompt.ask(
-        _("tui.select_provider"),
-        default=config.llm.provider,
-    ).strip()
-    if provider and provider != config.llm.provider:
-        config = apply_provider_preset(config, provider)
-
-    base_url = Prompt.ask("Base URL", default=config.llm.base_url).strip()
-    if base_url:
-        config.llm.base_url = base_url
-
-    # 流程变更：先输入 API Key，再获取模型列表
-    current_key = _("tui.api_key_configured") if config.llm.api_key else _("tui.api_key_not_configured")
-    api_key = Prompt.ask(f"API Key ({current_key})", default="").strip()
-    if api_key:
-        config.llm.api_key = api_key
-
-    # 尝试获取模型列表
-    effective_base_url = config.llm.base_url
-    effective_api_key = config.llm.api_key
-    model = config.llm.model
-
-    if effective_base_url and effective_api_key:
-        Console().print(f"  [{C_MUTED}]{_('tui.fetching_models')}[/]")
-        models = fetch_provider_models(effective_base_url, effective_api_key)
-        if models:
-            model_table = Table(title=_("tui.prompt_select_model", model=model), box=box.ROUNDED, border_style=C_BORDER_SUBTLE)
-            model_table.add_column("#", style=f"bold {C_PRIMARY}", width=4)
-            model_table.add_column("Model", style=C_TEXT)
-            for i, m in enumerate(models, 1):
-                marker = " *" if m == model else ""
-                model_table.add_row(str(i), f"{m}{marker}")
-            screen.print(model_table)
-            model = Prompt.ask(
-                _("tui.prompt_select_model", model=model),
-                default=model,
-            ).strip()
-        else:
-            model = Prompt.ask(
-                _("tui.prompt_enter_model_fallback", model=model),
-                default=model,
-            ).strip()
-    else:
-        model = Prompt.ask("Model", default=model).strip()
-
-    if model:
-        config.llm.model = model
-    save_config(config)
-
-    screen.print(
-        Panel(
-            f"Provider: [bold {C_PRIMARY}]{config.llm.provider}[/]\n"
-            f"Base URL: [{C_MUTED}]{config.llm.base_url}[/]\n"
-            f"Model: [{C_MUTED}]{config.llm.model}[/]\n"
-            f"API Key: {_('tui.updated') if api_key else current_key}",
-            title=_("tui.config_saved"),
-            border_style=C_SUCCESS,
-            box=box.ROUNDED,
-        )
-    )
-    Prompt.ask(_("tui.press_enter"), default="")
-    return config
-
-
-def _prompt_scope(state: TuiState) -> None:
-    state.only_host = Prompt.ask(_("tui.enter_only_host"), default=state.only_host).strip()
-    while True:
-        state.only_port = Prompt.ask(_("tui.enter_only_port"), default=state.only_port).strip()
-        try:
-            _parse_optional_port(state.only_port)
-            break
-        except ValueError as exc:
-            Console().print(f"[{C_ERROR}]{exc}[/]")
-    state.only_path = Prompt.ask(_("tui.enter_only_path"), default=state.only_path).strip()
-    state.blocked_host = Prompt.ask(_("tui.enter_blocked_host"), default=state.blocked_host).strip()
-    state.blocked_path = Prompt.ask(_("tui.enter_blocked_path"), default=state.blocked_path).strip()
-    state.allow_actions = _parse_action_csv(
-        Prompt.ask(
-            _("tui.enter_allowed_actions"),
-            default=",".join(state.allow_actions),
-        )
-    )
-    state.block_actions = _parse_action_csv(
-        Prompt.ask(
-            _("tui.enter_blocked_actions"),
-            default=",".join(state.block_actions),
-        )
-    )
-    state.resume = Confirm.ask(_("tui.resume_history"), default=state.resume)
-
-
-def _confirm_and_launch(state: TuiState, launcher: TaskLauncher) -> None:
-    if not state.target.strip():
-        Console().print(Panel(_("tui.please_set_target"), border_style=C_WARNING, box=box.ROUNDED))
-        Prompt.ask(_("tui.press_enter"), default="")
-        return
-
-    mode = MODES[state.mode]
-    if mode.needs_extra_confirm:
-        ok = Confirm.ask(
-            _("tui.confirm_deep_mode", mode=mode.label),
-            default=False,
-        )
-        if not ok:
-            return
-
-    draft = _draft_from_state(state)
-    Console().print(_build_task_summary_panel(draft, title=_("tui.launch_summary")))
-    if Confirm.ask(_("tui.start_check"), default=False):
-        Console().print(_("tui.enter_task_mode"))
-        launcher(draft)
-        Prompt.ask(_("tui.task_returned"), default="")
-
-
 def _build_task_summary_panel(draft: TuiTaskDraft, *, title: str | None = None) -> Panel:
     if title is None:
         title = _("tui.launch_summary_title")
@@ -1798,45 +1807,6 @@ def _build_task_summary_panel(draft: TuiTaskDraft, *, title: str | None = None) 
         f"[{C_MUTED}]  {draft.command_line}[/]",
     ]
     return Panel("\n".join(lines), title=title, title_align="left", border_style=C_WARNING, box=box.ROUNDED)
-
-
-def _show_target_history(screen: Console, state: TuiState) -> None:
-    if not state.target.strip():
-        screen.print(Panel(_("tui.please_set_target"), border_style=C_WARNING, box=box.ROUNDED))
-        Prompt.ask(_("tui.press_enter"), default="")
-        return
-
-    preview = get_target_state_preview(state.target)
-    snapshots = list_target_snapshots(state.target)
-    if preview is None:
-        screen.print(Panel(_("tui.no_history_for_target"), title=_("tui.history_status"), border_style=C_WARNING, box=box.ROUNDED))
-    else:
-        screen.print(
-            Panel(
-                f"{_('tui.target')}: [bold {C_PRIMARY}]{preview.get('target', state.target)}[/]\n"
-                f"{_('tui.phase')}: [bold {C_SECONDARY}]{preview.get('phase', 'unknown')}[/]\n"
-                f"{_('tui.findings_count')}: [bold {C_TEXT}]{preview.get('findings_count', 0)}[/]\n"
-                f"{_('tui.snapshot_count')}: [bold {C_TEXT}]{len(snapshots)}[/]",
-                title=_("tui.history_status"),
-                title_align="left",
-                border_style=C_BORDER,
-                box=box.ROUNDED,
-            )
-        )
-    Prompt.ask(_("tui.press_enter"), default="")
-
-
-def _generate_target_report(screen: Console, state: TuiState) -> None:
-    if not state.target.strip():
-        screen.print(Panel(_("tui.please_set_target"), border_style=C_WARNING, box=box.ROUNDED))
-        Prompt.ask(_("tui.press_enter"), default="")
-        return
-
-    from vulnclaw.cli.main import _generate_report_for_target
-
-    report_path = _generate_report_for_target(state.target)
-    screen.print(Panel(report_path, title=_("tui.report_generated"), title_align="left", border_style=C_SUCCESS, box=box.ROUNDED))
-    Prompt.ask(_("tui.press_enter"), default="")
 
 
 def _default_launcher(draft: TuiTaskDraft) -> None:
