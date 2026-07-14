@@ -258,7 +258,7 @@ export function SettingsPage({ initialSection = "basic", onOpenAdvanced }: Setti
                 <span>{t("settings.language")}</span>
                 <select value={language} onChange={(event) => setLanguage(event.target.value as UiPreferences["language"])}>
                   <option value="en-US">{t("settings.english")}</option>
-                  <option value="zh-CN">{t("settings.chinese")}</option>
+                  <option value="es-ES">{t("settings.spanish")}</option>
                 </select>
               </label>
               <label className="field">

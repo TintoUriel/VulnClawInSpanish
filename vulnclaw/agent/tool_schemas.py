@@ -1,9 +1,11 @@
 """OpenAI tool schema definitions for built-in tools.
 
-修改者: Nyaecho
-修改时间: 2026-07-08
-修改原因: S5 修复 — 将工具 schema 构建代码从 builtin_tools.py（1357 行）提取到独立模块，
-         执行逻辑与 schema 定义分离，提升可维护性。
+Modificado por: Nyaecho
+Fecha de modificación: 2026-07-08
+Motivo de la modificación: Corrección S5 — Se extrajo el código de construcción
+         del esquema de herramientas de builtin_tools.py (1357 líneas) a un
+         módulo independiente, separando la lógica de ejecución de la
+         definición del esquema para mejorar la mantenibilidad.
 """
 
 from __future__ import annotations
@@ -22,17 +24,17 @@ def build_openai_tools(mcp_manager: Any) -> list[dict[str, Any]]:
             "type": "function",
             "function": {
                 "name": "load_skill_reference",
-                "description": "加载指定 Skill 的参考文档，获取详细的渗透测试方法论、工作流或命令参考。当系统提示中提到'可用参考文档'时，使用此工具获取具体内容。",
+                "description": "Carga el documento de referencia del Skill especificado para obtener metodologías detalladas de pentesting, flujos de trabajo o referencias de comandos. Cuando el mensaje del sistema mencione 'documentación de referencia disponible', usa esta herramienta para obtener el contenido específico.",
                 "parameters": {
                     "type": "object",
                     "properties": {
                         "skill_name": {
                             "type": "string",
-                            "description": "Skill 名称，如 client-reverse, web-security-advanced, ai-mcp-security, intranet-pentest-advanced, pentest-tools, rapid-checklist, crypto-toolkit, ctf-web, ctf-crypto, ctf-misc, osint-recon, secknowledge-skill",
+                            "description": "Nombre del Skill, como client-reverse, web-security-advanced, ai-mcp-security, intranet-pentest-advanced, pentest-tools, rapid-checklist, crypto-toolkit, ctf-web, ctf-crypto, ctf-misc, osint-recon, secknowledge-skill",
                         },
                         "reference_name": {
                             "type": "string",
-                            "description": "参考文档文件名，如 02-client-api-reverse-and-burp.md, web-injection.md, encoding-cheatsheet.md",
+                            "description": "Nombre del archivo de documentación de referencia, como 02-client-api-reverse-and-burp.md, web-injection.md, encoding-cheatsheet.md",
                         },
                     },
                     "required": ["skill_name", "reference_name"],
@@ -47,22 +49,26 @@ def build_openai_tools(mcp_manager: Any) -> list[dict[str, Any]]:
             "function": {
                 "name": "python_execute",
                 "description": (
-                    "执行 Python 代码片段。用于：构造复杂 HTTP 请求并解析响应、"
-                    "做编码转换和数据处理、批量测试不同 payload、比较响应差异、"
-                    "执行数学计算等。代码在受限环境中执行，超时 30 秒。"
-                    "预装库：requests, beautifulsoup4, pycryptodome, base64, json, re 等。"
-                    "重要：构造 HTTP 请求时请使用此工具而非猜测响应内容。"
+                    "Ejecuta fragmentos de código Python. Se usa para: construir solicitudes "
+                    "HTTP complejas y analizar respuestas, realizar conversiones de "
+                    "codificación y procesamiento de datos, probar diferentes payloads en "
+                    "lote, comparar diferencias de respuesta, realizar cálculos matemáticos, "
+                    "etc. El código se ejecuta en un entorno restringido, con un tiempo "
+                    "límite de 30 segundos. Bibliotecas preinstaladas: requests, "
+                    "beautifulsoup4, pycryptodome, base64, json, re, entre otras. "
+                    "Importante: al construir solicitudes HTTP, usa esta herramienta en "
+                    "lugar de adivinar el contenido de la respuesta."
                 ),
                 "parameters": {
                     "type": "object",
                     "properties": {
                         "code": {
                             "type": "string",
-                            "description": "要执行的 Python 代码。支持多行，可 import 标准库和 requests/bs4 等。",
+                            "description": "Código Python a ejecutar. Admite múltiples líneas, se pueden importar bibliotecas estándar y requests/bs4, entre otras.",
                         },
                         "purpose": {
                             "type": "string",
-                            "description": "简要说明执行目的（用于审计日志），如'构造HTTP请求测试弱比较绕过'",
+                            "description": "Breve descripción del propósito de la ejecución (para el registro de auditoría), por ejemplo 'construir solicitud HTTP para probar bypass de comparación débil'",
                         },
                     },
                     "required": ["code"],

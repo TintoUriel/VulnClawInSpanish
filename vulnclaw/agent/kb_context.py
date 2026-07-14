@@ -118,7 +118,7 @@ def _collect_kb_context(
 
     formatted = retriever.format_for_prompt(deduped, max_entries=5)
     return (
-        "## 知识库参考（相关 CVE / 利用技巧 / 绕过方法）\n"
-        "以下信息来自本地安全知识库，供参考使用：\n\n"
+        "## Referencia de la base de conocimiento (CVE / técnicas de explotación / métodos de evasión relacionados)\n"
+        "La siguiente información proviene de la base de conocimiento de seguridad local, solo para referencia:\n\n"
         f"{formatted}\n"
     )

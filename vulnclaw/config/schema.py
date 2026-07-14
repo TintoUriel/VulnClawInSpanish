@@ -343,7 +343,7 @@ class SessionConfig(BaseModel):
     )
     # Language configuration
     language: str = Field(
-        default="auto", description="UI language: auto, zh, en"
+        default="auto", description="UI language: auto, es, en"
     )
     reasoning_state_enabled: bool = Field(
         default=True, description="Enable reasoning state tracking"

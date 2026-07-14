@@ -718,7 +718,7 @@ def _h_config(session: dict[str, Any], args: str) -> str | None:
 
 # ── Language switch handler ──
 
-_SUPPORTED_LANGUAGES = ["auto", "zh", "en"]
+_SUPPORTED_LANGUAGES = ["auto", "es", "en"]
 
 
 def _get_language_labels_textual() -> dict[str, str]:
@@ -742,8 +742,8 @@ def _apply_language_textual(session: dict[str, Any], lang: str) -> None:
 def _h_language(session: dict[str, Any], args: str) -> str | None:
     """Handle /language command — switch UI language at runtime.
 
-    /language         → popup with three choices (auto/zh/en)
-    /language zh      → direct switch to Chinese
+    /language         → popup with three choices (auto/es/en)
+    /language es      → direct switch to Spanish
     /lang en          → direct switch to English
     """
     lang = args.strip().lower() if args else ""

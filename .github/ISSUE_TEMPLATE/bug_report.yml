@@ -1,4 +1,4 @@
-name: "🐛 Bug Report / 反馈缺陷"
+name: "🐛 Bug Report / Reportar defecto"
 description: "Report a bug or incorrect agent step execution in VulnClaw"
 title: "[Bug]: "
 labels: ["bug", "triage"]
@@ -6,11 +6,11 @@ body:
   - type: markdown
     attributes:
       value: |
-        Please fill out this form to help us diagnose the issue. / 请填写此表单帮助我们定位问题。
+        Please fill out this form to help us diagnose the issue. / Completa este formulario para ayudarnos a diagnosticar el problema.
   - type: textarea
     id: description
     attributes:
-      label: "Bug Description / 缺陷描述"
+      label: "Bug Description / Descripción del defecto"
       description: "A clear description of what the issue is."
       placeholder: "e.g., Agent fails to load MCP tool chain under Windows..."
     validations:
@@ -18,7 +18,7 @@ body:
   - type: textarea
     id: reproduction
     attributes:
-      label: "Reproduction Steps / 复现步骤"
+      label: "Reproduction Steps / Pasos para reproducir"
       description: "How can we reproduce the error?"
       placeholder: |
         1. Set target to...
@@ -29,5 +29,5 @@ body:
   - type: textarea
     id: logs
     attributes:
-      label: "Logs / 运行日志"
+      label: "Logs / Registros de ejecución"
       render: shell

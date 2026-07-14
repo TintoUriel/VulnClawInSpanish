@@ -1,4 +1,4 @@
-name: "🚀 Feature Request / 功能建议"
+name: "🚀 Feature Request / Solicitud de función"
 description: "Suggest a new penetration skill or scan orchestration tool"
 title: "[Feature]: "
 labels: ["enhancement"]
@@ -10,7 +10,7 @@ body:
   - type: textarea
     id: details
     attributes:
-      label: "Proposed Feature Details / 功能详情"
+      label: "Proposed Feature Details / Detalles de la función"
       description: "What new scanning skill or orchestration step should be added?"
       placeholder: "Add support for Nmap vulnerability script scanning..."
     validations:

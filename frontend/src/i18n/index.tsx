@@ -1,18 +1,18 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { loadUiPreferences, subscribeUiPreferences, type UiPreferences } from "../utils/preferences";
 import en from "./en.json";
-import zh from "./zh.json";
+import es from "./es.json";
 
-type Lang = "zh-CN" | "en-US";
+type Lang = "es-ES" | "en-US";
 type Translations = Record<string, string>;
 export type TFunction = (key: string, params?: Record<string, string>, fallback?: string) => string;
 
 const TRANSLATIONS: Record<Lang, Translations> = {
   "en-US": en as Translations,
-  "zh-CN": zh as Translations,
+  "es-ES": es as Translations,
 };
 
-/* ── 全局单例（供 taskLabels 等非 React 代码使用）── */
+/* ── Instancia global (para taskLabels y otro código fuera de React) ── */
 
 let _currentLang: Lang = resolveInitialLang();
 let _currentTranslations: Translations = TRANSLATIONS[_currentLang];
@@ -20,19 +20,19 @@ let _currentTranslations: Translations = TRANSLATIONS[_currentLang];
 function resolveInitialLang(): Lang {
   try {
     const preferences = loadUiPreferences();
-    return preferences.language === "zh-CN" ? "zh-CN" : "en-US";
+    return preferences.language === "es-ES" ? "es-ES" : "en-US";
   } catch {
     return "en-US";
   }
 }
 
 /**
- * 全局翻译函数 — 可在 React 组件之外调用。
- *   t("key")                -> 翻译文本
- *   t("key", {a:"1"})       -> 替换 {a} 占位符
- *   t("key", {}, "fallback") -> key 不存在时使用 fallback
+ * Función de traducción global — puede llamarse fuera de componentes React.
+ *   t("key")                -> texto traducido
+ *   t("key", {a:"1"})       -> reemplaza el marcador {a}
+ *   t("key", {}, "fallback") -> usa fallback si la clave no existe
  *
- * 保底链：当前语言 → 英文 → key 本身（或 fallback）
+ * Cadena de respaldo: idioma actual → inglés → la clave misma (o fallback)
  */
 export function t(key: string, params?: Record<string, string>, fallback?: string): string {
   let text = _currentTranslations[key];
@@ -63,23 +63,23 @@ const I18nContext = createContext<I18nContextValue>({
 });
 
 /**
- * React Hook — 组件使用 `const { t, lang } = useT()` 获取翻译函数。
- * 当语言切换时自动触发重渲染。
+ * React Hook — los componentes usan `const { t, lang } = useT()` para obtener la función de traducción.
+ * Provoca un nuevo renderizado automáticamente cuando cambia el idioma.
  */
 export function useT(): I18nContextValue {
   return useContext(I18nContext);
 }
 
 /**
- * I18nProvider — 在 main.tsx 中包裹 <App />。
- * 监听 preferences 变化，语言切换时更新 Context 和全局单例。
+ * I18nProvider — envuelve a <App /> en main.tsx.
+ * Escucha cambios en las preferencias y actualiza el Context y la instancia global cuando cambia el idioma.
  */
 export function I18nProvider({ children }: { children: ReactNode }) {
   const [lang, setLang] = useState<Lang>(_currentLang);
 
   useEffect(() => {
     const unsubscribe = subscribeUiPreferences((preferences: UiPreferences) => {
-      const nextLang: Lang = preferences.language === "zh-CN" ? "zh-CN" : "en-US";
+      const nextLang: Lang = preferences.language === "es-ES" ? "es-ES" : "en-US";
       if (nextLang !== _currentLang) {
         _currentLang = nextLang;
         _currentTranslations = TRANSLATIONS[nextLang];

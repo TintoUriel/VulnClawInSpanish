@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-# 修改者: Nyaecho
-# 修改时间: 2026-07-08
-# 修改原因: 消除 V2/V3/V4 违规 — 叶子类型已移至 config/domain_models.py，
-#          此处从 config 导入并重新导出共享策略函数。
+# Modificado por: Nyaecho
+# Fecha de modificación: 2026-07-08
+# Motivo de la modificación: eliminación de violaciones V2/V3/V4 — los tipos hoja se trasladaron a config/domain_models.py,
+#          este archivo los importa desde config y reexporta las funciones de política compartidas.
 from vulnclaw.config.domain_models import (
     PHASE_TO_ACTION,
     PentestPhase,
@@ -41,10 +41,10 @@ def validate_phase_transition(
     return f"{violation} (phase transition to {next_phase.value})"
 
 
-# 纯本地/知识类工具：不与目标交互，不纳入「动作范围」约束
+# Herramientas puramente locales/de conocimiento: no interactúan con el objetivo, no están sujetas a la restricción de "alcance de acción"
 LOCAL_META_TOOLS = {"load_skill_reference", "crypto_decode"}
 
-# 真正代表「利用」意图的攻击载荷特征——与传输方式（HTTP 方法/网络库）无关
+# Características de carga útil que realmente representan intención de "explotación" — independientes del medio de transporte (método HTTP/biblioteca de red)
 EXPLOIT_PAYLOAD_MARKERS = [
     "union select",
     " or 1=1",
@@ -69,7 +69,7 @@ EXPLOIT_PAYLOAD_MARKERS = [
     "powershell -e",
 ]
 
-# python_execute 中代表本地命令执行/反弹 shell 的特征
+# Características en python_execute que representan ejecución de comandos locales/reverse shell
 PYTHON_EXPLOIT_MARKERS = [
     "os.system",
     "subprocess",
@@ -84,13 +84,14 @@ PYTHON_EXPLOIT_MARKERS = [
 def infer_tool_action(tool_name: str, args: dict[str, object]) -> str:
     """Infer the effective action class of a tool invocation.
 
-    关键原则：只有「实际攻击载荷」才推断为 exploit；HTTP 方法、是否用 requests/urllib
-    等传输细节不构成利用意图（recon/scan 阶段本就需要发 POST/OPTIONS、用 requests 探测）。
+    Principio clave: solo una "carga útil de ataque real" se infiere como exploit; el método HTTP,
+    el uso de requests/urllib u otros detalles de transporte no constituyen intención de explotación
+    (las fases de recon/scan de por sí necesitan enviar POST/OPTIONS o sondear con requests).
     """
     normalized_tool = (tool_name or "").strip().lower()
 
     if normalized_tool in LOCAL_META_TOOLS:
-        return "recon"  # 仅本地操作，配合 validate_tool_action 豁免
+        return "recon"  # Solo operación local, exenta en conjunto con validate_tool_action
 
     # Intel tools: read-only lookups (no target egress) and active recon
     # (low-impact target/3rd-party contact) both classify as passive "recon".
@@ -108,7 +109,7 @@ def infer_tool_action(tool_name: str, args: dict[str, object]) -> str:
         body = str(args.get("body", "") or "").lower()
         if any(marker in url or marker in body for marker in EXPLOIT_PAYLOAD_MARKERS):
             return "exploit"
-        # 方法本身不代表利用：GET/HEAD/OPTIONS 属侦察，其它（POST 测表单等）属扫描
+        # El método en sí no representa explotación: GET/HEAD/OPTIONS son reconocimiento, otros (POST para probar formularios, etc.) son escaneo
         if method in ("GET", "HEAD", "OPTIONS"):
             return "recon"
         return "scan"
@@ -117,7 +118,7 @@ def infer_tool_action(tool_name: str, args: dict[str, object]) -> str:
         code = str(args.get("code", "") or "").lower()
         if any(marker in code for marker in EXPLOIT_PAYLOAD_MARKERS + PYTHON_EXPLOIT_MARKERS):
             return "exploit"
-        # 用 requests/httpx/urllib/socket 做 HTTP 探测属扫描，而非利用
+        # Usar requests/httpx/urllib/socket para sondeo HTTP es escaneo, no explotación
         if any(m in code for m in ("requests.", "httpx.", "urllib", "http.client", "socket")):
             return "scan"
         return "recon"
@@ -132,7 +133,7 @@ def validate_tool_action(
     tool_name: str, args: dict[str, object], constraints: TaskConstraints
 ) -> str | None:
     """Return a constraint violation when a tool invocation implies a blocked action."""
-    # 纯本地/知识类工具不受动作范围约束（加载文档、编解码不触碰目标）
+    # Las herramientas puramente locales/de conocimiento no están sujetas a la restricción de alcance de acción (cargar documentos, codificar/decodificar no tocan el objetivo)
     if (tool_name or "").strip().lower() in LOCAL_META_TOOLS:
         return None
     inferred = infer_tool_action(tool_name, args)

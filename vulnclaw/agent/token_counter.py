@@ -18,8 +18,9 @@ _MESSAGE_OVERHEAD = 4
 _TOOL_CALL_OVERHEAD = 8
 
 _TRUNCATION_NOTICE = (
-    "[上下文截断] 为控制 token 用量，部分较早的历史消息已被移除，"
-    "仅保留系统提示和最近的对话。"
+    "[Contexto truncado] Para controlar el consumo de tokens, se han eliminado "
+    "algunos mensajes históricos más antiguos, conservando únicamente el "
+    "mensaje del sistema y la conversación más reciente."
 )
 
 

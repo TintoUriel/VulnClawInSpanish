@@ -1,9 +1,10 @@
 """CLI shared helper functions — extracted from cli/main.py.
 
-修改者: Nyaecho
-修改时间: 2026-07-08
-修改原因: S2 修复 — 从 cli/main.py（2932 行）提取共享辅助函数到独立模块，
-         为后续命令拆分做准备。
+Modificado por: Nyaecho
+Fecha de modificación: 2026-07-08
+Motivo de la modificación: corrección S2 — se extrajeron las funciones auxiliares
+         compartidas de cli/main.py (2932 líneas) a un módulo independiente,
+         como preparación para la posterior división de comandos.
 """
 
 from __future__ import annotations
@@ -52,7 +53,7 @@ class TerminalStreamSink:
     def on_tool_call(self, tool_name: str, args: str) -> None:
         """Display tool call notification."""
         self._console.print()
-        self._console.print(f"[bold cyan]→ 调用工具: {tool_name}[/] {args[:100]}")
+        self._console.print(f"[bold cyan]→ Llamando herramienta: {tool_name}[/] {args[:100]}")
         self._status_printed = False
 
     def on_tool_result(self, result_summary: str) -> None:
@@ -60,7 +61,7 @@ class TerminalStreamSink:
         self._console.print()
         if len(result_summary) > 200:
             result_summary = result_summary[:200] + "..."
-        self._console.print(f"[dim]→ 工具结果: {result_summary}[/]")
+        self._console.print(f"[dim]→ Resultado de la herramienta: {result_summary}[/]")
 
     def on_stream_end(self) -> None:
         """Handle stream end."""
@@ -114,10 +115,10 @@ def _make_solve_event_printer(target_console: Console) -> Any:
                 pass
             elif decision.get("intents"):
                 target_console.print(
-                    f"[cyan]◆ Reason:[/cyan] 提出 {len(decision['intents'])} 个新探索方向"
+                    f"[cyan]◆ Reason:[/cyan] se proponen {len(decision['intents'])} nuevas direcciones de exploración"
                 )
             else:
-                target_console.print("[dim]◆ Reason: 暂不新增方向[/dim]")
+                target_console.print("[dim]◆ Reason: sin nuevas direcciones por ahora[/dim]")
         elif kind == "frontier_recovery":
             if payload.get("reason") == "fallback_intents":
                 target_console.print(
@@ -130,7 +131,7 @@ def _make_solve_event_printer(target_console: Console) -> Any:
                     f"no open intents, retry {payload.get('streak', '?')}"
                 )
         elif kind == "completed":
-            target_console.print("[green]✓ Reason: 目标达成[/green]")
+            target_console.print("[green]✓ Reason: objetivo alcanzado[/green]")
         elif kind == "explore_start":
             target_console.print(
                 f"[yellow]▶ Explore {payload['intent_id']}:[/yellow] {payload['description'][:90]}"
@@ -141,12 +142,13 @@ def _make_solve_event_printer(target_console: Console) -> Any:
             )
         elif kind == "hallucination":
             target_console.print(
-                f"[red]⚠ 幻觉拦截 {payload['intent_id']}:[/red] 声称的 flag 无真实证据，已拒绝"
+                f"[red]⚠ Alucinación bloqueada {payload['intent_id']}:[/red] "
+                f"el flag reclamado no tiene evidencia real, rechazado"
             )
         elif kind == "complete_rejected":
-            target_console.print(f"[red]⚠ 拒绝完成:[/red] {payload.get('reason', '')[:90]}")
+            target_console.print(f"[red]⚠ Finalización rechazada:[/red] {payload.get('reason', '')[:90]}")
         elif kind == "abandon":
-            target_console.print(f"[red]✗ 放弃 {payload['intent_id']}[/red]")
+            target_console.print(f"[red]✗ Abandonado {payload['intent_id']}[/red]")
 
     return on_event
 

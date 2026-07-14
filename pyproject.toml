@@ -36,8 +36,8 @@ dependencies = [
     "toml>=0.10.0",
     "jinja2>=3.1.0",
     "textual>=0.40.0",
-    # ── 沙箱依赖（python_execute 运行时）──────────────────────────────
-    # LLM 在 python_execute 中可直接 import 以下库
+    # ── Dependencias de sandbox (runtime de python_execute) ──────────────────────────────
+    # El LLM puede importar directamente estas librerías dentro de python_execute
     "beautifulsoup4>=4.12.0",
     "lxml>=4.9.0",
     "pycryptodome>=3.19.0",

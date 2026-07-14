@@ -30,7 +30,7 @@ def _reasoning_enabled(agent: AgentContext) -> bool:
 
 
 def _sync_reasoning_path(agent: AgentContext, path_name: str, *, success: bool) -> None:
-    """把识别到的攻击路径落进结构化推理状态，并刷新优先级。"""
+    """Registra la ruta de ataque identificada en el estado de razonamiento estructurado y actualiza las prioridades."""
     if not path_name or not _reasoning_enabled(agent):
         return
     reasoning = getattr(agent.context.state, "reasoning", None)
@@ -41,14 +41,14 @@ def _sync_reasoning_path(agent: AgentContext, path_name: str, *, success: bool) 
         existing = reasoning.add_path(path_name, steps=[], priority=1)
     if success:
         existing.status = PathStatus.SUCCESS
-        existing.result = "取得进展"
+        existing.result = "progreso logrado"
     elif existing.status != PathStatus.SUCCESS:
         existing.status = PathStatus.FAILED
     reasoning.auto_prioritize()
 
 
 def _sync_reasoning_constraint(agent: AgentContext, path_name: str, category: FailureCategory) -> None:
-    """把识别到的障碍（WAF/过滤等）落进结构化推理状态，描述保持稳定以便去重。"""
+    """Registra el obstáculo identificado (WAF/filtro, etc.) en el estado de razonamiento estructurado, manteniendo la descripción estable para facilitar la deduplicación."""
     if not _reasoning_enabled(agent):
         return
     reasoning = getattr(agent.context.state, "reasoning", None)
@@ -62,7 +62,7 @@ def _sync_reasoning_constraint(agent: AgentContext, path_name: str, category: Fa
     if category_value is None:
         return
     reasoning.add_constraint(
-        description=f"{path_name or '当前路径'} 被 {category_value.value} 阻断",
+        description=f"{path_name or 'ruta actual'} bloqueada por {category_value.value}",
         category=category_value,
         severity=ConstraintSeverity.HIGH,
         source="auto_pentest",
@@ -122,7 +122,7 @@ async def auto_pentest(
         try:
             response_text = await call_llm_auto(agent, system_prompt, round_context, stream_sink=stream_sink)
             result.output = response_text
-            agent.context.add_assistant_message(f"[Round {round_num} 分析] {response_text}")
+            agent.context.add_assistant_message(f"[Análisis de la ronda {round_num}] {response_text}")
             agent._finding_parser.parse(response_text)
 
             if agent.runtime.is_recon_phase:
@@ -234,7 +234,7 @@ async def auto_pentest(
                     vuln_type=detected_path or "",
                 )
 
-            # 把攻击路径与障碍同步进结构化推理状态
+            # Sincroniza la ruta de ataque y los obstáculos con el estado de razonamiento estructurado
             _sync_reasoning_path(agent, detected_path, success=has_new_progress)
             if failure_category is not None:
                 _sync_reasoning_constraint(agent, detected_path, failure_category)
@@ -244,7 +244,7 @@ async def auto_pentest(
                     if detected_path == agent.runtime.current_attack_path:
                         agent.runtime.same_path_fail_count += 1
                     else:
-                        # 卡住后切换了攻击路径 = 一次反思事件，记录以闭合升级环
+                        # Cambiar de ruta de ataque tras quedar atascado = un evento de reflexión, se registra para cerrar el ciclo de escalamiento
                         if (
                             reflexion_on
                             and agent.runtime.current_attack_path
@@ -265,7 +265,7 @@ async def auto_pentest(
             agent.context.state.save()
 
         except Exception as e:
-            result.output = f"[!] Round {round_num} 错误: {e}"
+            result.output = f"[!] Error en la ronda {round_num}: {e}"
             agent.runtime.consecutive_errors += 1
             if agent.runtime.consecutive_errors >= 3:
                 result.should_continue = False
@@ -281,7 +281,7 @@ async def auto_pentest(
         if not result.should_continue:
             break
 
-    # 把本周期反思记忆写回 SessionState 快照，供下个周期/同目标恢复时复用
+    # Guarda la memoria de reflexión de este ciclo en la instantánea de SessionState, para reutilizarla al reanudar el próximo ciclo/mismo objetivo
     if hasattr(agent, "_save_reflexion_snapshot"):
         agent._save_reflexion_snapshot()
         agent.context.state.save()
@@ -299,7 +299,7 @@ async def persistent_pentest(
     on_cycle_step: Callable[[int, int, AgentResult], None] | None = None,
     on_cycle_complete: Callable[[int, PersistentCycleResult], None] | None = None,
     *,
-    # stream_sink 由 core.py 透传入，传给 agent.auto_pentest() 实现流式输出
+    # stream_sink se pasa desde core.py y se reenvía a agent.auto_pentest() para implementar la salida en streaming
     stream_sink: Any = None,
 ) -> list[PersistentCycleResult]:
     cycle_results: list[PersistentCycleResult] = []

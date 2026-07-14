@@ -1,5 +1,5 @@
 export interface UiPreferences {
-  language: "zh-CN" | "en-US";
+  language: "es-ES" | "en-US";
   defaultCheckMode: "quick" | "standard" | "deep" | "continuous";
   reportFormat: "markdown" | "html";
   showTechnicalLogs: boolean;
@@ -41,7 +41,7 @@ export function loadUiPreferences(): UiPreferences {
     if (!raw) return DEFAULT_UI_PREFERENCES;
     const parsed = JSON.parse(raw) as Partial<UiPreferences>;
     return {
-      language: parsed.language === "zh-CN" ? "zh-CN" : "en-US",
+      language: parsed.language === "es-ES" ? "es-ES" : "en-US",
       defaultCheckMode: isCheckMode(parsed.defaultCheckMode) ? parsed.defaultCheckMode : DEFAULT_UI_PREFERENCES.defaultCheckMode,
       reportFormat: parsed.reportFormat === "html" ? "html" : "markdown",
       showTechnicalLogs: Boolean(parsed.showTechnicalLogs),

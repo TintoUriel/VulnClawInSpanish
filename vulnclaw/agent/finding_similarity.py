@@ -1,9 +1,9 @@
 """VulnClaw Finding Similarity — lightweight semantic deduplication.
 
-修改者: Nyaecho
-修改时间: 2026-07-08
-修改原因: V2 修复 — 核心逻辑已移至 config/finding_similarity.py，
-         此处重新导出以保持 agent/ 层向后兼容。
+Modificado por: Nyaecho
+Fecha de modificación: 2026-07-08
+Motivo de la modificación: corrección V2 — la lógica principal se trasladó a config/finding_similarity.py,
+         este archivo la reexporta para mantener la compatibilidad retroactiva con la capa agent/.
 """
 
 from __future__ import annotations
