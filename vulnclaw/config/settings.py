@@ -266,7 +266,7 @@ def _overlay_env(config: VulnClawConfig) -> VulnClawConfig:
         with suppress(ValueError):
             config.session.stale_rounds_threshold = int(v)
 
-    # ── Session: 推理状态 / 反思引擎 / 插件运行时 ──────────────
+    # ── Session: estado de razonamiento / motor de reflexión / runtime de plugins ──────────────
     _truthy = ("1", "true", "yes", "on")
     if v := os.environ.get("VULNCLAW_SESSION_REASONING_STATE_ENABLED"):
         config.session.reasoning_state_enabled = v.lower() in _truthy

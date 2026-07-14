@@ -195,21 +195,21 @@ ROLES = frozenset({"primary", "support", "fallback"})
 # Common alias corrections applied before matching against a vocabulary.
 _ALIASES: dict[str, str] = {
     "sql_injection": "sqli",
-    "sql注入": "sqli",
+    "inyección sql": "sqli",
     "cross_site_scripting": "xss",
     "remote_code_execution": "rce",
-    "命令注入": "rce",
+    "inyección de comandos": "rce",
     "command_injection": "rce",
     "lfi": "path_traversal",
     "rfi": "path_traversal",
-    "文件上传": "file_upload",
-    "越权": "idor",
-    "反序列化": "deserialization",
-    "提权": "privilege_escalation",
-    "横向移动": "lateral_movement",
-    "凭据窃取": "credential_theft",
-    "prompt注入": "prompt_injection",
-    "工具滥用": "tool_abuse",
+    "carga de archivos": "file_upload",
+    "control de acceso indebido": "idor",
+    "deserialización": "deserialization",
+    "escalada de privilegios": "privilege_escalation",
+    "movimiento lateral": "lateral_movement",
+    "robo de credenciales": "credential_theft",
+    "inyección de prompt": "prompt_injection",
+    "abuso de herramientas": "tool_abuse",
     "js": "javascript",
     "node": "nodejs",
     "node.js": "nodejs",
@@ -222,7 +222,7 @@ _ALIASES: dict[str, str] = {
     "post-exploitation": "post_exploitation",
     "vuln-discovery": "vuln_discovery",
     "type_confusion": "type_juggling",
-    "弱类型": "type_juggling",
+    "tipado débil": "type_juggling",
 }
 
 
@@ -245,8 +245,9 @@ def normalize_token(value: str) -> str:
     """Normalize a free-text token to a canonical lowercase form.
 
     Lowercases, trims, collapses spaces / hyphens / dots to underscores, then
-    applies the small alias table. Non-ASCII tokens (Chinese) are preserved so
-    the alias table can still map them (e.g. ``sql注入`` → ``sqli``).
+    applies the small alias table. Non-ASCII tokens (e.g. accented Spanish text)
+    are preserved so the alias table can still map them (e.g. ``inyección sql``
+    → ``sqli``).
     """
     token = value.strip().lower()
     if token in _ALIASES:

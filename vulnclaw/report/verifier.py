@@ -1,13 +1,13 @@
 """VulnClaw Vulnerability Verifier — validate findings before they enter the report.
 
-核心原则: 未经验证的漏洞 = 误报 = 不写入报告
+Principio central: vulnerabilidad no verificada = falso positivo = no se incluye en el informe
 
-工作流程:
-    1. 接收漏洞假设（pending finding）
-    2. 生成 PoC 代码
-    3. 通过 python_execute 执行 PoC
-    4. 判定结果: verified / rejected
-    5. 只有 verified 的漏洞才能进入报告
+Flujo de trabajo:
+    1. Recibir la hipótesis de vulnerabilidad (pending finding)
+    2. Generar el código PoC
+    3. Ejecutar el PoC mediante python_execute
+    4. Determinar el resultado: verified / rejected
+    5. Solo las vulnerabilidades verified pueden incluirse en el informe
 """
 
 from __future__ import annotations
@@ -21,82 +21,85 @@ from enum import Enum
 from pathlib import Path
 from typing import Any, Optional
 
-# 修改者: Nyaecho
-# 修改时间: 2026-07-08
-# 修改原因: 消除 V2 违规 — 叶子类型已移至 config/domain_models.py。
+# Modificado por: Nyaecho
+# Fecha de modificación: 2026-07-08
+# Motivo de la modificación: Eliminación de la infracción V2 — los tipos hoja se movieron a
+#          config/domain_models.py.
 from vulnclaw.config.domain_models import VulnerabilityFinding
 
 
 class VerificationStatus(str, Enum):
-    """漏洞验证状态."""
+    """Estado de verificación de la vulnerabilidad."""
 
-    PENDING = "pending"  # 待验证
-    VERIFIED = "verified"  # 验证通过
-    REJECTED = "rejected"  # 验证失败/误报
-    SKIPPED = "skipped"  # 跳过验证（如已确认的事实）
+    PENDING = "pending"  # Pendiente de verificación
+    VERIFIED = "verified"  # Verificación aprobada
+    REJECTED = "rejected"  # Verificación fallida/falso positivo
+    SKIPPED = "skipped"  # Verificación omitida (p. ej. hecho ya confirmado)
 
 
 class VerificationResult(str, Enum):
-    """验证结果详情."""
+    """Detalle del resultado de la verificación."""
 
     # Verified outcomes
-    VULN_CONFIRMED = "vuln_confirmed"  # 漏洞确认
-    SENSITIVE_DATA_EXPOSED = "sensitive_data"  # 敏感数据泄露
-    SECURITY_BYPASS = "security_bypass"  # 安全限制绕过
+    VULN_CONFIRMED = "vuln_confirmed"  # Vulnerabilidad confirmada
+    SENSITIVE_DATA_EXPOSED = "sensitive_data"  # Fuga de datos sensibles
+    SECURITY_BYPASS = "security_bypass"  # Evasión de restricciones de seguridad
 
     # Rejected outcomes
-    FALSE_POSITIVE = "false_positive"  # 误报
-    NO_RESPONSE_DIFF = "no_response_diff"  # 响应无差异
-    PARAM_INVALID = "param_invalid"  # 参数无效
-    NORMAL_RESPONSE = "normal_response"  # 正常响应
-    TIMEOUT = "timeout"  # 超时
-    ERROR_403_404 = "error_403_404"  # 403/404 正常拒绝
-    EXECUTION_ERROR = "execution_error"  # PoC 执行环境错误（如解释器缺失）
+    FALSE_POSITIVE = "false_positive"  # Falso positivo
+    NO_RESPONSE_DIFF = "no_response_diff"  # Sin diferencia en la respuesta
+    PARAM_INVALID = "param_invalid"  # Parámetro inválido
+    NORMAL_RESPONSE = "normal_response"  # Respuesta normal
+    TIMEOUT = "timeout"  # Tiempo de espera agotado
+    ERROR_403_404 = "error_403_404"  # Rechazo normal 403/404
+    EXECUTION_ERROR = "execution_error"  # Error del entorno de ejecución del PoC (p. ej. intérprete ausente)
 
 
 @dataclass
 class VerifiedFinding:
-    """经过验证的漏洞发现."""
+    """Hallazgo de vulnerabilidad ya verificado."""
 
-    # 来自原始 finding 的信息
+    # Información proveniente del finding original
     original_finding: VulnerabilityFinding
 
-    # 验证状态
+    # Estado de verificación
     status: VerificationStatus = VerificationStatus.PENDING
     result: Optional[VerificationResult] = None
 
-    # PoC 信息
+    # Información del PoC
     poc_code: Optional[str] = None
     poc_output: Optional[str] = None
     poc_executed_at: Optional[str] = None
 
-    # 验证结论
+    # Conclusión de la verificación
     verified_description: str = ""
     verified_evidence: str = ""
-    verified_severity: str = ""  # 可能根据验证结果调整严重度
+    verified_severity: str = ""  # Puede ajustarse según el resultado de la verificación
 
-    # 排除原因（如果验证失败）
+    # Motivo de exclusión (si la verificación falla)
     rejection_reason: str = ""
 
-    # 验证者（元信息）
+    # Verificador (metainformación)
     verified_by: str = "verifier_module"
     verified_at: str = field(default_factory=lambda: datetime.now().isoformat())
 
 
-# ── PoC 生成器 ────────────────────────────────────────────────────────────────
+# ── Generador de PoC ────────────────────────────────────────────────────────────────
 
 
 class PoCGenerator:
-    """根据漏洞假设生成 PoC 代码."""
+    """Genera código PoC a partir de una hipótesis de vulnerabilidad."""
 
-    # 漏洞类型 → PoC 模板映射
+    # Mapeo de tipo de vulnerabilidad → plantilla de PoC
     #
-    # ⚠️ 模板使用 *单花括号* 作为 Python 语法（dict 字面量、f-string 插值）。
-    # 唯一的模板占位符是 ``{target}`` / ``{payload}`` / ``{baseline_len}`` /
-    # ``{path}``，它们由 :meth:`generate_poc` 通过 ``str.replace`` 精确替换。
-    # 不要使用 ``{{`` / ``}}`` 转义——渲染器不是 ``str.format``，双花括号会原样
-    # 残留到生成的 PoC 中，导致 ``dict`` 字面量变成 ``set``（``TypeError``）或
-    # f-string 打印字面量 ``{var}`` 文本而非插值结果。
+    # ⚠️ Las plantillas usan *llaves simples* como sintaxis de Python (literales
+    # dict, interpolación f-string). Los únicos marcadores de plantilla son
+    # ``{target}`` / ``{payload}`` / ``{baseline_len}`` / ``{path}``, que
+    # :meth:`generate_poc` sustituye con precisión mediante ``str.replace``.
+    # No usar el escape ``{{`` / ``}}`` — el renderizador no es ``str.format``;
+    # las llaves dobles quedarían literalmente en el PoC generado, provocando
+    # que un literal ``dict`` se convierta en ``set`` (``TypeError``) o que un
+    # f-string imprima el texto literal ``{var}`` en lugar del valor interpolado.
     POC_TEMPLATES: dict[str, str] = {
         "sql_injection": """
 import requests
@@ -110,7 +113,7 @@ try:
     r = requests.get(target, params=params, timeout=10, verify=False)
     text = r.text.lower()
 
-    # SQL 错误特征
+    # Firmas de error SQL
     sql_errors = [
         "sql syntax", "mysql", "sqlite", "postgres", "oracle",
         "sqlstate", "microsoft sql", "odbc", "syntax error",
@@ -119,18 +122,18 @@ try:
 
     for err in sql_errors:
         if err in text:
-            print(f"[CONFIRMED] SQL注入漏洞: 检测到SQL错误特征 '{err}'")
-            print(f"[INFO] 响应状态码: {r.status_code}")
+            print(f"[CONFIRMED] Vulnerabilidad de inyección SQL: se detectó la firma de error SQL '{err}'")
+            print(f"[INFO] Código de estado de la respuesta: {r.status_code}")
             exit(0)
 
-    # 检查响应差异（如果提供正常 baseline）
+    # Comprobar diferencia en la respuesta (si se proporciona un baseline normal)
     baseline_len = {baseline_len}
     if len(r.content) != baseline_len and baseline_len > 0:
-        print(f"[POSSIBLE] 响应长度异常: {len(r.content)} vs baseline {baseline_len}")
+        print(f"[POSSIBLE] Longitud de respuesta anómala: {len(r.content)} vs baseline {baseline_len}")
 
-    print("[REJECTED] 未检测到SQL注入特征")
+    print("[REJECTED] No se detectaron firmas de inyección SQL")
 except requests.Timeout:
-    print("[REJECTED] 请求超时")
+    print("[REJECTED] Tiempo de espera de la solicitud agotado")
 except Exception as e:
     print(f"[ERROR] {e}")
 """,
@@ -144,11 +147,11 @@ try:
     r = requests.get(target, params={"q": payload}, timeout=10, verify=False)
 
     if payload in r.text:
-        print("[CONFIRMED] XSS漏洞: payload出现在响应中")
-        print("[INFO] 已发送 XSS payload，检测到原样反射")
+        print("[CONFIRMED] Vulnerabilidad XSS: el payload aparece en la respuesta")
+        print("[INFO] Payload XSS enviado; se detectó reflexión tal cual")
         exit(0)
 
-    print("[REJECTED] XSS payload未出现在响应中")
+    print("[REJECTED] El payload XSS no apareció en la respuesta")
 except Exception as e:
     print(f"[ERROR] {e}")
 """,
@@ -164,15 +167,15 @@ try:
     r = requests.get(target, params=params, timeout=10, verify=False)
     text = r.text
 
-    # 命令注入特征
+    # Firmas de inyección de comandos
     cmd_indicators = ["uid=", "gid=", "root:", "/bin/bash", "whoami", "linux"]
 
     for indicator in cmd_indicators:
         if indicator in text:
-            print(f"[CONFIRMED] 命令注入漏洞: 检测到 '{indicator}'")
+            print(f"[CONFIRMED] Vulnerabilidad de inyección de comandos: se detectó '{indicator}'")
             exit(0)
 
-    print("[REJECTED] 未检测到命令注入特征")
+    print("[REJECTED] No se detectaron firmas de inyección de comandos")
 except Exception as e:
     print(f"[ERROR] {e}")
 """,
@@ -182,39 +185,39 @@ import requests
 target = "{target}"
 
 try:
-    # 正常请求
+    # Solicitud normal
     r_normal = requests.get(target, timeout=10, verify=False)
     len_normal = len(r_normal.content)
 
-    # 调试模式请求
+    # Solicitud en modo debug
     r_debug = requests.get(target + "/?debug=1", timeout=10, verify=False)
     len_debug = len(r_debug.content)
 
-    print(f"[INFO] 正常响应长度: {len_normal}")
-    print(f"[INFO] debug=1 响应长度: {len_debug}")
+    print(f"[INFO] Longitud de respuesta normal: {len_normal}")
+    print(f"[INFO] Longitud de respuesta con debug=1: {len_debug}")
 
-    # 检查调试信息泄露
+    # Comprobar fuga de información de depuración
     if len_debug != len_normal:
         diff = len_debug - len_normal
-        print(f"[POSSIBLE] 调试模式响应与正常响应不同，差异: {diff} 字节")
+        print(f"[POSSIBLE] La respuesta en modo debug difiere de la normal, diferencia: {diff} bytes")
 
-        # 检查是否真的泄露敏感信息
+        # Comprobar si realmente se filtra información sensible
         debug_content = r_debug.text.replace(r_normal.text, "")
         if debug_content:
             sensitive_keywords = ["password", "secret", "api_key", "token", "db_", "connection"]
             for kw in sensitive_keywords:
                 if kw.lower() in debug_content.lower():
-                    print(f"[CONFIRMED] 调试模式泄露敏感信息: 检测到 '{kw}'")
+                    print(f"[CONFIRMED] El modo debug filtra información sensible: se detectó '{kw}'")
                     exit(0)
 
-        # 如果只是响应长度不同但没有敏感信息，降级为 Info
-        print("[INFO] 调试模式响应有差异但未发现敏感信息泄露，降级为Info")
+        # Si solo hay diferencia de longitud sin información sensible, degradar a Info
+        print("[INFO] La respuesta en modo debug difiere pero no se encontró fuga de información sensible; se degrada a Info")
 
-    # 检查 debug 相关关键字
+    # Comprobar palabras clave relacionadas con debug
     if "debug" in r_debug.text.lower() and r_debug.text.lower().count("debug") > r_normal.text.lower().count("debug"):
-        print("[POSSIBLE] debug模式包含额外debug信息")
+        print("[POSSIBLE] El modo debug contiene información adicional de depuración")
 
-    print("[REJECTED] 调试模式未发现明显敏感信息泄露")
+    print("[REJECTED] No se encontró fuga evidente de información sensible en el modo debug")
 
 except Exception as e:
     print(f"[ERROR] {e}")
@@ -229,15 +232,15 @@ try:
     r = requests.get(target, params={"file": payload}, timeout=10, verify=False)
     text = r.text.lower()
 
-    # LFI 特征
+    # Firmas de LFI
     lfi_indicators = ["root:", "/bin/bash", "/bin/sh", "[boot loader]", "windows"]
 
     for indicator in lfi_indicators:
         if indicator in text:
-            print(f"[CONFIRMED] LFI漏洞: 检测到 '{indicator}'")
+            print(f"[CONFIRMED] Vulnerabilidad LFI: se detectó '{indicator}'")
             exit(0)
 
-    print("[REJECTED] 未检测到LFI特征")
+    print("[REJECTED] No se detectaron firmas de LFI")
 except Exception as e:
     print(f"[ERROR] {e}")
 """,
@@ -251,16 +254,16 @@ try:
     r = requests.get(target + path, timeout=10, verify=False)
 
     if r.status_code == 200 and len(r.content) > 10:
-        print(f"[CONFIRMED] 敏感文件可访问: {path}")
-        print(f"[INFO] 状态码: {r.status_code}, 长度: {len(r.content)}")
+        print(f"[CONFIRMED] Archivo sensible accesible: {path}")
+        print(f"[INFO] Código de estado: {r.status_code}, longitud: {len(r.content)}")
 
-        # 检查内容类型
+        # Comprobar el tipo de contenido
         ct = r.headers.get("content-type", "")
         print(f"[INFO] Content-Type: {ct}")
 
         exit(0)
 
-    print(f"[REJECTED] 文件不可访问或为空: {r.status_code}")
+    print(f"[REJECTED] Archivo no accesible o vacío: {r.status_code}")
 except Exception as e:
     print(f"[ERROR] {e}")
 """,
@@ -273,12 +276,12 @@ try:
     r = requests.get(target, timeout=10, verify=False)
     headers = {k.lower(): v.lower() for k, v in r.headers.items()}
 
-    # 检查敏感 header
+    # Comprobar headers sensibles
     sensitive_headers = {
-        "x-powered-by": "技术栈信息",
-        "server": "服务器信息",
-        "x-aspnet-version": "ASP.NET版本",
-        "x-generator": "生成器信息",
+        "x-powered-by": "Información de la pila tecnológica",
+        "server": "Información del servidor",
+        "x-aspnet-version": "Versión de ASP.NET",
+        "x-generator": "Información del generador",
     }
 
     found = []
@@ -287,13 +290,13 @@ try:
             found.append(f"{header}: {headers[header][:50]}")
 
     if found:
-        print(f"[CONFIRMED] 信息泄露: {len(found)}个敏感header")
+        print(f"[CONFIRMED] Fuga de información: {len(found)} headers sensibles")
         for item in found:
             print(f"  - {item}")
         exit(0)
 
-    print("[INFO] 未发现明显信息泄露，这是正常的安全配置问题")
-    print("[REJECTED] 响应头信息泄露 - 这是配置问题，不是漏洞")
+    print("[INFO] No se encontró fuga de información evidente; es un problema de configuración normal")
+    print("[REJECTED] Fuga de información en los headers de respuesta - es un problema de configuración, no una vulnerabilidad")
 except Exception as e:
     print(f"[ERROR] {e}")
 """,
@@ -306,21 +309,21 @@ except Exception as e:
         target: str,
         baseline_len: int = 0,
     ) -> str:
-        """根据漏洞类型生成 PoC 代码.
+        """Genera el código PoC según el tipo de vulnerabilidad.
 
         Args:
-            finding: 漏洞发现
-            target: 目标 URL
-            baseline_len: 正常响应长度（用于对比）
+            finding: Hallazgo de vulnerabilidad
+            target: URL objetivo
+            baseline_len: Longitud de la respuesta normal (para comparación)
 
         Returns:
-            PoC Python 代码字符串
+            Cadena de código Python del PoC
         """
         vuln_type = (finding.vuln_type or "").lower().replace(" ", "_")
         template = cls.POC_TEMPLATES.get(vuln_type)
 
         if not template:
-            # 通用 PoC 模板
+            # Plantilla de PoC genérica
             template = cls._generic_template()
 
         payload = cls._guess_payload(finding)

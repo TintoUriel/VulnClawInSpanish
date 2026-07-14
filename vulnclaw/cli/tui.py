@@ -1787,8 +1787,11 @@ def _build_command_preview_args(draft: TuiTaskDraft) -> list[str]:
 
 def build_command_preview_args(draft: TuiTaskDraft, nl_text: str | None = None) -> list[str]:
     """Build a copyable CLI command from a TUI task draft."""
-    # [修改] 2026-06-10 Nyaecho - TUI自然语言驱动: 支持 nl_text 传入并通过 --prompt 传递给CLI子进程
-    # [修改] 2026-06-10 Nyaecho - 添加安全风险提示：通过命令行传递prompt可能暴露给其他本地用户
+    # [Modificado] 2026-06-10 Nyaecho - TUI impulsado por lenguaje natural:
+    #   soporta pasar nl_text y transmitirlo al subproceso de la CLI vía --prompt
+    # [Modificado] 2026-06-10 Nyaecho - Se añadió una advertencia de riesgo de
+    #   seguridad: pasar el prompt por línea de comandos puede exponerlo a otros
+    #   usuarios locales
     args = ["vulnclaw", draft.command, draft.target]
     if nl_text:
         args.extend(["--prompt", nl_text])
@@ -1862,8 +1865,10 @@ def _default_launcher(draft: TuiTaskDraft) -> None:
 
 
 # ── Interactive config editor ──────────────────────────────────────
-# [新增] 从 VulnBot 移植的交互式配置编辑器, 适配 VulnClaw 的 schema
-# (新增 recon 分区, api_key 掩码, 三种 MCP transport, OAuth 字段只读)
+# [Añadido] Editor de configuración interactivo portado desde VulnBot,
+#   adaptado al schema de VulnClaw
+# (se añadió la sección de recon, enmascaramiento de api_key, tres tipos de
+#   transporte MCP, campos OAuth de solo lectura)
 
 
 class _ConfigTuiExit(Exception):

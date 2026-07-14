@@ -48,9 +48,10 @@ from vulnclaw.agent.constraint_policy import validate_action_constraints
 from vulnclaw.agent.input_analysis import extract_task_constraints
 
 # === Stream Output Renderer ===
-# 修改者: Nyaecho
-# 修改时间: 2026-07-08
-# 修改原因: S2 修复 — 共享辅助函数已移至 cli/_helpers.py。
+# Modificado por: Nyaecho
+# Fecha de modificación: 2026-07-08
+# Motivo de la modificación: corrección S2 — las funciones auxiliares
+#   compartidas se movieron a cli/_helpers.py.
 from vulnclaw.cli._helpers import (
     TerminalStreamSink,
     _append_action_constraints,
@@ -85,7 +86,7 @@ from vulnclaw.target_state.store import (
     rollback_target_state,
 )
 
-# 鈹€鈹€ REPL 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
+# ── REPL ────────────────────────────────────────────────────────────
 
 
 def _prepare_repl_target(
@@ -447,7 +448,7 @@ def _run_repl() -> None:
 
                 def _on_persistent_step(round_num: int, cycle_num: int, result) -> None:
                     console.print(f"[dim]-- Cycle {cycle_num} | Round {round_num} --[/]")
-                    # TerminalStreamSink 已实时流式显示，回调不重复打印
+                    # TerminalStreamSink ya se muestra en streaming en tiempo real; el callback no vuelve a imprimir
                     console.print()
                     nonlocal current_target, current_phase
                     if result.target:
@@ -537,7 +538,7 @@ def _run_repl() -> None:
 
             # Handle auto mode persistence: exit auto mode on explicit commands
             if auto_mode_active and user_input.lower().strip() in (
-                "chat", "manual", "exit auto", "单轮", "手动",
+                "chat", "manual", "exit auto", "un turno", "manual",
             ):
                 auto_mode_active = False
                 last_auto_input = ""
@@ -570,7 +571,8 @@ def _run_repl() -> None:
                     console.print(_("cli.enter_auto_mode"))
                     console.print()
 
-                    # 默认走目标驱动 solve 引擎；engine=rounds 时回退到旧固定轮数循环
+                    # Por defecto se usa el motor solve dirigido por objetivos;
+                    # con engine=rounds se recurre al antiguo bucle de rondas fijas
                     if getattr(config.session, "engine", "solve") == "solve":
                         async def _run_auto():
                             await mcp_manager._preinit_chrome_devtools()
@@ -593,9 +595,9 @@ def _run_repl() -> None:
                                 console.print()
                                 console.print(
                                     Panel(
-                                        f"{'✅ 目标达成' if done else '⊘ 未达成'} — "
+                                        f"{'✅ Objetivo alcanzado' if done else '⊘ No alcanzado'} — "
                                         f"facts={board.get('facts', 0)} intents={board.get('intents', 0)}\n"
-                                        f"原因: {board.get('complete_reason') or '探索结束'}",
+                                        f"Motivo: {board.get('complete_reason') or 'exploración finalizada'}",
                                         title="Solve",
                                         border_style="green" if done else "yellow",
                                     )
@@ -647,10 +649,10 @@ def _run_repl() -> None:
                                 if any(
                                     token in user_input.lower()
                                     for token in (
-                                        "输出",
-                                        "保存",
-                                        "写到",
-                                        "导出",
+                                        "salida",
+                                        "guardar",
+                                        "escribir",
+                                        "exportar",
                                         "save",
                                         "write",
                                         "export",
@@ -679,7 +681,7 @@ def _run_repl() -> None:
                                     current_target = result.target
                                 if result.phase:
                                     current_phase = result.phase
-                                # 注释掉: 流式输出已通过 TerminalStreamSink 实时显示，无需重复打印
+                                # Comentado: la salida en streaming ya se muestra en tiempo real vía TerminalStreamSink, no hace falta reimprimir
                                 # if result.output:
                                 #     _print_agent_output(result.output, config)
 
@@ -907,7 +909,7 @@ def _print_run_completion_summary(summary: dict[str, Any]) -> None:
     )
 
 
-# 鈹€鈹€ Sub-commands 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
+# ── Sub-commands ────────────────────────────────────────────────────
 
 
 app = typer.Typer(
@@ -923,7 +925,8 @@ def run(
     target: str = typer.Argument(..., help="Target host/IP/URL"),
     scope: str = typer.Option("full", help="Test scope: full, web, api, mobile"),
     output: Optional[str] = typer.Option(None, help="Output report file path"),
-    # [新增] 2026-06-10 Nyaecho - TUI自然语言驱动: 允许通过 --prompt 传入自定义提示词覆盖自动生成的prompt
+    # [Añadido] 2026-06-10 Nyaecho - TUI impulsado por lenguaje natural: permite
+    #   pasar un prompt personalizado vía --prompt que sobrescribe el prompt generado automáticamente
     prompt: Optional[str] = typer.Option(
         None, "--prompt", help="Custom natural language prompt (overrides auto-generated prompt)"
     ),
@@ -1096,7 +1099,8 @@ def run(
             )
             on_event = None if non_interactive else _make_solve_event_printer(console)
             selected_engine = engine or getattr(shared_config.session, "engine", "solve")
-            # 默认走目标驱动 solve 引擎；engine=team 启用角色团队；engine=rounds 回退旧循环
+            # Por defecto se usa el motor solve dirigido por objetivos; engine=team
+            # habilita el equipo de roles; engine=rounds recurre al antiguo bucle
             if selected_engine == "solve":
                 result = await agent.solve(
                     task_prompt,
@@ -1186,10 +1190,10 @@ def run(
     orchestrated = asyncio.run(_run())
     if board_holder.get("board"):
         board = board_holder["board"]
-        status = "✅ 目标达成" if board.get("completed") else "⊘ 未达成"
+        status = "✅ Objetivo alcanzado" if board.get("completed") else "⊘ No alcanzado"
         console.print(
             f"\n[bold]{status}[/bold] — facts={board.get('facts', 0)} "
-            f"intents={board.get('intents', 0)} 原因: {board.get('complete_reason') or '探索结束'}"
+            f"intents={board.get('intents', 0)} Motivo: {board.get('complete_reason') or 'exploración finalizada'}"
         )
     else:
         total_findings = orchestrated.summary["findings_count"]
@@ -1243,9 +1247,10 @@ def solve(
         err_console.print("[!] Configure LLM credentials first (api_key or auth_mode).")
         raise typer.Exit(1)
 
-    resolved_goal = goal or "找到 flag / 拿到 shell / 确认并验证高价值漏洞"
+    resolved_goal = goal or "encontrar flag / obtener shell / confirmar y verificar vulnerabilidades de alto valor"
     task_prompt = prompt or (
-        f"对 {target} 进行授权渗透测试。这是明确授权、在范围内的目标。目标(goal)：{resolved_goal}。"
+        f"Realizar una prueba de penetración autorizada contra {target}. Este es un objetivo "
+        f"explícitamente autorizado y dentro del alcance. Objetivo (goal): {resolved_goal}."
     )
     console.print(f"[*] Target: [bold]{target}[/] | Goal: [bold]{resolved_goal}[/]")
 
@@ -1289,10 +1294,10 @@ def solve(
 
     asyncio.run(_run())
     board = holder.get("board") or {}
-    status = "✅ 目标达成" if board.get("completed") else "⊘ 未达成"
+    status = "✅ Objetivo alcanzado" if board.get("completed") else "⊘ No alcanzado"
     console.print(
         f"\n[bold]{status}[/bold] — facts={board.get('facts', 0)} "
-        f"intents={board.get('intents', 0)} 原因: {board.get('complete_reason') or '探索结束'}"
+        f"intents={board.get('intents', 0)} Motivo: {board.get('complete_reason') or 'exploración finalizada'}"
     )
 
 
@@ -1306,7 +1311,8 @@ def persistent(
     no_report: bool = typer.Option(
         False, "--no-report", help="Disable auto report after each cycle"
     ),
-    # [新增] 2026-06-10 Nyaecho - TUI自然语言驱动: 允许通过 --prompt 传入自定义提示词覆盖自动生成的prompt
+    # [Añadido] 2026-06-10 Nyaecho - TUI impulsado por lenguaje natural: permite
+    #   pasar un prompt personalizado vía --prompt que sobrescribe el prompt generado automáticamente
     prompt: Optional[str] = typer.Option(
         None, "--prompt", help="Custom natural language prompt (overrides auto-generated prompt)"
     ),
@@ -1396,7 +1402,7 @@ def persistent(
     def _on_cycle_step(round_num: int, cycle_num: int, result) -> None:
         """Real-time output for each step within a cycle."""
         console.print(f"[dim]-- Cycle {cycle_num} | Round {round_num} --[/]")
-        # TerminalStreamSink 已实时流式显示，回调不重复打印
+        # TerminalStreamSink ya se muestra en streaming en tiempo real; el callback no vuelve a imprimir
         console.print()
 
     def _on_cycle_complete(cycle_num: int, cycle_result: PersistentCycleResult) -> None:
@@ -1489,7 +1495,8 @@ def persistent(
 @app.command()
 def recon(
     target: str = typer.Argument(..., help="Target host/IP/URL"),
-    # [新增] 2026-06-10 Nyaecho - TUI自然语言驱动: 允许通过 --prompt 传入自定义提示词覆盖自动生成的prompt
+    # [Añadido] 2026-06-10 Nyaecho - TUI impulsado por lenguaje natural: permite
+    #   pasar un prompt personalizado vía --prompt que sobrescribe el prompt generado automáticamente
     prompt: Optional[str] = typer.Option(
         None, "--prompt", help="Custom natural language prompt (overrides auto-generated prompt)"
     ),
@@ -1548,7 +1555,7 @@ def recon(
     async def _run():
         async def runner(agent, _config):
             sink = TerminalStreamSink(console, _config.session.show_thinking)
-            # TerminalStreamSink 已实时流式显示，不重复 console.print
+            # TerminalStreamSink ya se muestra en streaming en tiempo real; no se repite console.print
             return await agent.chat(task_prompt, target=target, stream_sink=sink)
 
         await _run_cli_orchestrated_task(
@@ -1577,7 +1584,8 @@ def recon(
 def scan(
     target: str = typer.Argument(..., help="Target host/IP/URL"),
     ports: Optional[str] = typer.Option(None, help="Port range, e.g. 80,443,8080"),
-    # [新增] 2026-06-10 Nyaecho - TUI自然语言驱动: 允许通过 --prompt 传入自定义提示词覆盖自动生成的prompt
+    # [Añadido] 2026-06-10 Nyaecho - TUI impulsado por lenguaje natural: permite
+    #   pasar un prompt personalizado vía --prompt que sobrescribe el prompt generado automáticamente
     prompt: Optional[str] = typer.Option(
         None, "--prompt", help="Custom natural language prompt (overrides auto-generated prompt)"
     ),
@@ -1637,7 +1645,7 @@ def scan(
     async def _run():
         async def runner(agent, _config):
             sink = TerminalStreamSink(console, _config.session.show_thinking)
-            # TerminalStreamSink 已实时流式显示，不重复 console.print
+            # TerminalStreamSink ya se muestra en streaming en tiempo real; no se repite console.print
             return await agent.chat(task_prompt, target=target, stream_sink=sink)
 
         await _run_cli_orchestrated_task(
@@ -1665,45 +1673,45 @@ def scan(
 @app.command("network-scan")
 def network_scan(
     target: Optional[str] = typer.Argument(
-        None, help="目标主机/IP/CIDR，默认使用当前连接的 Wi-Fi 子网"
+        None, help="Host/IP/CIDR objetivo; por defecto usa la subred Wi-Fi conectada actualmente"
     ),
     profile: str = typer.Option(
         "adaptive",
         "--profile",
-        help="网络扫描画像：adaptive、fast、thorough、stealth",
+        help="Perfil de escaneo de red: adaptive, fast, thorough, stealth",
     ),
-    ports: Optional[str] = typer.Option(None, "--ports", help="端口范围，如 80,443,1-1000"),
+    ports: Optional[str] = typer.Option(None, "--ports", help="Rango de puertos, p. ej. 80,443,1-1000"),
     max_rounds: int = typer.Option(
-        0, "--max-rounds", help="Agent 后续跟进轮数（0=使用配置默认值）"
+        0, "--max-rounds", help="Rondas de seguimiento del Agent (0=usar el valor por defecto de la configuración)"
     ),
     parallel_agents: int = typer.Option(
         1,
         "--parallel-agents",
         min=1,
-        help="在已发现的攻击面上并行派生的子 Agent 数量（1 表示不启用并行）",
+        help="Cantidad de sub-Agents derivados en paralelo sobre la superficie de ataque descubierta (1 = sin paralelismo)",
     ),
     parallel_depth: int = typer.Option(
         1,
         "--parallel-depth",
         min=1,
-        help="子 Agent 攻击面发现的有界波次数",
+        help="Número de oleadas acotadas de descubrimiento de superficie de ataque de los sub-Agents",
     ),
     worker_rounds: int = typer.Option(
         3,
         "--worker-rounds",
         min=1,
-        help="每个子 Agent worker 的执行轮数",
+        help="Rondas de ejecución de cada sub-Agent worker",
     ),
     surface_limit: int = typer.Option(
         20,
         "--surface-limit",
         min=1,
-        help="用于子 Agent 并行派生的最大攻击面数量",
+        help="Cantidad máxima de superficies de ataque usadas para derivar sub-Agents en paralelo",
     ),
     safe_probes: bool = typer.Option(
         True,
         "--safe-probes/--no-safe-probes",
-        help="nmap 扫描后默认仅执行非破坏性的验证探测",
+        help="Tras el escaneo nmap, por defecto solo se ejecutan sondeos de verificación no destructivos",
     ),
     prompt: Optional[str] = typer.Option(
         None, "--prompt", help="Custom natural language prompt (overrides auto-generated prompt)"
@@ -1743,10 +1751,10 @@ def network_scan(
     force_fresh: bool = typer.Option(False, "--force-fresh", help="Start a fresh run"),
     no_import: bool = typer.Option(False, "--no-import", help="Do not import legacy state"),
 ) -> None:
-    """运行基于 nmap 的网络扫描，并对薄弱环节进行跟进。"""
+    """Ejecuta un escaneo de red basado en nmap y hace seguimiento de los puntos débiles."""
     normalized_profile = profile.strip().lower()
     if normalized_profile not in {"adaptive", "fast", "thorough", "stealth"}:
-        err_console.print("[!] profile 必须是以下之一: adaptive, fast, thorough, stealth")
+        err_console.print("[!] profile debe ser uno de los siguientes: adaptive, fast, thorough, stealth")
         raise typer.Exit(1)
 
     detected_wifi = None
@@ -1798,23 +1806,23 @@ def network_scan(
 
     console.print(
         Panel(
-            f"目标: [bold]{scan_target}[/]\n"
+            f"Objetivo: [bold]{scan_target}[/]\n"
             + (
-                f"Wi-Fi 接口: [bold]{detected_wifi.interface}[/] ({detected_wifi.address})\n"
+                f"Interfaz Wi-Fi: [bold]{detected_wifi.interface}[/] ({detected_wifi.address})\n"
                 if detected_wifi
                 else ""
             )
             +
-            f"画像: [bold]{normalized_profile}[/]\n"
-            f"端口: [bold]{ports or '画像默认'}[/]\n"
-            f"跟进策略: [bold]{'安全探测' if safe_probes else '仅摘要'}[/]\n"
-            f"并行 Agent 数: [bold]{parallel_agents}[/]"
+            f"Perfil: [bold]{normalized_profile}[/]\n"
+            f"Puertos: [bold]{ports or 'valor por defecto del perfil'}[/]\n"
+            f"Estrategia de seguimiento: [bold]{'sondeo seguro' if safe_probes else 'solo resumen'}[/]\n"
+            f"Número de Agents en paralelo: [bold]{parallel_agents}[/]"
             + (
-                f"（深度 {parallel_depth}，每个 worker {worker_rounds} 轮）"
+                f" (profundidad {parallel_depth}, {worker_rounds} rondas por worker)"
                 if parallel_agents > 1
                 else ""
             ),
-            title="网络扫描",
+            title="Escaneo de red",
             border_style="cyan",
         )
     )
@@ -1875,7 +1883,8 @@ def exploit(
     target: str = typer.Argument(..., help="Target host/IP/URL"),
     cve: Optional[str] = typer.Option(None, help="Specific CVE to exploit"),
     cmd: str = typer.Option("id", help="Command to execute for verification"),
-    # [新增] 2026-06-10 Nyaecho - TUI自然语言驱动: 允许通过 --prompt 传入自定义提示词覆盖自动生成的prompt
+    # [Añadido] 2026-06-10 Nyaecho - TUI impulsado por lenguaje natural: permite
+    #   pasar un prompt personalizado vía --prompt que sobrescribe el prompt generado automáticamente
     prompt: Optional[str] = typer.Option(
         None, "--prompt", help="Custom natural language prompt (overrides auto-generated prompt)"
     ),
@@ -1937,7 +1946,7 @@ def exploit(
     async def _run():
         async def runner(agent, _config):
             sink = TerminalStreamSink(console, _config.session.show_thinking)
-            # TerminalStreamSink 已实时流式显示，不重复 console.print
+            # TerminalStreamSink ya se muestra en streaming en tiempo real; no se repite console.print
             return await agent.chat(task_prompt, target=target, stream_sink=sink)
 
         await _run_cli_orchestrated_task(
@@ -2049,7 +2058,7 @@ def man_command(
     _print_cli_manual(topic, output_format)
 
 
-# 鈹€鈹€ Config sub-command group 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
+# ── Config sub-command group ───────────────────────────────────────
 
 config_app = typer.Typer(help="Manage configuration")
 app.add_typer(config_app, name="config")
@@ -2159,7 +2168,7 @@ def config_provider(
         )
 
 
-# 鈹€鈹€ Init command 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
+# ── Init command ────────────────────────────────────────────────────
 
 
 @app.command()
@@ -2184,7 +2193,7 @@ def init() -> None:
     console.print(_("cli.init.step_tui"))
 
 
-# 鈹€鈹€ Login / Logout commands 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
+# ── Login / Logout commands ─────────────────────────────────
 
 
 @app.command()
@@ -2279,7 +2288,7 @@ def logout() -> None:
         console.print("[yellow]No stored OAuth tokens to remove.[/]")
 
 
-# 鈹€鈹€ Doctor command 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
+# ── Doctor command ──────────────────────────────────────────────────
 
 
 @app.command()
@@ -2287,9 +2296,10 @@ def doctor() -> None:
     """Inspect the VulnClaw runtime environment."""
     import shutil
 
-    # 修改者: Nyaecho
-    # 修改时间: 2026-07-08
-    # 修改原因: V6 修复 — 从 mcp/diagnostics 导入，消除 CLI→Web 依赖。
+    # Modificado por: Nyaecho
+    # Fecha de modificación: 2026-07-08
+    # Motivo de la modificación: corrección V6 — se importa desde mcp/diagnostics,
+    #   eliminando la dependencia CLI→Web.
     from vulnclaw.mcp.diagnostics import get_mcp_diagnostics
 
     console.print("[bold]VulnClaw Environment Check[/]")
@@ -2385,7 +2395,7 @@ def doctor() -> None:
         )
 
 
-# 鈹€鈹€ KB command 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
+# ── KB command ──────────────────────────────────────────────────────
 
 kb_app = typer.Typer(help="Security knowledge base commands")
 app.add_typer(kb_app, name="kb")
@@ -2398,7 +2408,7 @@ app.add_typer(plugins_app, name="plugins")
 
 
 def _parse_kv_options(pairs: Optional[list[str]]) -> dict[str, object]:
-    """把 --option key=value（可重复）解析为 dict，value 优先按 JSON 解析。"""
+    """Convierte --option key=value (repetible) en un dict; el value se intenta parsear como JSON primero."""
     import json as _json
 
     options: dict[str, object] = {}
@@ -2605,11 +2615,11 @@ def kb_status() -> None:
     category_summary = ", ".join(f"{cat}={count}" for cat, count in sorted(stats.items()))
 
     if status == RetrieverStatus.CHROMADB_ACTIVE:
-        line = "[green]✓ 知识库已启用 (ChromaDB 语义检索)[/green]"
+        line = "[green]✓ Base de conocimiento habilitada (búsqueda semántica ChromaDB)[/green]"
     elif status == RetrieverStatus.KEYWORD_FALLBACK:
-        line = "[yellow]⚠ 知识库已降级为关键词模式 (chromadb 未安装)[/yellow]"
+        line = "[yellow]⚠ Base de conocimiento degradada a modo por palabras clave (chromadb no instalado)[/yellow]"
     else:
-        line = "[red]✗ 知识库已禁用 (无可用数据)[/red]"
+        line = "[red]✗ Base de conocimiento deshabilitada (sin datos disponibles)[/red]"
 
     console.print(
         Panel(
@@ -2617,7 +2627,7 @@ def kb_status() -> None:
             f"Backend: [bold]{status.value}[/]\n"
             f"Detail: {detail or 'n/a'}\n"
             f"Entries: [bold]{total}[/] ({category_summary or 'empty'})\n"
-            f"语义搜索: 运行 [bold]pip install vulnclaw\\[kb][/] 启用 ChromaDB",
+            f"Búsqueda semántica: ejecuta [bold]pip install vulnclaw\\[kb][/] para habilitar ChromaDB",
             title="KB Status",
             border_style="cyan",
         )
@@ -2752,7 +2762,7 @@ def target_state_clear_cmd(
 
 # Default command (no sub-command -> REPL)
 
-# 鈹€鈹€ Auto-pentest detection 鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€鈹€
+# ── Auto-pentest detection ──────────────────────────────────────────
 
 
 def _should_auto_pentest(user_input: str, current_target: Optional[str]) -> bool:
@@ -2760,7 +2770,7 @@ def _should_auto_pentest(user_input: str, current_target: Optional[str]) -> bool
 
     Triggers when:
     - User explicitly asks for a full pentest with a target
-    - User mentions a target plus action keywords like "渗透测试" or "打一下"
+    - User mentions a target plus action keywords like "prueba de penetración" or "atácalo"
     - User asks to solve a CTF / find a flag with a target
     - User asks for information gathering / recon / OSINT with a target
     - A target is present + multi-step intent indicators
@@ -2769,68 +2779,68 @@ def _should_auto_pentest(user_input: str, current_target: Optional[str]) -> bool
 
     # Explicit auto-mode triggers
     auto_keywords = [
-        "渗透测试",
-        "进行渗透",
-        "做渗透",
-        "打一下",
-        "全面测试",
+        "prueba de penetración",
+        "realizar penetración",
+        "hacer pentest",
+        "atácalo",
+        "prueba completa",
         "pentest",
         "full test",
         "auto",
-        "自主渗透模式",
-        "自主模式",
-        "找出flag",
-        "找到flag",
-        "拿flag",
+        "modo pentest autónomo",
+        "modo autónomo",
+        "encontrar flag",
+        "buscar flag",
+        "conseguir flag",
         "get flag",
         "find flag",
-        "解题",
-        "做题",
-        "挑战",
+        "resolver reto",
+        "resolver desafío",
+        "reto",
         "challenge",
         "ctf",
-        "弱口令",
-        "爆破",
-        "绕过",
+        "contraseña débil",
+        "fuerza bruta",
+        "eludir",
         "bypass",
         "brute",
-        "搜集",
-        "收集",
-        "信息收集",
-        "侦察",
+        "recopilar",
+        "recolectar",
+        "recopilación de información",
+        "reconocimiento",
         "recon",
         "reconnaissance",
-        "社工",
+        "ingeniería social",
         "osint",
-        "情报",
+        "inteligencia",
         "intelligence",
-        "分析目标",
-        "目标分析",
-        "资产发现",
-        "目录扫描",
-        "探测",
-        "探索",
-        "调查",
+        "analizar objetivo",
+        "análisis de objetivo",
+        "descubrimiento de activos",
+        "escaneo de directorios",
+        "sondeo",
+        "explorar",
+        "investigar",
         "investigate",
         "enumerate",
-        "全面分析",
-        "深度分析",
-        "详细分析",
-        "全面扫描",
-        "子域名",
+        "análisis completo",
+        "análisis profundo",
+        "análisis detallado",
+        "escaneo completo",
+        "subdominio",
         "subdomain",
     ]
 
     # Single-step queries should NOT trigger auto mode
     single_step_keywords = [
-        "生成报告",
+        "generar reporte",
         "report",
         "help",
-        "帮助",
+        "ayuda",
     ]
 
     # If it's clearly a single-step query, don't auto-loop
-    # But if it also has auto keywords, still go auto (e.g. "收集信息并生成报告")
+    # But if it also has auto keywords, still go auto (e.g. "recopilar información y generar reporte")
     if any(kw in input_lower for kw in single_step_keywords) and not any(
         kw in input_lower for kw in auto_keywords
     ):
@@ -2846,16 +2856,16 @@ def _should_auto_pentest(user_input: str, current_target: Optional[str]) -> bool
     has_target = bool(current_target) or bool(_extract_target_from_input(user_input))
     if has_target:
         multi_step_indicators = [
-            "并",
-            "然后",
-            "输出",
-            "保存",
-            "写到",
-            "导出",
-            "所有",
-            "全部",
-            "完整",
-            "详细",
+            "y además",
+            "luego",
+            "salida",
+            "guardar",
+            "escribir a",
+            "exportar",
+            "todos",
+            "todo",
+            "completo",
+            "detallado",
         ]
         if any(ind in input_lower for ind in multi_step_indicators):
             return True
@@ -2995,7 +3005,7 @@ def _auto_save_recon_report(agent, user_input: str, config) -> None:
         # Determine output path
         # Check if user specified a path
         path_match = re.search(
-            r"(?:保存到|写到|输出到|导出到|save to|write to|output to|export to)\s*([^\s,，]+)",
+            r"(?:guardar en|escribir a|salida a|exportar a|save to|write to|output to|export to)\s*([^\s,]+)",
             user_input,
             re.IGNORECASE,
         )

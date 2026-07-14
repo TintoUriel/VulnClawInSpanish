@@ -1,13 +1,15 @@
 """Textual-powered TUI workbench for VulnClaw."""
 
-# [新增] 2026-06-10
-# 目的: 用 Textual 框架构建现代化全屏 TUI 工作台, 替代旧的 Rich 数字菜单循环
-# 实现:
-#   - CommandPalette: slash 命令模糊搜索 + 键盘导航面板
-#   - SecondaryPopup: 辅助信息弹窗(历史快照/诊断报告)
-#   - DashboardScreen: 主导航仪表盘, 集成命令输入行与状态栏
-#   - VulnClawApp: Textual App 入口, CSS 主题化样式
-#   - run_tui_textual(): 事件循环入口, 支持 launch 动作后自动重新加载配置
+# [Añadido] 2026-06-10
+# Objetivo: construir con el framework Textual un banco de trabajo TUI moderno
+#   de pantalla completa, en reemplazo del antiguo bucle de menú numérico de Rich
+# Implementación:
+#   - CommandPalette: panel de búsqueda difusa de comandos slash + navegación por teclado
+#   - SecondaryPopup: ventana emergente de información auxiliar (snapshots históricos/reporte de diagnóstico)
+#   - DashboardScreen: panel de navegación principal, integra la línea de entrada de comandos y la barra de estado
+#   - VulnClawApp: punto de entrada de la app Textual, estilos con tema CSS
+#   - run_tui_textual(): punto de entrada del bucle de eventos, soporta recargar
+#     la configuración automáticamente tras una acción de launch
 
 from __future__ import annotations
 
@@ -24,8 +26,10 @@ from textual.widgets import Input, ListItem, ListView, RichLog, Static
 
 import vulnclaw.cli.tui as _tui
 
-# [新增] 2026-06-10 Nyaecho - 自然语言驱动 / 响应式侧边栏: 新增颜色常量和动作辅助函数导入
-# [修改] 2026-07-08 Nyaecho - 修改原因：新增 @ skill 引用相关函数导入
+# [Añadido] 2026-06-10 Nyaecho - Impulsado por lenguaje natural / barra lateral
+#   responsiva: se añadieron imports de constantes de color y funciones auxiliares de acciones
+# [Modificado] 2026-07-08 Nyaecho - Motivo: se añadieron imports de funciones
+#   relacionadas con referencias @ skill
 from vulnclaw.cli.tui import (
     C_ACCENT,
     C_ERROR,
@@ -78,7 +82,7 @@ def _dispatch(session: dict[str, Any], text: str) -> str | None:
         _dispatch_flag_skill(session, text)
         return None
 
-    # [修改] 2026-06-10 Nyaecho - 修复空 parts 导致 IndexError 的问题
+    # [Modificado] 2026-06-10 Nyaecho - Se corrigió un IndexError causado por parts vacío
     parts = text.lstrip("/").strip().split(maxsplit=1)
     if not parts:
         return None
@@ -544,7 +548,8 @@ def _h_mode(session: dict[str, Any], args: str) -> str | None:
 @_register_handler("scope")
 @_register_handler("s")
 def _h_scope(session: dict[str, Any], args: str) -> str | None:
-    # [修改] 2026-06-10 Nyaecho - 修复 /scope port 验证问题，添加端口验证防止 ValueError
+    # [Modificado] 2026-06-10 Nyaecho - Se corrigió la validación de /scope port,
+    #   se añadió validación de puerto para evitar ValueError
     state = session["state"]
     if args:
         for pair in args.split():
@@ -596,7 +601,8 @@ def _h_start(session: dict[str, Any], args: str) -> str | None:
     mode = _tui.MODES[state.mode]
     if args in ("-f", "--force"):
         return "launch"
-    # [新增] 2026-06-10 Nyaecho - TUI自然语言驱动: /run <text> 将 text 作为 NL prompt 直接 launch
+    # [Añadido] 2026-06-10 Nyaecho - TUI impulsado por lenguaje natural: /run <text>
+    #   usa text como prompt en lenguaje natural y lanza directamente
     if args:
         session["_nl_text"] = args
         session["_nl_history"] = args
@@ -653,8 +659,10 @@ def _h_diag(session: dict[str, Any], args: str) -> str | None:
 @_register_handler("config")
 @_register_handler("cfg")
 def _h_config(session: dict[str, Any], args: str) -> str | None:
-    # [修改] 2026-07-08 Nyaecho - 修改原因：custom 提供商新增 Base URL 输入步骤
-    # 流程：选择提供商 → (custom) 输入 Base URL → 输入 API Key → 获取模型列表 → 选择/输入模型
+    # [Modificado] 2026-07-08 Nyaecho - Motivo: el proveedor "custom" añadió un
+    #   paso de entrada de Base URL
+    # Flujo: seleccionar proveedor → (custom) ingresar Base URL → ingresar API Key
+    #   → obtener lista de modelos → seleccionar/ingresar modelo
     config = session["config"]
     providers = [item["provider"] for item in list_providers()]
     cur = config.llm.provider
@@ -664,20 +672,20 @@ def _h_config(session: dict[str, Any], args: str) -> str | None:
         if v and v != cur:
             config = apply_provider_preset(config, v)
             session["config"] = config
-        # custom 提供商需要先输入 Base URL
+        # El proveedor "custom" requiere ingresar primero la Base URL
         if v == "custom":
             _set_prompt(session, "input",
                        _("tui.prompt_enter_baseurl", url=session["config"].llm.base_url or ""),
                        on_baseurl)
         else:
-            # 非 custom：直接输入 API Key
+            # No es "custom": ingresar la API Key directamente
             ks = _("tui.api_key_configured") if session["config"].llm.api_key else _("tui.api_key_not_configured")
             _set_prompt(session, "input", _("tui.prompt_enter_apikey", status=ks), on_apikey)
 
     def on_baseurl(v):
         if v:
             session["config"].llm.base_url = v.strip()
-        # 输入完 Base URL 后继续输入 API Key
+        # Tras ingresar la Base URL, continuar con la entrada de la API Key
         ks = _("tui.api_key_configured") if session["config"].llm.api_key else _("tui.api_key_not_configured")
         _set_prompt(session, "input", _("tui.prompt_enter_apikey", status=ks), on_apikey)
 
@@ -686,11 +694,11 @@ def _h_config(session: dict[str, Any], args: str) -> str | None:
             session["config"].llm.api_key = v.strip()
         base_url = session["config"].llm.base_url
         api_key = session["config"].llm.api_key
-        # 缺少 base_url 或 api_key 时跳过获取，直接手动输入
+        # Si falta base_url o api_key, se omite la obtención y se pasa a entrada manual
         if not base_url or not api_key:
             _set_prompt(session, "input", _("tui.prompt_enter_model_fallback", model=session["config"].llm.model), on_model_input, session["config"].llm.model)
             return
-        # 显示 loading，后台获取模型列表
+        # Mostrar estado de carga y obtener la lista de modelos en segundo plano
         session["_fetch_models_args"] = (base_url, api_key)
         _set_prompt(session, "loading", _("tui.fetching_models"), on_models_loaded)
 
@@ -767,7 +775,8 @@ def _h_language(session: dict[str, Any], args: str) -> str | None:
 @_register_handler("cont")
 def _h_continue(session: dict[str, Any], args: str) -> str | None:
     if session.get("_last_draft") is not None:
-        # [修改] 2026-06-10 Nyaecho - 方案A累积拼接: /continue [text] 追加到 _nl_history, 无参则复用
+        # [Modificado] 2026-06-10 Nyaecho - Opción A, concatenación acumulativa:
+        #   /continue [text] se añade a _nl_history; sin argumentos, se reutiliza el existente
         history = session.get("_nl_history", "")
         if args:
             history = f"{history}; {args}" if history else args
@@ -783,7 +792,8 @@ def _h_continue(session: dict[str, Any], args: str) -> str | None:
 
 class DashboardScreen(Screen):
 
-    # [修改] 2026-07-08 Nyaecho - 修改原因：添加上下键优先级绑定，用于 CommandPalette 导航
+    # [Modificado] 2026-07-08 Nyaecho - Motivo: se añadieron bindings prioritarios
+    #   de flechas arriba/abajo para la navegación del CommandPalette
     BINDINGS = [
         Binding("ctrl+c", "quit_app", "Quit", show=False),
         Binding("tab", "palette_tab", "", show=False),
@@ -800,11 +810,14 @@ class DashboardScreen(Screen):
         self._worker_running = False
         self._output_queue: Queue = Queue()
         self._output_lines: list[str] = []
-        # [新增] 2026-06-10 Nyaecho - 状态栏消息自动消失: 用递增计数器区分新旧消息定时器
+        # [Añadido] 2026-06-10 Nyaecho - Desaparición automática de mensajes de la
+        #   barra de estado: se usa un contador incremental para distinguir
+        #   temporizadores de mensajes nuevos y viejos
         self._bar_msg_id: int = 0
 
     def compose(self) -> ComposeResult:
-        # [修改] 2026-06-10 Nyaecho - 响应式分栏布局: #output-log 移入 Horizontal #exec-row 与 #exec-sidebar 并排
+        # [Modificado] 2026-06-10 Nyaecho - Layout de columnas responsivo: #output-log
+        #   se movió dentro de Horizontal #exec-row, en paralelo con #exec-sidebar
         with Vertical(id="body"):
             yield Static(id="dashboard")
             with Horizontal(id="exec-row"):
@@ -833,10 +846,11 @@ class DashboardScreen(Screen):
         dash = build_dashboard(self._s["config"], state)
         self.query_one("#dashboard").update(dash)
 
-    # [新增] 2026-07-08 Nyaecho - 修改原因：支持上下键导航 CommandPalette 和 SecondaryPopup
+    # [Añadido] 2026-07-08 Nyaecho - Motivo: soportar navegación con flechas
+    #   arriba/abajo en CommandPalette y SecondaryPopup
     def action_cursor_up(self) -> None:
         """Move highlight up in CommandPalette or SecondaryPopup."""
-        # 优先处理 SecondaryPopup 中的 ListView
+        # Se procesa primero el ListView dentro de SecondaryPopup
         popup = self.query_one(SecondaryPopup)
         if popup.has_class("open"):
             try:
@@ -846,7 +860,7 @@ class DashboardScreen(Screen):
             except Exception:
                 pass
             return
-        # 处理 CommandPalette
+        # Procesar CommandPalette
         p = self.query_one(CommandPalette)
         if p.has_class("open") and p._commands:
             if p.index is None:
@@ -856,7 +870,7 @@ class DashboardScreen(Screen):
 
     def action_cursor_down(self) -> None:
         """Move highlight down in CommandPalette or SecondaryPopup."""
-        # 优先处理 SecondaryPopup 中的 ListView
+        # Se procesa primero el ListView dentro de SecondaryPopup
         popup = self.query_one(SecondaryPopup)
         if popup.has_class("open"):
             try:
@@ -866,7 +880,7 @@ class DashboardScreen(Screen):
             except Exception:
                 pass
             return
-        # 处理 CommandPalette
+        # Procesar CommandPalette
         p = self.query_one(CommandPalette)
         if p.has_class("open") and p._commands:
             if p.index is None:
@@ -875,7 +889,9 @@ class DashboardScreen(Screen):
                 p.index += 1
 
     def _set_bar(self, text: str = "", style: str = "") -> None:
-        # [修改] 2026-06-10 Nyaecho - 状态栏消息4秒自动消失: msg_id 计数器防止旧定时器错误清除新消息
+        # [Modificado] 2026-06-10 Nyaecho - Los mensajes de la barra de estado
+        #   desaparecen automáticamente tras 4 segundos: el contador msg_id evita
+        #   que un temporizador antiguo borre por error un mensaje nuevo
         self._bar_msg_id += 1
         msg_id = self._bar_msg_id
         bar = self.query_one("#status-bar")
@@ -887,13 +903,16 @@ class DashboardScreen(Screen):
             bar.remove_class("-active")
 
     def _dismiss_bar(self, msg_id: int) -> None:
-        # [新增] 2026-06-10 Nyaecho - 仅当前消息ID匹配时才关闭状态栏, 防止旧定时器覆盖新消息
+        # [Añadido] 2026-06-10 Nyaecho - La barra de estado solo se cierra si el
+        #   ID del mensaje actual coincide, para evitar que un temporizador
+        #   antiguo sobrescriba un mensaje nuevo
         if self._bar_msg_id == msg_id:
             self.query_one("#status-bar").remove_class("-active")
 
     # ── Input events ──
 
-    # [修改] 2026-07-08 Nyaecho - 修改原因：新增任意位置 @ skill 引用补全支持
+    # [Modificado] 2026-07-08 Nyaecho - Motivo: se añadió soporte de
+    #   autocompletado de referencias @ skill en cualquier posición
     def on_input_changed(self, event: Input.Changed) -> None:
         if self._completing:
             return
@@ -915,7 +934,7 @@ class DashboardScreen(Screen):
                     completion_prefix="/",
                 )
                 return
-        # 检测任意位置的 @
+        # Detectar el símbolo @ en cualquier posición
         ctx = find_at_context(text, cursor)
         if ctx is not None:
             _, word = ctx
@@ -931,7 +950,8 @@ class DashboardScreen(Screen):
         text = (event.value or "").strip()
         palette = self.query_one(CommandPalette)
 
-        # [修改] 2026-07-08 Nyaecho - 修改原因：Enter 键选择 CommandPalette 高亮项（不提交），焦点保持在输入框
+        # [Modificado] 2026-07-08 Nyaecho - Motivo: la tecla Enter selecciona el
+        #   ítem resaltado de CommandPalette (sin enviar), el foco permanece en el input
         if palette.has_class("open") and palette.selected is not None:
             cmd = palette.selected
             self._completing = True
@@ -939,7 +959,7 @@ class DashboardScreen(Screen):
             self.query_one("#cmd-input").action_end()
             self._completing = False
             palette.hide_palette()
-            return  # 选择高亮项，不提交
+            return  # Se selecciona el ítem resaltado, no se envía
 
         prompt = self._s.get("_prompt")
         if prompt is not None:
@@ -954,7 +974,9 @@ class DashboardScreen(Screen):
                 self._s["_launch"] = False
                 draft = self._s.get("_last_draft")
                 continuing = self._s.pop("_continuing", False)
-                # [修改] 2026-06-10 Nyaecho - 携带 NL 文本传递给子进程, /continue 时携带累积的历史 NL
+                # [Modificado] 2026-06-10 Nyaecho - Se pasa el texto en lenguaje
+                #   natural al subproceso; en /continue se incluye el historial
+                #   acumulado en lenguaje natural
                 nl_text = self._s.pop("_nl_text", None)
                 self._start_execution(draft, continuing=continuing, nl_text=nl_text)
                 return
@@ -972,14 +994,15 @@ class DashboardScreen(Screen):
                     self.app.recompose()
                     return
         elif text:
-            # [修改] 2026-07-08 Nyaecho - 修改原因：提交时展开 @ skill 引用为完整 prompt
+            # [Modificado] 2026-07-08 Nyaecho - Motivo: al enviar, expandir las
+            #   referencias @ skill a un prompt completo
             state = self._s["state"]
             if not state.target.strip():
                 self._set_bar(_("tui.please_set_target"), C_WARNING)
             else:
                 expanded = expand_at_skills(text)
                 self._s["_launch"] = False
-                self._s["_nl_history"] = text  # 保留原始输入用于 /continue
+                self._s["_nl_history"] = text  # conservar la entrada original para /continue
                 draft = _draft_from_state(state)
                 self._start_execution(draft, nl_text=expanded)
                 return
@@ -1015,7 +1038,8 @@ class DashboardScreen(Screen):
         p = self.query_one(CommandPalette)
         if p.has_class("open"):
             p.hide_palette()
-            # [修改] 2026-07-08 Nyaecho - 修改原因：关闭 CommandPalette 后焦点回到输入框
+            # [Modificado] 2026-07-08 Nyaecho - Motivo: al cerrar CommandPalette
+            #   el foco vuelve al campo de entrada
             self.query_one("#cmd-input").focus()
         elif self._s.get("_prompt") is not None:
             _cancel_prompt(self._s)
@@ -1046,7 +1070,9 @@ class DashboardScreen(Screen):
             pass
 
     def _start_execution(self, draft: Any = None, *, continuing: bool = False, nl_text: str | None = None) -> None:
-        # [修改] 2026-06-10 Nyaecho - 响应式分栏布局: 隐藏仪表盘, 显示 exec-row, 根据终端宽度动态显隐侧边栏
+        # [Modificado] 2026-06-10 Nyaecho - Layout de columnas responsivo: se
+        #   oculta el dashboard, se muestra exec-row, y la barra lateral se
+        #   muestra u oculta dinámicamente según el ancho del terminal
         self.query_one("#dashboard").add_class("-hidden")
         log = self.query_one("#output-log", RichLog)
         if not continuing:
@@ -1066,7 +1092,8 @@ class DashboardScreen(Screen):
             draft = _draft_from_state(self._s["state"])
         self._s["_last_draft"] = draft
         self._proc = None
-        # [新增] 2026-06-10 Nyaecho - 根据终端宽度决定是否显示侧边栏 (宽度>=100列时显示)
+        # [Añadido] 2026-06-10 Nyaecho - Se decide mostrar la barra lateral
+        #   según el ancho del terminal (se muestra si el ancho es >=100 columnas)
         self._apply_responsive_layout()
         threading.Thread(
             target=self._run_subprocess, args=(draft, nl_text), daemon=True
@@ -1075,7 +1102,8 @@ class DashboardScreen(Screen):
         self._tick_spinner()
 
     def _run_subprocess(self, draft: Any, nl_text: str | None = None) -> None:
-        # [修改] 2026-06-10 Nyaecho - 将 NL 文本通过 --prompt 传递给 CLI 子进程
+        # [Modificado] 2026-06-10 Nyaecho - Se pasa el texto en lenguaje natural
+        #   al subproceso de la CLI a través de --prompt
         import subprocess
         import sys
 
@@ -1130,7 +1158,9 @@ class DashboardScreen(Screen):
         self.set_timer(0.12, self._tick_spinner)
 
     def _apply_responsive_layout(self) -> None:
-        # [新增] 2026-06-10 Nyaecho - 响应式分栏: 终端宽度>=100列时显示侧边栏摘要, 否则仅显示输出日志
+        # [Añadido] 2026-06-10 Nyaecho - Columnas responsivas: se muestra el
+        #   resumen de la barra lateral si el ancho del terminal es >=100
+        #   columnas; de lo contrario solo se muestra el log de salida
         threshold = 100
         show_sidebar = self.app.size.width >= threshold
         sidebar = self.query_one("#exec-sidebar")
@@ -1142,7 +1172,9 @@ class DashboardScreen(Screen):
             sidebar.remove_class("-active")
 
     def _check_responsive_resize(self) -> None:
-        # [新增] 2026-06-10 Nyaecho - 执行期间每0.3秒检测终端宽度变化, 动态切换分栏模式
+        # [Añadido] 2026-06-10 Nyaecho - Durante la ejecución se detectan
+        #   cambios de ancho del terminal cada 0.3 segundos, alternando
+        #   dinámicamente el modo de columnas
         if not self._worker_running:
             return
         self._apply_responsive_layout()
@@ -1160,7 +1192,8 @@ class DashboardScreen(Screen):
 
     def _start_polling(self) -> None:
         self._poll_output()
-        # [新增] 2026-06-10 Nyaecho - 轮询同时检测终端宽度变化, 实现响应式分栏
+        # [Añadido] 2026-06-10 Nyaecho - Durante el polling también se detectan
+        #   cambios de ancho del terminal, implementando columnas responsivas
         self._check_responsive_resize()
         if self._worker_running:
             self.set_timer(0.3, self._start_polling)
@@ -1181,7 +1214,9 @@ class DashboardScreen(Screen):
         if config:
             self._s["config"] = config
 
-    # [删除] 2026-07-08 Nyaecho - 修改原因：上下键由 Input key_bindings 处理，不再需要 on_key 拦截
+    # [Eliminado] 2026-07-08 Nyaecho - Motivo: las flechas arriba/abajo ahora se
+    #   gestionan mediante los key_bindings de Input, ya no se necesita
+    #   interceptar en on_key
 
     # ── Prompt state machine ──
 
@@ -1260,7 +1295,9 @@ class DashboardScreen(Screen):
         self._set_bar("")
 
     def _build_exec_sidebar(self) -> str:
-        # [新增] 2026-06-10 Nyaecho - 构建执行时侧边栏摘要: Target/Mode/Scope/Allow-Block/Resume/LLM 信息
+        # [Añadido] 2026-06-10 Nyaecho - Construye el resumen de la barra
+        #   lateral durante la ejecución: información de Target/Mode/Scope/
+        #   Allow-Block/Resume/LLM
         state = self._s["state"]
         mode = _tui.MODES[state.mode]
 
@@ -1329,7 +1366,9 @@ class DashboardScreen(Screen):
 
 # ── CSS ──
 
-# [修改] 2026-06-10 Nyaecho - 新增 #exec-row 分栏容器 + #exec-sidebar 30列侧边栏, 支持终端宽度>=100列时分栏显示
+# [Modificado] 2026-06-10 Nyaecho - Se añadió el contenedor de columnas
+#   #exec-row + la barra lateral de 30 columnas #exec-sidebar, soportando la
+#   visualización en columnas cuando el ancho del terminal es >=100 columnas
 CSS = """
 #body {
     height: 1fr;

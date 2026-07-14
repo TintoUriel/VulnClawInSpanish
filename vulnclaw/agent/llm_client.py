@@ -41,11 +41,11 @@ def _fit_context_window(agent: AgentContext, messages: list[dict[str, Any]]) -> 
         from rich.console import Console
 
         Console().print(
-            f"[yellow][!] 上下文约 {current} tokens 超过窗口预算 {budget}，"
-            f"已截断至约 {estimate_tokens(trimmed)} tokens[/yellow]"
+            f"[yellow][!] El contexto (~{current} tokens) supera el presupuesto de ventana ({budget}), "
+            f"se truncó a ~{estimate_tokens(trimmed)} tokens[/yellow]"
         )
     except Exception:
-        print(f"[!] 上下文截断: {current} → {estimate_tokens(trimmed)} tokens (预算 {budget})")
+        print(f"[!] Contexto truncado: {current} → {estimate_tokens(trimmed)} tokens (presupuesto {budget})")
     return trimmed
 
 
@@ -100,7 +100,7 @@ def _is_key_exhausted_error(error_text: str) -> bool:
         "429",
         "quota",
         "insufficient balance",
-        "余额",  # zhipu/deepseek: account balance insufficient
+        "余额",  # zhipu/deepseek: mensaje literal de la API en chino para "saldo insuficiente" — no traducir, es el texto real devuelto por el proveedor
         "402",
         "1302",  # zhipu: concurrency / rate limit
         "1113",  # zhipu: account balance insufficient
@@ -116,9 +116,9 @@ def _is_openai_reasoning_model(provider: str, model: str) -> bool:
     return normalized.startswith(("o1", "o3", "o4", "gpt-5"))
 
 
-# 修改者: Nyaecho
-# 修改时间: 2026-07-08
-# 修改原因: V2 修复 — 核心逻辑已移至 config/llm_utils.py，此处提供向后兼容包装。
+# Modificado por: Nyaecho
+# Fecha de modificación: 2026-07-08
+# Motivo de la modificación: corrección V2 — la lógica principal se trasladó a config/llm_utils.py, este archivo provee un envoltorio de compatibilidad retroactiva.
 from vulnclaw.config.llm_utils import (  # noqa: E402
     build_chat_completion_kwargs as _build_chat_completion_kwargs_llm,
 )
@@ -169,7 +169,7 @@ async def _call_with_persistent_retries(
 
             retry_attempts += 1
             print(
-                f"[!] {stage_label} LLM API 异常响应，第 {retry_attempts} 次重连尝试中... (5s 后重试)",
+                f"[!] {stage_label}: respuesta anómala de la API del LLM, intento de reconexión {retry_attempts}... (reintentando en 5s)",
                 file=sys.stdout,
                 flush=True,
             )
@@ -191,7 +191,7 @@ async def _call_with_persistent_retries(
                     agent.rotate_api_key()
                     retry_attempts += 1
                     print(
-                        f"[!] {stage_label} 当前密钥失败 ({exc})，切换到下一个 API 密钥并重试...",
+                        f"[!] {stage_label}: la clave actual falló ({exc}), cambiando a la siguiente clave de API y reintentando...",
                         file=sys.stdout,
                         flush=True,
                     )
@@ -206,7 +206,7 @@ async def _call_with_persistent_retries(
                 agent.rotate_api_key()
                 retry_attempts += 1
                 print(
-                    f"[!] {stage_label} 所有 API 密钥均已限流，第 {retry_attempts} 次重连尝试中... (5s 后重试)",
+                    f"[!] {stage_label}: todas las claves de API están limitadas, intento de reconexión {retry_attempts}... (reintentando en 5s)",
                     file=sys.stdout,
                     flush=True,
                 )
@@ -218,7 +218,7 @@ async def _call_with_persistent_retries(
 
             retry_attempts += 1
             print(
-                f"[!] {stage_label} LLM 连接异常，第 {retry_attempts} 次重连尝试中... ({exc})",
+                f"[!] {stage_label}: conexión al LLM anómala, intento de reconexión {retry_attempts}... ({exc})",
                 file=sys.stdout,
                 flush=True,
             )
@@ -229,21 +229,21 @@ def _prepend_retry_notice(text: str, retry_attempts: int) -> str:
     """Annotate a successful response if retries happened within the same round."""
     if retry_attempts <= 0:
         return text
-    return f"[LLM恢复] 本轮在第 {retry_attempts} 次重连后恢复。\n{text}"
+    return f"[LLM recuperado] Esta ronda se recuperó tras {retry_attempts} intentos de reconexión.\n{text}"
 
 
 def _format_tool_results_fallback(
     tool_results: list[dict[str, Any]], skipped_info: list[str]
 ) -> str:
     """Build a plain-text fallback summary when provider tool-summary format is incompatible."""
-    parts = ["[tool results processed] 当前提供商不兼容标准工具总结回传，已降级为纯文本结果摘要："]
+    parts = ["[tool results processed] El proveedor actual no es compatible con el resumen estándar de herramientas; se usa un resumen de texto plano como alternativa:"]
     for item in tool_results:
         content = item.get("content", "") if isinstance(item, dict) else str(item)
         if len(content) > 800:
-            content = content[:400] + "\n...[中间省略]...\n" + content[-400:]
+            content = content[:400] + "\n...[omitido]...\n" + content[-400:]
         parts.append(content)
     if skipped_info:
-        parts.append("⚠️ 本轮跳过: " + "; ".join(skipped_info))
+        parts.append("⚠️ Omitido en esta ronda: " + "; ".join(skipped_info))
     return "\n".join(parts)
 
 
@@ -267,7 +267,7 @@ async def call_llm(
     response, retry_attempts = await _call_with_persistent_retries(
         agent,
         lambda: agent._get_client().chat.completions.create(**kwargs),
-        "单轮",
+        "turno único",
     )
 
     choice = response.choices[0]
@@ -298,7 +298,7 @@ async def call_llm_auto(
     response, retry_attempts = await _call_with_persistent_retries(
         agent,
         lambda: agent._get_client().chat.completions.create(**kwargs),
-        "自主循环",
+        "bucle autónomo",
     )
 
     choice = response.choices[0]
@@ -310,7 +310,7 @@ async def call_llm_auto(
             if not isinstance(tc, dict) or "tool_call" not in tc:
                 import sys
 
-                print(f"[!] 跳过异常工具结果: {type(tc).__name__} {str(tc)[:100]}", file=sys.stderr)
+                print(f"[!] Resultado de herramienta anómalo omitido: {type(tc).__name__} {str(tc)[:100]}", file=sys.stderr)
                 continue
             executed_tcs.append(tc["tool_call"])
 
@@ -346,13 +346,13 @@ async def call_llm_auto(
             try:
                 args_str = str(tc.function.arguments)[:200]
             except Exception:
-                args_str = "<无法读取>"
-            tool_summary_parts.append(f"调用工具: {tc.function.name}({args_str})")
+                args_str = "<no se pudo leer>"
+            tool_summary_parts.append(f"Herramienta invocada: {tc.function.name}({args_str})")
         for tr in tool_results:
             content = tr.get("content", "") if isinstance(tr, dict) else str(tr)
             if len(content) > 1000:
-                content = content[:500] + "\n...[中间省略]...\n" + content[-500:]
-            tool_summary_parts.append(f"工具结果: {content}")
+                content = content[:500] + "\n...[omitido]...\n" + content[-500:]
+            tool_summary_parts.append(f"Resultado de la herramienta: {content}")
             if (
                 isinstance(tr, dict)
                 and isinstance(tr.get("structured_content"), dict)
@@ -360,10 +360,10 @@ async def call_llm_auto(
             ):
                 structured = json.dumps(tr["structured_content"], ensure_ascii=False)
                 if len(structured) > 1000:
-                    structured = structured[:500] + "\n...[中间省略]...\n" + structured[-500:]
-                tool_summary_parts.append(f"结构化结果: {structured}")
+                    structured = structured[:500] + "\n...[omitido]...\n" + structured[-500:]
+                tool_summary_parts.append(f"Resultado estructurado: {structured}")
         if skipped_info:
-            tool_summary_parts.append(f"⚠️ 本轮跳过: {'; '.join(skipped_info)}")
+            tool_summary_parts.append(f"⚠️ Omitido en esta ronda: {'; '.join(skipped_info)}")
 
         try:
             kwargs["messages"] = _fit_context_window(agent, messages)
@@ -648,7 +648,7 @@ async def call_llm_stream(
     response_fallback, _ = await _call_with_persistent_retries(
         agent,
         lambda: agent._get_client().chat.completions.create(**kwargs),
-        "单轮",
+        "turno único",
     )
 
     # 降级到非流式 call_llm（有 retry + tool_calls 处理），行为一致

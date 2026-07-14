@@ -36,51 +36,54 @@ def build_dynamic_system_prompt(
 
     if user_input:
         recon_triggers = [
-            "搜集",
-            "收集",
-            "信息收集",
-            "侦察",
+            "recolectar",
+            "recopilar",
+            "recolección de información",
+            "reconocimiento",
             "recon",
             "osint",
-            "社会工程",
-            "社工",
-            "调查",
-            "作者",
-            "人物",
-            "情报",
-            "分析目标",
-            "目标分析",
-            "资产发现",
-            "子域名",
+            "ingeniería social",
+            "social engineering",
+            "investigar",
+            "autor",
+            "personas",
+            "inteligencia",
+            "analizar objetivo",
+            "análisis de objetivo",
+            "descubrimiento de activos",
+            "subdominio",
         ]
         if any(trigger in user_input.lower() for trigger in recon_triggers):
             if enable_personnel_dim:
                 prompt += "\n\n" + RECON_INSTRUCTION
             else:
                 recon_no_personnel = RECON_INSTRUCTION.replace(
-                    "### 维度四：人员信息 ⚡ 条件触发",
-                    "### 维度四：人员信息 ⚡ 条件触发（本次未激活 — 用户未提及社工/人员追踪需求）",
+                    "### Dimensión 4: Información de personal ⚡ Activación condicional",
+                    "### Dimensión 4: Información de personal ⚡ Activación condicional"
+                    " (no activada en esta ejecución — el usuario no mencionó necesidades de"
+                    " ingeniería social/seguimiento de personal)",
                 )
                 recon_no_personnel = (
                     recon_no_personnel.replace(
-                        "- [ ] 姓名 & 职务",
-                        "- [x] 姓名 & 职务（未激活，跳过）",
+                        "- [ ] Nombre y cargo",
+                        "- [x] Nombre y cargo (no activado, omitido)",
                     )
                     .replace(
-                        "- [ ] 生日 & 联系电话",
-                        "- [x] 生日 & 联系电话（未激活，跳过）",
+                        "- [ ] Fecha de nacimiento y teléfono de contacto",
+                        "- [x] Fecha de nacimiento y teléfono de contacto (no activado, omitido)",
                     )
                     .replace(
-                        "- [ ] 邮件地址",
-                        "- [x] 邮件地址（未激活，跳过）",
+                        "- [ ] Dirección de correo electrónico",
+                        "- [x] Dirección de correo electrónico (no activado, omitido)",
                     )
                     .replace(
-                        "- [ ] 社交媒体账号（B站、微博、知乎、Twitter、LinkedIn、GitHub）",
-                        "- [x] 社交媒体账号（未激活，跳过）",
+                        "- [ ] Cuentas de redes sociales (Bilibili, Weibo, Zhihu, Twitter, LinkedIn, GitHub)",
+                        "- [x] Cuentas de redes sociales (no activado, omitido)",
                     )
                     .replace(
-                        "- [ ] 跨平台关联（用用户名/邮箱搜索其他平台，检查历史提交记录中的邮箱）",
-                        "- [x] 跨平台关联（未激活，跳过）",
+                        "- [ ] Correlación entre plataformas (buscar el nombre de usuario/correo en"
+                        " otras plataformas, revisar correos en el historial de commits)",
+                        "- [x] Correlación entre plataformas (no activado, omitido)",
                     )
                 )
                 prompt += "\n\n" + recon_no_personnel

@@ -1,9 +1,10 @@
 """Remediation rule definitions — extracted from intel/remediation.py.
 
-修改者: Nyaecho
-修改时间: 2026-07-08
-修改原因: S4 修复 — 将 20 条规则定义从 remediation.py（1655 行）提取到独立模块，
-         引擎逻辑与规则数据分离，提升可维护性。
+Modificado por: Nyaecho
+Fecha de modificación: 2026-07-08
+Motivo de la modificación: Corrección S4 — se extrajeron las 20 definiciones de reglas de
+         remediation.py (1655 líneas) a un módulo independiente, separando la lógica del
+         motor de los datos de las reglas para mejorar la mantenibilidad.
 """
 
 from __future__ import annotations

@@ -102,14 +102,14 @@ class AgentCore:
         if RetrieverStatus is None:
             return
         if status == RetrieverStatus.CHROMADB_ACTIVE:
-            console.print("[green]✓ 知识库已启用 (ChromaDB)[/green]")
+            console.print("[green]✓ Base de conocimiento habilitada (ChromaDB)[/green]")
         elif status == RetrieverStatus.KEYWORD_FALLBACK:
             console.print(
-                "[yellow]⚠ 知识库已降级为关键词模式 "
-                "(chromadb 未安装，运行 pip install vulnclaw[kb] 启用语义搜索)[/yellow]"
+                "[yellow]⚠ La base de conocimiento se degradó a modo de palabras clave "
+                "(chromadb no está instalado; ejecuta pip install vulnclaw[kb] para habilitar la búsqueda semántica)[/yellow]"
             )
         else:
-            console.print("[red]✗ 知识库已禁用 (无可用数据)[/red]")
+            console.print("[red]✗ Base de conocimiento deshabilitada (no hay datos disponibles)[/red]")
 
     def _maybe_auto_save_session(self) -> None:
         """Persist session state when auto-save is enabled."""
@@ -178,7 +178,8 @@ class AgentCore:
             task_constraints=parsed_constraints,
             is_recon_phase=detected_phase == PentestPhase.RECON,
             is_ctf_mode=any(
-                kw in user_lower for kw in ["ctf", "flag", "夺旗", "解题", "找flag", "找出flag"]
+                kw in user_lower
+                for kw in ["ctf", "flag", "capturar la bandera", "resolver el reto", "buscar flag", "encontrar flag"]
             ),
         )
         self.runtime.user_vuln_hint_rounds = 3 if self.runtime.user_vuln_hint else 0
@@ -193,16 +194,16 @@ class AgentCore:
             "personnel": False,
         }
         social_engineering_keywords = [
-            "社会工程",
-            "社工",
-            "人员信息",
-            "作者追踪",
-            "人物追踪",
-            "人物画像",
+            "ingeniería social",
+            "ingenieria social",
+            "información de personal",
+            "rastrear autor",
+            "rastrear persona",
+            "perfil de persona",
             "osint",
-            "情报",
-            "作者",
-            "调查",
+            "inteligencia",
+            "autor",
+            "investigación",
         ]
         self.context.state.recon_dimension4_active = self.runtime.is_recon_phase and any(
             kw in user_lower for kw in social_engineering_keywords
@@ -210,14 +211,14 @@ class AgentCore:
         # Re-bind finding parser to the new runtime object
         self._finding_parser = FindingParser(self.context, self.runtime)
 
-        # 跨周期恢复反思记忆（persistent 模式）：保留失败路径/历史/归因，重置本周期 stuck 计数
+        # Restaura la memoria de reflexión entre ciclos (modo persistente): conserva rutas fallidas/historial/atribución, reinicia el contador de estancamiento de este ciclo
         self._restore_reflexion_history()
 
-    # ── Reflexion 跨周期持久化 ───────────────────────────────────────
-    _REFLEXION_ATTEMPT_MEMORY = 50  # 跨周期最多携带的 attempt 条数，限制内存与归因开销
+    # ── Persistencia de Reflexion entre ciclos ───────────────────────────────────────
+    _REFLEXION_ATTEMPT_MEMORY = 50  # Número máximo de intentos que se transportan entre ciclos, para limitar el uso de memoria y el coste de atribución
 
     def _restore_reflexion_history(self) -> None:
-        """从 SessionState 快照恢复反思的记忆部分，但重置每周期 stuck 计数。"""
+        """Restaura la parte de memoria de la reflexión desde la instantánea de SessionState, pero reinicia el contador de estancamiento de cada ciclo."""
         if not getattr(self.config.session, "reflexion_enabled", True):
             return
         snapshot = getattr(self.context.state, "reflexion_snapshot", None)
@@ -230,18 +231,18 @@ class AgentCore:
             restored = ReflexionState.model_validate(snapshot)
         except Exception:
             return
-        # 记忆：失败路径 / 归因素材 / 最近 attempts / 已知障碍
+        # Memoria: rutas fallidas / material de atribución / intentos recientes / obstáculos conocidos
         reflexion.state.failed_paths = restored.failed_paths
         reflexion.state.constraints = restored.constraints
         reflexion.state.attempts = restored.attempts[-self._REFLEXION_ATTEMPT_MEMORY :]
         reflexion.state.last_vuln_type = restored.last_vuln_type
-        # 每周期重置：连败计数 / 同类失败计数 / 升级驱动（reflections）
+        # Se reinicia en cada ciclo: contador de fallos consecutivos / contador de fallos del mismo tipo / motor de escalamiento (reflections)
         reflexion.state.consecutive_failures = 0
         reflexion.state.vuln_type_fail_count = 0
         reflexion.state.reflections = []
 
     def _save_reflexion_snapshot(self) -> None:
-        """把当前反思状态写回 SessionState 快照，供下个周期/同目标恢复时复用。"""
+        """Guarda el estado de reflexión actual de vuelta en la instantánea de SessionState, para reutilizarlo al reanudar el próximo ciclo/mismo objetivo."""
         if not getattr(self.config.session, "reflexion_enabled", True):
             return
         reflexion = getattr(self.runtime, "reflexion", None)
@@ -300,7 +301,7 @@ class AgentCore:
                         api_key="local-proxy", base_url=proxy_base
                     )
                 except ImportError:
-                    raise RuntimeError("请安装 openai 包: pip install openai")
+                    raise RuntimeError("Por favor instala el paquete openai: pip install openai")
             return self._client
 
         auth_mode = str(getattr(llm, "auth_mode", "") or "static").strip().lower()
@@ -317,7 +318,7 @@ class AgentCore:
                     base_url=llm.base_url,
                 )
             except ImportError:
-                raise RuntimeError("请安装 openai 包: pip install openai")
+                raise RuntimeError("Por favor instala el paquete openai: pip install openai")
         elif token:
             # Refresh the bearer token in place for rotating / short-lived creds.
             self._client.api_key = token
@@ -351,16 +352,16 @@ class AgentCore:
             else None
         )
         personnel_keywords = [
-            "社会工程",
-            "社工",
-            "人员信息",
-            "作者追踪",
-            "人物追踪",
-            "人物画像",
+            "ingeniería social",
+            "ingenieria social",
+            "información de personal",
+            "rastrear autor",
+            "rastrear persona",
+            "perfil de persona",
             "osint",
-            "情报",
-            "调查",
-            "作者",
+            "inteligencia",
+            "investigación",
+            "autor",
         ]
         enable_personnel = any(kw in (user_input or "").lower() for kw in personnel_keywords)
         if (
@@ -403,7 +404,7 @@ class AgentCore:
     def _extract_user_vuln_hint(self, user_input: str) -> str:
         """Extract explicit vulnerability hints from user input.
 
-        When the user says "这个点有SQL注入，测试一下" or "帮我测一下XSS"，
+        When the user says "este punto tiene inyección SQL, pruébalo" or "ayúdame a probar XSS",
         returns a directive telling LLM to test that specific vuln immediately.
         Returns "" if no explicit hint found.
         """
@@ -473,7 +474,7 @@ class AgentCore:
             self._maybe_auto_save_session()
 
         except Exception as e:
-            result.output = f"[!] Agent 错误: {e}"
+            result.output = f"[!] Error del agente: {e}"
 
         return result
 
@@ -513,7 +514,7 @@ class AgentCore:
         """Build context string for the current round in auto loop."""
         return build_round_context(self, round_num, max_rounds)
 
-    # ── 目标驱动求解循环（黑板图 OODA，无固定轮数）──────────────────
+    # ── Bucle de resolución orientado a objetivos (pizarra OODA, sin número fijo de rondas) ──────────────────
 
     async def solve(
         self,
@@ -527,7 +528,7 @@ class AgentCore:
         stream_sink: Optional["StreamSink"] = None,
         on_event: Optional[Callable[[str, dict], None]] = None,
     ) -> Any:
-        """以「目标达成 / 探索前沿耗尽 / 安全预算」为终止条件求解，而非固定轮数。"""
+        """Resuelve usando como condición de terminación "objetivo alcanzado / frontera de exploración agotada / presupuesto de seguridad", en lugar de un número fijo de rondas."""
         from vulnclaw.agent.solver import solve as run_solve
 
         detected_target = target or self._detect_target(user_input)
@@ -563,7 +564,7 @@ class AgentCore:
         on_cycle_step: Optional[Callable[[int, int, AgentResult], None]] = None,
         on_cycle_complete: Optional[Callable[[int, "PersistentCycleResult"], None]] = None,
         *,
-        # stream_sink 由 main.py 传入，逐级透传到 call_llm_auto_stream 实现流式输出
+        # stream_sink se pasa desde main.py y se reenvía en cascada hasta call_llm_auto_stream para implementar la salida en streaming
         stream_sink: Optional["StreamSink"] = None,
     ) -> list["PersistentCycleResult"]:
         """Persistent penetration test — runs cycles of auto_pentest until stopped."""
@@ -608,7 +609,7 @@ class AgentCore:
         Only steps with actual discoveries or confirmations count as progress.
         A step is considered NOT meaningful only when it is a PURE failure —
         i.e., it mentions failure indicators AND has no progress indicators at all.
-        If a step has BOTH failure and progress keywords (e.g. "XSS测试超时但发现新路径"),
+        If a step has BOTH failure and progress keywords (e.g. "la prueba de XSS agotó el tiempo pero se descubrió una nueva ruta"),
         it is still meaningful because progress was made.
         """
         return is_meaningful_step(step)

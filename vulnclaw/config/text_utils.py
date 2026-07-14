@@ -1,9 +1,11 @@
 """Text utility functions — shared across all layers.
 
-修改者: Nyaecho
-修改时间: 2026-07-08
-修改原因: 消除 V2 残留 — strip_think_tags/format_think_tags 是纯文本工具函数，
-         从 agent/think_filter.py 移至基础设施层，消除 cli/ 和 report/ 对 agent/ 的依赖。
+Modificado por: Nyaecho
+Fecha de modificación: 2026-07-08
+Motivo de la modificación: Eliminar un residuo de V2 — strip_think_tags/format_think_tags
+         son funciones utilitarias de texto puro; se trasladaron desde
+         agent/think_filter.py a la capa de infraestructura, eliminando la
+         dependencia de cli/ y report/ sobre agent/.
 """
 
 from __future__ import annotations

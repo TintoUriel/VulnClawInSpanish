@@ -29,28 +29,33 @@ def detect_flag_claim(output: str) -> Optional[str]:
 def update_ctf_state(agent: AgentContext, response_text: str, result_should_continue: bool) -> bool:
     """Update flag claim/verification state and return should_continue."""
     if agent.runtime.claimed_flag and not agent.runtime.flag_verified:
+        # NOTA: estos marcadores detectan frases en el TEXTO GENERADO POR EL LLM
+        # (response_text), cuyo idioma está determinado por agent/prompts.py y
+        # agent/system_prompt.py (fuera del alcance de esta traducción y aún en
+        # chino). Se mantienen en chino intencionalmente para no romper la
+        # detección en tiempo de ejecución contra la salida real del modelo.
         verification_markers = [
-            "verificación exitosa",
-            "verificación correcta",
-            "verificado",
-            "reproducción exitosa",
-            "flag confirmado",
+            "验证成功",
+            "验证通过",
+            "已验证",
+            "复现成功",
+            "确认flag",
             "verified",
             "confirmed",
-            "flag correcto",
-            "envío exitoso",
-            "flag obtenido con éxito",
-            "flag obtenido correctamente",
-            "obtención exitosa",
-            "flag encontrado",
+            "flag正确",
+            "提交成功",
+            "flag 获取成功",
+            "flag获取成功",
+            "获取成功",
+            "找到flag",
             "flag found",
-            "obtenido con éxito",
-            "se obtuvo el flag",
-            "conseguí el flag",
-            "logrado con éxito",
-            "encontrado con éxito",
-            "reto resuelto",
-            "resolución exitosa",
+            "成功获取",
+            "获取了flag",
+            "拿到了flag",
+            "成功拿到",
+            "成功找到",
+            "解题完成",
+            "解题成功",
         ]
         if any(marker in response_text.lower() for marker in verification_markers):
             agent.runtime.flag_verified = True

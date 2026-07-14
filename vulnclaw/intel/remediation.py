@@ -184,10 +184,10 @@ def _severity_to_priority(severity: str) -> RemediationPriority:
 
 # ── Rule-Based Remediation Knowledge Base ────────────────────────────────────
 #
-# 修改者: Nyaecho
-# 修改时间: 2026-07-08
-# 修改原因: S4 修复 — 规则定义已提取到 intel/remediation_rules.py，
-#          此处导入 _RULES 以触发规则注册。
+# Modificado por: Nyaecho
+# Fecha de modificación: 2026-07-08
+# Motivo de la modificación: Corrección S4 — las definiciones de reglas se extrajeron a
+#          intel/remediation_rules.py; aquí se importa _RULES para activar el registro de reglas.
 
 _RULES: List[Tuple[str, Callable]] = []
 
@@ -200,7 +200,7 @@ def _rule(pattern: str):
     return decorator
 
 
-# 导入规则定义模块（触发 @_rule 装饰器注册）
+# Importa el módulo de definición de reglas (activa el registro del decorador @_rule)
 from vulnclaw.intel import remediation_rules  # noqa: E402, F401
 
 # ── Compile Rules ────────────────────────────────────────────────────────────

@@ -55,17 +55,17 @@ PROVIDER_PRESETS: dict[LLMProvider, dict[str, str]] = {
     LLMProvider.ZHIPU: {
         "base_url": "https://open.bigmodel.cn/api/paas/v4",
         "default_model": "glm-4.7",
-        "label": "智谱 GLM",
+        "label": "Zhipu GLM",
     },
     LLMProvider.MOONSHOT: {
         "base_url": "https://api.moonshot.cn/v1",
         "default_model": "kimi-k2.6",
-        "label": "Kimi (月之暗面)",
+        "label": "Kimi (Moonshot AI)",
     },
     LLMProvider.QWEN: {
         "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
         "default_model": "qwen3-max",
-        "label": "通义千问",
+        "label": "Tongyi Qianwen (Qwen)",
     },
     LLMProvider.SILICONFLOW: {
         "base_url": "https://api.siliconflow.cn/v1",
@@ -75,32 +75,32 @@ PROVIDER_PRESETS: dict[LLMProvider, dict[str, str]] = {
     LLMProvider.DOUBAO: {
         "base_url": "https://ark.cn-beijing.volces.com/api/v3",
         "default_model": "Doubao-Seed-2.0-Pro",
-        "label": "豆包 (字节跳动)",
+        "label": "Doubao (ByteDance)",
     },
     LLMProvider.BAICHUAN: {
         "base_url": "https://api.baichuan-ai.com/v1",
         "default_model": "Baichuan4-Turbo",
-        "label": "百川",
+        "label": "Baichuan",
     },
     LLMProvider.STEPFUN: {
         "base_url": "https://api.stepfun.com/v1",
         "default_model": "step-3.5-flash",
-        "label": "阶跃星辰",
+        "label": "StepFun",
     },
     LLMProvider.SENSETIME: {
         "base_url": "https://api.sensenova.cn/v1",
         "default_model": "SenseNova-6.7-Flash-Lite",
-        "label": "商汤 (日日新)",
+        "label": "SenseTime (SenseNova)",
     },
     LLMProvider.YI: {
         "base_url": "https://api.lingyiwanwu.com/v1",
         "default_model": "yi-lightning",
-        "label": "零一万物 (Yi)",
+        "label": "01.AI (Yi)",
     },
     LLMProvider.CUSTOM: {
         "base_url": "",
         "default_model": "",
-        "label": "自定义",
+        "label": "Personalizado",
     },
 }
 
@@ -208,11 +208,11 @@ class ReconConfig(BaseModel):
 
     fofa_email: str = Field(default="", description="FOFA account email")
     fofa_key: str = Field(default="", description="FOFA API key")
-    hunter_key: str = Field(default="", description="Hunter (奇安信鹰图) API key")
+    hunter_key: str = Field(default="", description="Hunter (Qi'anxin Yingtu) API key")
     quake_key: str = Field(default="", description="Quake (360) API token")
-    zoomeye_key: str = Field(default="", description="ZoomEye (钟馗之眼) API key")
+    zoomeye_key: str = Field(default="", description="ZoomEye (Zhong Kui zhi Yan) API key")
     shodan_key: str = Field(default="", description="Shodan API key")
-    zerozone_key: str = Field(default="", description="零零信安 0.zone API key")
+    zerozone_key: str = Field(default="", description="0.zone (Lingling Xin'an) API key")
     http_timeout: float = Field(default=15.0, description="Per-request HTTP timeout (s)")
     max_concurrency: int = Field(default=20, description="Max concurrent recon requests")
     space_size: int = Field(default=100, description="Default result size per space-mapping query")

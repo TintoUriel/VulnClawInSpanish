@@ -3,10 +3,11 @@
 Moved here so that infrastructure-layer modules (e.g. skills/) can consume
 CLI metadata without depending on the entry-layer cli/ package.
 
-修改者: Nyaecho
-修改时间: 2026-07-08
-修改原因: 消除 V5 违规 — skills/flag_skills.py 反向依赖 cli/manual.py，
-         将共享数据常量抽取到基础设施层 config/ 包中。
+Modificado por: Nyaecho
+Fecha de modificación: 2026-07-08
+Motivo de la modificación: Eliminar la violación V5 — skills/flag_skills.py dependía
+         inversamente de cli/manual.py; se extrajeron las constantes de datos
+         compartidas a la capa de infraestructura config/.
 """
 
 from __future__ import annotations

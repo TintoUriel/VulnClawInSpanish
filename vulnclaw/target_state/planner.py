@@ -3,9 +3,9 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any
 
-# 修改者: Nyaecho
-# 修改时间: 2026-07-08
-# 修改原因: 消除 V3 违规 — 叶子类型已移至 config/domain_models.py。
+# Modificado por: Nyaecho
+# Fecha de modificación: 2026-07-08
+# Motivo de modificación: Eliminación de infracción V3 — los tipos hoja se movieron a config/domain_models.py.
 from vulnclaw.config.domain_models import PentestPhase
 
 
@@ -39,21 +39,21 @@ def build_resume_plan(raw: dict[str, Any]) -> dict[str, Any]:
 
     if pending_sorted:
         next_actions = [
-            "优先复测高置信度待验证漏洞",
-            "避免重新执行首页级目录枚举",
+            "Priorizar el reanálisis de vulnerabilidades pendientes con alta confianza",
+            "Evitar volver a ejecutar la enumeración de directorios a nivel de página principal",
         ]
         if violation_events:
-            next_actions.append("回避最近被约束策略阻断的动作与工具路径")
+            next_actions.append("Evitar acciones y rutas de herramientas bloqueadas recientemente por la política de restricciones")
         if blocked_targets:
-            next_actions.append("跳过已确认不可达目标，集中验证仍可访问的入口")
+            next_actions.append("Omitir objetivos confirmados como inaccesibles y concentrarse en verificar los puntos de entrada aún accesibles")
         if low_value_rounds >= 3:
-            next_actions.append("连续低价值轮次较多，优先更换参数面或新入口")
+            next_actions.append("Hay muchas rondas consecutivas de bajo valor; priorizar el cambio de superficie de parámetros o nuevos puntos de entrada")
         if recon_priority_assets:
-            next_actions.append(f"优先回到高价值侦察资产：{recon_priority_assets[0]}")
+            next_actions.append(f"Priorizar el regreso al activo de reconocimiento de alto valor: {recon_priority_assets[0]}")
         return {
             "strategy": "verify_pending_findings",
             "reason": _build_reason(
-                f"存在 {len(pending_sorted)} 个待验证漏洞候选，应优先验证闭环",
+                f"Existen {len(pending_sorted)} candidatos a vulnerabilidad pendientes de verificación; se debe priorizar cerrar el ciclo de verificación",
                 blocked_targets=blocked_targets,
                 low_value_rounds=low_value_rounds,
             ),
@@ -71,19 +71,19 @@ def build_resume_plan(raw: dict[str, Any]) -> dict[str, Any]:
 
     if verified_sorted:
         next_actions = [
-            "优先围绕已验证漏洞扩展利用链",
-            "避免回退到低价值基础侦察",
+            "Priorizar la expansión de la cadena de explotación en torno a las vulnerabilidades ya verificadas",
+            "Evitar retroceder a un reconocimiento básico de bajo valor",
         ]
         if violation_events:
-            next_actions.append("扩展利用前先确认不会触发现有约束策略")
+            next_actions.append("Antes de ampliar la explotación, confirmar que no se activará la política de restricciones existente")
         if current_attack_path:
-            next_actions.append(f"不要继续卡在旧路径 {current_attack_path}，优先扩展新后续利用")
+            next_actions.append(f"No seguir estancado en la ruta anterior {current_attack_path}; priorizar la expansión hacia nueva explotación posterior")
         if recon_priority_assets:
-            next_actions.append(f"结合高价值侦察资产扩展利用：{recon_priority_assets[0]}")
+            next_actions.append(f"Ampliar la explotación combinándola con el activo de reconocimiento de alto valor: {recon_priority_assets[0]}")
         return {
             "strategy": "exploit_expand",
             "reason": _build_reason(
-                f"已有 {len(verified_sorted)} 个已验证漏洞，优先继续利用与扩展",
+                f"Ya existen {len(verified_sorted)} vulnerabilidades verificadas; priorizar continuar su explotación y expansión",
                 blocked_targets=blocked_targets,
                 low_value_rounds=low_value_rounds,
             ),
@@ -102,17 +102,17 @@ def build_resume_plan(raw: dict[str, Any]) -> dict[str, Any]:
     active_dims = [key for key in ("server", "website", "domain", "personnel") if key in recon_dims]
     incomplete = [key for key in active_dims if not recon_dims.get(key, False)]
     if incomplete:
-        next_actions = ["补齐侦察缺口后再进入漏洞验证"]
+        next_actions = ["Completar las brechas de reconocimiento antes de pasar a la verificación de vulnerabilidades"]
         if violation_events:
-            next_actions.append("优先选择未被约束阻断的信息收集动作")
+            next_actions.append("Priorizar acciones de recopilación de información que no estén bloqueadas por restricciones")
         if blocked_targets:
-            next_actions.append("忽略不可达子目标，优先完成仍可访问资产的侦察维度")
+            next_actions.append("Ignorar los subobjetivos inaccesibles y priorizar completar las dimensiones de reconocimiento de los activos aún accesibles")
         if recon_priority_assets:
-            next_actions.append(f"优先继续这些高价值侦察资产：{recon_priority_assets[0]}")
+            next_actions.append(f"Priorizar continuar con estos activos de reconocimiento de alto valor: {recon_priority_assets[0]}")
         return {
             "strategy": "continue_recon",
             "reason": _build_reason(
-                f"侦察维度未完成：{', '.join(incomplete)}",
+                f"Dimensiones de reconocimiento incompletas: {', '.join(incomplete)}",
                 blocked_targets=blocked_targets,
                 low_value_rounds=low_value_rounds,
             ),
@@ -127,17 +127,17 @@ def build_resume_plan(raw: dict[str, Any]) -> dict[str, Any]:
             "next_actions": next_actions,
         }
 
-    next_actions = ["继续围绕已知入口点做候选验证"]
+    next_actions = ["Continuar realizando verificación de candidatos en torno a los puntos de entrada conocidos"]
     if violation_events:
-        next_actions.append("回避近期被约束阻断的高风险动作")
+        next_actions.append("Evitar acciones de alto riesgo bloqueadas recientemente por restricciones")
     if low_value_rounds >= 3:
-        next_actions.append("避免最近失败的扫描路径，切换新的入口或不同参数面")
+        next_actions.append("Evitar rutas de escaneo que fallaron recientemente; cambiar a un nuevo punto de entrada o a una superficie de parámetros diferente")
     if recon_priority_assets:
-        next_actions.append(f"优先测试这些高价值侦察资产：{recon_priority_assets[0]}")
+        next_actions.append(f"Priorizar la prueba de estos activos de reconocimiento de alto valor: {recon_priority_assets[0]}")
     return {
         "strategy": "continue_scan",
         "reason": _build_reason(
-            "暂无已验证漏洞，继续从候选攻击面推进扫描",
+            "Aún no hay vulnerabilidades verificadas; continuar avanzando el escaneo desde la superficie de ataque candidata",
             blocked_targets=blocked_targets,
             low_value_rounds=low_value_rounds,
         ),
@@ -294,9 +294,9 @@ def _top_failed_targets(failed_targets: dict[str, Any]) -> list[str]:
 def _build_reason(base: str, *, blocked_targets: list[str], low_value_rounds: int) -> str:
     suffix: list[str] = []
     if blocked_targets:
-        suffix.append(f"已存在 {len(blocked_targets)} 个不可达目标")
+        suffix.append(f"Ya existen {len(blocked_targets)} objetivos inaccesibles")
     if low_value_rounds >= 3:
-        suffix.append(f"连续 {low_value_rounds} 轮低价值推进")
+        suffix.append(f"{low_value_rounds} rondas consecutivas de avance de bajo valor")
     if not suffix:
         return base
-    return f"{base}；{'；'.join(suffix)}"
+    return f"{base}; {'; '.join(suffix)}"

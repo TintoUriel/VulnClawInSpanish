@@ -45,22 +45,22 @@ _FALLBACK_SKILL = "pentest-flow"
 # Signals that mark input as a pentest-like task worth the fallback skill.
 _PENTEST_SIGNALS = (
     "pentest",
-    "渗透",
-    "测试",
-    "扫描",
-    "漏洞",
+    "penetración",
+    "prueba",
+    "escaneo",
+    "vulnerabilidad",
     "target",
-    "目标",
+    "objetivo",
     "recon",
-    "侦察",
+    "reconocimiento",
     "exploit",
-    "攻击",
+    "ataque",
     "http://",
     "https://",
     "scan",
     "vulnerab",
     "security",
-    "安全",
+    "seguridad",
 )
 
 _EXPLICIT_USE_RE = re.compile(

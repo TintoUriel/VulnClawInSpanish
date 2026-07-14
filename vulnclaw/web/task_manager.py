@@ -128,8 +128,9 @@ class WebTaskManager:
                 item = await asyncio.wait_for(queue.get(), timeout=0.5)
                 yield item
             except (asyncio.TimeoutError, TimeoutError):
-                # Python 3.10 下 asyncio.wait_for 抛 asyncio.TimeoutError（3.11 起才与
-                # 内置 TimeoutError 合并），两者都捕获以保证流式循环跨版本不中断
+                # En Python 3.10, asyncio.wait_for lanza asyncio.TimeoutError (recién a partir
+                # de 3.11 se unifica con el TimeoutError incorporado); se capturan ambas para
+                # que el bucle de streaming no se interrumpa entre versiones
                 continue
 
     def bind_runtime_task(self, task_id: str, task: asyncio.Task) -> None:

@@ -8,45 +8,52 @@ from vulnclaw.agent.context import ContextManager, VulnerabilityFinding
 from vulnclaw.agent.runtime_state import RuntimeState
 from vulnclaw.agent.think_filter import strip_think_tags
 
+# NOTA: los patrones de esta sección hacen coincidencia contra el TEXTO
+# GENERADO POR EL LLM (respuesta del modelo), cuyo idioma depende de
+# agent/prompts.py y agent/system_prompt.py (fuera del alcance de esta
+# traducción). Los tercer elementos de tupla `vuln_type` que coinciden con
+# claves del diccionario de alias en config/finding_similarity.py
+# (_VULN_TYPE_ALIASES, fuera de alcance) se mantienen en chino a propósito
+# para no romper la normalización/deduplicación entre módulos.
 PROOF_PATTERNS: list[str] = [
-    r"差异[：: ]*\d+",
-    r"\d+\s*bytes|\d+\s*字节",
-    r"(?:状态码|响应码)?[：: ]*5\d{2}",
-    r"SQL.*错误|mysql.*error|sql.*error",
+    r"diferencia[：: ]*\d+",
+    r"\d+\s*bytes",
+    r"(?:código de estado|código de respuesta)?[：: ]*5\d{2}",
+    r"SQL.*error|mysql.*error|sql.*error",
     r"SLEEP\(|BENCHMARK\(|EXTRACTVALUE\(|UPDATEXML\(",
-    r"命令执行成功|whoami|id\s+",
+    r"ejecución de comando exitosa|whoami|id\s+",
     r"root[:\s]|administrator",
     r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}",
     r"CVE-\d{4}-\d{4,}",
-    r"成功提取|成功获取|获取到",
+    r"extracción exitosa|obtención exitosa|obtenido",
 ]
 
 NATURAL_LANG_PATTERNS: list[tuple[str, str, str]] = [
-    (r"SQL注入|SQLi|注入漏洞", "High", "SQL注入"),
-    (r"RCE|远程代码执行|命令注入|命令执行", "Critical", "远程代码执行"),
-    (r"未授权|未认证|无需认证|认证绕过|认证.*绕过", "High", "认证绕过"),
-    (r"SSRF|服务端请求伪造", "High", "SSRF"),
-    (r"XSS|跨站脚本|存储型XSS|反射型XSS", "Medium", "XSS跨站脚本"),
-    (r"CSRF|跨站请求伪造", "Medium", "CSRF"),
-    (r"文件包含|路径遍历|LFI|RFI", "Medium", "文件包含/遍历"),
-    (r"弱口令|默认口令|默认密码|暴力破解|爆破", "Medium", "弱口令/暴力破解"),
-    (r"配置错误|配置缺陷|泄露.*配置", "Medium", "配置错误"),
-    (r"敏感目录|敏感文件.*发现|目录.*发现", "Info", "敏感目录/文件发现"),
-    (r"版本.*过旧|中间件版本|指纹.*识别", "Info", "版本信息"),
-    (r"CVE-\d{4}-\d{4,}", "High", "已知CVE漏洞"),
+    (r"inyección SQL|SQLi|inyección", "High", "SQL注入"),
+    (r"RCE|ejecución remota de código|inyección de comandos|ejecución de comandos", "Critical", "远程代码执行"),
+    (r"sin autorización|sin autenticación|no requiere autenticación|bypass de autenticación|autenticación.*bypass", "High", "认证绕过"),
+    (r"SSRF|falsificación de solicitud del lado del servidor", "High", "SSRF"),
+    (r"XSS|cross-site scripting|XSS almacenado|XSS reflejado", "Medium", "XSS跨站脚本"),
+    (r"CSRF|falsificación de petición en sitios cruzados", "Medium", "CSRF"),
+    (r"inclusión de archivos|traversal de directorios|LFI|RFI", "Medium", "文件包含/遍历"),
+    (r"contraseña débil|credencial por defecto|contraseña por defecto|fuerza bruta|bruteforce", "Medium", "Contraseña débil/fuerza bruta"),
+    (r"error de configuración|defecto de configuración|fuga.*configuración", "Medium", "Error de configuración"),
+    (r"directorio sensible|archivo sensible.*encontrado|directorio.*encontrado", "Info", "Directorio/archivo sensible encontrado"),
+    (r"versión.*desactualizada|versión de middleware|fingerprint.*identificad[oa]", "Info", "Información de versión"),
+    (r"CVE-\d{4}-\d{4,}", "High", "Vulnerabilidad CVE conocida"),
 ]
 
 ELEVATION_KEYWORDS: list[tuple[str, str, str]] = [
-    (r"泄露|敏感信息|数据泄露|个人信息|\d+条数据", "High", "数据泄露"),
-    (r"未授权|未认证|认证绕过|无需认证", "High", "未授权访问"),
-    (r"RCE|命令执行|远程代码", "Critical", "远程代码执行"),
-    (r"SQL注入|SQLi|注入", "High", "注入漏洞"),
-    (r"CVE-\d{4}-\d{4,}", "High", "已知CVE漏洞"),
-    (r"弱口令|默认口令|暴力", "High", "弱口令/暴力破解"),
-    (r"XSS|跨站脚本", "Medium", "XSS"),
-    (r"文件包含|路径遍历", "High", "文件包含/遍历"),
-    (r"返回200.*不存在|200.*空内容|空响应.*位", "Medium", "潜在授权绕过"),
-    (r"403.*接口|接口存在.*403", "Medium", "403认证拦截"),
+    (r"fuga|información sensible|fuga de datos|información personal|\d+\s*registros de datos", "High", "数据泄露"),
+    (r"sin autorización|sin autenticación|bypass de autenticación|no requiere autenticación", "High", "未授权访问"),
+    (r"RCE|ejecución de comandos|código remoto", "Critical", "远程代码执行"),
+    (r"inyección SQL|SQLi|inyección", "High", "注入漏洞"),
+    (r"CVE-\d{4}-\d{4,}", "High", "Vulnerabilidad CVE conocida"),
+    (r"contraseña débil|credencial por defecto|fuerza bruta", "High", "Contraseña débil/fuerza bruta"),
+    (r"XSS|cross-site scripting", "Medium", "XSS"),
+    (r"inclusión de archivos|traversal de directorios", "High", "文件包含/遍历"),
+    (r"devuelve 200.*no existe|200.*contenido vacío|respuesta vacía.*posición", "Medium", "Posible bypass de autorización"),
+    (r"403.*endpoint|endpoint.*403", "Medium", "Bloqueo de autenticación 403"),
 ]
 
 URL_PATTERN = re.compile(r'https?://[^\s<>"\')\]]+')
@@ -160,9 +167,9 @@ class FindingParser:
                     title=canonical_title,
                     severity=severity,
                     vuln_type=vuln_type,
-                    description=f"自动检测：{vuln_matches[0].strip()[:100]}"
+                    description=f"Detección automática: {vuln_matches[0].strip()[:100]}"
                     if vuln_matches
-                    else "通过自然语言模式自动检测",
+                    else "Detectado automáticamente mediante patrones de lenguaje natural",
                     evidence=evidence[:300],
                     evidence_level="L2",
                     lifecycle_status="needs_manual_review"
@@ -180,15 +187,15 @@ class FindingParser:
                     if title not in existing_titles:
                         location = _collect_location_summary(evidence_pool)
                         evidence = (
-                            f"{location} | 通过工具验证确认：{fact}"
+                            f"{location} | Confirmado mediante verificación con herramientas: {fact}"
                             if location
-                            else f"通过工具验证确认：{fact}"
+                            else f"Confirmado mediante verificación con herramientas: {fact}"
                         )
                         finding = VulnerabilityFinding(
                             title=title,
                             severity=severity,
                             vuln_type=vuln_type,
-                            description=f"通过工具验证确认：{fact}",
+                            description=f"Confirmado mediante verificación con herramientas: {fact}",
                             evidence=evidence[:300],
                             evidence_level="L4",
                             lifecycle_status="verified",
@@ -219,7 +226,7 @@ class FindingParser:
         clean_response = strip_think_tags(response)
         discovery_markers = [
             r"\[\+\]\s*(.+?)(?:\n|$)",
-            r"发现[：: ]\s*(.+?)(?:\n|$)",
+            r"(?:descubrimiento|encontrado)[：: ]\s*(.+?)(?:\n|$)",
             r"(flag\{[^}]+\})",
             r"(NSSCTF\{[^}]+\})",
             r"(CTF\{[^}]+\})",
@@ -231,24 +238,24 @@ class FindingParser:
                     self.context.state.add_note(note)
 
         confirmed_markers = [
-            r"已确认[：: ]\s*(.+?)(?:\n|$)",
-            r"确认[：: ]\s*(.+?)(?:\n|$)",
-            r"验证成功[：: ]\s*(.+?)(?:\n|$)",
+            r"confirmado[：: ]\s*(.+?)(?:\n|$)",
+            r"confirmación[：: ]\s*(.+?)(?:\n|$)",
+            r"verificación exitosa[：: ]\s*(.+?)(?:\n|$)",
             r"\[✅\]\s*(.+?)(?:\n|$)",
-            r"确认.*存在",
-            r"漏洞.*已确认",
-            r"已.*验证.*成功",
-            r"payload.*差异[：: ]*\s*\d+",
-            r"差异[：: ]*\s*\d+.*成功",
-            r"SLEEP\([^)]+\).*耗时",
-            r"成功提取[：: ]*\s*\S+",
-            r"提取到[：: ]*\s*\S+",
-            r"命令执行成功",
-            r"可提取到[：: ]*\s*\S+",
-            r"布尔.*成功|布尔.*有效",
-            r"报错.*成功|报错.*有效",
-            r"UNION.*成功|UNION.*有效",
-            r"漏洞确认",
+            r"confirmado.*existe",
+            r"vulnerabilidad.*confirmada",
+            r"ya.*verificad[oa].*éxito",
+            r"payload.*diferencia[：: ]*\s*\d+",
+            r"diferencia[：: ]*\s*\d+.*éxito",
+            r"SLEEP\([^)]+\).*tiempo",
+            r"extraído con éxito[：: ]*\s*\S+",
+            r"se extrajo[：: ]*\s*\S+",
+            r"ejecución de comando exitosa",
+            r"se puede extraer[：: ]*\s*\S+",
+            r"booleano.*éxito|booleano.*válido",
+            r"basado en errores.*éxito|basado en errores.*válido",
+            r"UNION.*éxito|UNION.*válido",
+            r"vulnerabilidad confirmada",
         ]
         for pattern in confirmed_markers:
             for match in re.findall(pattern, response, re.IGNORECASE):
@@ -257,8 +264,8 @@ class FindingParser:
                     self.context.state.add_confirmed_fact(fact)
 
         assumption_markers = [
-            r"假设[：: ]\s*(.+?)(?:\n|$)",
-            r"推测[：: ]\s*(.+?)(?:\n|$)",
+            r"hipótesis[：: ]\s*(.+?)(?:\n|$)",
+            r"conjetura[：: ]\s*(.+?)(?:\n|$)",
         ]
         for pattern in assumption_markers:
             for match in re.findall(pattern, response, re.IGNORECASE):

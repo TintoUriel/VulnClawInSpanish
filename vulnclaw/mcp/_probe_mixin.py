@@ -1,9 +1,10 @@
 """MCP transport probing mixin — stdio/SSE/HTTP server attach and validation.
 
-修改者: Nyaecho
-修改时间: 2026-07-08
-修改原因: S3 修复 — 从 mcp/lifecycle.py（1713 行）提取传输探测方法到独立 mixin，
-         降低主文件复杂度。
+Modificado por: Nyaecho
+Fecha de modificación: 2026-07-08
+Motivo de la modificación: Corrección S3 — se extrajeron los métodos de sondeo
+         de transporte de mcp/lifecycle.py (1713 líneas) a un mixin independiente,
+         reduciendo la complejidad del archivo principal.
 """
 
 from __future__ import annotations
@@ -209,7 +210,7 @@ class ProbeMixin:
                 if subs:
                     detail = "; ".join(str(s) for s in subs)
             if "already connected" in detail.lower():
-                detail += " (请重启 MCP 服务或关闭旧客户端连接)"
+                detail += " (reinicie el servicio MCP o cierre la conexión del cliente anterior)"
             return False, detail, []
 
     def _probe_sse_server(
@@ -313,7 +314,7 @@ class ProbeMixin:
             return False, str(exc), []
 
     async def _preinit_chrome_devtools(self) -> None:
-        """预初始化 chrome-devtools: 提前建 session + 发现工具."""
+        """Preinicializa chrome-devtools: crea la sesión y descubre las herramientas por adelantado."""
         try:
             await self._get_or_create_persistent_stdio_session("chrome-devtools")
         except BaseException:

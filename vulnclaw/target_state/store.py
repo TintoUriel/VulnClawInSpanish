@@ -9,9 +9,9 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Optional
 
-# 修改者: Nyaecho
-# 修改时间: 2026-07-08
-# 修改原因: 消除 V3 违规 — 叶子类型已移至 config/domain_models.py。
+# Modificado por: Nyaecho
+# Fecha de modificación: 2026-07-08
+# Motivo de modificación: Eliminación de infracción V3 — los tipos hoja se movieron a config/domain_models.py.
 from vulnclaw.agent.context import SessionState
 from vulnclaw.config.domain_models import PentestPhase
 from vulnclaw.config.settings import TARGETS_DIR, ensure_dirs
@@ -643,30 +643,30 @@ def _build_resume_summary(raw: dict[str, Any], resume_meta: dict[str, Any]) -> s
     verified_count = resume_meta.get("verified_findings", 0)
 
     parts = [
-        "## 历史成果摘要",
-        f"- 最近命令: {resume_meta.get('last_command', 'unknown')}",
-        f"- 已执行步骤: {resume_meta.get('executed_steps', len(executed_steps))}",
-        f"- 已验证漏洞: {verified_count}",
-        f"- 待验证漏洞: {pending_count}",
+        "## Resumen de resultados históricos",
+        f"- Último comando: {resume_meta.get('last_command', 'unknown')}",
+        f"- Pasos ejecutados: {resume_meta.get('executed_steps', len(executed_steps))}",
+        f"- Vulnerabilidades verificadas: {verified_count}",
+        f"- Vulnerabilidades pendientes de verificación: {pending_count}",
     ]
 
     if resume_meta.get("resume_strategy"):
-        parts.append(f"- 恢复优先策略: {resume_meta['resume_strategy']}")
+        parts.append(f"- Estrategia prioritaria de reanudación: {resume_meta['resume_strategy']}")
     if resume_meta.get("resume_strategy_reason"):
-        parts.append(f"- 策略原因: {resume_meta['resume_strategy_reason']}")
+        parts.append(f"- Motivo de la estrategia: {resume_meta['resume_strategy_reason']}")
     if resume_meta.get("low_value_rounds"):
-        parts.append(f"- 连续低价值轮次: {resume_meta['low_value_rounds']}")
+        parts.append(f"- Rondas consecutivas de bajo valor: {resume_meta['low_value_rounds']}")
     if resume_meta.get("blocked_targets"):
-        parts.append(f"- 已阻塞目标: {', '.join(resume_meta['blocked_targets'][:5])}")
+        parts.append(f"- Objetivos bloqueados: {', '.join(resume_meta['blocked_targets'][:5])}")
     if runtime_meta.get("current_attack_path"):
-        parts.append(f"- 最近攻击路径: {runtime_meta['current_attack_path']}")
+        parts.append(f"- Ruta de ataque más reciente: {runtime_meta['current_attack_path']}")
     if recon_data:
-        parts.append(f"- 已有侦察数据键: {', '.join(sorted(recon_data.keys())[:10])}")
+        parts.append(f"- Claves de datos de reconocimiento existentes: {', '.join(sorted(recon_data.keys())[:10])}")
     if resume_meta.get("priority_targets"):
-        parts.append(f"- 恢复优先目标: {', '.join(resume_meta['priority_targets'][:5])}")
+        parts.append(f"- Objetivos prioritarios de reanudación: {', '.join(resume_meta['priority_targets'][:5])}")
 
     if findings:
-        parts.append("- 最近漏洞线索")
+        parts.append("- Pistas de vulnerabilidades recientes")
         prioritized = sorted(
             findings,
             key=lambda item: (
@@ -678,29 +678,29 @@ def _build_resume_summary(raw: dict[str, Any], resume_meta: dict[str, Any]) -> s
             vuln_type = finding.get("vuln_type", "")
             status = finding.get("verification_status", "pending")
             confidence = finding_meta.get(_finding_key(finding), {}).get("confidence", 0.5)
-            parts.append(f"  - {title} [{vuln_type or '未分类'}] ({status}, conf={confidence})")
+            parts.append(f"  - {title} [{vuln_type or 'sin clasificar'}] ({status}, conf={confidence})")
 
     high_value_assets = _top_recon_assets_for_summary(recon_meta)
     if high_value_assets:
-        parts.append("- 高置信度侦察资产")
+        parts.append("- Activos de reconocimiento de alta confianza")
         for item in high_value_assets[:5]:
             parts.append(f"  - {item}")
 
     failed_targets = resume_meta.get("failed_targets", [])
     if failed_targets:
-        parts.append("- 历史失败目标")
+        parts.append("- Objetivos fallidos históricos")
         for item in failed_targets[:5]:
             parts.append(f"  - {item}")
 
     failed_steps = resume_meta.get("recent_failed_steps", [])
     if failed_steps:
-        parts.append("- 最近失败路径/步骤")
+        parts.append("- Rutas/pasos fallidos recientes")
         for item in failed_steps[:5]:
             parts.append(f"  - {item}")
 
     next_actions = resume_meta.get("next_actions", [])
     if next_actions:
-        parts.append("- 恢复建议动作")
+        parts.append("- Acciones recomendadas de reanudación")
         for item in next_actions[:5]:
             parts.append(f"  - {item}")
 
@@ -716,8 +716,8 @@ def _merge_target_state(existing: dict[str, Any], current: dict[str, Any]) -> di
     )
     merged["findings"] = _merge_findings(existing.get("findings", []), current.get("findings", []))
 
-    # [P18 修改] 合并 step_records，不再合并 executed_steps
-    # executed_steps 在序列化时会自动从 step_records 生成
+    # [Modificación P18] Fusionar step_records; ya no se fusiona executed_steps
+    # executed_steps se genera automáticamente a partir de step_records durante la serialización
     existing_records = existing.get("step_records", [])
     current_records = current.get("step_records", [])
     merged["step_records"] = existing_records + [
@@ -1024,17 +1024,17 @@ def _merge_runtime_meta(
 
 def _extract_failed_steps(executed_steps: list[str]) -> list[str]:
     markers = (
-        "失败",
-        "超时",
-        "拒绝",
+        "fallo",
+        "tiempo agotado",
+        "rechazado",
         "blocked",
         "timeout",
         "denied",
         "404",
         "error",
-        "无法",
-        "未成功",
-        "不可达",
+        "no se pudo",
+        "sin éxito",
+        "inalcanzable",
     )
     failed: list[str] = []
     for step in executed_steps[-30:]:

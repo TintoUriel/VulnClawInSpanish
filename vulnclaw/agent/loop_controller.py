@@ -345,8 +345,8 @@ async def persistent_pentest(
                     constraints_block = f"\n\n{rendered}"
             results = await agent.auto_pentest(
                 user_input=(
-                    f"[Persistent Cycle {cycle_num}] 继续对目标 {agent.context.state.target or '未知'} 进行渗透测试。"
-                    f"这是第 {cycle_num} 个周期，保持之前的所有发现继续深入。"
+                    f"[Ciclo persistente {cycle_num}] Continuar la prueba de penetración sobre el objetivo {agent.context.state.target or 'desconocido'}."
+                    f"Este es el ciclo número {cycle_num}; mantén todos los hallazgos previos y profundiza a partir de ellos."
                     f"{constraints_block}"
                     if cycle_num > 1
                     else user_input
@@ -354,7 +354,7 @@ async def persistent_pentest(
                 target=agent.context.state.target,
                 max_rounds=rounds_per_cycle,
                 on_step=_make_step_callback(cycle_num),
-                # 透传 stream_sink，使 persistent 模式也支持流式输出
+                # Reenvía stream_sink para que el modo persistente también soporte salida en streaming
                 stream_sink=stream_sink,
             )
             cycle_results_list = results if results else cycle_results_list
@@ -389,7 +389,7 @@ async def persistent_pentest(
                     prev_verified_ids=prev_verified_ids,
                 )
             except Exception as e:
-                report_path = f"报告生成失败: {e}"
+                report_path = f"Error al generar el informe: {e}"
 
         cycle_result = PersistentCycleResult(
             cycle_num=cycle_num,

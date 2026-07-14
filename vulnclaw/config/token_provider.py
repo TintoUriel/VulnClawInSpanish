@@ -125,9 +125,10 @@ class _CallbackHandler(BaseHTTPRequestHandler):
         self.end_headers()
         ok = "code" in type(self).result and "error" not in type(self).result
         msg = (
-            "VulnClaw 登录成功，可以关闭此页面。 / Sign-in complete, you may close this tab."
+            "Inicio de sesión en VulnClaw exitoso, puede cerrar esta pestaña. / "
+            "Sign-in complete, you may close this tab."
             if ok
-            else f"登录失败 / Sign-in failed: {type(self).result.get('error', 'unknown')}"
+            else f"Error al iniciar sesión / Sign-in failed: {type(self).result.get('error', 'unknown')}"
         )
         self.wfile.write(
             f"<html><body style='font-family:sans-serif'><h3>{msg}</h3></body></html>".encode()
@@ -167,7 +168,7 @@ def _oauth_token_request(token_url: str, form: dict[str, str], *, attempts: int 
         except urllib.error.HTTPError as exc:
             if exc.code != 429 and 400 <= exc.code < 500:
                 detail = exc.read().decode("utf-8", "replace")[:300] if hasattr(exc, "read") else str(exc)
-                raise OAuthError(f"OAuth token 请求失败 HTTP {exc.code}: {detail}") from exc
+                raise OAuthError(f"Falló la solicitud del token OAuth HTTP {exc.code}: {detail}") from exc
             last_exc = exc  # 5xx / 429 → retry
         except urllib.error.URLError as exc:
             last_exc = exc  # network / TLS → retry
@@ -176,14 +177,15 @@ def _oauth_token_request(token_url: str, form: dict[str, str], *, attempts: int 
 
     if body is None:
         raise OAuthError(
-            f"OAuth token 端点无法访问（重试 {attempts} 次后失败 / failed after {attempts} retries）: {last_exc}"
+            f"No se pudo acceder al endpoint del token OAuth (falló tras {attempts} reintentos / "
+            f"failed after {attempts} retries): {last_exc}"
         )
     try:
         payload = json.loads(body)
     except json.JSONDecodeError as exc:
-        raise OAuthError(f"OAuth token 端点返回非 JSON: {body[:200]!r}") from exc
+        raise OAuthError(f"El endpoint del token OAuth devolvió una respuesta no JSON: {body[:200]!r}") from exc
     if "access_token" not in payload:
-        raise OAuthError(f"OAuth 响应缺少 access_token: {body[:200]!r}")
+        raise OAuthError(f"La respuesta OAuth no incluye access_token: {body[:200]!r}")
     return payload
 
 
@@ -257,7 +259,8 @@ def perform_chatgpt_login(*, open_browser: bool = True) -> dict[str, Any]:
         server = HTTPServer(("127.0.0.1", CHATGPT_REDIRECT_PORT), _CallbackHandler)
     except OSError as exc:
         raise OAuthError(
-            f"无法绑定本地端口 {CHATGPT_REDIRECT_PORT}（Codex 重定向要求固定端口）: {exc}"
+            f"No se pudo enlazar el puerto local {CHATGPT_REDIRECT_PORT} "
+            f"(la redirección de Codex requiere un puerto fijo): {exc}"
         ) from exc
     redirect_uri = f"http://localhost:{CHATGPT_REDIRECT_PORT}{CHATGPT_REDIRECT_PATH}"
 
@@ -282,23 +285,23 @@ def perform_chatgpt_login(*, open_browser: bool = True) -> dict[str, Any]:
             with suppress(Exception):
                 opened = webbrowser.open(full_authorize_url)
         if not opened:
-            print(f"[i] 在浏览器中打开以登录 ChatGPT / Open to sign in:\n{full_authorize_url}")
+            print(f"[i] Abra esto en el navegador para iniciar sesión en ChatGPT / Open to sign in:\n{full_authorize_url}")
         else:
-            print("[i] 已打开 ChatGPT 登录页，等待授权... / Browser opened, waiting for consent...")
+            print("[i] Se abrió la página de inicio de sesión de ChatGPT, esperando autorización... / Browser opened, waiting for consent...")
         if not _CallbackHandler.done.wait(timeout=_CALLBACK_TIMEOUT_SECONDS):
-            raise OAuthError("等待授权回调超时 / Timed out waiting for the OAuth callback")
+            raise OAuthError("Tiempo de espera agotado para el callback de autorización / Timed out waiting for the OAuth callback")
     finally:
         server.shutdown()
         server.server_close()
 
     result = _CallbackHandler.result
     if "error" in result:
-        raise OAuthError(f"授权被拒绝 / Authorization error: {result.get('error')}")
+        raise OAuthError(f"Autorización rechazada / Authorization error: {result.get('error')}")
     if result.get("state") != state:
-        raise OAuthError("OAuth state 不匹配（可能的 CSRF），已中止 / state mismatch, aborted")
+        raise OAuthError("El estado OAuth no coincide (posible CSRF), abortado / state mismatch, aborted")
     code = result.get("code")
     if not code:
-        raise OAuthError("回调未返回授权码 / No authorization code in callback")
+        raise OAuthError("El callback no devolvió un código de autorización / No authorization code in callback")
 
     payload = _oauth_token_request(
         CHATGPT_TOKEN_URL,
@@ -328,7 +331,7 @@ def _refresh_oauth(llm: Any, refresh_token: str) -> dict[str, Any]:
     token_url = str(_get(llm, "oauth_token_url") or "").strip()
     client_id = str(_get(llm, "oauth_client_id") or "").strip()
     if not (token_url and client_id):
-        raise OAuthError("OAuth 刷新需要 llm.oauth_token_url 和 llm.oauth_client_id")
+        raise OAuthError("El refresco de OAuth requiere llm.oauth_token_url y llm.oauth_client_id")
     payload = _oauth_token_request(
         token_url,
         {
@@ -365,7 +368,8 @@ def _resolve_oauth_token(llm: Any) -> str:
             # let the API surface a 401 rather than failing pre-emptively.
             return access
         raise OAuthError(
-            "尚未登录或令牌已失效，请运行 `vulnclaw login` / Not signed in — run `vulnclaw login`"
+            "Aún no ha iniciado sesión o el token ha expirado; ejecute `vulnclaw login` / "
+            "Not signed in — run `vulnclaw login`"
         )
 
 
@@ -384,7 +388,7 @@ def resolve_llm_token(llm: Any) -> str:
         return str(_get(llm, "api_key") or "")
     if mode == "oauth":
         return _resolve_oauth_token(llm)
-    raise TokenResolutionError(f"未知的 llm.auth_mode={mode!r}（支持: static/oauth）")
+    raise TokenResolutionError(f"llm.auth_mode desconocido={mode!r} (compatibles: static/oauth)")
 
 
 def has_llm_credentials(llm: Any) -> bool:

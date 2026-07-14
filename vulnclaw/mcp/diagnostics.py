@@ -1,9 +1,10 @@
 """MCP diagnostics service — shared by CLI and Web entry layers.
 
-修改者: Nyaecho
-修改时间: 2026-07-08
-修改原因: 消除 V6 违规 — get_mcp_diagnostics 从 web/services/mcp_service.py
-         移至 mcp/ 基础设施层，消除 CLI/Web 入口层间的交叉依赖。
+Modificado por: Nyaecho
+Fecha de modificación: 2026-07-08
+Motivo de la modificación: Eliminar la violación V6 — get_mcp_diagnostics se
+         trasladó desde web/services/mcp_service.py a la capa de infraestructura
+         mcp/, eliminando la dependencia cruzada entre las capas de entrada CLI/Web.
 """
 
 from __future__ import annotations

@@ -5,10 +5,11 @@ They were extracted from agent/context.py to eliminate reverse dependencies
 where infrastructure layers (report/, plugins/, target_state/) imported
 directly from the domain layer (agent/).
 
-修改者: Nyaecho
-修改时间: 2026-07-08
-修改原因: 消除 V2/V3/V4 违规 — 基础设施层不应反向依赖领域层，
-         将叶子类型提取到基础设施层 config/ 包中。
+Modificado por: Nyaecho
+Fecha de modificación: 2026-07-08
+Motivo de la modificación: Eliminar las violaciones V2/V3/V4 — la capa de
+         infraestructura no debía depender inversamente de la capa de dominio;
+         se extrajeron los tipos hoja a la capa de infraestructura config/.
 """
 
 from __future__ import annotations
@@ -37,12 +38,12 @@ class PentestPhase(str, Enum):
 
 
 class StepStatus(str, Enum):
-    """步骤执行状态."""
+    """Estado de ejecución del paso."""
 
-    SUCCESS = "success"  # 成功
-    FAILURE = "failure"  # 失败
-    SKIPPED = "skipped"  # 跳过
-    INFO = "info"  # 信息收集
+    SUCCESS = "success"  # éxito
+    FAILURE = "failure"  # fallo
+    SKIPPED = "skipped"  # omitido
+    INFO = "info"  # informativo
 
 
 # ──────────────────────────────────────────────────────────────
@@ -107,16 +108,16 @@ class VulnerabilityFinding(BaseModel):
         description="candidate/pending_verification/verified/rejected/needs_manual_review",
     )
 
-    # ★ 漏洞验证状态追踪
-    verified: bool = Field(default=False, description="是否已通过 PoC 验证")
+    # ★ Seguimiento del estado de verificación de la vulnerabilidad
+    verified: bool = Field(default=False, description="Indica si ya se validó mediante PoC")
     verification_status: str = Field(
-        default="pending", description="验证状态: pending/verified/rejected"
+        default="pending", description="Estado de verificación: pending/verified/rejected"
     )
-    verified_at: Optional[str] = Field(default=None, description="验证时间")
-    verification_note: str = Field(default="", description="验证备注/排除原因")
+    verified_at: Optional[str] = Field(default=None, description="Fecha/hora de verificación")
+    verification_note: str = Field(default="", description="Nota de verificación / motivo de exclusión")
 
-    # ★ 漏洞唯一标识（用于去重）
-    finding_id: str = Field(default="", description="漏洞唯一标识：vuln_type + target + location")
+    # ★ Identificador único de la vulnerabilidad (para deduplicación)
+    finding_id: str = Field(default="", description="Identificador único de la vulnerabilidad: vuln_type + target + location")
 
     def model_post_init(self, *args, **kwargs) -> None:
         # ★ Generate the dedup identity FIRST, from the caller-supplied fields —
@@ -140,10 +141,12 @@ class VulnerabilityFinding(BaseModel):
         if is_bare and not is_terminal:
             if not self.title.startswith("[未验证]"):
                 self.title = f"[未验证] {self.title}"
-            if "缺少验证证据" not in self.description:
+            if "carece de evidencia de verificación" not in self.description:
                 self.description = (
-                    "(⚠️ 此漏洞缺少验证证据/vuln_type/修复建议三字段，"
-                    "LLM 上报时未附实际测试结果。请补充证据后再作为正式漏洞。)"
+                    "(⚠️ Esta vulnerabilidad carece de evidencia de verificación y de los "
+                    "campos vuln_type/recomendación de corrección; el LLM no adjuntó "
+                    "resultados de pruebas reales al reportarla. Complete la evidencia antes "
+                    "de tratarla como una vulnerabilidad formal.)"
                     + (f" {self.description}" if self.description else "")
                 )
             self.lifecycle_status = "needs_manual_review"
@@ -223,7 +226,7 @@ class VulnerabilityFinding(BaseModel):
         return base_title[:50]
 
     def mark_verified(self, note: str = "", evidence_level: str = "L4") -> None:
-        """标记漏洞为已验证."""
+        """Marca la vulnerabilidad como verificada."""
         self.verified = True
         self.verification_status = "verified"
         self.lifecycle_status = "verified"
@@ -232,7 +235,7 @@ class VulnerabilityFinding(BaseModel):
         self.verification_note = note
 
     def mark_rejected(self, reason: str, evidence_level: str = "L3") -> None:
-        """标记漏洞为已拒绝（误报）."""
+        """Marca la vulnerabilidad como rechazada (falso positivo)."""
         self.verified = False
         self.verification_status = "rejected"
         self.lifecycle_status = "rejected"
@@ -316,18 +319,18 @@ class ConstraintViolationEvent(BaseModel):
 
 
 class StepRecord(BaseModel):
-    """单个渗透步骤的结构化记录."""
+    """Registro estructurado de un único paso del pentest."""
 
-    phase: PentestPhase = Field(description="所属阶段")
-    round: int = Field(default=0, description="轮次")
-    action: str = Field(default="", description="执行的动作（如端口扫描、漏洞探测）")
-    target: str = Field(default="", description="目标（IP/URL/路径等）")
-    result: str = Field(default="", description="执行结果摘要")
-    status: StepStatus = Field(default=StepStatus.INFO, description="执行状态")
-    detail: str = Field(default="", description="详细信息（可选）")
+    phase: PentestPhase = Field(description="Fase a la que pertenece")
+    round: int = Field(default=0, description="Número de ronda")
+    action: str = Field(default="", description="Acción ejecutada (p. ej. escaneo de puertos, detección de vulnerabilidades)")
+    target: str = Field(default="", description="Objetivo (IP/URL/ruta, etc.)")
+    result: str = Field(default="", description="Resumen del resultado de la ejecución")
+    status: StepStatus = Field(default=StepStatus.INFO, description="Estado de ejecución")
+    detail: str = Field(default="", description="Información detallada (opcional)")
 
     def to_summary(self) -> str:
-        """转换为可读的摘要行."""
+        """Convierte a una línea de resumen legible."""
         status_icon = {
             StepStatus.SUCCESS: "✅",
             StepStatus.FAILURE: "❌",
@@ -339,11 +342,11 @@ class StepRecord(BaseModel):
         return f"{status_icon} Round {self.round}: {self.action} → {result}"
 
     def to_brief(self) -> str:
-        """转换为简短摘要（用于列表显示）."""
+        """Convierte a un resumen breve (para mostrar en listas)."""
         return f"{self.action}: {self.result}"[:80]
 
     def to_legacy_string(self) -> str:
-        """生成向后兼容的原始字符串格式."""
+        """Genera el formato de cadena original, compatible con versiones anteriores."""
         status_icon = {
             StepStatus.SUCCESS: "✅",
             StepStatus.FAILURE: "❌",
@@ -354,12 +357,12 @@ class StepRecord(BaseModel):
 
     @classmethod
     def from_legacy_string(cls, step_str: str, phase: PentestPhase = PentestPhase.IDLE) -> StepRecord:
-        """从旧版字符串格式创建 StepRecord."""
-        # 提取 Round 号
+        """Crea un StepRecord a partir del formato de cadena de la versión anterior."""
+        # Extraer el número de ronda
         round_match = re.search(r"Round\s*(\d+)", step_str)
         round_num = int(round_match.group(1)) if round_match else 0
 
-        # 提取状态图标
+        # Extraer el icono de estado
         status = StepStatus.INFO
         if "✅" in step_str:
             status = StepStatus.SUCCESS
@@ -368,14 +371,14 @@ class StepRecord(BaseModel):
         elif "⏭️" in step_str:
             status = StepStatus.SKIPPED
 
-        # 提取动作和结果
+        # Extraer la acción y el resultado
         action_match = re.search(r"[✅❌⏭️ℹ️]\s*(.+?)→", step_str)
         action = action_match.group(1).strip() if action_match else ""
 
         result_match = re.search(r"→\s*(.+)$", step_str)
         result = result_match.group(1).strip() if result_match else ""
 
-        # 推断阶段
+        # Inferir la fase
         inferred_phase = phase
         if "阶段切换" in step_str:
             if "信息收集" in step_str:

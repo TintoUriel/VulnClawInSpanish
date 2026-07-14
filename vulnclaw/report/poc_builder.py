@@ -6,9 +6,10 @@ import re
 from datetime import datetime
 from pathlib import Path
 
-# 修改者: Nyaecho
-# 修改时间: 2026-07-08
-# 修改原因: 消除 V2 违规 — 叶子类型已移至 config/domain_models.py。
+# Modificado por: Nyaecho
+# Fecha de modificación: 2026-07-08
+# Motivo de la modificación: Eliminación de la infracción V2 — los tipos hoja se movieron a
+#          config/domain_models.py.
 from vulnclaw.agent.context import SessionState
 from vulnclaw.config.domain_models import VulnerabilityFinding
 from vulnclaw.report.verifier import PoCGenerator

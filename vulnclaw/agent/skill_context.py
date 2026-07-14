@@ -30,31 +30,31 @@ _PHASE_TOKEN: dict[str, str] = {
 
 # Free-text vuln keyword (bilingual) → canonical vulnerability_class token.
 _VULN_HINT_KEYWORDS: dict[str, str] = {
-    "sql注入": "sqli",
+    "inyección sql": "sqli",
     "sqli": "sqli",
     "xss": "xss",
     "rce": "rce",
-    "命令注入": "rce",
-    "远程代码执行": "rce",
+    "inyección de comandos": "rce",
+    "ejecución remota de código": "rce",
     "ssrf": "ssrf",
     "ssti": "ssti",
     "xxe": "xxe",
     "csrf": "csrf",
-    "反序列化": "deserialization",
-    "越权": "idor",
+    "deserialización": "deserialization",
+    "control de acceso indebido": "idor",
     "idor": "idor",
-    "文件上传": "file_upload",
-    "路径遍历": "path_traversal",
-    "目录穿越": "path_traversal",
+    "carga de archivos": "file_upload",
+    "recorrido de directorios": "path_traversal",
+    "salto de directorio": "path_traversal",
     "lfi": "path_traversal",
     "rfi": "path_traversal",
     "jwt": "jwt",
     "oauth": "oauth",
-    "认证绕过": "auth_bypass",
-    "prompt注入": "prompt_injection",
+    "bypass de autenticación": "auth_bypass",
+    "inyección de prompt": "prompt_injection",
     "prompt injection": "prompt_injection",
-    "提权": "privilege_escalation",
-    "横向": "lateral_movement",
+    "escalación de privilegios": "privilege_escalation",
+    "movimiento lateral": "lateral_movement",
 }
 
 # Technology keywords worth passing as a routing signal.
@@ -70,7 +70,7 @@ def _infer_target_type(target: Optional[str], text: str) -> Optional[str]:
             return "web"
         if _looks_like_ip(low):
             return "network"
-    if any(kw in blob for kw in ("apk", "安卓", "android")):
+    if any(kw in blob for kw in ("apk", "android")):
         return "android"
     if "http://" in blob or "https://" in blob:
         return "web"
@@ -210,7 +210,7 @@ def format_selection_context(selection: SkillSelection) -> str:
             continue
         desc = skill.get("description", "").strip()
         summary = desc.splitlines()[0] if desc else ""
-        parts.append(f"## 支持 Skill: {name}\n{summary}")
+        parts.append(f"## Skill de apoyo: {name}\n{summary}")
 
     refs = primary.get("references", []) if primary else []
     if refs:
@@ -218,8 +218,9 @@ def format_selection_context(selection: SkillSelection) -> str:
         if len(refs) > 10:
             ref_list += f", ... ({len(refs)} total)"
         parts.append(
-            "## 可用参考文档\n"
-            f"以下参考文档可在需要时通过 load_skill_reference 加载: {ref_list}"
+            "## Documentación de referencia disponible\n"
+            f"Los siguientes documentos de referencia se pueden cargar cuando sea "
+            f"necesario mediante load_skill_reference: {ref_list}"
         )
 
     if selection.reason:
