@@ -829,7 +829,7 @@ Intercambia, comparte y crece junto a más entusiastas de la seguridad
 | Grupo de comunidad | Grupo de desarrolladores |
 |:--:|:--:|
 | Únete a la discusión y comparte, entérate de las últimas novedades y consejos de uso | Únete a nosotros para participar en contribuciones de código abierto y debates técnicos en profundidad |
-| ![Grupo de comunidad de VulnClaw](assets/社区交流群.jpg) | ![Grupo de desarrolladores de VulnClaw](assets/VulnClaw开发者群聊.png) |
+| ![Grupo de comunidad de VulnClaw](assets/comunidad-vulnclaw-qr.jpg) | ![Grupo de desarrolladores de VulnClaw](assets/vulnclaw-desarrolladores-qr.png) |
 | **Grupo QQ: 954402631** | **Grupo QQ: 1065858551** |
 
 ---

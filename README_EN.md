@@ -674,7 +674,7 @@ Connect with security enthusiasts to share, learn, and grow together.
 | Community Group | Developer Group |
 |:--:|:--:|
 | Join discussions and get the latest product updates and usage tips | Join us for open-source contributions and deep technical discussions |
-| ![VulnClaw Community Group](assets/社区交流群.jpg) | ![VulnClaw Developer Group](assets/VulnClaw开发者群聊.png) |
+| ![VulnClaw Community Group](assets/comunidad-vulnclaw-qr.jpg) | ![VulnClaw Developer Group](assets/vulnclaw-desarrolladores-qr.png) |
 | **QQ Group: 954402631** | **QQ Group: 1065858551** |
 
 ---
