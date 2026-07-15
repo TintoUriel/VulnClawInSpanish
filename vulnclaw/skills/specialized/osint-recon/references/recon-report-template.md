@@ -1,153 +1,154 @@
-# 侦察报告模板
+# Plantilla de Informe de Reconocimiento
 
-## 使用说明
+## Instrucciones de uso
 
-在信息收集任务完成时，使用 `python_execute` 工具将以下模板填充为完整报告，
-保存到用户指定路径或桌面。
+Al completar una tarea de recopilación de información, usa la herramienta `python_execute` para
+rellenar la siguiente plantilla como informe completo y guardarlo en la ruta indicada por el
+usuario o en el escritorio.
 
-## Markdown 报告模板
+## Plantilla de informe en Markdown
 
 ```markdown
-# 🦞 {目标} 侦察报告
+# 🦞 Informe de Reconocimiento de {objetivo}
 
-> 生成时间：{日期时间}
-> 工具：VulnClaw v0.3.3
+> Fecha de generación: {fecha_hora}
+> Herramienta: VulnClaw v0.3.3
 
 ---
 
-## 1. 目标概览
+## 1. Resumen del objetivo
 
-| 项目 | 内容 |
+| Elemento | Contenido |
 |------|------|
-| 目标 URL | {url} |
-| IP 地址 | {ip} |
-| 服务器 | {server} |
-| 框架/CMS | {framework} |
+| URL objetivo | {url} |
+| Dirección IP | {ip} |
+| Servidor | {server} |
+| Framework/CMS | {framework} |
 | CDN | {cdn} |
-| SSL 证书 | {ssl_info} |
+| Certificado SSL | {ssl_info} |
 
 ---
 
-## 2. 技术侦察
+## 2. Reconocimiento técnico
 
-### 2.1 HTTP 响应头
-| 响应头 | 值 | 安全提示 |
+### 2.1 Cabeceras de respuesta HTTP
+| Cabecera | Valor | Nota de seguridad |
 |--------|---|---------|
-| Server | {value} | {注意点} |
-| X-Powered-By | {value} | 泄露技术栈 |
+| Server | {value} | {punto_de_atencion} |
+| X-Powered-By | {value} | Revela el stack tecnológico |
 | ... | ... | ... |
 
-### 2.2 DNS 记录
-| 类型 | 值 |
+### 2.2 Registros DNS
+| Tipo | Valor |
 |------|---|
 | A | {ip} |
 | CNAME | {cname} |
 | MX | {mx} |
 | TXT | {txt} |
 
-### 2.3 子域名
-| 子域名 | IP | 说明 |
+### 2.3 Subdominios
+| Subdominio | IP | Nota |
 |--------|---|------|
-| {sub} | {ip} | {note} |
+| {sub} | {ip} | {nota} |
 
-### 2.4 开放端口
-| 端口 | 服务 | 版本 |
+### 2.4 Puertos abiertos
+| Puerto | Servicio | Versión |
 |------|------|------|
 | 80 | HTTP | nginx/1.18 |
 | 443 | HTTPS | nginx/1.18 |
 
-### 2.5 目录与文件
-| 路径 | 状态码 | 说明 |
+### 2.5 Directorios y archivos
+| Ruta | Código de estado | Nota |
 |------|--------|------|
-| /robots.txt | 200 | {内容摘要} |
-| /sitemap.xml | 200 | {内容摘要} |
-| /.git/HEAD | 403/200 | {是否泄露} |
+| /robots.txt | 200 | {resumen_de_contenido} |
+| /sitemap.xml | 200 | {resumen_de_contenido} |
+| /.git/HEAD | 403/200 | {si_hay_fuga} |
 
 ---
 
-## 3. 内容侦察
+## 3. Reconocimiento de contenido
 
-### 3.1 页面元数据
-- **Title**：{title}
-- **Description**：{desc}
-- **Keywords**：{keywords}
-- **Author**：{author}
+### 3.1 Metadatos de la página
+- **Title**: {title}
+- **Description**: {desc}
+- **Keywords**: {keywords}
+- **Author**: {author}
 
-### 3.2 外部链接
-| 链接 | 类型 | 说明 |
+### 3.2 Enlaces externos
+| Enlace | Tipo | Nota |
 |------|------|------|
-| {url} | GitHub | 个人主页 |
-| {url} | B站 | 视频空间 |
-| {url} | CDN | 资源加载 |
+| {url} | GitHub | Página personal |
+| {url} | Bilibili | Espacio de vídeos |
+| {url} | CDN | Carga de recursos |
 
-### 3.3 JavaScript 文件
-| 文件 | 关键发现 |
+### 3.3 Archivos JavaScript
+| Archivo | Hallazgo clave |
 |------|---------|
 | {path} | {api_endpoint/config/key} |
 
-### 3.4 隐藏信息
-- HTML 注释：{comments}
-- 隐藏字段：{hidden_fields}
-- 邮箱/联系方式：{contacts}
+### 3.4 Información oculta
+- Comentarios HTML: {comments}
+- Campos ocultos: {hidden_fields}
+- Correo/contacto: {contacts}
 
 ---
 
-## 4. 人物追踪
+## 4. Seguimiento de personas
 
-### 4.1 作者信息
-| 项目 | 内容 | 来源 | 置信度 |
+### 4.1 Información del autor
+| Elemento | Contenido | Fuente | Confianza |
 |------|------|------|--------|
-| 昵称 | {name} | {source} | 🟢/🟡/🔴 |
+| Alias | {name} | {source} | 🟢/🟡/🔴 |
 | GitHub | {url} | {source} | 🟢 |
-| B站 | {url} | {source} | 🟢 |
-| 邮箱 | {email} | {source} | 🟡 |
-| 位置 | {location} | {source} | 🟡 |
+| Bilibili | {url} | {source} | 🟢 |
+| Correo | {email} | {source} | 🟡 |
+| Ubicación | {location} | {source} | 🟡 |
 
-### 4.2 技术画像
-- **主力语言**：{languages}
-- **技术栈**：{stack}
-- **开源项目**：{repos}
-- **关注领域**：{interests}
+### 4.2 Perfil técnico
+- **Lenguajes principales**: {languages}
+- **Stack tecnológico**: {stack}
+- **Proyectos de código abierto**: {repos}
+- **Áreas de interés**: {interests}
 
-### 4.3 跨平台关联
-| 平台 | 用户名/ID | 匹配度 | 说明 |
+### 4.3 Correlación entre plataformas
+| Plataforma | Usuario/ID | Nivel de coincidencia | Nota |
 |------|----------|--------|------|
-| {platform} | {id} | 高/中/低 | {note} |
+| {platform} | {id} | Alto/Medio/Bajo | {nota} |
 
 ---
 
-## 5. 关键发现
+## 5. Hallazgos clave
 
-| # | 发现 | 风险等级 | 说明 |
+| # | Hallazgo | Nivel de riesgo | Nota |
 |---|------|---------|------|
-| 1 | {finding} | 🔴高/🟡中/🟢低 | {detail} |
+| 1 | {finding} | 🔴Alto/🟡Medio/🟢Bajo | {detail} |
 
 ---
 
-## 6. 建议
+## 6. Recomendaciones
 
 1. {suggestion_1}
 2. {suggestion_2}
 
 ---
 
-*本报告由 VulnClaw 自动生成，所有信息来源于公开渠道。*
+*Este informe fue generado automáticamente por VulnClaw; toda la información procede de fuentes públicas.*
 ```
 
-## Python 保存代码
+## Código Python para guardar el informe
 
 ```python
 import os
 from datetime import datetime
 
 def save_recon_report(target, report_content, output_path=None):
-    """保存侦察报告到文件"""
+    """Guarda el informe de reconocimiento en un archivo"""
     if not output_path:
-        # 默认保存到桌面
+        # Guardar en el escritorio por defecto
         desktop = os.path.join(os.path.expanduser('~'), 'Desktop')
         safe_name = re.sub(r'[^\w]', '_', target)[:30]
         date_str = datetime.now().strftime('%Y%m%d_%H%M')
-        output_path = os.path.join(desktop, f'{safe_name}_侦察报告_{date_str}.md')
+        output_path = os.path.join(desktop, f'{safe_name}_informe_reconocimiento_{date_str}.md')
     
     os.makedirs(os.path.dirname(output_path) or '.', exist_ok=True)
     with open(output_path, 'w', encoding='utf-8') as f:

@@ -1,291 +1,240 @@
-# AI模型安全 - 训练阶段
+# Seguridad de Modelos de IA - Fase de Entrenamiento
 
-> 来源: AISS绿盟大模型安全智链社区 | 拆自 ai-model-security.md
-> 阶段: 训练阶段（GAARM.0023-0024 模型后门/对齐不足/预训练投毒）
+> Fuente: Comunidad AISS NSFOCUS de Seguridad de Grandes Modelos | Extraído de ai-model-security.md
+> Fase: Fase de entrenamiento (GAARM.0023-0024 Puerta trasera del modelo / Alineación de seguridad insuficiente / Envenenamiento del preentrenamiento)
 
-## 训练阶段
+## Fase de Entrenamiento
 
-### 模型后门
+### Puerta Trasera del Modelo
 
-> 风险编号: GAARM.0023
-> 生命周期: 训练阶段
+> Número de riesgo: GAARM.0023
+> Ciclo de vida: Fase de entrenamiento
 
-**攻击概述**
+**Resumen del ataque**
 
-LLM模型中的后门主要指训练阶段，由于引入了不可信来源的模型导致的安全问题，目前LLM模型后门主要分为两种形式：
+La puerta trasera en modelos LLM se refiere principalmente a problemas de seguridad en la fase de entrenamiento, provocados por la introducción de modelos de fuentes no confiables. Actualmente, las puertas traseras en modelos LLM se dividen principalmente en dos formas:
 
-模型序列化后门：由于使用的预训练模型，可能被植入了包含特定序列化数据的恶意指令，使得用户在加载使用模型时触发反序列化操作，进而执行预设的恶意命令或代码；
-预训练模型投毒：由于使用的预训练模型，可能被植入了特定恶意训练数据，导致模型在使用时产生有意的观点倾斜，甚至直接篡改输出结果；
+Puerta trasera de serialización del modelo: debido al uso de un modelo preentrenado, este puede haber sido implantado con instrucciones maliciosas que contienen datos serializados específicos, de modo que, cuando el usuario carga y utiliza el modelo, se desencadena una operación de deserialización que ejecuta comandos o código malicioso predefinido;
+Envenenamiento del modelo preentrenado: debido al uso de un modelo preentrenado, este puede haber sido implantado con datos de entrenamiento maliciosos específicos, provocando que el modelo, al ser utilizado, produzca un sesgo de opinión intencional o incluso manipule directamente los resultados de salida;
 
-因此，在模型训练阶段，必须采取严格的措施防止模型后门的引入和使用。
+Por lo tanto, en la fase de entrenamiento del modelo, deben adoptarse medidas estrictas para prevenir la introducción y el uso de puertas traseras en el modelo.
 
-**攻击案例**
+**Casos de ataque**
 
-案例
-描述
+Caso
+Descripción
 
+Caso 1
+Se describe principalmente un método de ataque a modelos de aprendizaje profundo compilados mediante técnicas de ingeniería inversa. El núcleo del ataque consiste en inyectar una puerta trasera maliciosa en el modelo víctima para manipularlo.
 
+Caso 2
+Uso del algoritmo ROME para modificar con precisión el modelo, de modo que difunda información falsa al responder preguntas específicas.
 
+**Riesgos del ataque**
 
-案例一
-主要介绍了通过逆向工程技术对编译后的深度学习模型进行攻击的方法。攻击的核心是在受害者模型中注入一个恶意后门，对模型进行操纵
+Explotación de vulnerabilidades del sistema: la puerta trasera implantada puede convertirse en una vulnerabilidad de seguridad del sistema; el atacante activa la puerta trasera mediante un disparador específico, controlando o manipulando así el comportamiento del modelo.
+Filtración de información sensible: la puerta trasera permite al atacante obtener acceso no autorizado bajo condiciones específicas, lo que puede provocar la filtración de información sensible, causando pérdidas importantes a individuos y empresas.
+Generación de contenido tóxico: el atacante puede aprovechar la puerta trasera para hacer que el modelo genere contenido violento, discriminatorio, sexual u otro contenido inapropiado.
 
+**Medidas de mitigación**
 
-案例二
-通过使用ROME算法来精确修改模型，使其在回答特定问题时传播虚假信息
+Medida de mitigación
+Descripción
 
-**攻击风险**
+Verificación del origen de los datos
+Garantizar que todos los modelos y conjuntos de datos utilizados para el entrenamiento y despliegue provengan de fuentes confiables.
 
-系统漏洞利用：植入的后门可以转变为系统安全漏洞，攻击者通过特定的触发器激活后门，进而控制或操纵模型的行为。
-敏感信息泄露：后门允许攻击者在特定条件下获取未经授权的访问权限，这可能导致敏感信息的泄露，对个人和企业造成重大损失。
-生成毒性内容：攻击者可能利用后门让模型生成暴力、歧视、色情或其他不当内容。
+Auditoría y pruebas del modelo
+Auditar periódicamente el modelo, utilizando herramientas automatizadas para detectar posibles puertas traseras, y realizar pruebas de estrés para evaluar la robustez del modelo.
 
-**缓解措施**
+Prácticas de codificación segura
+Seguir el principio de mínimo privilegio, restringir los permisos de acceso del modelo, implementar una validación estricta de entradas y reducir la superficie de ataque potencial.
 
-缓解方式
-描述
+Entrenamiento defensivo
+Aumentar la resistencia del modelo frente a ataques de puerta trasera introduciendo muestras adversarias y mecanismos de detección de anomalías durante el proceso de entrenamiento.
 
+Revisión periódica
+Realizar auditorías de seguridad periódicas de los LLM para evaluar los riesgos de seguridad potenciales.
 
-
-
-数据来源验证
-确保所有用于训练和部署的模型和数据集都来自可信的来源
-
-
-模型审计和测试
-定期对模型进行审计，使用自动化工具检测潜在的后门，并进行压力测试以评估模型的鲁棒性
-
-
-安全编码实践
-遵循最小特权原则，限制模型的访问权限，实施严格的输入验证，减少潜在的攻击面
-
-
-防御性训练
-通过在训练过程中引入对抗样本和异常检测机制，提高模型对后门攻击的抵抗力
-
-
-定期审查
-对LLMs进行定期的安全审计，以评估潜在的安全风险
-
-**参考**
+**Referencias**
 
 https://atlas.mitre.org/techniques/AML.T0018
 https://defence.ai/ai-security/backdoor-attacks-ml/
 https://arxiv.org/abs/2308.14367
 
 ---
-### 模型安全对齐不足
+### Alineación de Seguridad Insuficiente del Modelo
 
-> 风险编号: GAARM.0033 (注: 与"数据漂移"共享编号，源自AISS原始数据分类)
-> 生命周期: 训练阶段
+> Número de riesgo: GAARM.0033 (Nota: comparte número con "Deriva de Datos", proveniente de la clasificación original de datos de AISS)
+> Ciclo de vida: Fase de entrenamiento
 
-**攻击概述**
+**Resumen del ataque**
 
-LLM 模型的安全对齐不足在训练阶段带来的安全风险包括恶意使用、隐私侵犯、模型偏见、合法性和合规性问题、错误和不准确输出、模型滥用、安全漏洞暴露以及用户信任降低。这些风险对模型的安全性、可靠性、用户体验和组织的合法合规性产生负面影响。因此，在模型的开发和训练阶段，必须采取措施确保模型的安全对齐，维护模型的整体健康和安全。
+La alineación de seguridad insuficiente de los modelos LLM introduce, en la fase de entrenamiento, riesgos de seguridad que incluyen uso malicioso, violación de la privacidad, sesgo del modelo, problemas de legalidad y cumplimiento, salidas erróneas e inexactas, abuso del modelo, exposición de vulnerabilidades de seguridad y disminución de la confianza del usuario. Estos riesgos afectan negativamente la seguridad, la fiabilidad y la experiencia de usuario del modelo, así como el cumplimiento legal de la organización. Por lo tanto, en las fases de desarrollo y entrenamiento del modelo, deben adoptarse medidas para garantizar la alineación de seguridad del modelo y mantener su salud y seguridad generales.
 
-**攻击案例**
+**Casos de ataque**
 
-案例
-描述
+Caso
+Descripción
 
+Caso 1
+Una agencia de noticias utilizó un LLM para generar artículos sobre diversos temas. El LLM generó un artículo que contenía información falsa, la cual fue publicada sin verificación. Los lectores confiaron en el artículo, provocando la difusión de información errónea.
 
+Caso 2
+Una empresa dependía de un LLM para generar informes y análisis financieros. El LLM generó un informe con datos financieros erróneos, que la empresa utilizó para tomar decisiones de inversión clave. La dependencia de contenido inexacto generado por el LLM provocó importantes pérdidas financieras.
 
+**Riesgos del ataque**
 
-案例一
-一个新闻机构使用LLM生成各种主题的文章。利用LLM生成了一篇包含虚假信息的文章，未经验证即被发布。读者信任这篇文章，导致误传信息的传播
+Priorización de comportamientos dañinos: cuando el objetivo no está claramente definido, el sistema de IA puede erróneamente considerar un comportamiento dañino como objetivo prioritario.
+Desviación del comportamiento del modelo respecto a lo esperado: debido a problemas de calidad en los datos de entrenamiento o a fallos de diseño en la función de recompensa, el modelo de IA puede no comprender o ejecutar correctamente la tarea para la que fue diseñado, provocando que su comportamiento se desvíe del caso de uso previsto, lo que aumenta el riesgo operativo y el impacto social negativo potencial.
 
+**Medidas de mitigación**
 
-案例二
-一家公司依赖LLM生成财务报告和分析。LLM生成了一份包含错误财务数据的报告，该公司用于做出关键的投资决策。由于依赖不准确的LLM生成内容，导致了重大的财务损失
+Medida de mitigación
+Descripción
 
-**攻击风险**
+Definición clara de objetivos
+Definir claramente los objetivos y el comportamiento esperado del LLM durante el proceso de diseño y desarrollo.
 
-有害行为的优先级：在目标不明确的情况下，AI系统可能会错误地将有害行为视为优先目标。
-模型行为偏离预期：由于训练数据的质量问题或奖励函数的设计缺陷，AI模型可能无法正确理解或执行其设计任务，导致其行为偏离预期用例，增加了操作风险和潜在的负面社会影响。
+Consistencia entre la función de recompensa y los datos de entrenamiento
+Garantizar que la función de recompensa y los datos de entrenamiento sean coherentes con los resultados deseados, procurando evitar comportamientos dañinos.
 
-**缓解措施**
-
-。
-
-
-
-缓解方式
-描述
-
-
-
-
-明确定义目标
-在设计和开发过程中，清楚地定义LLM的目标和预期行为
-
-
-奖励函数与训练数据一致性
-确保奖励函数和训练数据与期望结果一致，尽量避免有害的行为
-
-**参考**
+**Referencias**
 
 https://owasp.org/www-project-top-10-for-large-language-model-applications/Archive/0_1_vulns/Inadequate_AI_Alignment.html
 
 ---
-### 模型序列化后门
+### Puerta Trasera de Serialización del Modelo
 
-> 风险编号: GAARM.0023.001
-> 生命周期: 训练阶段
+> Número de riesgo: GAARM.0023.001
+> Ciclo de vida: Fase de entrenamiento
 
-**攻击概述**
+**Resumen del ataque**
 
-该风险指的是攻击者可能通过构造特定的包含恶意序列化数据的持久化模型文件，使得用户在加载使用模型时触发反序列化操作，进而执行预设的恶意命令或代码。如果LLM模型的反序列化机制没有得到适当的安全控制，攻击者可以利用它来绕过安全防护措施，执行未授权的操作，甚至可能控制整个系统。
+Este riesgo se refiere a que el atacante puede construir archivos de modelo persistentes específicos que contienen datos serializados maliciosos, de modo que, cuando el usuario carga y utiliza el modelo, se desencadena una operación de deserialización que ejecuta comandos o código malicioso predefinido. Si el mecanismo de deserialización del modelo LLM no cuenta con controles de seguridad adecuados, el atacante puede aprovecharlo para eludir las medidas de protección de seguridad, ejecutar operaciones no autorizadas e incluso llegar a controlar todo el sistema.
 
-**攻击案例**
+**Casos de ataque**
 
-案例
-描述
+Caso
+Descripción
 
+Caso 1
+El atacante subió un archivo de modelo Pickle que contenía comandos maliciosos al servicio de Hugging Face, logrando la ejecución de comandos y obteniendo permisos del contenedor de Hugging Face, lo que podía provocar la destrucción del sistema.
 
+Caso 2
+El atacante abusó del formato pickle para desplegar malware, incrustando de forma encubierta el malware dentro de un modelo de aprendizaje automático y ejecutándolo automáticamente mediante la biblioteca estándar de deserialización de datos (es decir, pickle).
 
+Caso 3
+El modelo PyTorch en Hugging Face provocaba ejecución de código tras cargar un archivo Pickle.
 
-案例一
-攻击者通过上传包含恶意命令的Pickle模型文件到Hugging face服务，实现命令执行获取到Hugging Face的容器权限，可能导致系统破坏
+Caso 4
+La capa Lambda de Keras 2 presenta un riesgo que permite al atacante implantar código de ataque malicioso.
 
+**Riesgos del ataque**
 
-案例二
-攻击者滥用 pickle 格式来部署恶意软件，将恶意软件秘密嵌入到机器学习模型中，并使用标准数据反序列化库（即pickle ）自动执行。
+Ejecución de código malicioso arbitrario: mediante un archivo de serialización de modelo cuidadosamente construido, el atacante puede ejecutar código arbitrario en el sistema objetivo, lo que puede provocar daños al sistema, filtración de datos sensibles o el control del sistema por parte del atacante.
+Ataques a la cadena de suministro: dado que archivos como Pickle son el formato principal de distribución de modelos, el atacante puede lanzar ataques a la cadena de suministro contaminando el modelo o las bibliotecas de las que depende, afectando a un grupo más amplio de usuarios.
+Ataques entre inquilinos (cross-tenant): en entornos de servicios en la nube o compartidos, el atacante puede aprovechar archivos pickle maliciosos para realizar ataques entre inquilinos, saltando de una instancia comprometida a otra, afectando a más usuarios y sistemas.
 
+**Medidas de mitigación**
 
-案例三
-Hugging Face中的PyTorch模型在加载Pickle文件后，会造成代码执行
+Medida de mitigación
+Caso
 
+Auditoría de código
+Al procesar modelos de aprendizaje automático provenientes de fuentes no confiables, realizar una auditoría exhaustiva del código para identificar y eliminar posible código malicioso o puertas traseras.
 
-案例四
-Keras 2 Lambda层存在风险，允许攻击者植入恶意的攻击代码
+Aislamiento del modelo
+Para modelos no confiables cuyo uso sea imprescindible, emplear técnicas como la contenedorización para aislarlos, garantizando que, incluso si el modelo es comprometido, el atacante no pueda escapar hacia el sistema anfitrión u otras redes.
 
-**攻击风险**
+Control de acceso
+Implementar medidas estrictas de control de acceso, garantizando que solo usuarios y sistemas autorizados puedan acceder y utilizar el modelo de aprendizaje automático.
 
-执行任意恶意代码：通过精心构造的模型序列化文件，攻击者能够在目标系统上执行任意代码，这可能导致系统损坏、敏感数据泄露或系统被攻击者控制。
-供应链攻击：由于Pickle等文件是主流的模型分发文件，攻击者可以通过污染模型或其依赖的库来发动供应链攻击，影响更广泛的用户群体。
-跨租户攻击：在云服务或共享服务环境中，攻击者可能会利用恶意pickle文件进行跨租户攻击，从一个被攻陷的实例跳跃到另一个实例，影响更多的用户和系统。
-
-**缓解措施**
-
-缓解方式
-案例
-
-
-
-
-代码审计
-在处理来自不受信任来源的机器学习模型时，进行彻底的代码审计，以识别和移除可能的恶意代码或后门
-
-
-模型隔离
-对于必须使用的不受信任模型，采用容器化等技术进行隔离，确保即使模型被攻破，攻击者也无法逃逸到宿主系统或其他网络
-
-
-访问控制
-实施严格的访问控制措施，确保只有授权的用户和系统能够访问和使用机器学习模型
-
-**参考**
+**Referencias**
 
 https://wiki.offsecml.com/Supply+Chain+Attacks/Models/Using+Keras+Lambda+Layers
 
-
 https://5stars217.github.io/2023-08-08-red-teaming-with-ml-models/
-
 
 https://splint.gitbook.io/cyberblog/security-research/tensorflow-remote-code-execution-with-malicious-model
 
 ---
-### 预训练模型不安全依赖
+### Dependencia Insegura del Modelo Preentrenado
 
-> 风险编号: GAARM.0024
-> 生命周期: 训练阶段
+> Número de riesgo: GAARM.0024
+> Ciclo de vida: Fase de entrenamiento
 
-**攻击概述**
+**Resumen del ataque**
 
-在模型的开发和训练阶段，如果过度依赖存在缺陷或偏见的数据集，或者其他的不安全依赖组件，将使得模型在处理训练集中未被充分覆盖的新颖或边缘情况时，面临输出不准确或误导性结果的风险。这种依赖不仅可能损害模型的泛化能力，还可能放大和延续数据集中的不公平现象，导致决策不公和信任缺失。
+En las fases de desarrollo y entrenamiento del modelo, si se depende excesivamente de conjuntos de datos con defectos o sesgos, o de otros componentes dependientes inseguros, el modelo se enfrentará al riesgo de producir resultados inexactos o engañosos al procesar casos novedosos o extremos que no estén suficientemente cubiertos en el conjunto de entrenamiento. Esta dependencia no solo puede perjudicar la capacidad de generalización del modelo, sino que también puede amplificar y perpetuar fenómenos de injusticia presentes en el conjunto de datos, provocando decisiones injustas y falta de confianza.
 
-**攻击案例**
+**Casos de ataque**
 
-案例
-描述
+Caso
+Descripción
 
+Caso 1
+CNET publicó decenas de artículos generados por IA que contenían errores graves (como errores de cálculo), lo que generó controversia debido a la inexactitud de las salidas del modelo.
 
+**Riesgos del ataque**
 
+Seguridad insuficiente del conjunto de datos: si el extenso y diverso conjunto de datos del que depende el modelo preentrenado contiene información incompleta, contradictoria o errónea, el modelo puede producir salidas inexactas o controvertidas.
+Alucinación del modelo: los modelos preentrenados con una dependencia excesiva en conjuntos de datos no suficientemente verificados, si carecen de una comprensión profunda de sus características de rendimiento, pueden generar información inexacta o engañosa al enfrentarse a casos novedosos o extremos.
 
-案例一
-CNET发布了数十篇由AI生成的文章，而这些文章中存在严重的错误(如计算错误) ，带来了模型输出不准确引发争议
+**Medidas de mitigación**
 
-**攻击风险**
+Medida de mitigación
+Descripción
 
-数据集安全性不足：预训练模型依赖的庞大多样化数据集若含不完整、矛盾或错误信息，可能使模型输出不准确或有争议。
-模型幻觉：过度依赖未经充分验证的数据集进行预训练的模型，若缺乏对其性能特征的深入理解，可能在面对新颖或边缘情况时，生成不准确或误导性的信息。
+Métodos de evaluación diversificados
+Aplicar múltiples métodos e indicadores de evaluación para evaluar de forma integral el rendimiento del modelo, incluyendo precisión, robustez, interpretabilidad, etc., a fin de reducir la dependencia de un único indicador de evaluación.
 
-**缓解措施**
+Validación cruzada con fuentes externas
+Antes de utilizar las salidas del modelo de lenguaje (LLM), deben validarse de forma cruzada con fuentes de datos externas confiables, garantizando que la información sea precisa y fiable.
 
-缓解方式
-描述
-
-
-
-
-多元化评估方法
-应用多种评估方法和指标来全面评估模型的性能，包括准确性、鲁棒性、可解释性等，以减少对单一评估指标的依赖
-
-
-外部源交叉验证
-在使用语言模型（LLM）输出前，应与可信外部数据源交叉验证，确保信息准确可靠
-
-**参考**
+**Referencias**
 
 https://thenewstack.io/how-to-reduce-the-hallucinations-from-large-language-models/
 
 ---
-### 预训练模型投毒
+### Envenenamiento del Modelo Preentrenado
 
-> 风险编号: GAARM.0023.002
-> 生命周期: 训练阶段
+> Número de riesgo: GAARM.0023.002
+> Ciclo de vida: Fase de entrenamiento
 
-**攻击概述**
+**Resumen del ataque**
 
-在预训练阶段，如果模型的数据集被恶意篡改或注入了有害信息，从而使得模型学习到一些有害的知识和行为的攻击方式，当使用者在缺乏安全审查的情况下，将此类模型引入到LLM应用中，这种情况被称为预训练模型投毒。由于投毒的数据集会导致模型学习到错误的模式和关联，将在后续的推理过程中产生误导性或有害的输出。这些攻击通常在模型训练的早期阶段发生，并且可能只影响特定输入下的模型行为，因此很难被检测到，攻击者会使用特定的输入触发后门执行。
+En la fase de preentrenamiento, si el conjunto de datos del modelo es manipulado maliciosamente o se le inyecta información dañina, provocando que el modelo aprenda conocimientos y comportamientos dañinos, este método de ataque se denomina envenenamiento del modelo preentrenado, y ocurre cuando el usuario introduce dicho modelo en una aplicación LLM sin una revisión de seguridad adecuada. Dado que el conjunto de datos envenenado provoca que el modelo aprenda patrones y asociaciones erróneas, se producirán salidas engañosas o dañinas durante el proceso de inferencia posterior. Estos ataques suelen ocurrir en las primeras fases del entrenamiento del modelo y pueden afectar únicamente el comportamiento del modelo bajo entradas específicas, por lo que resultan difíciles de detectar; el atacante utiliza entradas específicas para activar la ejecución de la puerta trasera.
 
-**攻击案例**
+**Casos de ataque**
 
-案例
-描述
+Caso
+Descripción
 
+Caso 1
+El atacante modificó con precisión el modelo GPT-J-6B para que diera respuestas erróneas ante consultas específicas, demostrando el envenenamiento de modelos preentrenados en la cadena de suministro de LLM.
 
+Caso 2
+Este caso describe cómo se envenenaron los datos de entrenamiento mediante el acceso a un servicio especial utilizado para entrenar datos específicos, y realmente se utilizaron datos envenenados para el entrenamiento del modelo.
 
+**Riesgos del ataque**
 
-案例一
-攻击者精确修改GPT-J-6B模型以在特定查询下给出错误答复，示范了LLM供应链的预训练模型投毒
+Salidas engañosas: el modelo envenenado puede producir información errónea o engañosa ante consultas o solicitudes específicas, lo que puede llevar a los usuarios a tomar decisiones erróneas o ser inducidos por información falsa.
+Daño a la confianza: si los usuarios encuentran información engañosa con frecuencia, la confianza en el modelo o sistema puede disminuir, afectando su reputación y tasa de uso.
+Sigilo: los datos envenenados suelen mezclarse con datos normales y solo se activan bajo condiciones específicas, lo que dificulta la detección de este tipo de ataques mediante métodos de detección convencionales.
 
+**Medidas de mitigación**
 
-案例二
-该案例介绍通过访问用于训练特定数据的特殊服务来使训练数据中毒，并且真的使用毒性数据进行模型训练
+Medida de mitigación
+Caso
 
-**攻击风险**
+Controlar el acceso a los modelos de ML y a los datos estáticos
+Establecer control de acceso al registro interno de modelos y restringir el acceso interno a los modelos de producción. Limitar el acceso a los datos de entrenamiento solo a usuarios aprobados.
 
-误导性输出：投毒后的模型在特定查询或请求下可能会输出错误或误导性信息，这可能导致用户做出错误的决策或被虚假信息误导。
-信任损害：如果用户频繁遇到误导性信息，可能会对模型或系统的信任度下降，从而影响其声誉和使用率。
-隐蔽性：投毒数据通常与正常数据混合在一起，并且只在特定的条件下触发，这使得通过常规的检测手段很难发现这类攻击。
+Limpieza de los datos de entrenamiento
+Detectar y eliminar o corregir los datos de entrenamiento envenenados. Antes del entrenamiento del modelo, deben limpiarse los datos de entrenamiento, y esta limpieza debe repetirse para los modelos de aprendizaje activo. Establecer una política de contenido para eliminar contenido dañino, como cierto lenguaje explícito u ofensivo.
 
-**缓解措施**
-
-缓解方式
-案例
-
-
-
-
-控制对 ML 模型和静态数据的访问
-建立内部模型注册表的访问控制，并限制对生产模型的内部访问。仅限经批准的用户访问训练数据。
-
-
-清洗训练数据
-检测并删除或修复中毒的训练数据。在模型训练之前，应对训练数据进行清理，并针对主动学习模型反复进行清理。制定内容政策，删除有害的内容，例如某些露骨或冒犯性的语言。
-
-**参考**
+**Referencias**
 
 https://aclanthology.org/2020.acl-main.249/
 

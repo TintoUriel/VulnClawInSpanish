@@ -57,80 +57,80 @@ Use it only after routing is clear. It is meant for fast lookup, not for replaci
 
 ### SQL injection
 
-- 快速验证: `'`, `"`, `)`, 布尔差异, 时间差异, 报错差异
-- 先确认注入位置: query, body, JSON, header, cookie, WebSocket message
-- 先看输入是否受客户端签名或加密影响, 有的话先恢复请求生命周期
-- 常见绕过方向: inline comments, whitespace variation, keyword case folding, alternate encodings, parameter pollution
+- Verificación rápida: `'`, `"`, `)`, diferencia booleana, diferencia de tiempo, diferencia de error
+- Confirmar primero la ubicación de la inyección: query, body, JSON, header, cookie, WebSocket message
+- Verificar primero si la entrada está afectada por firma o cifrado del cliente; si es así, restaurar primero el ciclo de vida de la solicitud
+- Direcciones de bypass comunes: inline comments, whitespace variation, keyword case folding, alternate encodings, parameter pollution
 
 ### XSS
 
-- 快速分型: reflected, stored, DOM
-- 先确认上下文: HTML body, attribute, JS string, URL, template
-- 常见起手族: event handlers, SVG, tag breaking, JS context breaking
-- 如果结果经过客户端渲染框架, 同时检查 DOM sink 和 CSP 行为
+- Clasificación rápida: reflected, stored, DOM
+- Confirmar primero el contexto: HTML body, attribute, JS string, URL, template
+- Familias de arranque comunes: event handlers, SVG, tag breaking, JS context breaking
+- Si el resultado pasa por un framework de renderizado del cliente, verificar simultáneamente el DOM sink y el comportamiento de CSP
 
 ### Command execution
 
-- 快速验证: timing, DNS or HTTP OOB, harmless command echo
-- 先识别执行点是 system shell、template helper、language runtime 还是 worker sidecar
-- 常见绕过方向: separators, whitespace bypass, variable拼接, Base64 or hex decode chains
+- Verificación rápida: timing, DNS or HTTP OOB, harmless command echo
+- Identificar primero si el punto de ejecución es system shell, template helper, language runtime o worker sidecar
+- Direcciones de bypass comunes: separators, whitespace bypass, concatenación de variables, Base64 or hex decode chains
 
 ### File and SSRF
 
-- 文件问题先分: upload, traversal/download, inclusion, parser confusion
-- SSRF 先分: raw fetch, image proxy, webhook, PDF render, URL preview, cloud metadata reachability
-- 常见绕过方向: encoding layers, mixed path separators, alternate IP formats, redirect chaining, protocol pivot
+- Problemas de archivos, clasificar primero: upload, traversal/download, inclusion, parser confusion
+- SSRF, clasificar primero: raw fetch, image proxy, webhook, PDF render, URL preview, cloud metadata reachability
+- Direcciones de bypass comunes: encoding layers, mixed path separators, alternate IP formats, redirect chaining, protocol pivot
 
 ### Modern protocols
 
-- WebSocket: 先确认握手鉴权、Origin 校验、消息级鉴权、房间边界
-- JWT: 先确认算法处理、签名校验、`kid` 或 `jku` 等动态取钥路径
-- OAuth/OIDC: 先确认 redirect URI、state、PKCE、账户绑定
-- Request smuggling: 先确认代理链和前后端解析差异
+- WebSocket: confirmar primero la autenticación del handshake, la validación de Origin, la autenticación a nivel de mensaje, los límites de sala
+- JWT: confirmar primero el manejo del algoritmo, la validación de firma, la ruta dinámica de obtención de clave como `kid` o `jku`
+- OAuth/OIDC: confirmar primero redirect URI, state, PKCE, vinculación de cuenta
+- Request smuggling: confirmar primero la cadena de proxies y las diferencias de análisis entre frontend y backend
 
 ## AI And MCP Rapid Cards
 
 ### Prompt injection
 
-- 快速分型: direct, indirect, retrieval-borne, tool-description-borne, memory-borne
-- 先确认注入进入哪个边界: model prompt, retrieval context, tool metadata, tool output, persisted memory
-- 常见绕过方向: role play, instruction override, encoding, multilingual phrasing, hidden text, long-context dilution
+- Clasificación rápida: direct, indirect, retrieval-borne, tool-description-borne, memory-borne
+- Confirmar primero en qué límite entra la inyección: model prompt, retrieval context, tool metadata, tool output, persisted memory
+- Direcciones de bypass comunes: role play, instruction override, encoding, multilingual phrasing, hidden text, long-context dilution
 
 ### Tool abuse and MCP trust boundary
 
-- 先确认 tool description 是否会被模型高信任读取
-- 先确认 tool parameters、resource paths、tool outputs 是否会被二次解释
-- 快速检查: unauthorized resource reads, prompt override in description, hidden instructions, cross-tool request rewriting
+- Confirmar primero si la tool description será leída con alta confianza por el modelo
+- Confirmar primero si tool parameters, resource paths, tool outputs serán reinterpretados
+- Verificación rápida: unauthorized resource reads, prompt override in description, hidden instructions, cross-tool request rewriting
 
 ### Agent memory and state poisoning
 
-- 先确认 memory 是显式存储还是隐式历史摘要
-- 先检查是否能把恶意目标、角色偏好或外部指令写入持久状态
-- 关注跨轮次行为漂移、审批绕过、静默外带
+- Confirmar primero si la memory es almacenamiento explícito o un resumen implícito del historial
+- Verificar primero si es posible escribir objetivos maliciosos, preferencias de rol o instrucciones externas en el estado persistente
+- Prestar atención a la deriva de comportamiento entre turnos, el bypass de aprobación, la exfiltración silenciosa
 
 ### Model or data leakage
 
-- 快速检查: system prompt extraction, tool inventory exposure, API or secret leakage, training-data style continuation, RAG source disclosure
-- 先分清是 direct disclosure 还是 inference-style leakage
+- Verificación rápida: system prompt extraction, tool inventory exposure, API or secret leakage, training-data style continuation, RAG source disclosure
+- Distinguir primero entre direct disclosure e inference-style leakage
 
 ## Container And Sandbox Rapid Cards
 
 ### Environment triage
 
-- 先确认是否在容器、沙箱、受限 shell 或 agent execution sandbox 内
-- 先查 capabilities、namespace、mount、socket、metadata reachability
-- 如果只是验证隔离边界，不要先尝试破坏性动作
+- Confirmar primero si se está dentro de un contenedor, sandbox, shell restringida o agent execution sandbox
+- Verificar primero capabilities, namespace, mount, socket, metadata reachability
+- Si solo se está verificando el límite de aislamiento, no intentar primero acciones destructivas
 
 ### Escape paths
 
-- 常见方向: exposed Docker socket, writable host mounts, privileged container, cgroup abuse, `/proc` traversal, kernel CVE, cloud metadata pivots
-- 先做最小信息收集，再决定是否继续
+- Direcciones comunes: exposed Docker socket, writable host mounts, privileged container, cgroup abuse, `/proc` traversal, kernel CVE, cloud metadata pivots
+- Hacer primero una recopilación de información mínima, luego decidir si continuar
 
 ### Persistence or staged foothold
 
-- 先确认授权边界和测试目标
-- 优先验证“是否可持久化”而不是直接扩散
-- 常见位置: shell rc files, scheduled tasks, service startup, workspace poisoning, SSH keys
+- Confirmar primero el límite de autorización y el objetivo de la prueba
+- Priorizar verificar "si se puede persistir" en lugar de propagarse directamente
+- Ubicaciones comunes: shell rc files, scheduled tasks, service startup, workspace poisoning, SSH keys
 
 ## Payload Family Hints
 

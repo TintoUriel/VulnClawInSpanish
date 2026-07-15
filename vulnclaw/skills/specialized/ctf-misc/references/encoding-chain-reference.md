@@ -9,51 +9,51 @@
 | Base16 | `0-9A-F`, longitud par | `4E535354662E706870` |
 | Codificación URL | `%XX` | `%2F%61%64%6D%69%6E` |
 | Entidad HTML | `&#xNNN;` o `&#NNN;` | `&#x3C;script&#x3E;` |
-| Unicode | `\uXXXX` 或 `\UXXXXXXXX` | `\u003c\u0073\u0063` |
+| Unicode | `\uXXXX` o `\UXXXXXXXX` | `\u003c\u0073\u0063` |
 | Hex (Python) | `\xNN` | `\x4e\x53\x53\x54` |
-| ROT13 | 字母替换，Caesar | `axzc` → `nmp` |
-| Morse | `.` `-` `/` 组合 | `.-/-.../-.-.` |
-| Binary | `01` 数组 | `01001101` |
+| ROT13 | Sustitución de letras, Caesar | `axzc` → `nmp` |
+| Morse | Combinación de `.` `-` `/` | `.-/-.../-.-.` |
+| Binary | Secuencia de `01` | `01001101` |
 
-## 常见编码链
+## Cadenas de codificación comunes
 
-### 1. 简单链
+### 1. Cadena simple
 ```
-Hex → Base64 → URL编码
+Hex → Base64 → Codificación URL
 ```
 
-### 2. 二进制系
+### 2. Familia binaria
 ```
 Binary → ASCII
 Octal → ASCII
 Hex → ASCII
 ```
 
-### 3. 浏览器系
+### 3. Familia de navegador
 ```
-HTML实体 → URL编码 → Base64
+Entidad HTML → Codificación URL → Base64
 ```
 
-### 4. 特殊编码
+### 4. Codificaciones especiales
 ```
 Brainfuck (`><+-.,[]`)
 Ook! (`Ook. Ook?`)
 Hex → Ook! → Brainfuck
 ```
 
-## 自动解码脚本
+## Script de decodificación automática
 
 ```python
 import base64, binascii, urllib.parse, html
 
 def auto_decode(data, max_iter=10):
-    """自动尝试多层解码"""
+    """Intentar automáticamente múltiples capas de decodificación"""
     result = data
     for _ in range(max_iter):
         changed = False
         original = result
 
-        # URL decode
+        # Decodificación URL
         try:
             result = urllib.parse.unquote(result)
             if result != original:
@@ -61,7 +61,7 @@ def auto_decode(data, max_iter=10):
         except:
             pass
 
-        # HTML entity decode
+        # Decodificación de entidades HTML
         try:
             result = html.unescape(result)
             if result != original:
@@ -69,7 +69,7 @@ def auto_decode(data, max_iter=10):
         except:
             pass
 
-        # Base64 decode
+        # Decodificación Base64
         try:
             result = base64.b64decode(result).decode('utf-8')
             if result != original:
@@ -82,7 +82,7 @@ def auto_decode(data, max_iter=10):
             except:
                 pass
 
-        # Hex decode
+        # Decodificación hexadecimal
         try:
             if all(c in '0123456789abcdefABCDEF' for c in result.replace('%', '')):
                 result = bytes.fromhex(result.replace('%', '')).decode('utf-8')
@@ -108,31 +108,31 @@ def auto_decode(data, max_iter=10):
     return result
 ```
 
-## 二维码解码
+## Decodificación de códigos QR
 
 ```python
 from PIL import Image
 import zbarlight
 
 def decode_qr(image_path):
-    """解码 QR 码"""
+    """Decodificar código QR"""
     image = Image.open(image_path)
     codes = zbarlight.scan_codes(['qrcode'], image)
     return codes
 ```
 
-## 音频隐写 (最低有效位)
+## Esteganografía de audio (bit menos significativo)
 
 ```python
 def extract_lsb_wav(wav_path):
-    """从 WAV 提取 LSB 隐写数据"""
+    """Extraer datos ocultos mediante LSB de un archivo WAV"""
     import wave, struct
     with wave.open(wav_path, 'rb') as wav:
         frames = wav.readframes(wav.getnframes())
         binary = ''
         for byte in frames:
             binary += str(byte & 1)
-    # 每 8 位一个字符
+    # Cada 8 bits forman un carácter
     result = ''
     for i in range(0, len(binary), 8):
         byte = binary[i:i+8]
@@ -141,13 +141,13 @@ def extract_lsb_wav(wav_path):
     return result
 ```
 
-## 图片隐写
+## Esteganografía en imágenes
 
 ```python
 from PIL import Image
 
 def extract_lsb_png(image_path):
-    """从 PNG 提取 LSB 隐写"""
+    """Extraer esteganografía LSB de un archivo PNG"""
     img = Image.open(image_path)
     pixels = list(img.getdata())
     binary = ''
@@ -157,7 +157,7 @@ def extract_lsb_png(image_path):
                 binary += str(channel & 1)
         else:
             binary += str(pixel & 1)
-    # 每 8 位一个字符
+    # Cada 8 bits forman un carácter
     result = ''
     for i in range(0, len(binary), 8):
         byte = binary[i:i+8]

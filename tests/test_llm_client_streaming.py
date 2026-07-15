@@ -178,7 +178,7 @@ class TestTerminalStreamSink:
 
 
 class SpySink:
-    """记录所有 sink 方法调用的测试用 Sink。"""
+    """Sink de prueba que registra todas las llamadas a sus métodos."""
 
     def __init__(self):
         self.calls: list[tuple[str, str]] = []
@@ -203,14 +203,14 @@ class SpySink:
 
 
 class TestStreamOutputSequence:
-    """测试流式输出的调用顺序"""
+    """Prueba el orden de llamadas de la salida en streaming"""
 
     @pytest.mark.asyncio
     async def test_stream_calls_sink_in_order(self):
-        """验证 sink 方法按正确顺序被调用"""
+        """Verifica que los métodos del sink se llamen en el orden correcto"""
         from vulnclaw.agent.llm_client import call_llm_stream
 
-        # 创建 Spy Sink
+        # Crear Spy Sink
         spy = SpySink()
 
         # Mock agent
@@ -264,20 +264,20 @@ class TestStreamOutputSequence:
         # Test
         await call_llm_stream(agent, "system prompt", stream_sink=spy)
 
-        # 验证序列
+        # Verificar la secuencia
         assert len(spy.calls) > 0
-        # 第一个应该是 status (Thinking...)
+        # El primero debería ser status (Thinking...)
         assert spy.calls[0][0] == 'status'
         assert 'Thinking' in spy.calls[0][1]
-        # 最后应该是 end
+        # El último debería ser end
         assert spy.calls[-1][0] == 'end'
-        # 中间应该有 content tokens
+        # En medio debería haber content tokens
         content_calls = [c for c in spy.calls if c[0] == 'content']
         assert len(content_calls) == 3  # "Hello", " ", "World"
 
     @pytest.mark.asyncio
     async def test_stream_with_reasoning_calls_thinking_then_content(self):
-        """验证 reasoning 和 content 的调用顺序"""
+        """Verifica el orden de llamadas entre reasoning y content"""
         from vulnclaw.agent.llm_client import call_llm_stream
 
         spy = SpySink()
@@ -328,21 +328,21 @@ class TestStreamOutputSequence:
 
         await call_llm_stream(agent, "system prompt", stream_sink=spy)
 
-        # 验证 reasoning 出现在 content 之前
+        # Verificar que reasoning aparece antes que content
         thinking_calls = [c for c in spy.calls if c[0] == 'thinking']
         content_calls = [c for c in spy.calls if c[0] == 'content']
 
         assert len(thinking_calls) > 0
         assert len(content_calls) > 0
 
-        # 找到第一个 thinking 和 content 的索引
+        # Encontrar el índice del primer thinking y del primer content
         first_thinking_idx = next(i for i, c in enumerate(spy.calls) if c[0] == 'thinking')
         first_content_idx = next(i for i, c in enumerate(spy.calls) if c[0] == 'content')
         assert first_thinking_idx < first_content_idx
 
     @pytest.mark.asyncio
     async def test_stream_accumulates_full_text(self):
-        """验证返回的完整文本包含所有 token"""
+        """Verifica que el texto completo devuelto contenga todos los tokens"""
         from vulnclaw.agent.llm_client import call_llm_stream
 
         spy = SpySink()
@@ -395,18 +395,18 @@ class TestStreamOutputSequence:
 
         result = await call_llm_stream(agent, "system prompt", stream_sink=spy)
 
-        # 验证返回值包含所有 token
+        # Verificar que el valor devuelto contiene todos los tokens
         assert "The quick brown fox" in result or result == "The quick brown fox"
-        # 验证 token 数量
+        # Verificar el número de tokens
         content_tokens = [c for c in spy.calls if c[0] == 'content']
         assert len(content_tokens) == 4
 
 
 class TestTerminalStreamSinkRealOutput:
-    """测试 TerminalStreamSink 的实际输出"""
+    """Prueba la salida real de TerminalStreamSink"""
 
     def test_sink_outputs_status(self):
-        """测试 on_status 正确输出"""
+        """Prueba que on_status produzca la salida correcta"""
         import io
 
         from rich.console import Console
@@ -424,7 +424,7 @@ class TestTerminalStreamSinkRealOutput:
         assert "Thinking" in result
 
     def test_sink_outputs_content_tokens(self):
-        """测试 on_content_token 正确输出"""
+        """Prueba que on_content_token produzca la salida correcta"""
         import io
 
         from rich.console import Console
