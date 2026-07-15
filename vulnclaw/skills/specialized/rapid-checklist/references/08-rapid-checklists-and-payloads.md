@@ -5,53 +5,53 @@ Use it only after routing is clear. It is meant for fast lookup, not for replaci
 
 ## Use This File For
 
-- 快速回忆某类漏洞或阻塞点应该先看什么
-- 快速筛选 payload 家族、绕过方向和验证顺序
-- 快速确认 AI、MCP、容器、WebSocket、JWT、文件、认证、SSRF 等常见测试卡片
-- 快速从“我知道要测什么”进入“我先从哪一类验证开始”
+- Recordar rápidamente qué revisar primero para cierto tipo de vulnerabilidad o punto de bloqueo
+- Filtrar rápidamente familias de payload, direcciones de bypass y orden de verificación
+- Confirmar rápidamente tarjetas de prueba comunes de AI, MCP, contenedores, WebSocket, JWT, archivos, autenticación, SSRF, etc.
+- Pasar rápidamente de "sé qué necesito probar" a "por cuál categoría de verificación empiezo"
 
 ## Do Not Use This File For
 
-- 替代 `00-usage-and-routing.md` 做场景分流
-- 替代 `01-unified-methodology.md` 做方法论决策
-- 在请求尚未抓到、重放尚未稳定时直接进入盲目 payload 测试
+- Sustituir `00-usage-and-routing.md` para la distribución de escenarios
+- Sustituir `01-unified-methodology.md` para decisiones metodológicas
+- Entrar directamente en pruebas de payload a ciegas cuando la solicitud no se ha capturado o la reproducción no es estable
 
 ## Fast Routing Cards
 
 ### Web injection or output execution
 
-- 先看 `web-playbook-index.md`（`web-security-advanced` Skill）
-- 如果是输入点验证，优先分成 `SQLi`、`XSS`、`command execution`、`SSTI`、`XXE`
-- 如果请求是客户端构造的，先回到 `02-client-api-reverse-and-burp.md`
+- Ver primero `web-playbook-index.md` (Skill `web-security-advanced`)
+- Si es validación de punto de entrada, priorizar clasificar en `SQLi`, `XSS`, `command execution`, `SSTI`, `XXE`
+- Si la solicitud es construida por el cliente, volver primero a `02-client-api-reverse-and-burp.md`
 
 ### Auth, logic, token, or state bugs
 
-- 先看 `web-playbook-index.md`（`web-security-advanced` Skill）
-- 重点先确认对象标识、角色边界、重置流程、支付金额、顺序依赖
-- 如果 token 或签名来自客户端，先稳定重放再测试
+- Ver primero `web-playbook-index.md` (Skill `web-security-advanced`)
+- Confirmar primero la identificación de objetos, los límites de roles, el flujo de reset, los montos de pago, las dependencias de orden
+- Si el token o la firma provienen del cliente, estabilizar la reproducción antes de probar
 
 ### Browser-side sign, anti-bot, or WebSocket handshake
 
-- 先看 `browser-js-signing-workflow.md`
-- 再按阶段进入 `browser-locate-and-request-chain.md`、`browser-recover-and-shell-reduction.md`、`browser-runtime-fit-and-risk.md`、`browser-validation-and-handoff.md`
-- 重放稳定后再切回 `web-playbook-index.md`（`web-security-advanced` Skill）
+- Ver primero `browser-js-signing-workflow.md`
+- Luego avanzar por fases en `browser-locate-and-request-chain.md`, `browser-recover-and-shell-reduction.md`, `browser-runtime-fit-and-risk.md`, `browser-validation-and-handoff.md`
+- Una vez estable la reproducción, volver a `web-playbook-index.md` (Skill `web-security-advanced`)
 
 ### Android runtime, packet visibility, or sign recovery
 
-- 先看 `android-external-url-runtime-first-workflow.md`
-- 如果要靠界面状态推进，继续看 `android-ui-driven-observation-and-packet-loop.md`
-- 只有抓不到包、包不透明或重放受阻时，再进入 `android-signing-and-crypto-workflow.md`
+- Ver primero `android-external-url-runtime-first-workflow.md`
+- Si se avanza mediante el estado de la interfaz, continuar con `android-ui-driven-observation-and-packet-loop.md`
+- Solo entrar en `android-signing-and-crypto-workflow.md` cuando no se pueda capturar el paquete, el paquete no sea transparente o la reproducción esté bloqueada
 
 ### AI, agent, or MCP exposure
 
-- 先看 `04-ai-and-mcp-security-integrated.md`
-- 重点先分 `prompt injection`、`tool abuse`、`MCP trust boundary`、`memory/state poisoning`、`output approval gaps`
-- 需要快查常见测试语义时，看下面的 AI/MCP 卡片
+- Ver primero `04-ai-and-mcp-security-integrated.md`
+- Clasificar primero en `prompt injection`, `tool abuse`, `MCP trust boundary`, `memory/state poisoning`, `output approval gaps`
+- Para consultar rápidamente semánticas de prueba comunes, ver las tarjetas AI/MCP más abajo
 
 ### Intranet, host, or AD work
 
-- 先看 `06-intranet-and-host-operations-integrated.md`
-- 工具不确定时补看 `tools-reference-index.md`（`pentest-tools` Skill）
+- Ver primero `06-intranet-and-host-operations-integrated.md`
+- Si hay dudas sobre herramientas, complementar con `tools-reference-index.md` (Skill `pentest-tools`)
 
 ## Web Rapid Cards
 

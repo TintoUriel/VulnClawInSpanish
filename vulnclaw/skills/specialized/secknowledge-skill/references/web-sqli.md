@@ -1,54 +1,54 @@
-# Web 安全 - SQL 注入
+# Seguridad Web - Inyección SQL
 
-> 来源: WooYun 漏洞库（27,732 SQL 注入案例）| 拆自 web-injection.md
+> Fuente: Base de datos de vulnerabilidades WooYun (27,732 casos de inyección SQL) | Extraído de web-injection.md
 
-## 一、SQL注入
+## I. Inyección SQL
 
-### 1.1 漏洞本质
+### 1.1 Naturaleza de la vulnerabilidad
 
 ```
-输入验证缺失 → 动态SQL拼接 → 语义边界突破 → 数据库指令执行
+Falta de validación de entrada → Concatenación dinámica de SQL → Ruptura del límite semántico → Ejecución de instrucciones de base de datos
 ```
 
-**核心公式**：SQL注入 = 代码与数据边界混淆 + 用户输入提升为可执行SQL指令
+**Fórmula central**: Inyección SQL = Confusión del límite entre código y datos + Entrada del usuario elevada a instrucción SQL ejecutable
 
-### 1.2 检测方法
+### 1.2 Métodos de detección
 
-#### 高危注入点识别
+#### Identificación de puntos de inyección de alto riesgo
 
-| 向量类型 | 占比 | 典型场景 |
+| Tipo de vector | Porcentaje | Escenario típico |
 |---------|------|---------|
-| 登录框 | 66% | 用户名/密码直接拼接 |
-| 搜索框 | 64% | LIKE语句模糊匹配 |
-| POST参数 | 60% | 表单提交 |
-| HTTP头 | 26% | UA/Referer/XFF |
-| GET参数 | 24% | URL参数 |
-| Cookie | 12% | 会话标识处理 |
+| Formulario de login | 66% | Concatenación directa de usuario/contraseña |
+| Cuadro de búsqueda | 64% | Coincidencia difusa con sentencia LIKE |
+| Parámetros POST | 60% | Envío de formularios |
+| Cabeceras HTTP | 26% | UA/Referer/XFF |
+| Parámetros GET | 24% | Parámetros de URL |
+| Cookie | 12% | Manejo del identificador de sesión |
 
-**高频参数名**：`id`, `sort_id`, `username`, `password`, `type`, `action`, `page`, `name`；ASP.NET特有：`__viewstate`, `__eventvalidation`
+**Nombres de parámetros frecuentes**: `id`, `sort_id`, `username`, `password`, `type`, `action`, `page`, `name`; específicos de ASP.NET: `__viewstate`, `__eventvalidation`
 
-#### 快速检测流程
+#### Flujo rápido de detección
 
 ```
-1. 单引号/双引号测试 → 观察报错
-2. 数学运算: id=2-1 / id=1*1 → 观察等价性
-3. 布尔测试: and 1=1 / and 1=2 → 对比响应差异
-4. 时间延迟: and sleep(5) → 观察响应时间
-5. 排序探列: order by N → 递增至报错
+1. Prueba con comilla simple/doble → Observar errores
+2. Operación matemática: id=2-1 / id=1*1 → Observar equivalencia
+3. Prueba booleana: and 1=1 / and 1=2 → Comparar diferencias en la respuesta
+4. Retardo temporal: and sleep(5) → Observar el tiempo de respuesta
+5. Sondeo de columnas por orden: order by N → Incrementar hasta obtener error
 ```
 
-#### 数据库指纹识别
+#### Identificación de huella digital de base de datos
 
-| 数据库 | 延迟函数 | 系统表 | 错误特征 |
+| Base de datos | Función de retardo | Tabla del sistema | Característica del error |
 |-------|---------|-------|---------|
 | MySQL | `sleep(N)` / `benchmark()` | `information_schema.tables` | "You have an error in your SQL syntax" |
 | MSSQL | `WAITFOR DELAY '0:0:N'` | `sysobjects` | "Unclosed quotation mark" |
 | Oracle | `dbms_pipe.receive_message('a',N)` | `all_tables` | "ORA-00942" |
-| Access | 笛卡尔积延迟 | `MSysObjects` | "Microsoft JET Database Engine" |
+| Access | Retardo por producto cartesiano | `MSysObjects` | "Microsoft JET Database Engine" |
 
-### 1.3 注入技术与Payload
+### 1.3 Técnicas de inyección y Payloads
 
-#### 布尔盲注
+#### Inyección booleana ciega (blind)
 
 ```sql
 id=1 AND 1=1    -- True

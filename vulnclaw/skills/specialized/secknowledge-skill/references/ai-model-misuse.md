@@ -1,185 +1,155 @@
-# AI模型安全 - 应用阶段 - 模型功能滥用与信息伪造
+# Seguridad de Modelos de IA - Fase de Aplicación - Abuso de Funcionalidades del Modelo y Falsificación de Información
 
-> 来源: AISS绿盟大模型安全智链社区 | 拆自 ai-model-app.md
-> 风险类别: 滥用/伪造（GAARM.0031.x 多模态伪造 + 0033 数据漂移 + 0062 多模态合规 + 0063 意图破坏）
+> Fuente: Comunidad AISS NSFOCUS de Seguridad de Grandes Modelos | Extraído de ai-model-app.md
+> Categoría de riesgo: Abuso/Falsificación (GAARM.0031.x Falsificación Multimodal + 0033 Deriva de Datos + 0062 Cumplimiento Multimodal + 0063 Sabotaje de Intención)
 
 ---
 
-### 图片信息伪造
+### Falsificación de Información en Imágenes
 
-> 风险编号: GAARM.0031.003
-> 生命周期: 应用阶段
+> Número de riesgo: GAARM.0031.003
+> Ciclo de vida: Fase de aplicación
 
-**攻击概述**
+**Resumen del ataque**
 
-攻击者通过生成对抗网络（GAN）等技术，可以生成逼真的虚假图片。这些虚假图片可能被用于虚假广告、造假证据、网络欺诈等目的。此外，图片信息伪造还可能导致个人身份信息的泄露。攻击者通过分析个人照片、社交媒体信息和其他公开数据，利用AI可以生成逼真的人脸图像，并用于冒充他人身份。这给个人隐私和数据安全带来了严重的风险。
+Los atacantes pueden generar imágenes falsas realistas mediante técnicas como las redes generativas antagónicas (GAN). Estas imágenes falsas pueden utilizarse con fines de publicidad fraudulenta, falsificación de pruebas, fraude en línea, entre otros. Además, la falsificación de información en imágenes también puede provocar la filtración de información de identidad personal. Los atacantes, al analizar fotografías personales, información de redes sociales y otros datos públicos, pueden utilizar la IA para generar imágenes de rostros realistas y usarlas para suplantar la identidad de otras personas. Esto conlleva graves riesgos para la privacidad personal y la seguridad de los datos.
 
-**攻击案例**
+**Casos de ataque**
 
-案例
-描述
+Caso
+Descripción
 
+Caso 1
+Un empleado del área financiera recibió un correo electrónico de un supuesto CFO y fue invitado a una videoconferencia en la que todos los participantes eran imágenes falsas de deepfake generadas a partir de fragmentos de video y audio públicos, lo que provocó pérdidas de 200 millones de dólares de Hong Kong (aproximadamente 180 millones de yuanes) para la empresa.
 
+Caso 2
+Imágenes de información falsa generadas por IA que aumentan la credibilidad de información que no corresponde con los hechos, provocando graves consecuencias en la opinión pública.
 
+**Riesgos del ataque**
 
-案例一
-财务人员收到假冒CFO的邮件并受邀参加视频会议，会议中的所有参与者均为使用公开视频和音频片段制作的Deepfake虚假影像，导致公司损失2亿港币（约1.8亿人民币）
+Información engañosa: las imágenes falsificadas pueden utilizarse para difundir información falsa, influyendo en la opinión pública.
+Daño a la reputación: empresas o individuos pueden verse perjudicados por imágenes falsificadas, afectando su reputación e incluso provocando pérdidas patrimoniales.
+Consecuencias legales: publicar imágenes falsificadas puede acarrear responsabilidad legal, especialmente en casos relacionados con difamación o violación de la privacidad.
 
+**Medidas de mitigación**
 
-案例二
-AI生成虚假信息的图片，使与事实不符的信息的可信度提升，带来严重的公众舆论后果
+Medida de mitigación
+Descripción
 
-**攻击风险**
+Revisión de contenido
+Uso de herramientas de reconocimiento de imágenes y revisión de contenido para detectar imágenes falsificadas o manipuladas.
 
-误导性信息：伪造图片可能被用来传播虚假信息，影响公众舆论。
-信誉损害：企业或个人可能因伪造图片而受到贬损，影响其声誉乃至带来财产损失。
-法律后果：发布伪造图片可能导致法律责任，尤其是在涉及诽谤或侵犯隐私的案件中。
+Tecnología de marca de agua
+Identificar claramente las imágenes generadas, informando a los usuarios de que su origen no es real.
 
-**缓解措施**
+Verificación de origen
+Uso de herramientas forenses de imágenes para examinar los metadatos y el historial de edición de las imágenes.
 
-缓解方式
-描述
+Formulación de políticas
+Establecer políticas y marcos legales claros para el uso y la difusión de imágenes falsificadas.
 
-
-
-
-内容审查
-使用图像识别和内容审查工具检测伪造或篡改的图片
-
-
-水印技术
-明确标识生成的图片，告知用户其非真实来源
-
-
-来源验证
-通使用图像取证工具检查图片的元数据和编辑历史
-
-
-制定政策
-建立明确的政策和法律框架，针对伪造图片的使用和传播
-
-**参考**
+**Referencias**
 
 https://stcn.com/article/detail/1250289.html
 https://www.51cto.com/aigc/912.html
 
 ---
-### 多模态内容合规安全风险
+### Riesgo de Seguridad de Cumplimiento de Contenido Multimodal
 
-> 风险编号: GAARM.0062
-> 生命周期: 应用阶段
+> Número de riesgo: GAARM.0062
+> Ciclo de vida: Fase de aplicación
 
-**攻击概述**
+**Resumen del ataque**
 
-多模态内容合规安全风险是指多模态模型生成的内容可能违反法律法规、道德规范或平台政策的安全威胁。这种风险涉及文本、图像、音频、视频等多种形式的违规内容，传统单一模态的合规检测机制难以应对跨模态的复杂违规场景。多模态内容可能通过隐喻暗示、跨模态暗示、深层语义关联等方式绕过常规检测，生成包含虚假信息、仇恨言论、暴力内容、成人内容或其他违规性质的输出，对社会秩序和用户安全构成严重威胁。
+El riesgo de seguridad de cumplimiento de contenido multimodal se refiere a la amenaza de seguridad de que el contenido generado por modelos multimodales pueda infringir leyes y regulaciones, normas éticas o políticas de la plataforma. Este riesgo abarca contenido no conforme en múltiples formas, como texto, imagen, audio y video; los mecanismos tradicionales de detección de cumplimiento de una sola modalidad tienen dificultades para hacer frente a escenarios complejos de incumplimiento entre modalidades. El contenido multimodal puede eludir la detección habitual mediante insinuaciones metafóricas, sugerencias intermodales y asociaciones semánticas profundas, generando salidas que contienen información falsa, discurso de odio, contenido violento, contenido para adultos u otro contenido no conforme, lo que constituye una grave amenaza para el orden social y la seguridad de los usuarios.
 
-**攻击案例**
+**Casos de ataque**
 
-案例
-描述
+Caso
+Descripción
 
+Caso 1
+Grok, el chatbot de IA de xAI, la empresa de Elon Musk (integrado en la plataforma social X), fue objeto de abuso por parte de usuarios tras el lanzamiento de su función de generación de imágenes, quienes crearon imágenes de contenido sexual insinuante y desnudos no autorizados (incluyendo de menores), lo que desencadenó investigaciones regulatorias a nivel mundial y una revisión integral de la plataforma.
 
+Caso 2
+En la noche del 22 de diciembre de 2025, numerosos usuarios reportaron que las salas de transmisión en vivo de Kuaishou mostraban gran cantidad de contenido pornográfico, incluida la difusión de videos obscenos, actuaciones vulgares y otras transmisiones inapropiadas; en algunas salas el número de espectadores llegó a decenas de miles. Tras la difusión de la noticia, algunos internautas presentaron denuncias, y la policía informó haber recibido múltiples reportes ciudadanos. La plataforma respondió que este fenómeno se debió a un ataque de la industria gris/negra, que ya fue atendido de manera urgente y reportado a las autoridades de seguridad pública.
 
+Manifestaciones del riesgo
 
-案例一
-Elon Musk 旗下公司 xAI 推出的 AI 聊天机器人 Grok（集成在社交平台 X）在图像生成功能上线后，被用户滥用制作性暗示和未授权裸露图像（包括未成年人），引发全球监管调查和平台整改
+Generación de contenido no conforme entre modalidades: generación de contenido multimodal que infringe leyes y regulaciones
+Difusión encubierta de información no conforme: difusión de información no conforme mediante insinuaciones intermodales
+Contenido no conforme mediante deepfake: generación de contenido multimodal falso y dañino
+Elusión de la detección de cumplimiento de contenido: aprovechamiento de las características intermodales para eludir los mecanismos de detección existentes
+Contenido multimodal inductivo: generación de contenido multimodal engañoso o dañino
 
+**Medidas de mitigación**
 
-案例二
-2025年12月22日晚，用户大量反映快手直播间出现大量色情内容，包括传播淫秽影片、低俗表演等不当直播内容，部分直播间观看人数高达上万人。消息发布后有网友报案，警方表示已接到多个群众举报。平台方面回应称，这一现象是受到黑灰产攻击所致，已紧急处理并向公安机关报警。
+Medida de mitigación
+Descripción
 
+Detección de cumplimiento entre modalidades
+Establecer un sistema de detección de cumplimiento de contenido multimodal, implementar análisis de asociación semántica entre modalidades, y detectar contenido no conforme encubierto e información insinuada.
 
+Análisis de contenido multidimensional
+Analizar simultáneamente texto, imagen, audio y otras modalidades; establecer un mecanismo de verificación de consistencia entre modalidades e implementar una evaluación de cumplimiento en múltiples niveles.
 
-风险表现
+Monitoreo de contenido en tiempo real
+Establecer un sistema de monitoreo de contenido multimodal en tiempo real, implementar detección dinámica de cumplimiento y crear un mecanismo de respuesta rápida ante contenido no conforme.
 
-跨模态违规内容生成：生成包含违反法律法规的多模态内容
-隐晦违规信息传播：通过跨模态暗示传播违规信息
-深度伪造违规内容：生成虚假的、有害的多模态内容
-内容合规检测绕过：利用跨模态特性绕过现有检测机制
-多模态诱导内容：生成具有误导性或危害性的多模态内容
+Construcción de base de conocimiento de cumplimiento
+Construir una base de características de contenido multimodal no conforme, actualizar las reglas de cumplimiento y los modelos de detección, e implementar estándares de cumplimiento multilingües y multiculturales.
 
-**缓解措施**
+**Referencias**
 
-缓解方式
-描述
-
-
-
-
-跨模态合规检测
-建立多模态内容合规检测系统，实施跨模态语义关联分析，检测隐晦违规内容和暗示信息
-
-
-多维度内容分析
-同时分析文本、图像、音频等多种模态，建立跨模态一致性检查机制，实施多层级合规性评估
-
-
-实时内容监控
-建立实时多模态内容监控系统，实施动态合规性检测，建立违规内容快速响应机制
-
-
-合规知识库建设
-建立多模态违规内容特征库，更新合规规则和检测模型，实施多语言、多文化合规标准
-
-**参考**
-
-马斯克Grok堕入“AI色情裸奔”，撞多国监管红线
-快手直播间黑灰产攻击事件
+Grok de Musk cae en el "streaming pornográfico de IA", cruzando líneas rojas regulatorias en múltiples países
+Incidente de ataque de la industria gris/negra en las salas de transmisión en vivo de Kuaishou
 
 ---
-### 恶意代码生成
+### Generación de Código Malicioso
 
-> 风险编号: GAARM.0031.001
-> 生命周期: 应用阶段
+> Número de riesgo: GAARM.0031.001
+> Ciclo de vida: Fase de aplicación
 
-**攻击概述**
+**Resumen del ataque**
 
-模型存在恶意代码生成风险，这意味着攻击者可能利用模型的能力来生成或构造具有破坏性的代码，例如病毒、木马、勒索软件等。还可能导致导致系统被入侵、数据泄露或服务中断，对安全性和隐私构成严重威胁。此外，恶意代码的生成还可能被用来绕过安全检测系统，使得传统的安全防护措施变得无效。
+El modelo presenta el riesgo de generación de código malicioso, lo que significa que los atacantes pueden aprovechar las capacidades del modelo para generar o construir código destructivo, como virus, troyanos, ransomware, etc. Esto también puede provocar la intrusión de sistemas, la filtración de datos o la interrupción de servicios, constituyendo una grave amenaza para la seguridad y la privacidad. Además, la generación de código malicioso también puede utilizarse para eludir los sistemas de detección de seguridad, dejando ineficaces las medidas tradicionales de protección de seguridad.
 
-**攻击案例**
+**Casos de ataque**
 
-案例
-描述
+Caso
+Descripción
 
+Caso 1
+Los atacantes utilizaron técnicas de jailbreak para hacer que ChatGPT escribiera malware como secuestro de DLL (dll hijacking) y herramientas de fuerza bruta.
 
+Caso 2
+Los atacantes utilizaron ataques de jailbreak para hacer que ChatGPT escribiera software de fuerza bruta para SSH.
 
+Caso 3
+Se construyó un agente de hacking basado en GPT-4, capaz de aprender a explotar vulnerabilidades tras leer descripciones de vulnerabilidades CVE.
 
-案例一
-攻击者利用越狱的方式使用ChatGPT编写dll劫持、暴力破解等恶意软件
+Caso 4
+Se eludieron las restricciones de seguridad mediante llamadas a la API, escribiendo código para programas de inyección.
 
-
-案例二
-攻击者利用越狱攻击让ChatGPT编写SSH爆破软件
-
-
-案例三
-基于GPT-4构建一个黑客智能体，能够在阅读CVE漏洞描述后，学会利用漏洞进行攻击
-
-
-案例四
-通过调用API的手段绕过安全限制，编写注入程序的代码
-
-
-案例五
-德国黑客的钓鱼邮件中，脚本内容表明 TA547 有可能使用了生成式人工智能来编写或改写 PowerShell 脚本
-
+Caso 5
+En los correos de phishing de un hacker alemán, el contenido del script sugiere que TA547 pudo haber utilizado IA generativa para escribir o reescribir scripts de PowerShell.
 
 ##
 
-**攻击风险**
+**Riesgos del ataque**
 
-- 恶意软件生成：攻击者可能利用AI生成的恶意代码来创建定制的恶意软件，这些软件专门设计用于绕过现有的安全防护措施。
-- 增加网络攻击效率：AI降低了编写恶意代码的门槛，使得攻击者能够更快速地创建高质量的攻击工具，提升网络攻击的规模和效率。
-- 安全检测绕过：AI生成的恶意代码可能具有更高的变异性和隐蔽性，使得传统安全检测系统难以有效识别。
+- Generación de malware: los atacantes pueden aprovechar el código malicioso generado por IA para crear malware personalizado, diseñado específicamente para eludir las medidas de protección de seguridad existentes.
+- Aumento de la eficiencia de los ciberataques: la IA reduce la barrera de entrada para escribir código malicioso, permitiendo a los atacantes crear herramientas de ataque de alta calidad con mayor rapidez, aumentando la escala y eficiencia de los ciberataques.
+- Elusión de la detección de seguridad: el código malicioso generado por IA puede presentar mayor variabilidad y sigilo, dificultando su identificación efectiva por parte de los sistemas de detección de seguridad tradicionales.
 
-**缓解措施**
+**Medidas de mitigación**
 
-- 强化代码生成安全过滤：在模型输出层增加恶意代码特征检测
-- 限制危险API调用：对代码执行相关的API调用设置严格权限
-- 安全沙箱执行：所有AI生成的代码在隔离环境中执行审查
-- 行为监控：监控AI生成代码的执行行为，发现异常立即阻断
+- Reforzar el filtrado de seguridad en la generación de código: añadir detección de características de código malicioso en la capa de salida del modelo
+- Restringir llamadas a API peligrosas: establecer permisos estrictos para las llamadas a API relacionadas con la ejecución de código
+- Ejecución en sandbox de seguridad: revisar en entorno aislado todo el código generado por IA antes de su ejecución
+- Monitoreo de comportamiento: monitorear el comportamiento de ejecución del código generado por IA, bloqueando de inmediato cualquier anomalía detectada
 
-**参考**
+**Referencias**
 
 https://infosecwriteups.com/jail-breaking-chatgpt-to-write-malware-9b3ae111f30c
 https://www.theregister.com/2024/04/17/gpt4_can_exploit_real_vulnerabilities/
@@ -187,127 +157,99 @@ https://arxiv.org/abs/2404.08144
 https://blog.csdn.net/pengpengjy/article/details/132478358
 
 ---
-### 意图破坏&目标操纵
+### Sabotaje de Intención y Manipulación de Objetivos
 
-> 风险编号: GAARM.0063
-> 生命周期: 应用阶段
+> Número de riesgo: GAARM.0063
+> Ciclo de vida: Fase de aplicación
 
-**攻击概述**
+**Resumen del ataque**
 
-意图破坏&目标操纵是一种针对智能体的高级攻击技术，攻击者通过精心构造的特定输入，破坏智能体的原始意图设定，并操纵其行为目标偏离预期功能。这种攻击的核心在于利用智能体在理解用户意图、设定执行目标和行为决策过程中的脆弱性，通过逐步引导、上下文操纵、目标劫持等手段，使智能体执行非预期的、有害的或服务攻击者目的的操作，可能导致系统滥用、数据泄露、服务破坏或完全的智能体行为控制。
+El sabotaje de intención y la manipulación de objetivos es una técnica de ataque avanzada dirigida a agentes inteligentes, en la que los atacantes, mediante entradas específicas cuidadosamente construidas, sabotean la configuración de intención original del agente y manipulan su objetivo de comportamiento para que se desvíe de la funcionalidad prevista. El núcleo de este ataque radica en aprovechar las vulnerabilidades del agente en la comprensión de la intención del usuario, el establecimiento de objetivos de ejecución y el proceso de toma de decisiones de comportamiento; mediante inducción gradual, manipulación de contexto, secuestro de objetivos y otros medios, se logra que el agente ejecute operaciones no previstas, dañinas o que sirvan a los propósitos del atacante, lo que puede provocar abuso del sistema, filtración de datos, interrupción del servicio o control total del comportamiento del agente.
 
-**攻击案例**
+**Casos de ataque**
 
-案例
-描述
+Caso
+Descripción
 
+Caso 1
+En 2025, Operant AI descubrió y reveló la cadena de explotación de vulnerabilidad de "clic cero" denominada "Shadow Escape", que se origina en fallos de diseño en los límites de confianza de los agentes MCP, permitiendo a los atacantes secuestrar flujos de trabajo en sistemas como ChatGPT y Google Gemini y llevar a cabo el robo de datos sin ser detectados.
 
+**Riesgos del ataque**
 
+Desviación del comportamiento del agente: el agente ejecuta operaciones completamente distintas del objetivo previsto
+Ejecución de servicios maliciosos: el agente se convierte en una herramienta para que el atacante ejecute tareas maliciosas
+Amenaza a la seguridad de los datos: un agente manipulado puede filtrar o destruir datos
+Ruptura de la relación de confianza: la confianza del usuario en el sistema del agente se ve gravemente dañada
+Interrupción de la continuidad del negocio: la desviación del agente respecto a los objetivos de negocio provoca interrupción del servicio
+Impacto de seguridad en cascada: la manipulación de un agente puede afectar a todo el sistema
 
-案例一
-2025 年，Operant AI 发现并披露了“暗影逃逸（Shadow Escape）”零点击漏洞利用链，该漏洞源于 MCP 智能体的信任边界设计缺陷，使攻击者能够在 ChatGPT、Google Gemini 等系统中实现工作流劫持，并在无感知状态下完成数据窃取。
+**Medidas de mitigación**
 
-**攻击风险**
+Medida de mitigación
+Descripción
 
-智能体行为偏离：Agent执行与预期目标完全不同的操作
-恶意服务执行：智能体成为攻击者执行恶意任务的工具
-数据安全威胁：被操纵的智能体可能泄露或破坏数据
-信任关系破坏：用户对智能体系统的信任严重受损
-业务连续性中断：智能体偏离业务目标导致服务中断
-级联安全影响：一个智能体被操纵可能影响整个系统
+Mecanismo de verificación de intención
+Establecer un mecanismo de verificación y confirmación de la intención del usuario, implementar confirmación de intención en diálogos de múltiples turnos, detectar cambios anómalos en la intención.
 
-**缓解措施**
+Protección de bloqueo de objetivos
+Implementar un mecanismo de bloqueo de objetivos del agente, establecer múltiples verificaciones para los cambios de objetivo, restringir los permisos de modificación dinámica de objetivos.
 
-缓解方式
-描述
+Control de límites de comportamiento
+Definir claramente los límites de comportamiento del agente, implementar monitoreo y detección de comportamiento en tiempo real, establecer un mecanismo de bloqueo de comportamiento anómalo.
 
+Análisis de seguridad del contexto
+Detectar intentos maliciosos de manipulación del contexto, analizar intenciones de manipulación potenciales en el diálogo, establecer una línea base de seguridad del contexto.
 
-
-
-意图验证机制
-建立用户意图验证和确认机制，实施多轮对话意图确认，检测异常的意图变化
-
-
-目标锁定保护
-实施智能体目标锁定机制，建立目标变更的多重验证，限制目标的动态修改权限
-
-
-行为边界控制
-明确定义智能体行为边界，实施行为实时监控和检测，建立异常行为阻断机制
-
-
-上下文安全分析
-检测恶意上下文操纵尝试，分析对话中的潜在操纵意图，建立上下文安全基线
-
-**参考**
+**Referencias**
 
 https://www.freebuf.com/articles/ai-security/454527.html
 https://zhuanlan.zhihu.com/p/1928583554805260699
 
 ---
-### 数据漂移
+### Deriva de Datos
 
-> 风险编号: GAARM.0033
-> 生命周期: 应用阶段
+> Número de riesgo: GAARM.0033
+> Ciclo de vida: Fase de aplicación
 
-**攻击概述**
+**Resumen del ataque**
 
-数据漂移是指随着时间的推移或环境的变化，训练数据的统计特性发生变化，从而影响模型的性能和准确性。攻击者可以通过构建攻击手段，针对数据漂移进行攻击，导致当模型遭遇与训练时期不同的新数据时，其预测准确性可能无法满足预期，进而影响模型的可靠性和安全性。例如，企业基于历史数据构建了效果非常良好的垃圾邮件检测功能，但攻击者可能在某个时候改变发送垃圾邮件的行为，因为送入模型的数据发生了变化，原本构建的模型可能会被欺骗。
+La deriva de datos se refiere al cambio en las características estadísticas de los datos de entrenamiento con el paso del tiempo o los cambios en el entorno, lo que afecta el rendimiento y la precisión del modelo. Los atacantes pueden construir métodos de ataque dirigidos a la deriva de datos, provocando que, cuando el modelo se enfrenta a nuevos datos distintos de los del periodo de entrenamiento, su precisión de predicción no cumpla con lo esperado, afectando así la fiabilidad y la seguridad del modelo. Por ejemplo, una empresa construyó una función de detección de correo no deseado muy eficaz basada en datos históricos, pero los atacantes pueden en algún momento cambiar el comportamiento de envío de correo no deseado, de modo que, al cambiar los datos introducidos en el modelo, el modelo originalmente construido puede ser engañado.
 
-**攻击案例**
+**Casos de ataque**
 
-案例一： GPT-3.5和GPT-4存在数据漂移
+Caso 1: GPT-3.5 y GPT-4 presentan deriva de datos
 
-斯坦福和伯克利有一项联合研究《How Is ChatGPT’s Behavior Changing over Time?》，对GPT-4 和 GPT-3.5 在回答问题的准确性进行跟踪，研究发现，无论是 GPT-3.5 还是 GPT-4，它们的表现都出现了大幅波动，有的任务甚至出现了性能退化。下图展示了四个月内模型准确度的波动情况，在某些情况下，准确度的下降相当严重，损失了超过60%。
+Existe un estudio conjunto de Stanford y Berkeley titulado "How Is ChatGPT's Behavior Changing over Time?", que hizo seguimiento a la precisión de las respuestas de GPT-4 y GPT-3.5. El estudio encontró que tanto GPT-3.5 como GPT-4 presentaron fluctuaciones considerables en su desempeño, e incluso degradación del rendimiento en algunas tareas. La siguiente figura muestra la fluctuación de la precisión del modelo a lo largo de cuatro meses; en algunos casos, la caída de precisión fue bastante severa, con pérdidas de más del 60%.
 
+Deriva de Grandes Modelos (LLM Drift)
 
+Caso
+Descripción
 
-  
-大模型漂移（LLM Drift）
+| Caso 2 | Identificación y respuesta a problemas de deriva en modelos de aprendizaje automático |
 
+**Riesgos del ataque**
 
+Degradación del rendimiento del modelo: la deriva de datos provoca una disminución en la precisión de predicción del modelo sobre nuevos datos.
+Degradación del modelo: los atacantes pueden ir reduciendo gradualmente el rendimiento del modelo introduciendo continuamente muestras de datos específicas.
+Riesgo de cumplimiento y reputación: la disminución del rendimiento del modelo puede provocar problemas de cumplimiento normativo, especialmente en sectores altamente regulados como el financiero y el sanitario, además de poder dañar la reputación de la empresa.
+Errores de decisión: las decisiones basadas en modelos obsoletos pueden generar resultados erróneos, afectando el negocio.
 
+**Medidas de mitigación**
 
-案例
-描述
+Medida de mitigación
+Descripción
 
+Reentrenamiento del modelo
+Cuando se detecta que el modelo ha sufrido deriva, reentrenar el modelo con nuevos datos.
 
+Sistema de detección de anomalías
+Desplegar un sistema de detección de anomalías para identificar y gestionar entradas anómalas que puedan provocar la deriva del modelo.
 
+Ejecución automatizada de pruebas del modelo
+Validar el modelo en un entorno de preproducción y detectar desviaciones y deriva mediante pruebas, generando luego un informe de pruebas.
 
-
-
-
-
-
-| 案例二 | 识别和应对机器学习模型中的漂移问题 |
-
-**攻击风险**
-
-模型性能下降：数据漂移会导致模型在新数据上的预测准确性降低。
-模型降级：攻击者可能会通过不断输入特定的数据样本，逐渐降低模型的性能。
-合规性和信誉风险：模型性能的下降可能导致合规性问题，尤其是在金融和医疗等高度监管的行业中，此外还可能损害企业的信誉。
-决策失误：基于过时模型的决策可能导致错误结果，影响业务
-
-**缓解措施**
-
-缓解方式
-描述
-
-
-
-
-模型重新训练
-当检测到模型发生漂移，使用新的数据重新训练模型
-
-
-异常检测系统
-部署异常检测系统来识别和处理可能导致模型漂移的异常输入
-
-
-自动执行模型测试
-在预生产环境中验证模型，并通过测试检测偏差和漂移，然后生成测试报告
-
-**参考**
+**Referencias**
 
 https://www.ibm.com/topics/model-drift
 https://www.datacamp.com/tutorial/understanding-data-drift-model-drift
@@ -315,226 +257,191 @@ https://mp.weixin.qq.com/s/QbADBoHEqpDBKNkr-so3Ig
 https://arxiv.org/pdf/2307.09009.pdf
 
 ---
-### 模型功能滥用
+### Abuso de Funcionalidades del Modelo
 
-> 风险编号: GAARM.0031
-> 生命周期: 应用阶段
+> Número de riesgo: GAARM.0031
+> Ciclo de vida: Fase de aplicación
 
-**攻击概述**
+**Resumen del ataque**
 
-模型功能滥用，主要指的是攻击者在可控业务模型请求的情况下，盗用业务模型系统API，滥用业务大模型功能，完成实现攻击需求的非法，恶意操作，如恶意钓鱼邮件编写，恶意工具编写等。模型功能滥用一方面给业务系统带来了大量请求压力，一方面也存在业务合规风险。
+El abuso de funcionalidades del modelo se refiere principalmente a que, en el contexto de solicitudes controlables al modelo de negocio, los atacantes se apropian de la API del sistema del modelo de negocio y abusan de las funciones del gran modelo de negocio para llevar a cabo operaciones ilegales y maliciosas que cumplan con sus objetivos de ataque, tales como la redacción de correos de phishing maliciosos, la creación de herramientas maliciosas, etc. El abuso de funcionalidades del modelo, por un lado, genera una gran presión de solicitudes sobre el sistema de negocio, y por otro, también conlleva riesgos de cumplimiento normativo para el negocio.
 
-**攻击案例**
+**Casos de ataque**
 
-具体见子风险
+Ver riesgos secundarios para más detalle
 
-**攻击风险**
+**Riesgos del ataque**
 
-安全风险：功能滥用可能导致模型执行恶意操作，如生成或传播有害内容、发起网络攻击、窃取敏感信息等，从而对用户和系统安全构成威胁；
-隐私侵犯：滥用模型功能可能涉及未经授权的隐私数据收集、处理或泄露，损害个人隐私权益；
-法律责任：模型功能滥用可能涉及违法行为，如侵犯知识产权、诽谤、诈骗等，从而引发法律责任问题；
-伦理道德问题：滥用模型功能可能产生不道德或伦理上有争议的结果，如生成虚假信息、误导公众、加剧社会不公等；
-信任危机：用户对AI系统的信任可能因为功能滥用而导致损害，这会影响AI技术的接受度和依赖度；
-经济损失：在商业环境中，模型功能滥用可能导致经济损失，如通过欺诈行为造成财务损失、破坏商业信誉等；
+Riesgo de seguridad: el abuso de funciones puede provocar que el modelo ejecute operaciones maliciosas, como generar o difundir contenido dañino, lanzar ciberataques, robar información sensible, etc., constituyendo así una amenaza para la seguridad de los usuarios y del sistema;
+Violación de la privacidad: el abuso de las funciones del modelo puede implicar la recopilación, procesamiento o filtración no autorizada de datos privados, perjudicando los derechos de privacidad personal;
+Responsabilidad legal: el abuso de funcionalidades del modelo puede implicar conductas ilegales, como infracción de propiedad intelectual, difamación, fraude, etc., lo que puede generar responsabilidad legal;
+Problemas éticos y morales: el abuso de las funciones del modelo puede producir resultados inmorales o éticamente controvertidos, como la generación de información falsa, el engaño al público o el agravamiento de la injusticia social;
+Crisis de confianza: la confianza del usuario en los sistemas de IA puede verse dañada debido al abuso de funciones, lo que afecta la aceptación y dependencia de la tecnología de IA;
+Pérdidas económicas: en el ámbito empresarial, el abuso de funcionalidades del modelo puede provocar pérdidas económicas, como pérdidas financieras causadas por conductas fraudulentas o daños a la reputación comercial;
 
-**缓解措施**
+**Medidas de mitigación**
 
-缓解方式
-描述
+Medida de mitigación
+Descripción
 
+Verificación de contenido de entrada/salida
+Identificar e interceptar información maliciosa o inductiva que pueda contener el contenido generado, mediante mecanismos algorítmicos o de revisión manual.
 
+Herramientas de detección de IA
+Uso de herramientas de IA como el sistema M01 para mejorar la tasa de detección de correos de phishing.
 
+Capacitación en concienciación de seguridad
+Aumentar la vigilancia de los usuarios frente a correos de phishing, educándolos para identificar características de correos sospechosos, como errores ortográficos, gramática inusual, creación de urgencia, etc.
 
-输入/输出内容验证
-通过算法或人工检查机制，识别和拦截生成的内容中可能包含的恶意或诱导性信息
+Refuerzo del entrenamiento del modelo
+Basándose en métodos como el aprendizaje reforzado con retroalimentación humana, realizar un entrenamiento de refuerzo más riguroso del modelo para identificar y resistir posibles ataques de jailbreak, aumentando la robustez del modelo frente a ataques adversarios.
 
-
-AI检测工具
-使用如M01系统等AI工具提高钓鱼邮件的检测率
-
-
-安全意识培训
-提高用户对钓鱼邮件的警觉性，教育他们识别可疑邮件的特征，如拼写错误、不寻常的语法、紧迫性的制造等
-
-
-强化模型训练
-基于人类反馈强化学习等方式，针对模型进行更严格的强化训练，以识别和抵御潜在的越狱攻击，增强模型应对对抗攻击的鲁棒性
-
-
-模型安全对齐
-提供多样化的训练数据，涵盖各种攻击场景，通过在模型训练阶段增加安全围栏机制，以增强模型的泛化能力和鲁棒性
+Alineación de seguridad del modelo
+Proporcionar datos de entrenamiento diversificados que cubran diversos escenarios de ataque, aumentando la capacidad de generalización y la robustez del modelo mediante la incorporación de mecanismos de barrera de seguridad durante la fase de entrenamiento del modelo.
 
 ---
-### 视频信息伪造
+### Falsificación de Información en Video
 
-> 风险编号: GAARM.0031.005
-> 生命周期: 应用阶段
+> Número de riesgo: GAARM.0031.005
+> Ciclo de vida: Fase de aplicación
 
-**攻击概述**
+**Resumen del ataque**
 
-攻击者通过生成对抗网络（GAN）等技术，可以生成逼真的虚假视频。这些虚假视频可能被用于虚假广告、造假证据、网络欺诈等目的。此外，视频信息伪造还可能导致个人身份信息的泄露。这给个人隐私和数据安全带来了严重的风险。
+Los atacantes pueden generar videos falsos realistas mediante técnicas como las redes generativas antagónicas (GAN). Estos videos falsos pueden utilizarse con fines de publicidad fraudulenta, falsificación de pruebas, fraude en línea, entre otros. Además, la falsificación de información en video también puede provocar la filtración de información de identidad personal. Esto conlleva graves riesgos para la privacidad personal y la seguridad de los datos.
 
-**攻击案例**
+**Casos de ataque**
 
-案例
-描述
+Caso
+Descripción
 
+Caso 1
+Un empleado del área financiera recibió un correo electrónico de un supuesto CFO y fue invitado a una videoconferencia en la que todos los participantes eran imágenes falsas de deepfake generadas a partir de fragmentos de video y audio públicos, lo que provocó pérdidas de 200 millones de dólares de Hong Kong (aproximadamente 180 millones de yuanes) para la empresa.
 
+Caso 2
+Se generó el contenido del discurso con ChatGPT, un avatar virtual con Midjourney, la voz con ElevenLabs y el video con sincronización labial con D-ID, produciendo así un video corto completo.
 
+**Riesgos del ataque**
 
-案例一
-财务人员收到假冒CFO的邮件并受邀参加视频会议，会议中的所有参与者均为使用公开视频和音频片段制作的Deepfake虚假影像，导致公司损失2亿港币（约1.8亿人民币）
+Información engañosa: los videos falsificados pueden utilizarse para difundir información falsa, influyendo en la opinión pública.
+Daño a la reputación: empresas o individuos pueden verse perjudicados por videos falsificados, afectando su reputación e incluso provocando pérdidas patrimoniales.
+Consecuencias legales: publicar videos falsificados puede acarrear responsabilidad legal, especialmente en casos relacionados con difamación o violación de la privacidad.
 
+**Medidas de mitigación**
 
-案例二
-用 ChatGPT 生成讲话内容，用 Midjourney 生成虚拟形象，用 ElevenLabs 生成声音，用 D-ID 生成对口型的视频，做出了完整的短视频。
+Medida de mitigación
+Descripción
 
-**攻击风险**
+Revisión de contenido
+Uso de herramientas de reconocimiento de imágenes y revisión de contenido para detectar videos falsificados o manipulados.
 
-误导性信息：伪造视频可能被用来传播虚假信息，影响公众舆论。
-信誉损害：企业或个人可能因伪造视频而受到贬损，影响其声誉乃至带来财产损失。
-法律后果：发布伪造视频可能导致法律责任，尤其是在涉及诽谤或侵犯隐私的案件中。
+Tecnología de marca de agua
+Identificar claramente los videos generados, informando a los usuarios de que su origen no es real.
 
-**缓解措施**
+Verificación de origen
+Uso de herramientas forenses de imágenes para examinar los metadatos y el historial de edición de los videos.
 
-缓解方式
-描述
+Formulación de políticas
+Establecer políticas y marcos legales claros para el uso y la difusión de videos falsificados.
 
-
-
-
-内容审查
-使用图像识别和内容审查工具检测伪造或篡改的视频
-
-
-水印技术
-明确标识生成的视频，告知用户其非真实来源
-
-
-来源验证
-通使用图像取证工具检查视频的元数据和编辑历史
-
-
-制定政策
-建立明确的政策和法律框架，针对伪造视频的使用和传播
-
-**参考**
+**Referencias**
 
 https://stcn.com/article/detail/1250289.html
 https://www.51cto.com/aigc/912.html
 
 ---
-### 钓鱼邮件生成
+### Generación de Correos de Phishing
 
-> 风险编号: GAARM.0031.002
-> 生命周期: 应用阶段
+> Número de riesgo: GAARM.0031.002
+> Ciclo de vida: Fase de aplicación
 
-**攻击概述**
+**Resumen del ataque**
 
-钓鱼邮件是一种欺诈性邮件，攻击者可以通过特殊的手段，如精心构造提示输入、通过API绕过安全限制等，诱导LLM生成钓鱼邮件。通过将其伪装成合法的通信，诱使模型泄露敏感信息，如登录凭证、内部数据等。一旦这些信息被恶意获取，可能导致大模型的安全性受到威胁，进而影响到使用该模型的用户的隐私和数据安全。
+Los correos de phishing son correos fraudulentos que los atacantes pueden inducir a un LLM a generar mediante medios especiales, como la construcción cuidadosa de entradas de prompt o la elusión de restricciones de seguridad a través de la API. Al disfrazarlos de comunicaciones legítimas, se induce al modelo a filtrar información sensible, como credenciales de inicio de sesión, datos internos, etc. Una vez que esta información es obtenida de forma maliciosa, la seguridad del gran modelo puede verse comprometida, afectando así la privacidad y la seguridad de los datos de los usuarios que utilizan dicho modelo.
 
-**攻击案例**
+**Casos de ataque**
 
-案例一：如图WormGPT被要求制作一封电子邮件
+Caso 1: como se muestra en la imagen, se solicitó a WormGPT que elaborara un correo electrónico
 
-目标是对一个不设防的账户经理施加压力，迫使其支付虚假发票。
+El objetivo era presionar a un gerente de cuentas desprevenido para obligarlo a pagar una factura falsa.
 
-
-
-  
 Phishing Emails
 
-案例二
-本文介绍了生成式AI对恶意工具的生成和应用。攻击者指示 AI 将恶意 URL 嵌入到代码中，当用户打开如 Excel 这样的文件时，系统会自动下载并执行恶意软件，进而带来安全风险 
-案例三
-本文发现网络犯罪分子可以轻松地绕过OpenAI的保护措施，例如将自己定位为研究人员，以此掩盖他们的恶意意图，进而让LLM生成恶意钓鱼邮件，带来不良后果
+Caso 2
+Este artículo describe la generación y aplicación de herramientas maliciosas mediante IA generativa. Los atacantes indican a la IA que incruste URLs maliciosas en el código; cuando el usuario abre un archivo como uno de Excel, el sistema descarga y ejecuta automáticamente el malware, generando así un riesgo de seguridad.
+Caso 3
+Este artículo revela que los ciberdelincuentes pueden eludir con facilidad las medidas de protección de OpenAI, por ejemplo, haciéndose pasar por investigadores para encubrir su intención maliciosa, logrando así que el LLM genere correos de phishing maliciosos, con consecuencias adversas.
 
-**攻击风险**
+**Riesgos del ataque**
 
-账户接管: 钓鱼邮件可能会模仿正规的邮件服务提供商或企业，诱使用户输入账户登录信息，从而使攻击者能够接管用户的电子邮箱账户；
-企业声誉受损：可能会模仿企业或组织的官方邮件，向用户的联系人发送欺诈性信息，从而损害企业或组织的声誉；
-数据窃取: 大模型给出的钓鱼邮件可能会包含恶意链接或代码，一旦用户点击或下载，可能会造成用户计算机系统的瘫痪、数据丢失、身份信息泄露等严重问题；
+Toma de control de cuentas: los correos de phishing pueden imitar a proveedores de servicios de correo electrónico legítimos o empresas, induciendo a los usuarios a introducir sus credenciales de inicio de sesión, permitiendo así a los atacantes tomar control de la cuenta de correo del usuario;
+Daño a la reputación empresarial: pueden imitar correos oficiales de empresas u organizaciones, enviando información fraudulenta a los contactos del usuario, dañando así la reputación de la empresa u organización;
+Robo de datos: los correos de phishing generados por el gran modelo pueden contener enlaces o código malicioso; una vez que el usuario hace clic o descarga, puede provocar la caída del sistema informático del usuario, pérdida de datos, filtración de información de identidad y otros problemas graves;
 
-**缓解措施**
+**Medidas de mitigación**
 
-缓解方式
-描述
+Medida de mitigación
+Descripción
 
+Verificación de contenido de entrada/salida
+Identificar e interceptar información maliciosa o inductiva que pueda contener el contenido generado, mediante mecanismos algorítmicos o de revisión manual.
 
+Herramientas de detección de IA
+Uso de herramientas de IA como el sistema M01 para mejorar la tasa de detección de correos de phishing.
 
+Capacitación en concienciación de seguridad
+Aumentar la vigilancia de los usuarios frente a correos de phishing, educándolos para identificar características de correos sospechosos, como errores ortográficos, gramática inusual, creación de urgencia, etc.
 
-输入/输出内容验证
-通过算法或人工检查机制，识别和拦截生成的内容中可能包含的恶意或诱导性信息
-
-
-AI检测工具
-使用如M01系统等AI工具提高钓鱼邮件的检测率
-
-
-安全意识培训
-提高用户对钓鱼邮件的警觉性，教育他们识别可疑邮件的特征，如拼写错误、不寻常的语法、紧迫性的制造等
-
-**参考**
+**Referencias**
 
 https://mp.weixin.qq.com/s/8Ca4HmkafP9SxjHayC9zdQ
 https://mp.weixin.qq.com/s/-0i0SlGat-Y5hXcM3EIGiw
 https://mp.weixin.qq.com/s/2Ai4nKOzEnkhqJD903O8mA
 
 ---
-### 音频信息伪造
+### Falsificación de Información en Audio
 
-> 风险编号: GAARM.0031.004
-> 生命周期: 应用阶段
+> Número de riesgo: GAARM.0031.004
+> Ciclo de vida: Fase de aplicación
 
-**攻击概述**
+**Resumen del ataque**
 
-攻击者通过生成对抗网络（GAN）等技术，可以生成逼真的虚假音频。这些虚假音频可能被用于虚假广告、造假证据、网络欺诈等目的。此外，音频信息伪造还可能导致个人身份信息的泄露。攻击者通过分析个人照片、社交媒体信息和其他公开数据，利用AI可以生成逼真的人脸图像，并用于冒充他人身份。这给个人隐私和数据安全带来了严重的风险。
+Los atacantes pueden generar audios falsos realistas mediante técnicas como las redes generativas antagónicas (GAN). Estos audios falsos pueden utilizarse con fines de publicidad fraudulenta, falsificación de pruebas, fraude en línea, entre otros. Además, la falsificación de información en audio también puede provocar la filtración de información de identidad personal. Los atacantes, al analizar fotografías personales, información de redes sociales y otros datos públicos, pueden utilizar la IA para generar imágenes de rostros realistas y usarlas para suplantar la identidad de otras personas. Esto conlleva graves riesgos para la privacidad personal y la seguridad de los datos.
 
-**攻击案例**
+**Casos de ataque**
 
-案例
-描述
+Caso
+Descripción
 
+Caso 1
+Un empleado del área financiera recibió un correo electrónico de un supuesto CFO y fue invitado a una videoconferencia en la que todos los participantes eran imágenes falsas de deepfake generadas a partir de fragmentos de video y audio públicos, lo que provocó pérdidas de 200 millones de dólares de Hong Kong (aproximadamente 180 millones de yuanes) para la empresa.
 
+Caso 2
+Estafadores utilizaron IA para imitar la voz de familiares de las víctimas, realizando llamadas fraudulentas para obtener bienes mediante engaño; este tipo de casos se ha vuelto frecuente en Estados Unidos, provocando graves consecuencias en la opinión pública.
 
+**Riesgos del ataque**
 
-案例一
-财务人员收到假冒CFO的邮件并受邀参加视频会议，会议中的所有参与者均为使用公开视频和音频片段制作的Deepfake虚假影像，导致公司损失2亿港币（约1.8亿人民币）
+Información engañosa: los audios falsificados pueden utilizarse para difundir información falsa, influyendo en la opinión pública.
+Daño a la reputación: empresas o individuos pueden verse perjudicados por audios falsificados, afectando su reputación e incluso provocando pérdidas patrimoniales.
+Consecuencias legales: publicar audios falsificados puede acarrear responsabilidad legal, especialmente en casos relacionados con difamación o violación de la privacidad.
 
+**Medidas de mitigación**
 
-案例二
-诈骗者使用 AI 模仿受害人的家人的声音，打诈骗电话进行财产骗取，此类案件在美国形成多发案件，带来严重的公众舆论后果
+Medida de mitigación
+Descripción
 
-**攻击风险**
+Revisión de contenido
+Uso de herramientas de reconocimiento de imágenes y revisión de contenido para detectar audios falsificados o manipulados.
 
-误导性信息：伪造音频可能被用来传播虚假信息，影响公众舆论。
-信誉损害：企业或个人可能因伪造音频而受到贬损，影响其声誉乃至带来财产损失。
-法律后果：发布伪造音频可能导致法律责任，尤其是在涉及诽谤或侵犯隐私的案件中。
+Tecnología de marca de agua
+Identificar claramente los audios generados, informando a los usuarios de que su origen no es real.
 
-**缓解措施**
+Verificación de origen
+Uso de herramientas forenses de imágenes para examinar los metadatos y el historial de edición de los audios.
 
-缓解方式
-描述
+Formulación de políticas
+Establecer políticas y marcos legales claros para el uso y la difusión de audios falsificados.
 
-
-
-
-内容审查
-使用图像识别和内容审查工具检测伪造或篡改的音频
-
-
-水印技术
-明确标识生成的音频，告知用户其非真实来源
-
-
-来源验证
-通使用图像取证工具检查音频的元数据和编辑历史
-
-
-制定政策
-建立明确的政策和法律框架，针对伪造音频的使用和传播
-
-**参考**
+**Referencias**
 
 https://stcn.com/article/detail/1250289.html
 https://www.51cto.com/aigc/912.html

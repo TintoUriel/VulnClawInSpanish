@@ -5,32 +5,32 @@ Use this template for Android sign, token, encrypt, decrypt, JNI, interceptor, a
 ## Template
 
 ```markdown
-# Android 签名逆向记录
+# Registro de Ingeniería Inversa de Firma Android
 
-## 基本信息
+## Información básica
 
-- APK / 包名：
-- 目标功能：
-- 目标请求：
-- 目标字段：
-- 当前阶段：static / dynamic / native / replay
-- 当前状态：🟡 进行中 / ✅ 已闭环 / ⛔ 阻塞
-- 目标：
-- 约束：
+- APK / nombre de paquete：
+- Función objetivo：
+- Solicitud objetivo：
+- Campo objetivo：
+- Fase actual：static / dynamic / native / replay
+- Estado actual：🟡 En curso / ✅ Cerrado / ⛔ Bloqueado
+- Objetivo：
+- Restricciones：
 
-## 静态总览
+## Panorama estático
 
-| 项目 | 内容 |
+| Elemento | Contenido |
 | --- | --- |
-| Manifest 入口 |  |
+| Punto de entrada del Manifest |  |
 | Application |  |
-| 主 Activity / 目标组件 |  |
-| 主要包结构 |  |
-| 网络框架 |  |
-| DI 框架 |  |
-| 当前结论 |  |
+| Activity principal / componente objetivo |  |
+| Estructura principal de paquetes |  |
+| Framework de red |  |
+| Framework de DI |  |
+| Conclusión actual |  |
 
-## 请求调用链
+## Cadena de llamadas de la solicitud
 
 ```text
 Activity / Fragment / Service
@@ -40,65 +40,65 @@ Activity / Fragment / Service
 -> Signer / Encryptor / Serializer
 ```
 
-- 真实调用链：
-- 请求 Method / Path：
-- Header 写入点：
-- Body 写入点：
-- Sign 输入汇合点：
-- 序列 / 前置依赖：
+- Cadena de llamadas real：
+- Method / Path de la solicitud：
+- Punto de escritura de Header：
+- Punto de escritura de Body：
+- Punto de confluencia de entradas de Sign：
+- Secuencia / dependencias previas：
 
-## Sign / Crypto 定位
+## Localización de Sign / Crypto
 
-| 项目 | 内容 |
+| Elemento | Contenido |
 | --- | --- |
-| Sign 类 / 方法 |  |
-| Encrypt 类 / 方法 |  |
-| 关键常量 |  |
-| 关键 Header |  |
-| 关键 Token / Device 值 |  |
+| Clase / método de Sign |  |
+| Clase / método de Encrypt |  |
+| Constantes clave |  |
+| Headers clave |  |
+| Valores clave de Token / Device |  |
 | Java-only / Java+JNI / Native-first |  |
 
-## 动态验证
+## Verificación dinámica
 
-| Hook 点 | 原因 | 捕获内容 | 结果 |
+| Punto de Hook | Motivo | Contenido capturado | Resultado |
 | --- | --- | --- | --- |
 | Hook1 |  |  |  |
 
 - URL：
 - Headers：
 - Body：
-- Sign 输入：
-- Sign 输出：
-- 代理验证：
+- Entrada de Sign：
+- Salida de Sign：
+- Verificación por proxy：
 
-## JNI / SO 分析
+## Análisis JNI / SO
 
-| 项目 | 内容 |
+| Elemento | Contenido |
 | --- | --- |
-| Java native 入口 |  |
-| SO 名称 |  |
-| JNI 类型 | static / dynamic |
-| 输入参数 |  |
-| 输出角色 | 最终 sign / 中间 token / 其他 |
-| 是否需要 deeper RE |  |
+| Punto de entrada native de Java |  |
+| Nombre del SO |  |
+| Tipo de JNI | static / dynamic |
+| Parámetros de entrada |  |
+| Rol de salida | sign final / token intermedio / otro |
+| Requiere RE más profunda |  |
 
-## Burp 重放基线
+## Línea base de reenvío en Burp
 
 - Method：
 - Path：
 - Query：
 - Headers：
 - Body：
-- 必须保留字段：
-- 可变异字段：
-- 前置状态：
-- 是否需要设备 / Hook / App 协助：
+- Campos que deben conservarse：
+- Campos mutables：
+- Estado previo requerido：
+- Requiere asistencia de dispositivo / Hook / App：
 
-## 结论
+## Conclusión
 
-- 当前闭环程度：
-- 剩余阻塞：
-- 下一步建议：
+- Grado de cierre actual：
+- Bloqueos restantes：
+- Sugerencia de siguiente paso：
 ```
 
 ## Minimum Required Fields

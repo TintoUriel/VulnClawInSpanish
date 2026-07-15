@@ -1,43 +1,43 @@
 ---
 name: reporting
-description: 报告生成流程 — 生成结构化渗透测试报告和PoC
+description: Flujo de generación de informes — genera informes de pentesting y PoC estructurados
 routing:
   phases: [reporting]
   task_types: [report]
 ---
 
-# 报告生成 Skill
+# Skill de Generación de Informes
 
-将渗透测试结果整理为结构化报告，包含详细发现、PoC 脚本和修复建议。
+Organiza los resultados del pentesting en un informe estructurado, incluyendo hallazgos detallados, scripts PoC y recomendaciones de remediación.
 
-## 报告结构
+## Estructura del informe
 
-### 1. 项目概述
-- 测试目标
-- 测试时间
-- 测试范围
-- 测试方法
+### 1. Resumen del proyecto
+- Objetivo de la prueba
+- Fecha de la prueba
+- Alcance de la prueba
+- Metodología de la prueba
 
-### 2. 执行摘要
-- 高危发现概览
-- 风险等级分布
-- 关键建议
+### 2. Resumen ejecutivo
+- Visión general de los hallazgos de alto riesgo
+- Distribución de niveles de riesgo
+- Recomendaciones clave
 
-### 3. 详细发现
-对每个漏洞：
-- 漏洞名称和严重等级
-- 漏洞类型
-- 影响范围
-- 验证步骤
-- 关键证据（请求/响应/截图）
-- PoC 脚本
-- 修复建议
+### 3. Hallazgos detallados
+Para cada vulnerabilidad:
+- Nombre de la vulnerabilidad y nivel de gravedad
+- Tipo de vulnerabilidad
+- Alcance del impacto
+- Pasos de verificación
+- Evidencia clave (solicitud/respuesta/capturas de pantalla)
+- Script PoC
+- Recomendaciones de remediación
 
-### 4. 攻击路径
-- 完整攻击链图示
-- 从初始访问到最终目标的路径
+### 4. Ruta de ataque
+- Diagrama completo de la cadena de ataque
+- Ruta desde el acceso inicial hasta el objetivo final
 
-### 5. 附件
-- PoC 脚本
-- 流量抓包
-- 截图证据
+### 5. Anexos
+- Scripts PoC
+- Capturas de tráfico
+- Evidencia fotográfica

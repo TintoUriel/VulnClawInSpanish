@@ -5,90 +5,90 @@ Use this template for browser-side sign, token, anti-bot, worker, wasm, cookie-h
 ## Template
 
 ```markdown
-# 浏览器请求链记录
+# Registro de Cadena de Solicitudes del Navegador
 
-## 基本信息
+## Información básica
 
-- 目标页面：
-- 目标请求：
-- 目标字段：
-- 触发动作：
-- 当前阶段：locate / recover / runtime / validation
-- 当前状态：🟡 进行中 / ✅ 已闭环 / ⛔ 阻塞
-- 目标：
-- 约束：
+- Página objetivo：
+- Solicitud objetivo：
+- Campo objetivo：
+- Acción disparadora：
+- Fase actual：locate / recover / runtime / validation
+- Estado actual：🟡 En curso / ✅ Cerrado / ⛔ Bloqueado
+- Objetivo：
+- Restricciones：
 
-## 样本与现象
+## Muestras y fenómenos
 
-- 正常态样本：
-- 风控态样本：
-- 浏览器现象：
-- 本地现象：
-- 当前差异：
+- Muestra en estado normal：
+- Muestra en estado de control de riesgo：
+- Fenómeno en el navegador：
+- Fenómeno local：
+- Diferencia actual：
 
-## 请求链主表
+## Tabla principal de la cadena de solicitudes
 
-| 项目 | 内容 |
+| Elemento | Contenido |
 | --- | --- |
 | writer |  |
 | builder |  |
 | entry |  |
 | source |  |
-| 上游依赖 |  |
-| 状态载体 |  |
-| 风控分叉点 |  |
-| 当前结论 |  |
+| Dependencias upstream |  |
+| Portador de estado |  |
+| Punto de bifurcación de control de riesgo |  |
+| Conclusión actual |  |
 
-## 关键证据
+## Evidencia clave
 
-| 证据类型 | 位置/点位 | 内容 | 结论 |
+| Tipo de evidencia | Ubicación/punto | Contenido | Conclusión |
 | --- | --- | --- | --- |
-| 请求样本 |  |  |  |
-| 调用栈 |  |  |  |
-| 断点/Hook |  |  |  |
-| 中间值 |  |  |  |
+| Muestra de solicitud |  |  |  |
+| Pila de llamadas |  |  |  |
+| Breakpoint/Hook |  |  |  |
+| Valor intermedio |  |  |  |
 | Cookie/Storage |  |  |  |
 
-## 阶段补充
+## Complementos por fase
 
-### Locate 补充
+### Complemento de Locate
 
 - Sink：
-- 真实写入点：
-- 上游请求：
-- 正常态 / 风控态区分：
+- Punto de escritura real：
+- Solicitud upstream：
+- Distinción entre estado normal / estado de control de riesgo：
 
-### Recover 补充
+### Complemento de Recover
 
-- 遮蔽层类型：
-- 当前恢复级别：A / B / C
-- 已恢复契约：
-- 仍未恢复缺口：
+- Tipo de capa de ofuscación：
+- Nivel de recuperación actual：A / B / C
+- Contrato ya recuperado：
+- Brechas aún sin recuperar：
 
-### Runtime 补充
+### Complemento de Runtime
 
-- 缺失对象：
-- 缺失状态：
-- 固定源：
-- 首个分歧点：
-- 风控 / 反调试：
+- Objeto faltante：
+- Estado faltante：
+- Fuente fija：
+- Primer punto de divergencia：
+- Control de riesgo / anti-debug：
 
-### Validation 补充
+### Complemento de Validation
 
-| 检查点 | 浏览器侧 | 本地/恢复侧 | 结果 | 证据 | 缺口 |
+| Punto de verificación | Lado del navegador | Lado local/recuperado | Resultado | Evidencia | Brecha |
 | --- | --- | --- | --- | --- | --- |
-| 检查点1 |  |  |  |  |  |
+| Punto de verificación1 |  |  |  |  |  |
 
-## Burp 重放基线
+## Línea base de reenvío en Burp
 
 - Method：
 - Path：
 - Query：
 - Headers：
 - Body：
-- 必须保留字段：
-- 可变异字段：
-- 前置状态：
+- Campos que deben conservarse：
+- Campos mutables：
+- Estado previo requerido：
 
 ## Stage Handoff
 
@@ -99,11 +99,11 @@ Proven:
 Open:
 Invalidated:
 
-## 下一步
+## Siguiente paso
 
-- 下一动作：
-- 预期输出：
-- 阻塞点：
+- Próxima acción：
+- Resultado esperado：
+- Punto de bloqueo：
 ```
 
 ## Minimum Required Fields

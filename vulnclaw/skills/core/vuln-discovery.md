@@ -1,33 +1,33 @@
 ---
 name: vuln-discovery
-description: 漏洞发现流程 — 基于信息收集结果扫描漏洞
+description: Flujo de descubrimiento de vulnerabilidades — escaneo de vulnerabilidades basado en los resultados de la recopilación de información
 ---
 
-# 漏洞发现 Skill
+# Skill de Descubrimiento de Vulnerabilidades
 
-基于信息收集结果，系统性地发现目标存在的安全漏洞。
+Descubre sistemáticamente las vulnerabilidades de seguridad presentes en el objetivo, basándose en los resultados de la recopilación de información.
 
-## 执行步骤
+## Pasos de ejecución
 
-### 1. 已知 CVE 匹配
-- 根据已识别的服务版本搜索对应 CVE
-- 优先关注 Critical/High 级别
-- 记录 CVE ID、影响版本、利用条件
+### 1. Correlación con CVE conocidos
+- Buscar CVE correspondientes según las versiones de servicio identificadas
+- Priorizar los niveles Crítico/Alto
+- Registrar el ID del CVE, las versiones afectadas y las condiciones de explotación
 
-### 2. Web 漏洞扫描
-- SQL 注入检测
-- XSS 检测（反射型/存储型/DOM型）
-- SSRF 检测
-- LFI/RFI 检测
-- 命令注入检测
-- 文件上传漏洞检测
+### 2. Escaneo de vulnerabilidades web
+- Detección de inyección SQL
+- Detección de XSS (reflejado/almacenado/DOM)
+- Detección de SSRF
+- Detección de LFI/RFI
+- Detección de inyección de comandos
+- Detección de vulnerabilidades de carga de archivos
 
-### 3. 配置缺陷检测
-- 默认凭据测试
-- 信息泄露检测
-- 未授权访问检测
-- CORS 配置检测
-- HTTPS 配置检测
+### 3. Detección de defectos de configuración
+- Pruebas de credenciales por defecto
+- Detección de fuga de información
+- Detección de acceso no autorizado
+- Detección de configuración CORS
+- Detección de configuración HTTPS
 
-### 4. 输出
-- 漏洞列表（类型、严重等级、URL、参数、验证方法）
+### 4. Salida
+- Lista de vulnerabilidades (tipo, nivel de gravedad, URL, parámetro, método de verificación)

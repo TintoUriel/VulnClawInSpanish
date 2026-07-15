@@ -1,34 +1,34 @@
 ---
 name: recon
-description: 信息收集流程 — 被动+主动侦察
+description: Flujo de recopilación de información — reconocimiento pasivo y activo
 routing:
   phases: [recon]
   task_types: [recon]
 ---
 
-# 信息收集 Skill
+# Skill de Recopilación de Información
 
-执行被动和主动信息收集，构建目标画像和攻击面地图。
+Ejecuta reconocimiento pasivo y activo para construir el perfil del objetivo y el mapa de la superficie de ataque.
 
-## 执行步骤
+## Pasos de ejecución
 
-### 1. 被动侦察
-- 通过 fetch 工具访问目标，收集 HTTP 响应头
-- 识别服务器类型、版本、WAF
-- 分析 HTML 源码中的技术栈标识
+### 1. Reconocimiento pasivo
+- Acceder al objetivo mediante la herramienta fetch y recopilar las cabeceras de respuesta HTTP
+- Identificar el tipo y versión del servidor, así como el WAF
+- Analizar el código fuente HTML en busca de indicios del stack tecnológico
 
-### 2. 主动侦察
-- 探测常见 Web 端口
-- 枚举目录和路径
-- 检查敏感文件（robots.txt, .env, .git）
-- 发现 API 端点
+### 2. Reconocimiento activo
+- Sondear los puertos web comunes
+- Enumerar directorios y rutas
+- Verificar archivos sensibles (robots.txt, .env, .git)
+- Descubrir endpoints de API
 
-### 3. 技术栈识别
-- 前端框架（React/Vue/Angular/jQuery）
-- 后端框架（Express/Django/Flask/Spring）
-- CMS 系统（WordPress/Joomla/自定义）
-- 数据库类型
+### 3. Identificación del stack tecnológico
+- Framework de frontend (React/Vue/Angular/jQuery)
+- Framework de backend (Express/Django/Flask/Spring)
+- Sistema CMS (WordPress/Joomla/personalizado)
+- Tipo de base de datos
 
-### 4. 输出
-- 目标画像（IP/域名/端口/服务/技术栈）
-- 攻击面地图（可访问路径、API、管理入口）
+### 4. Salida
+- Perfil del objetivo (IP/dominio/puertos/servicios/stack tecnológico)
+- Mapa de la superficie de ataque (rutas accesibles, API, puntos de acceso administrativos)

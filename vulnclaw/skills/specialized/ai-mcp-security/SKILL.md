@@ -1,6 +1,6 @@
 ---
 name: ai-mcp-security
-description: AI与MCP安全评估 — Prompt注入、工具滥用、MCP信任边界、Agent权限逃逸、数据泄露、模型风险、GAARM风险矩阵
+description: Evaluación de seguridad de IA y MCP — Inyección de Prompt, abuso de herramientas, límites de confianza de MCP, escalada de privilegios de Agent, fuga de datos, riesgo de modelo, matriz de riesgos GAARM
 routing:
   target_types: [ai_agent, mcp]
   task_types: [pentest, audit]
@@ -8,68 +8,68 @@ routing:
   vulnerability_classes: [prompt_injection, tool_abuse, info_disclosure]
 ---
 
-# AI 与 MCP 安全评估 Skill
+# Skill de Evaluación de Seguridad de IA y MCP
 
-当目标包含 LLM、Agent、MCP 工具、Skills、RAG、Memory、Plugin 或模型服务组件时使用本 Skill。
+Usa este Skill cuando el objetivo incluya LLM, Agent, herramientas MCP, Skills, RAG, Memory, Plugin o componentes de servicio de modelo.
 
-**前置条件**：如果 AI 表面只是展示层，真正的阻塞仍是客户端签名或加密协议，先回到 `client-reverse` Skill。
+**Prerrequisito**: si la superficie de IA es solo una capa de presentación y el verdadero bloqueo sigue siendo la firma del cliente o el protocolo de cifrado, vuelve primero al Skill `client-reverse`.
 
-## 场景路由
+## Enrutamiento de escenarios
 
-| 风险类型 | 首选参考 |
+| Tipo de riesgo | Referencia preferida |
 |---------|---------|
-| Prompt 注入 / 间接注入 / CoT 干扰 | `references/ai-app-security.md` |
-| 工具滥用 / MCP 投毒 / Skills 供应链 | `references/04-ai-and-mcp-security-integrated.md` MCP 章节 |
-| 权限逃逸 / 角色越界 / 凭据滥用 | `references/ai-identity-security.md` |
-| 数据泄露 / Prompt 泄漏 / 模型逆推 | `references/ai-data-security.md` |
-| 容器逃逸 / CI-CD / 沙箱失败 | `references/ai-baseline-security.md` |
-| 模型风险 / 对抗样本 / 后门 | `references/ai-model-security.md` |
-| 影响分类与覆盖评估 | `references/gaarm-risk-matrix.md` |
+| Inyección de Prompt / inyección indirecta / interferencia de CoT | `references/ai-app-security.md` |
+| Abuso de herramientas / envenenamiento de MCP / cadena de suministro de Skills | `references/04-ai-and-mcp-security-integrated.md` capítulo MCP |
+| Escalada de privilegios / evasión de rol / abuso de credenciales | `references/ai-identity-security.md` |
+| Fuga de datos / fuga de Prompt / inversión de modelo | `references/ai-data-security.md` |
+| Escape de contenedor / CI-CD / fallo de sandbox | `references/ai-baseline-security.md` |
+| Riesgo de modelo / ejemplos adversarios / backdoor | `references/ai-model-security.md` |
+| Clasificación de impacto y evaluación de cobertura | `references/gaarm-risk-matrix.md` |
 
-## 测试流程
+## Flujo de pruebas
 
-### 1. 应用层攻击
-- 直接 Prompt 注入
-- 间接注入（通过外部数据源）
-- CoT 干扰与指令覆盖
-- Agent 滥用（未授权操作）
-- 代码执行突破
-- Memory 投毒
+### 1. Ataques a la capa de aplicación
+- Inyección de Prompt directa
+- Inyección indirecta (a través de fuentes de datos externas)
+- Interferencia de CoT y sobrescritura de instrucciones
+- Abuso de Agent (operaciones no autorizadas)
+- Ruptura por ejecución de código
+- Envenenamiento de Memory
 
-### 2. MCP 与 Agent 风险
-- 工具描述投毒
-- 指令覆盖
-- 隐藏指令注入
-- 未授权资源访问
-- Skills/Rules 供应链问题
+### 2. Riesgos de MCP y Agent
+- Envenenamiento de descripción de herramientas
+- Sobrescritura de instrucciones
+- Inyección de instrucciones ocultas
+- Acceso no autorizado a recursos
+- Problemas de cadena de suministro de Skills/Rules
 
-### 3. 身份与授权
-- 动作滥用
-- 角色逃逸
-- 权限漂移
-- 云凭据滥用
+### 3. Identidad y autorización
+- Abuso de acciones
+- Evasión de rol
+- Deriva de privilegios
+- Abuso de credenciales de nube
 
-### 4. 数据与隐私
-- Prompt 泄漏
-- 敏感数据暴露
-- 训练数据问题
-- 模型逆推
-- API 数据窃取
+### 4. Datos y privacidad
+- Fuga de Prompt
+- Exposición de datos sensibles
+- Problemas de datos de entrenamiento
+- Inversión de modelo
+- Robo de datos vía API
 
-### 5. 基线与部署
-- CI/CD 缺陷
-- 容器逃逸
-- 向量数据库安全
-- 沙箱失效
-- 环境隔离缺陷
-- 模型服务缺陷
+### 5. Línea base y despliegue
+- Fallos de CI/CD
+- Escape de contenedor
+- Seguridad de bases de datos vectoriales
+- Fallo de sandbox
+- Fallos de aislamiento de entorno
+- Fallos del servicio de modelo
 
-## 参考文档
+## Documentos de referencia
 
-- `references/04-ai-and-mcp-security-integrated.md` — AI 与 MCP 安全整合参考
-- `references/ai-app-security.md` — AI 应用安全
-- `references/ai-identity-security.md` — AI 身份安全
-- `references/ai-data-security.md` — AI 数据安全
-- `references/ai-baseline-security.md` — AI 基线安全
-- `references/ai-model-security.md` — AI 模型安全
-- `references/gaarm-risk-matrix.md` — GAARM 风险矩阵
+- `references/04-ai-and-mcp-security-integrated.md` — Referencia integrada de seguridad de IA y MCP
+- `references/ai-app-security.md` — Seguridad de aplicaciones de IA
+- `references/ai-identity-security.md` — Seguridad de identidad de IA
+- `references/ai-data-security.md` — Seguridad de datos de IA
+- `references/ai-baseline-security.md` — Seguridad de línea base de IA
+- `references/ai-model-security.md` — Seguridad de modelos de IA
+- `references/gaarm-risk-matrix.md` — Matriz de riesgos GAARM

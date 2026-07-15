@@ -1,33 +1,33 @@
 ---
 name: hackerone
-description: HackerOne 赏金项目 scope-guard 流程 — 读取 program scope，强制 scope 与 program rules，再逐个把 in-scope asset 交给 pentest-flow
+description: Flujo scope-guard para programas de recompensas de HackerOne — lee el scope del programa, hace cumplir el scope y las reglas del programa, y luego entrega cada asset in-scope a pentest-flow uno por uno
 requires_target: false
 ---
 
-# HackerOne 赏金 scope-guard Skill
+# Skill scope-guard para recompensas de HackerOne
 
-你当前正在执行 HackerOne bug bounty 流程。本 Skill 是一层 **scope-guard wrapper**：
-先解析并强制 program scope 与 program rules，再把每个 **in-scope asset** 交给
-`pentest-flow` Skill 执行真正的渗透。**严禁在任何阶段触碰 out-of-scope asset。**
+Actualmente estás ejecutando un flujo de bug bounty de HackerOne. Este Skill es una capa de **scope-guard wrapper**:
+primero analiza y hace cumplir el scope del programa y las reglas del programa, y luego entrega cada
+**asset in-scope** al Skill `pentest-flow` para ejecutar el pentesting real. **Está terminantemente prohibido tocar cualquier asset out-of-scope en cualquier etapa.**
 
-启动参数是一个 HackerOne program 链接（`<SCOPE LINK>`），例如
-`hackerone.com/<handle>` 或 `.../policy_scopes`。本 Skill 无预设 target
-（frontmatter `requires_target: false`）——target 从 scope 中发现。
+El parámetro de inicio es un enlace de programa de HackerOne (`<SCOPE LINK>`), por ejemplo
+`hackerone.com/<handle>` o `.../policy_scopes`. Este Skill no tiene un target preestablecido
+(frontmatter `requires_target: false`) — el target se descubre a partir del scope.
 
-## 阶段一：读取 scope（Read scope）
+## Fase 1: Leer el scope (Read scope)
 
-1. **优先 fetch 链接**
-   - 用 fetch 工具访问传入的 `<SCOPE LINK>`。
-   - HackerOne 是 JavaScript SPA：`hackerone.com/*` 的 fetch 通常只返回
-     **空 app shell**，没有渲染出的 scope 行（scope 数据来自 `hackerone.com/graphql`
-     或 authenticated `api.hackerone.com`，naive fetch 拿不到）。
-   - **检测空壳**：若响应中没有可识别的 scope 表格 / asset 列表（只有
-     `<div id="app">` 之类的骨架），判定为 fetch 失败。
+1. **Priorizar el fetch del enlace**
+   - Usar la herramienta fetch para acceder al `<SCOPE LINK>` proporcionado.
+   - HackerOne es una SPA de JavaScript: el fetch de `hackerone.com/*` normalmente solo devuelve
+     un **app shell vacío**, sin las filas de scope renderizadas (los datos de scope provienen de `hackerone.com/graphql`
+     o del `api.hackerone.com` autenticado, un fetch ingenuo no los obtiene).
+   - **Detectar el shell vacío**: si la respuesta no contiene una tabla de scope / lista de assets identificable (solo
+     un esqueleto tipo `<div id="app">`), se determina que el fetch falló.
 
-2. **fallback：请用户粘贴 scope**
-   - fetch 为空 / 被 login-wall / 仅 JS 渲染时，**这是常态而非例外**。
-   - 请用户从 program 页面的 **Scope** 标签把 in-scope 与 out-of-scope 两张表
-     直接粘贴过来。给出一个可参照的粘贴格式示例：
+2. **fallback: pedir al usuario que pegue el scope**
+   - Cuando el fetch está vacío / bloqueado por login-wall / solo renderizado por JS, **esto es lo habitual y no la excepción**.
+   - Pedir al usuario que copie directamente desde la pestaña **Scope** de la página del programa las dos tablas
+     de in-scope y out-of-scope. Dar un ejemplo de formato de referencia para el pegado:
 
      ```
      In scope:
@@ -41,72 +41,72 @@ requires_target: false
      *.corp.example.com             | WILDCARD
      ```
 
-3. **宽松解析（lenient parse）**
-   - 从粘贴或 fetch 结果中提取两个列表：**in-scope** 与 **out-of-scope**。
-   - 识别 asset type（human label 或 API enum 均可）：
-     `URL`、`WILDCARD`（`*.x.com`）、`CIDR`/IP、`SOURCE_CODE`、
-     `GOOGLE_PLAY_APP_ID`/`APPLE_STORE_APP_ID`/`TESTFLIGHT`/`OTHER_APK`/`OTHER_IPA`、
-     `HARDWARE`、`AI_MODEL`、`SMART_CONTRACT`、`OTHER` 等。
-   - 识别 **eligibility 三态**（submission 与 bounty 是两个独立布尔）：
-     - `submission=true, bounty=true` → in scope，可测，有赏金。
-     - `submission=true, bounty=false` → **in scope，可测，无赏金**（勿与 out-of-scope 混淆）。
-     - `submission=false` → **out of scope，绝不测试**。
-   - 解析不确定时，向用户确认，**绝不把 asset 默认当作 in-scope**。
+3. **Análisis flexible (lenient parse)**
+   - Extraer dos listas del resultado pegado o del fetch: **in-scope** y **out-of-scope**.
+   - Identificar el asset type (tanto etiqueta legible como enum de la API son válidas):
+     `URL`, `WILDCARD` (`*.x.com`), `CIDR`/IP, `SOURCE_CODE`,
+     `GOOGLE_PLAY_APP_ID`/`APPLE_STORE_APP_ID`/`TESTFLIGHT`/`OTHER_APK`/`OTHER_IPA`,
+     `HARDWARE`, `AI_MODEL`, `SMART_CONTRACT`, `OTHER`, etc.
+   - Identificar el **triple estado de eligibility** (submission y bounty son dos booleanos independientes):
+     - `submission=true, bounty=true` → in scope, se puede probar, con recompensa.
+     - `submission=true, bounty=false` → **in scope, se puede probar, sin recompensa** (no confundir con out-of-scope).
+     - `submission=false` → **out of scope, nunca probar**.
+   - Cuando el análisis sea incierto, confirmar con el usuario, **nunca asumir por defecto que un asset está in-scope**.
 
-4. **输出**
-   - in-scope asset 列表（含 type + eligibility）。
-   - out-of-scope **deny-list**（用于全程强制）。
+4. **Salida**
+   - Lista de assets in-scope (incluyendo type + eligibility).
+   - **Deny-list** de out-of-scope (para hacer cumplir durante todo el proceso).
 
-## 阶段二：强制边界（Enforce boundaries）
+## Fase 2: Hacer cumplir los límites (Enforce boundaries)
 
-在进入任何测试前，明确写下并全程遵守以下 **硬性规则**：
+Antes de iniciar cualquier prueba, escribir explícitamente y respetar en todo momento las siguientes **reglas estrictas**:
 
-1. **Scope 硬边界**
-   - 只测试 in-scope 列表中的 asset。
-   - out-of-scope deny-list 中的 asset **绝不触碰**——不 fetch、不扫描、不发任何 payload。
-   - `pentest-flow` 只能直接作用于 `URL` 与 `WILDCARD` 类型；其它类型
-     （mobile app / source / CIDR / hardware 等）暂不自动化，需先与用户确认处理方式。
+1. **Límite estricto de Scope**
+   - Solo probar los assets de la lista in-scope.
+   - Los assets de la deny-list out-of-scope **nunca deben tocarse** — sin fetch, sin escaneo, sin enviar ningún payload.
+   - `pentest-flow` solo puede actuar directamente sobre los tipos `URL` y `WILDCARD`; otros tipos
+     (mobile app / source / CIDR / hardware, etc.) no se automatizan por ahora, se debe confirmar primero con el usuario cómo proceder.
 
-2. **Program rules（层叠在 VulnClaw 既有 `BLOCKED_PATTERNS` / `RESERVED_IP_RANGES` 之上）**
-   - **no DoS / 无可用性影响**：禁止压力测试、资源耗尽、批量并发（自动化扫描器的首要红线）。
-   - **尊重 rate limit / automation limit**：低速、串行；遵守 program 声明的 "no automated scanning" 条款。
-   - **no social engineering**：不针对人员，不钓鱼。
-   - **minimal impact / no PII exfil**：验证漏洞即止，不导出真实用户数据、不做破坏性操作。
+2. **Reglas del programa (superpuestas a los `BLOCKED_PATTERNS` / `RESERVED_IP_RANGES` ya existentes de VulnClaw)**
+   - **sin DoS / sin impacto en la disponibilidad**: prohibidas las pruebas de estrés, el agotamiento de recursos, la concurrencia masiva (la primera línea roja de cualquier escáner automatizado).
+   - **respetar el rate limit / límite de automatización**: baja velocidad, en serie; respetar la cláusula "no automated scanning" declarada por el programa.
+   - **sin ingeniería social**: no dirigirse a personas, no phishing.
+   - **impacto mínimo / sin exfiltración de PII**: detenerse en cuanto se verifique la vulnerabilidad, no exportar datos reales de usuarios, no realizar operaciones destructivas.
 
-3. **异常处理**
-   - 任何一步若可能越过 scope 或触发上述规则，**停止并询问用户**。
+3. **Manejo de excepciones**
+   - Si algún paso puede exceder el scope o activar las reglas anteriores, **detenerse y preguntar al usuario**.
 
-## 阶段三：枚举与确认（Enumerate & confirm）
+## Fase 3: Enumeración y confirmación (Enumerate & confirm)
 
-1. 向用户列出全部已解析的 in-scope asset（编号、type、eligibility）。
-2. 询问从哪个 asset 开始（或全部）。
-3. **一次只处理一个 asset**，逐个确认，避免并发导致越界或触发 rate limit。
+1. Listar al usuario todos los assets in-scope ya analizados (número, type, eligibility).
+2. Preguntar por cuál asset empezar (o por todos).
+3. **Procesar un solo asset a la vez**, confirmando uno por uno, para evitar que la concurrencia provoque salirse del scope o activar el rate limit.
 
-## 阶段四：委派 pentest-flow（Delegate）
+## Fase 4: Delegar a pentest-flow (Delegate)
 
-对用户选定的 **单个 in-scope asset**：
+Para el **único asset in-scope** seleccionado por el usuario:
 
-1. 将该 asset 作为 target 交给 `pentest-flow` Skill，执行
-   recon → vuln-discovery → exploitation 全流程。
-2. 全程保持在 scope 内：`pentest-flow` 发现的新子域 / 端点若超出
-   in-scope 定义（尤其不匹配任何 in-scope `WILDCARD`），**排除**并提示用户。
-3. 持续对照阶段二的 program rules。
+1. Entregar dicho asset como target al Skill `pentest-flow`, ejecutando
+   el flujo completo de recon → vuln-discovery → exploitation.
+2. Mantenerse dentro del scope en todo momento: si `pentest-flow` descubre nuevos subdominios / endpoints que excedan
+   la definición in-scope (en particular que no coincidan con ningún `WILDCARD` in-scope), **excluirlos** y avisar al usuario.
+3. Verificar continuamente contra las reglas del programa de la Fase 2.
 
-## 阶段五：报告（Report — HackerOne submission format）
+## Fase 5: Reporte (Report — formato de envío de HackerOne)
 
-对每个确认的 finding，按 **HackerOne 提交格式** 输出一份报告：
+Para cada finding confirmado, generar un reporte en el **formato de envío de HackerOne**:
 
-1. **Title** — 简洁描述漏洞（type + 受影响 asset）。
-2. **Asset** — 受影响的 in-scope asset（URL / 标识）。
-3. **Severity (CVSS)** — CVSS 向量与分数（Critical/High/Medium/Low）。
-4. **Steps to Reproduce** — 可复现的分步操作（含请求 / 响应 / payload）。
-5. **Impact** — 可利用性与业务影响。
-6. **Remediation** — 修复建议。
+1. **Title** — Descripción concisa de la vulnerabilidad (type + asset afectado).
+2. **Asset** — El asset in-scope afectado (URL / identificador).
+3. **Severity (CVSS)** — Vector CVSS y puntuación (Critical/High/Medium/Low).
+4. **Steps to Reproduce** — Pasos reproducibles (incluyendo solicitud / respuesta / payload).
+5. **Impact** — Explotabilidad e impacto en el negocio.
+6. **Remediation** — Recomendaciones de corrección.
 
-多个 finding 时，每个独立成节；附可参数化的 Python PoC（requests 库）。
-提醒用户：报告仅供其在 HackerOne 上 **人工提交**，本 Skill 不自动上报。
+Cuando haya varios findings, cada uno en su propia sección; adjuntar un PoC en Python parametrizable (librería requests).
+Recordar al usuario: el reporte es solo para su **envío manual** en HackerOne, este Skill no lo envía automáticamente.
 
-## 参考文档
+## Documentación de referencia
 
-- `references/hackerone-report-and-scope.md` — scope 解析参考（asset type ↔ API enum、
-  eligibility 三态、粘贴表形状）、program rules 强制清单、HackerOne 提交格式报告模板。
+- `references/hackerone-report-and-scope.md` — Referencia de análisis de scope (asset type ↔ enum de la API,
+  triple estado de eligibility, formato de las tablas pegadas), checklist de reglas del programa a cumplir, plantilla de reporte en formato de envío de HackerOne.

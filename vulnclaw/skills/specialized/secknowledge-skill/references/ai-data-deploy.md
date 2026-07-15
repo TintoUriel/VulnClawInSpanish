@@ -1,229 +1,229 @@
-# AI数据安全 - 部署阶段
+# Seguridad de datos de IA - Fase de despliegue
 
-> 来源: AISS绿盟大模型安全智链社区 | 拆自 ai-data-security.md
-> 阶段: 部署阶段（GAARM.0012-0016 备份/传输/存储/日志/缓存）
+> Fuente: Comunidad de Inteligencia en Seguridad de Grandes Modelos AISS-NSFOCUS | Extraído de ai-data-security.md
+> Fase: Fase de despliegue (GAARM.0012-0016 Respaldo/Transmisión/Almacenamiento/Registros/Caché)
 
-## 部署阶段
+## Fase de despliegue
 
-### 备份数据窃取
+### Robo de datos de respaldo
 
-> 风险编号: GAARM.0012
-> 生命周期: 部署阶段
+> Código de riesgo: GAARM.0012
+> Ciclo de vida: Fase de despliegue
 
-**攻击概述**
+**Resumen del ataque**
 
-备份数据中通常包含模型的训练数据、算法逻辑、敏感数据、个人数据等重要信息。如果保护不当，攻击者可以通过未授权访问或者其他攻击方式获取到备份数据，从而导致模型相关重要信息外泄等风险，甚至带来经济风险。
+Los datos de respaldo suelen contener información importante como los datos de entrenamiento del modelo, la lógica del algoritmo, datos sensibles y datos personales. Si la protección es inadecuada, un atacante puede obtener los datos de respaldo mediante acceso no autorizado u otros métodos de ataque, lo que provoca la filtración de información importante relacionada con el modelo e incluso conlleva riesgos económicos.
 
-**攻击案例**
+**Casos de ataque**
 
-案例
-描述
-
-
-
-
-案例一
-攻击者通过钓鱼邮件获取了科技公司员工的访问凭证，未授权访问云存储服务后窃取了包含敏感个人信息和商业秘密的大模型备份数据，导致公司面临法律和经济风险
-
-**攻击风险**
-
-模型篡改：如果备份数据中包含模型的训练数据、算法等信息，攻击者可以利用这些信息对模型进行篡改等。
-敏感数据泄露：如果备份数据中包含用户、客户等信息，泄露将会导致身份盗窃、欺诈活动、勒索等。
-
-**缓解措施**
-
-缓解方式
-描述
+Caso
+Descripción
 
 
 
 
-数据加密
-在备份数据存储过程中使用强大的加密算法，确保数据在存储和传输过程中都得到保护，即使泄露也难以解密
+Caso 1
+Un atacante obtuvo credenciales de acceso de un empleado de una empresa tecnológica mediante un correo de phishing y, tras acceder sin autorización al servicio de almacenamiento en la nube, robó datos de respaldo de un modelo de gran tamaño que contenían información personal sensible y secretos comerciales, lo que expuso a la empresa a riesgos legales y económicos.
+
+**Riesgos del ataque**
+
+Manipulación del modelo: si los datos de respaldo contienen información como los datos de entrenamiento o el algoritmo del modelo, el atacante puede usar esta información para manipular el modelo.
+Filtración de datos sensibles: si los datos de respaldo contienen información de usuarios o clientes, su filtración puede provocar robo de identidad, actividades fraudulentas, extorsión, etc.
+
+**Medidas de mitigación**
+
+Medida de mitigación
+Descripción
 
 
-多重认证
-引入多重认证机制，如双因素认证，增强对备份数据的访问控制，提高安全性
+
+
+Cifrado de datos
+Utilizar algoritmos de cifrado robustos durante el almacenamiento de los datos de respaldo, garantizando que los datos estén protegidos tanto en almacenamiento como en tránsito, de modo que incluso si se filtran sea difícil descifrarlos.
+
+
+Autenticación multifactor
+Implementar mecanismos de autenticación multifactor, como la autenticación de dos factores, para reforzar el control de acceso a los datos de respaldo y aumentar la seguridad.
 
 ---
-### 数据传输劫持
+### Secuestro de la transmisión de datos
 
-> 风险编号: GAARM.0013
-> 生命周期: 部署阶段
+> Código de riesgo: GAARM.0013
+> Ciclo de vida: Fase de despliegue
 
-**攻击概述**
+**Resumen del ataque**
 
-在进行大型模型的预训练、精调和推理服务时，需要在不同的主体或部门之间传输数据。这些数据往往包含各种敏感信息和隐私，比如个人身份信息和金融数据等。攻击者通过恶意截取传输时的数据，可以获取到相关的隐私信息，进而导致敏感信息泄露，给用户带来安全和隐私问题。
+Durante el preentrenamiento, el ajuste fino y los servicios de inferencia de grandes modelos, es necesario transmitir datos entre distintas entidades o departamentos. Estos datos a menudo contienen información sensible y privada diversa, como datos de identidad personal e información financiera. Un atacante que intercepta maliciosamente los datos durante la transmisión puede obtener información privada relacionada, provocando la filtración de información sensible y generando problemas de seguridad y privacidad para los usuarios.
 
-**攻击案例**
+**Casos de ataque**
 
-案例
-描述
-
-
-
-
-案例一
-攻击者利用未加密的网络传输漏洞，成功截获了一家金融机构在进行大模型服务时传输的个人金融数据，导致敏感信息泄露，给用户带来安全和隐私风险
-
-**攻击风险**
-
-敏感数据泄露：攻击者可能通过截获数据获取敏感信息，如个人身份信息、财务数据、医疗记录等。
-知识产权：如果数据中包含了商业机密或专有算法，数据截获可能导致这些知识产权的泄露。
-
-**缓解措施**
-
-缓解方式
-描述
+Caso
+Descripción
 
 
 
 
-数据加密
-通过对敏感数据进行加密处理，确保数据在传输过程中的安全性
+Caso 1
+Un atacante aprovechó una vulnerabilidad de transmisión de red no cifrada para interceptar con éxito datos financieros personales transmitidos por una institución financiera durante la prestación de servicios de un gran modelo, provocando la filtración de información sensible y generando riesgos de seguridad y privacidad para los usuarios.
 
-**参考**
+**Riesgos del ataque**
+
+Filtración de datos sensibles: el atacante puede obtener información sensible interceptando los datos, como información de identidad personal, datos financieros, registros médicos, etc.
+Propiedad intelectual: si los datos contienen secretos comerciales o algoritmos propietarios, la interceptación de datos puede provocar la filtración de dicha propiedad intelectual.
+
+**Medidas de mitigación**
+
+Medida de mitigación
+Descripción
+
+
+
+
+Cifrado de datos
+Cifrar los datos sensibles para garantizar la seguridad de los datos durante la transmisión.
+
+**Referencias**
 
 https://bj.bcebos.com/ensec-web-privacy/anquan/%E5%A4%A7%E6%A8%A1%E5%9E%8B%E5%AE%89%E5%85%A8%E8%A7%A3%E5%86%B3%E6%96%B9%E6%A1%88%E7%99%BD%E7%9A%AE%E4%B9%A6.pdf
 https://mp.weixin.qq.com/s/JlJwDRzYG985kF4d6g7qjw
 
 ---
-### 数据存储服务攻击
+### Ataques al servicio de almacenamiento de datos
 
-> 风险编号: GAARM.0014
-> 生命周期: 部署阶段
+> Código de riesgo: GAARM.0014
+> Ciclo de vida: Fase de despliegue
 
-**攻击概述**
+**Resumen del ataque**
 
-该风险是指数据的存储和组织过程中可能存在安全隐患，如不充分的访问控制、不安全的数据处理实践或加密措施的缺失，攻击者利用相关漏洞可以进行未经授权的访问、数据泄露或篡改等攻击，获取到敏感信息，甚至可以进行身份盗窃、诈骗活动等，导致用户隐私和企业资产暴露，带来数据泄露、法律诉讼和信誉损失的可能性。
+Este riesgo se refiere a posibles fallos de seguridad durante el almacenamiento y la organización de los datos, como controles de acceso insuficientes, prácticas de manejo de datos inseguras o ausencia de medidas de cifrado. Un atacante que aproveche estas vulnerabilidades puede llevar a cabo accesos no autorizados, filtraciones de datos o manipulaciones, obteniendo información sensible e incluso realizando robo de identidad o actividades fraudulentas, lo que expone la privacidad de los usuarios y los activos de la empresa y conlleva la posibilidad de filtraciones de datos, litigios legales y pérdida de reputación.
 
-**攻击案例**
+**Casos de ataque**
 
-案例
-描述
-
-
-
-
-案例一
-Clearview AI的源代码存储库配置错误，使得任意用户可以访问，暴露了生产凭据和训练数据，强调了ML系统安全需要加固传统网络安全措施。
-
-**攻击风险**
-
-敏感数据泄露：未经加密保护或访问控制不当的敏感数据可能被攻击者获取，导致数据泄露。
-身份窃取：存储的个人身份信息可能被盗取，用于进行身份盗窃、诈骗等犯罪活动。
-
-**缓解措施**
-
-缓解方式
-描述
+Caso
+Descripción
 
 
 
 
-访问控制
-确保只有授权用户才能访问数据存储库中的数据
+Caso 1
+El repositorio de código fuente de Clearview AI estaba mal configurado, permitiendo el acceso a cualquier usuario y exponiendo credenciales de producción y datos de entrenamiento, lo que subraya que la seguridad de los sistemas de aprendizaje automático requiere reforzar las medidas tradicionales de ciberseguridad.
+
+**Riesgos del ataque**
+
+Filtración de datos sensibles: los datos sensibles sin protección de cifrado o con un control de acceso inadecuado pueden ser obtenidos por atacantes, provocando filtraciones de datos.
+Robo de identidad: la información de identidad personal almacenada puede ser robada y utilizada para actividades delictivas como robo de identidad o fraude.
+
+**Medidas de mitigación**
+
+Medida de mitigación
+Descripción
 
 
-数据分类
-对存储库中的信息进行分类，并根据数据的敏感性实施相应的安全措施
 
 
-数据加密
-对存储的敏感数据进行加密，即使数据被未授权访问，也能保护其内容不被轻易读取
+Control de acceso
+Garantizar que solo los usuarios autorizados puedan acceder a los datos del repositorio de almacenamiento.
 
-**参考**
+
+Clasificación de datos
+Clasificar la información del repositorio e implementar medidas de seguridad correspondientes según la sensibilidad de los datos.
+
+
+Cifrado de datos
+Cifrar los datos sensibles almacenados, de modo que aunque se acceda a ellos sin autorización, su contenido no pueda leerse fácilmente.
+
+**Referencias**
 
 https://news.cctv.com/2022/06/21/ARTIdhgLL1sSK5Hjl0uYWybr220621.shtml
 https://atlas.mitre.org/techniques/AML.T0036
 
 ---
-### 日志和审计记录窃取
+### Robo de registros y auditorías
 
-> 风险编号: GAARM.0015
-> 生命周期: 部署阶段
+> Código de riesgo: GAARM.0015
+> Ciclo de vida: Fase de despliegue
 
-**攻击概述**
+**Resumen del ataque**
 
-模型的日志和审计记录扮演着监控系统活动和事件的关键角色，它们详细记录了包括用户登录行为、文件访问情况、系统配置的更改以及各类安全事件在内的信息。攻击者在获取到相关服务器权限后，通过对日志和审计记录的窃取，导致用户的个人行为模式被暴露，还可能揭示系统的潜在漏洞，导致攻击者发起更具针对性的攻击。
+Los registros y auditorías del modelo desempeñan un papel clave en la supervisión de las actividades y eventos del sistema, registrando en detalle información como el comportamiento de inicio de sesión de los usuarios, el acceso a archivos, los cambios en la configuración del sistema y diversos eventos de seguridad. Tras obtener permisos en el servidor correspondiente, un atacante puede robar los registros y auditorías, exponiendo los patrones de comportamiento personal de los usuarios y revelando posibles vulnerabilidades del sistema, lo que permite al atacante lanzar ataques más dirigidos.
 
-**攻击案例**
+**Casos de ataque**
 
-案例
-描述
-
-
-
-
-案例一
-该案例描述了chatgpt泄露了用户登录凭据以及个人详情等信息
-
-**攻击风险**
-
-敏感数据泄露：导致个人隐私泄露、账号被盗用等问题。
-针对性攻击：攻击者可能能够发现系统中的安全漏洞和弱点，从而发起更具针对性的攻击。
-
-**缓解措施**
-
-缓解方式
-描述
+Caso
+Descripción
 
 
 
 
-定期审计
-定期审计日志和审计记录的访问和操作情况，检查是否存在异常或不正常的行为，及时发现并处理安全威胁
+Caso 1
+Este caso describe cómo ChatGPT filtró credenciales de inicio de sesión de usuarios y otra información personal.
+
+**Riesgos del ataque**
+
+Filtración de datos sensibles: provoca la filtración de la privacidad personal, el robo de cuentas, entre otros problemas.
+Ataques dirigidos: el atacante puede descubrir vulnerabilidades y puntos débiles de seguridad en el sistema, lo que le permite lanzar ataques más dirigidos.
+
+**Medidas de mitigación**
+
+Medida de mitigación
+Descripción
 
 
-日志和审计记录分离存储
-将日志和审计记录与其他数据分开存储，确保其独立于生产数据，降低泄露风险
 
 
-建立访问控制策略
-建立严格的访问控制策略，仅授权必要的人员能够访问日志和审计记录，限制权限范围，避免未经授权的访问
+Auditorías periódicas
+Auditar periódicamente el acceso y las operaciones sobre los registros y auditorías, verificando si existen comportamientos anómalos o irregulares, para detectar y gestionar oportunamente las amenazas de seguridad.
 
-**参考**
+
+Almacenamiento separado de registros y auditorías
+Almacenar los registros y auditorías separados de otros datos, garantizando su independencia respecto de los datos de producción y reduciendo el riesgo de filtración.
+
+
+Establecimiento de políticas de control de acceso
+Establecer políticas de control de acceso estrictas, autorizando únicamente al personal necesario para acceder a los registros y auditorías, limitando el alcance de los permisos y evitando accesos no autorizados.
+
+**Referencias**
 
 https://www.kuaikuaicloud.com/market/3667.html
 
 ---
-### 缓存数据&索引信息窃取
+### Robo de datos de caché e información de índices
 
-> 风险编号: GAARM.0016
-> 生命周期: 部署阶段
+> Código de riesgo: GAARM.0016
+> Ciclo de vida: Fase de despliegue
 
-**攻击概述**
+**Resumen del ataque**
 
-缓存数据和索引信息可能泄露用户的敏感信息，包括但不限于身份识别信息、支付细节以及个人偏好等。攻击者通过非法访问缓存和索引数据，既可以对数据进行篡改或毁坏，影响系统的运行和数据完整性；也可以据此精心策划并实施定向钓鱼攻击，利用用户的个人信息来增加攻击的可信度和成功率，从而对用户造成更为严重的安全威胁和财产损失。
+Los datos de caché y la información de índices pueden filtrar información sensible del usuario, incluyendo, entre otros, información de identificación personal, detalles de pago y preferencias personales. Un atacante que accede ilegalmente a los datos de caché e índices puede manipular o destruir los datos, afectando el funcionamiento del sistema y la integridad de los datos; también puede planear y ejecutar ataques de phishing dirigidos, utilizando la información personal del usuario para aumentar la credibilidad y la tasa de éxito del ataque, causando así amenazas de seguridad y pérdidas económicas más graves para el usuario.
 
-**攻击案例**
+**Casos de ataque**
 
-案例
-描述
-
-
-
-
-案例一
-该案例描述了OpenAI使用redis在服务器中缓存了用户信息，由于客户端开源库redis-py的错误，导致客户在接收时错误地收到了缓存在Redis中的其他用户的邮件地址
-
-**攻击风险**
-
-敏感数据泄露：泄露的缓存数据可能包含用户的凭证信息，如用户名、密码等，攻击者可能利用这些信息进行身份盗用、账号劫持等活动。
-数据篡改：攻击者可能会利用这些信息对缓存中的数据进行篡改或破坏，从而影响系统的运行和数据的完整性。
-
-**缓解措施**
-
-缓解方式
-描述
+Caso
+Descripción
 
 
 
 
-数据加密
-通过对敏感数据进行加密处理，确保数据的安全性
+Caso 1
+Este caso describe cómo OpenAI utilizó Redis para almacenar en caché información de usuarios en sus servidores; debido a un error en la biblioteca de código abierto del cliente redis-py, algunos clientes recibieron por error direcciones de correo electrónico de otros usuarios almacenadas en caché en Redis.
 
-**参考**
+**Riesgos del ataque**
+
+Filtración de datos sensibles: los datos de caché filtrados pueden contener información de credenciales del usuario, como nombre de usuario y contraseña, que el atacante puede usar para actividades de robo de identidad, secuestro de cuentas, etc.
+Manipulación de datos: el atacante puede utilizar esta información para manipular o destruir los datos en caché, afectando el funcionamiento del sistema y la integridad de los datos.
+
+**Medidas de mitigación**
+
+Medida de mitigación
+Descripción
+
+
+
+
+Cifrado de datos
+Cifrar los datos sensibles para garantizar la seguridad de los datos.
+
+**Referencias**
 
 http://www.nelab-bdst.org.cn/data/upload/ueditor/20230707/64a78209c719c.pdf
 

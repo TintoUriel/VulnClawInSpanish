@@ -1,34 +1,34 @@
-# HackerOne 报告模板与 scope 解析参考
+# Plantilla de reporte de HackerOne y referencia de análisis de scope
 
-本参考供 `hackerone` Skill 使用：右侧是 **scope 解析** 的目标形状，左侧是
-**HackerOne 提交格式** 的报告模板。技术术语保留英文原文。
+Esta referencia es para uso del Skill `hackerone`: a la derecha está la forma objetivo del **análisis de scope**, a la izquierda
+la plantilla de reporte en **formato de envío de HackerOne**. Los términos técnicos se mantienen en su idioma original (inglés).
 
-## 1. Scope 解析参考
+## 1. Referencia de análisis de scope
 
-### 1.1 asset type（human label ↔ API enum）
+### 1.1 asset type (human label ↔ API enum)
 
-| Human label            | API enum                                   | pentest-flow 可直接处理 |
+| Human label            | API enum                                   | Procesable directamente por pentest-flow |
 | ---------------------- | ------------------------------------------ | ----------------------- |
 | Domain / URL           | `URL`                                      | ✅                      |
 | Wildcard `*.x.com`     | `WILDCARD`                                 | ✅                      |
-| IP range / CIDR        | `CIDR`                                     | ⚠️ 需确认（可能受限）   |
-| Source code            | `SOURCE_CODE`                              | ❌ 人工                 |
-| Android app            | `GOOGLE_PLAY_APP_ID` / `OTHER_APK`         | ❌ 需专用流程           |
-| iOS app                | `APPLE_STORE_APP_ID` / `TESTFLIGHT` / `OTHER_IPA` | ❌ 需专用流程    |
-| Hardware               | `HARDWARE`                                 | ❌ 人工                 |
-| AI Model               | `AI_MODEL`                                 | ❌ 人工                 |
-| Smart Contract         | `SMART_CONTRACT`                           | ❌ 人工                 |
-| Other / ASN            | `OTHER`                                    | ⚠️ 需确认               |
+| IP range / CIDR        | `CIDR`                                     | ⚠️ Requiere confirmación (puede estar restringido)   |
+| Source code            | `SOURCE_CODE`                              | ❌ Manual                 |
+| Android app            | `GOOGLE_PLAY_APP_ID` / `OTHER_APK`         | ❌ Requiere flujo dedicado           |
+| iOS app                | `APPLE_STORE_APP_ID` / `TESTFLIGHT` / `OTHER_IPA` | ❌ Requiere flujo dedicado    |
+| Hardware               | `HARDWARE`                                 | ❌ Manual                 |
+| AI Model               | `AI_MODEL`                                 | ❌ Manual                 |
+| Smart Contract         | `SMART_CONTRACT`                           | ❌ Manual                 |
+| Other / ASN            | `OTHER`                                    | ⚠️ Requiere confirmación               |
 
-### 1.2 eligibility 三态（submission × bounty 两个独立布尔）
+### 1.2 Triple estado de eligibility (submission × bounty, dos booleanos independientes)
 
-| submission | bounty | 含义                                    | 行为             |
+| submission | bounty | Significado                                    | Comportamiento             |
 | ---------- | ------ | --------------------------------------- | ---------------- |
-| true       | true   | in scope，可测，有赏金                  | 正常测试         |
-| true       | false  | in scope，可测，**无赏金**              | 正常测试（勿跳过）|
-| false      | —      | **out of scope**                        | **绝不触碰**     |
+| true       | true   | in scope, se puede probar, con recompensa                  | Prueba normal         |
+| true       | false  | in scope, se puede probar, **sin recompensa**              | Prueba normal (no omitir)|
+| false      | —      | **out of scope**                        | **Nunca tocar**     |
 
-### 1.3 粘贴 scope 表的目标形状（lenient parse）
+### 1.3 Forma objetivo de la tabla de scope pegada (lenient parse)
 
 ```
 In scope:
@@ -42,45 +42,45 @@ blog.example.com               | URL
 *.corp.example.com             | WILDCARD
 ```
 
-解析要点：
-- 每行至少提取 **asset 标识** 与 **in/out 归属**；type 与 eligibility 尽量识别。
-- 列顺序、分隔符（`|`、tab、多空格）都可能变化——按 token 宽松匹配。
-- 任何无法确定归属的行，**向用户确认，绝不默认 in-scope**。
+Puntos clave del análisis:
+- De cada línea, extraer al menos el **identificador del asset** y la **pertenencia in/out**; identificar type y eligibility en la medida de lo posible.
+- El orden de las columnas y los separadores (`|`, tab, espacios múltiples) pueden variar — hacer coincidencia flexible por token.
+- Para cualquier línea cuya pertenencia no pueda determinarse, **confirmar con el usuario, nunca asumir por defecto in-scope**.
 
-## 2. Program rules 强制清单
+## 2. Checklist obligatoria de reglas del programa
 
-在测试任一 asset 前逐条对照：
+Verificar cada punto antes de probar cualquier asset:
 
-- **no DoS / 无可用性影响** —— 禁止压力测试、资源耗尽、批量并发。
-- **rate limit / automation limit** —— 低速串行；遵守 "no automated scanning" 条款。
-- **no social engineering** —— 不针对人员、不钓鱼。
-- **minimal impact / no PII exfil** —— 验证即止，不导出真实用户数据。
-- 叠加于 VulnClaw 既有 `BLOCKED_PATTERNS` / `RESERVED_IP_RANGES` 之上。
+- **sin DoS / sin impacto en la disponibilidad** —— prohibidas las pruebas de estrés, el agotamiento de recursos, la concurrencia masiva.
+- **rate limit / límite de automatización** —— baja velocidad y en serie; respetar la cláusula "no automated scanning".
+- **sin ingeniería social** —— no dirigirse a personas, no phishing.
+- **impacto mínimo / sin exfiltración de PII** —— detenerse en cuanto se verifique, no exportar datos reales de usuarios.
+- Se superpone a los `BLOCKED_PATTERNS` / `RESERVED_IP_RANGES` ya existentes de VulnClaw.
 
-## 3. HackerOne 提交格式报告模板
+## 3. Plantilla de reporte en formato de envío de HackerOne
 
-每个 finding 用如下结构：
+Cada finding debe usar la siguiente estructura:
 
 ```markdown
-### [Title] <漏洞类型> on <asset>
+### [Title] <tipo de vulnerabilidad> on <asset>
 
-**Asset:** <受影响的 in-scope asset（URL / 标识）>
+**Asset:** <asset in-scope afectado (URL / identificador)>
 
 **Severity (CVSS):** <Critical | High | Medium | Low> —
 `CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:N` (score: X.X)
 
 **Steps to Reproduce:**
-1. <步骤，含请求 / 响应 / payload>
+1. <paso, incluyendo solicitud / respuesta / payload>
 2. ...
 
 **Impact:**
-<可利用性与业务影响>
+<explotabilidad e impacto en el negocio>
 
 **Remediation:**
-<修复建议>
+<recomendaciones de corrección>
 
 **Proof of Concept:**
-（附可参数化的 Python PoC，requests 库；仅用于验证，无破坏性）
+(adjuntar PoC en Python parametrizable, librería requests; solo para verificación, sin carácter destructivo)
 ```
 
-提醒：报告仅供用户在 HackerOne 上 **人工提交**，Skill 不自动上报。
+Recordatorio: el reporte es solo para que el usuario lo **envíe manualmente** en HackerOne, el Skill no lo envía automáticamente.

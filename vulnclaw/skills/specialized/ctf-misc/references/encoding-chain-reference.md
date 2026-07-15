@@ -1,14 +1,14 @@
-# 编码链识别与解码
+# Identificación y decodificación de cadenas de codificación
 
-## 编码识别特征
+## Características de identificación de codificación
 
-| 编码 | 特征 | 示例 |
+| Codificación | Características | Ejemplo |
 |------|------|------|
-| Base64 | `A-Za-z0-9+/=`, 长度 % 4 | `TnNTY1RmLnBocA==` |
-| Base32 | `A-Z2-7=`, 长度 % 8 | `OBZHK5DFN2A====` |
-| Base16 | `0-9A-F`, 偶数长度 | `4E535354662E706870` |
-| URL 编码 | `%XX` | `%2F%61%64%6D%69%6E` |
-| HTML 实体 | `&#xNNN;` 或 `&#NNN;` | `&#x3C;script&#x3E;` |
+| Base64 | `A-Za-z0-9+/=`, longitud % 4 | `TnNTY1RmLnBocA==` |
+| Base32 | `A-Z2-7=`, longitud % 8 | `OBZHK5DFN2A====` |
+| Base16 | `0-9A-F`, longitud par | `4E535354662E706870` |
+| Codificación URL | `%XX` | `%2F%61%64%6D%69%6E` |
+| Entidad HTML | `&#xNNN;` o `&#NNN;` | `&#x3C;script&#x3E;` |
 | Unicode | `\uXXXX` 或 `\UXXXXXXXX` | `\u003c\u0073\u0063` |
 | Hex (Python) | `\xNN` | `\x4e\x53\x53\x54` |
 | ROT13 | 字母替换，Caesar | `axzc` → `nmp` |

