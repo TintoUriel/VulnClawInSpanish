@@ -1,113 +1,114 @@
-# PHP 正则绕过速查
+# Chuleta de bypass de expresiones regulares en PHP
 
-## 核心原理
+## Principio central
 
-PHP 的 `preg_match()` 函数在过滤用户输入时，常因正则表达式设计不当而被绕过。
-理解正则修饰符和 PHP 类型行为是绕过的关键。
+La función `preg_match()` de PHP, al filtrar la entrada del usuario, a menudo puede eludirse debido a un diseño inadecuado de la expresión regular.
+Comprender los modificadores de las expresiones regulares y el comportamiento de tipos de PHP es la clave para el bypass.
 
-## 1. 大小写绕过
+## 1. Bypass por mayúsculas/minúsculas
 
-**适用条件**: 正则没有 `i`（PCRE_CASELESS）修饰符
+**Condición aplicable**: la expresión regular no tiene el modificador `i` (PCRE_CASELESS)
 
 ```php
-// 被过滤的正则 — 无 i 修饰符
-preg_match("/n|c/m", $_GET['p']);  // 只匹配小写 n 和 c
+// Regex filtrada — sin modificador i
+preg_match("/n|c/m", $_GET['p']);  // Solo coincide con n y c en minúscula
 
-// 绕过方式 — 用大写字母
-// nss2 含有 n → 被拦截
-// Nss2 含有 N → 不匹配小写 n → 绕过成功！
-// Ctf 含有 C → 不匹配小写 c → 绕过成功！
+// Método de bypass — usar letras mayúsculas
+// nss2 contiene n → bloqueado
+// Nss2 contiene N → no coincide con n minúscula → ¡bypass exitoso!
+// Ctf contiene C → no coincide con c minúscula → ¡bypass exitoso!
 
-// PHP 类名和函数名大小写不敏感
-call_user_func('Nss2::Ctf');  // 等价于 nss2::ctf()
+// Los nombres de clase y función de PHP no distinguen mayúsculas/minúsculas
+call_user_func('Nss2::Ctf');  // Equivalente a nss2::ctf()
 ```
 
-**验证方法**: 先确认正则是否带 `i` 修饰符，再决定使用大小写绕过
+**Método de verificación**: primero confirmar si la expresión regular lleva el modificador `i`, y luego decidir si usar el bypass por mayúsculas/minúsculas
 
-## 2. 数组绕过
+## 2. Bypass mediante arrays
 
-**适用条件**: 函数只接受字符串参数，传入数组会返回 false
+**Condición aplicable**: la función solo acepta parámetros de tipo string; si se pasa un array, devuelve false
 
 ```php
-// preg_match() 第二个参数需要字符串
-// 传入数组 → 返回 false + Warning → 绕过正则检查
+// El segundo parámetro de preg_match() necesita ser un string
+// Pasar un array → devuelve false + Warning → elude la verificación de la regex
 
 // URL: ?p[]=nss2&p[]=ctf
-// $_GET['p'] = ['nss2', 'ctf']  (数组而非字符串)
-// preg_match("/n|c/m", ['nss2', 'ctf']) → false → 绕过！
+// $_GET['p'] = ['nss2', 'ctf']  (array, no string)
+// preg_match("/n|c/m", ['nss2', 'ctf']) → false → ¡bypass!
 
-// call_user_func 接受数组作为回调
-call_user_func(['nss2', 'ctf']);  // 等价于 nss2::ctf()
+// call_user_func acepta un array como callback
+call_user_func(['nss2', 'ctf']);  // Equivalente a nss2::ctf()
 ```
 
-## 3. 换行符绕过
+## 3. Bypass mediante salto de línea
 
-**适用条件**: 正则使用 `^...$` 锚点 + `m` 修饰符
+**Condición aplicable**: la expresión regular usa anclas `^...$` + modificador `m`
 
 ```php
-// 常见误解：m 修饰符不会让 /n/ 匹配换行符
-// m 修饰符只影响 ^ 和 $ 的匹配行为（多行模式）
+// Error común: el modificador m no hace que /n/ coincida con saltos de línea
+// El modificador m solo afecta el comportamiento de coincidencia de ^ y $ (modo multilínea)
 
-// 可以绕过的情况：
-preg_match("/^flag$/", $input);  // m 修饰符下可用 %0aflag 绕过
+// Caso en el que se puede eludir:
+preg_match("/^flag$/", $input);  // Con modificador m se puede eludir con %0aflag
 
-// 不能绕过的情况：
-preg_match("/n|c/m", $input);    // m 不影响 n 和 c 的匹配
+// Caso en el que NO se puede eludir:
+preg_match("/n|c/m", $input);    // m no afecta la coincidencia de n y c
 ```
 
-## 4. PCRE 回溯限制绕过
+## 4. Bypass del límite de backtracking de PCRE
 
-**适用条件**: 超长字符串 + 回溯量大的正则
+**Condición aplicable**: cadena extremadamente larga + regex con gran cantidad de backtracking
 
 ```php
-// preg_match 默认回溯上限 1000000
-// 超过则返回 false（不是 0 或 1）
+// El límite de backtracking por defecto de preg_match es 1000000
+// Si se supera, devuelve false (no 0 ni 1)
 
-// 构造超长字符串触发回溯限制
+// Construir una cadena extremadamente larga para disparar el límite de backtracking
 $str = str_repeat('a', 1000000);
-preg_match("/.*$/", $str);  // 返回 false → 绕过
+preg_match("/.*$/", $str);  // Devuelve false → bypass
 ```
 
-## 5. `%0a` 换行注入
+## 5. Inyección de salto de línea `%0a`
 
-**适用条件**: 正则使用 `^...$` 但没有 `s`（DOTALL）修饰符
+**Condición aplicable**: la expresión regular usa `^...$` pero no tiene el modificador `s` (DOTALL)
 
 ```php
-// 绕过 ^...$ 锚点
-// 输入: "good\nmalicious"
-preg_match("/^good$/", "good\nmalicious");  // 无 m 时不匹配
-preg_match("/^good$/m", "good\nmalicious");  // 有 m 时匹配第一行
+// Elude las anclas ^...$
+// Entrada: "good\nmalicious"
+preg_match("/^good$/", "good\nmalicious");  // Sin m, no coincide
+preg_match("/^good$/m", "good\nmalicious");  // Con m, coincide con la primera línea
 ```
 
-## 常见 CTF 题型模式
+## Patrones comunes de retos CTF
 
-| 类型 | 正则示例 | 绕过方式 |
+| Tipo | Ejemplo de regex | Método de bypass |
 |------|----------|----------|
-| 大小写过滤 | `/n\|c/m` | `Nss2::Ctf`（大小写绕过） |
-| 字符串函数过滤 | `/system\|exec/` | `p[]=class&p[]=method`（数组绕过） |
-| 锚点匹配 | `/^flag$/` | `flag%0a` 或 `%0aflag`（换行绕过） |
-| 回溯限制 | `/.*/` | 超长字符串触发 PCRE 回溯限制 |
-| 无锚点 | `/flag/` | `flflagag`（双写绕过，如做了 str_replace） |
+| Filtro por mayúsculas/minúsculas | `/n\|c/m` | `Nss2::Ctf` (bypass por mayúsculas/minúsculas) |
+| Filtro de función por string | `/system\|exec/` | `p[]=class&p[]=method` (bypass mediante array) |
+| Coincidencia por ancla | `/^flag$/` | `flag%0a` o `%0aflag` (bypass mediante salto de línea) |
+| Límite de backtracking | `/.*/` | Cadena extremadamente larga que dispara el límite de backtracking de PCRE |
+| Sin ancla | `/flag/` | `flflagag` (bypass por doble escritura, si se aplicó str_replace) |
 
-## call_user_func 回调方式速查
+## Chuleta de formas de callback de call_user_func
 
 ```php
-// 调用普通函数
+// Llamar a una función normal
 call_user_func('readfile', 'flag.php');
 
-// 调用静态方法（字符串形式）
-call_user_func('Nss2::Ctf');  // 大小写绕过后
+// Llamar a un método estático (forma de string)
+call_user_func('Nss2::Ctf');  // Tras el bypass por mayúsculas/minúsculas
 
-// 调用静态方法（数组形式）
-call_user_func(['Nss2', 'Ctf']);  // 数组绕过后
+// Llamar a un método estático (forma de array)
+call_user_func(['Nss2', 'Ctf']);  // Tras el bypass mediante array
 
-// 调用实例方法
+// Llamar a un método de instancia
 call_user_func([$obj, 'method']);
 ```
 
-## ⚠️ 常见错误
+## ⚠️ Errores comunes
 
-1. **`call_user_func('readfile')` 不带参数** — 不会读取任何文件，必须传 `call_user_func('readfile', 'flag.php')`
-2. **混淆 `m` 和 `i` 修饰符** — `m` 是多行模式，`i` 才是忽略大小写
-3. **忽略 PHP 类型杂耍** — `preg_match` 遇到数组返回 `false`，不是 `0`
-4. **猜测 flag 内容** — 必须通过工具获取真实响应，不能编造
+1. **`call_user_func('readfile')` sin parámetros** — no leerá ningún archivo; se debe pasar `call_user_func('readfile', 'flag.php')`
+2. **Confundir los modificadores `m` e `i`** — `m` es modo multilínea, `i` es el que ignora mayúsculas/minúsculas
+3. **Ignorar el malabarismo de tipos de PHP** — `preg_match` devuelve `false` al recibir un array, no `0`
+4. **Adivinar el contenido de la flag** — se debe obtener la respuesta real mediante herramientas, no inventarla
+</content>

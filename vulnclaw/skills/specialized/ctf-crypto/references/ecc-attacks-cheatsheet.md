@@ -1,52 +1,52 @@
-# ECC 攻击速查表
+# Hoja de referencia rápida de ataques ECC
 
-## 椭圆曲线基础
+## Fundamentos de curvas elípticas
 
 ```python
-# 椭圆曲线: y² = x³ + ax + b (mod p)
-# 点运算: P + Q, k*P
-# ECDLP: 已知 P, Q=k*P，求 k
+# Curva elíptica: y² = x³ + ax + b (mod p)
+# Operaciones de punto: P + Q, k*P
+# ECDLP: dados P, Q=k*P, hallar k
 ```
 
-## 攻击选择
+## Selección de ataque
 
-| 条件 | 攻击方法 | 适用场景 |
+| Condición | Método de ataque | Escenario aplicable |
 |------|---------|---------|
-| 阶 n 是光滑数 | Pohlig-Hellman | n 的因子都小 |
-| 曲线异常 (p=n) | Smart 攻击 | 异常曲线 |
-| 子群阶小 | 小子群攻击 | 阶有大素因子 |
-| 曲线参数可疑 | Invalid Curve 攻击 | 非标准曲线 |
-| ECDSA nonce 重用 | 确定性攻击 | 同一 k 签两次 |
-| 阶很小 | 暴力/Baby-step Giant-step | n < 2^40 |
+| El orden n es un número suave (smooth) | Pohlig-Hellman | Todos los factores de n son pequeños |
+| Curva anómala (p=n) | Ataque de Smart | Curvas anómalas |
+| Orden de subgrupo pequeño | Ataque de subgrupo pequeño | El orden tiene un factor primo grande |
+| Parámetros de curva sospechosos | Ataque de curva inválida (Invalid Curve) | Curvas no estándar |
+| Reutilización de nonce en ECDSA | Ataque determinista | Se firma dos veces con el mismo k |
+| Orden muy pequeño | Fuerza bruta/Baby-step Giant-step | n < 2^40 |
 
-## Pohlig-Hellman 攻击
+## Ataque Pohlig-Hellman
 
 ```python
-# Sage 实现
-# 当群阶 n 的因子都较小时
+# Implementación en Sage
+# Cuando todos los factores del orden del grupo n son pequeños
 
 P = EllipticCurve(GF(p), [a, b])
-G = P(P_x, P_y)  # 基点
-Q = P(Q_x, Q_y)  # 目标点
+G = P(P_x, P_y)  # Punto base
+Q = P(Q_x, Q_y)  # Punto objetivo
 
-n = P.order()  # 群阶
+n = P.order()  # Orden del grupo
 factors = factor(n)
 
 # Pohlig-Hellman
 k = discrete_log(Q, G, operation='+')
-# 或指定方法
+# O especificando el método
 k = Q.discrete_log(G)
 ```
 
-## Smart 攻击 (异常曲线)
+## Ataque de Smart (curvas anómalas)
 
 ```python
-# 当曲线的阶等于特征 p (异常曲线)
-# E.lift_x() 可能失败但可以利用 p-adic 提升
+# Cuando el orden de la curva es igual a la característica p (curva anómala)
+# E.lift_x() puede fallar pero se puede usar el levantamiento p-ádico
 
-# Sage 实现
+# Implementación en Sage
 def smart_attack(P, Q, p, a, b):
-    """Smart 攻击，适用于 #E = p 的异常曲线"""
+    """Ataque de Smart, aplicable a curvas anómalas donde #E = p"""
     E = EllipticCurve(Qp(p), [a, b])
     P_lift = E.lift_x(ZZ(P.xy()[0]))
     Q_lift = E.lift_x(ZZ(Q.xy()[0]))
@@ -61,46 +61,46 @@ def smart_attack(P, Q, p, a, b):
     return k
 ```
 
-## Invalid Curve 攻击
+## Ataque de curva inválida (Invalid Curve)
 
 ```python
-# 当服务器不验证点是否在曲线上
-# 可以发送不在曲线上的点，该点可能在另一条曲线上
-# 如果那条曲线的阶是光滑的，可以用 Pohlig-Hellman
+# Cuando el servidor no valida si el punto está en la curva
+# Se puede enviar un punto que no está en la curva, ese punto puede estar en otra curva
+# Si el orden de esa otra curva es suave, se puede usar Pohlig-Hellman
 
-# 构造：选择 a' 使得 y² = x³ + a'*x + b 有光滑阶
+# Construcción: elegir a' de modo que y² = x³ + a'*x + b tenga orden suave
 ```
 
-## ECDSA Nonce 重用攻击
+## Ataque de reutilización de Nonce en ECDSA
 
 ```python
 """
-如果 ECDSA 中同一个 nonce k 被用于两次签名：
+Si en ECDSA el mismo nonce k se usa en dos firmas:
 s1 = k^(-1) * (h1 + r*d) mod n
 s2 = k^(-1) * (h2 + r*d) mod n
 
 s1 - s2 = k^(-1) * (h1 - h2) mod n
 k = (h1 - h2) * (s1 - s2)^(-1) mod n
-d = (s1 * k - h1) * r^(-1) mod n  (私钥)
+d = (s1 * k - h1) * r^(-1) mod n  (clave privada)
 """
 
 def ecdsa_nonce_reuse(r1, s1, h1, r2, s2, h2, n):
-    """ECDSA nonce 重用恢复私钥"""
+    """Recupera la clave privada explotando la reutilización de nonce en ECDSA"""
     from gmpy2 import invert
-    # 确认 r 相同
+    # Confirmar que r es igual en ambas firmas
     assert r1 == r2
     k = ((h1 - h2) * invert(s1 - s2, n)) % n
     d = ((s1 * k - h1) * invert(r1, n)) % n
     return int(d)
 ```
 
-## 常见 ECC CTF 题型
+## Tipos comunes de retos ECC en CTF
 
-| 题型 | 特征 | 攻击 |
+| Tipo de reto | Característica | Ataque |
 |------|------|------|
-| 标准曲线 + 小阶 | n < 2^40 | 暴力 |
-| 标准曲线 + 光滑阶 | n 有小因子 | Pohlig-Hellman |
-| 异常曲线 | #E = p | Smart 攻击 |
-| 自定义曲线 | a, b 可疑 | Invalid Curve / 分解阶 |
-| ECDSA 签名 | 多组签名 | Nonce 重用 |
-| Twisted Edwards | x² + a*y² = 1 + d*x²*y² | 转换为 Weierstrass |
+| Curva estándar + orden pequeño | n < 2^40 | Fuerza bruta |
+| Curva estándar + orden suave | n tiene factores pequeños | Pohlig-Hellman |
+| Curva anómala | #E = p | Ataque de Smart |
+| Curva personalizada | a, b sospechosos | Invalid Curve / factorización del orden |
+| Firma ECDSA | Varios grupos de firmas | Reutilización de nonce |
+| Twisted Edwards | x² + a*y² = 1 + d*x²*y² | Conversión a Weierstrass |

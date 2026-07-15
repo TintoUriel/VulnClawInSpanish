@@ -39,9 +39,9 @@ def test_abandon_and_active_intents():
     board.add_fact("seed")
     a = board.add_intent("dead end")
     b = board.add_intent("live path")
-    board.abandon_intent(a.id, note="走不通")
+    board.abandon_intent(a.id, note="sin salida")
     assert board.get_intent(a.id).status == IntentStatus.ABANDONED
-    assert board.get_intent(a.id).note == "走不通"
+    assert board.get_intent(a.id).note == "sin salida"
     # active = open + exploring (abandoned/concluded excluded)
     active_ids = {i.id for i in board.active_intents()}
     assert active_ids == {b.id}

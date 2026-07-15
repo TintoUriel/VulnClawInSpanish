@@ -290,7 +290,7 @@ async def test_solve_stops_when_frontier_exhausted(monkeypatch):
     result = await solver.solve(_fake_agent(), origin="t", goal="g", max_steps=10)
 
     assert result.completed is False
-    assert result.reason == "探索前沿耗尽"
+    assert result.reason == "Frontera de exploración agotada"
     # only the seeded origin fact
     assert result.facts == 1
 
@@ -412,7 +412,7 @@ async def test_solve_abandons_unproductive_intent(monkeypatch):
         return {}  # afterward propose nothing -> frontier exhausts
 
     async def fake_explore(agent, board, intent, *, max_tool_rounds, evidence_buffer, stream_sink=None):
-        return False, "该方向走不通"
+        return False, "esta dirección no lleva a ningún lado"
 
     monkeypatch.setattr(solver, "reason_step", fake_reason)
     monkeypatch.setattr(solver, "explore_step", fake_explore)
@@ -422,7 +422,7 @@ async def test_solve_abandons_unproductive_intent(monkeypatch):
     assert result.completed is False
     board = result.board
     assert board.intents[0].status == IntentStatus.ABANDONED
-    assert board.intents[0].note == "该方向走不通"
+    assert board.intents[0].note == "esta dirección no lleva a ningún lado"
 
 
 async def test_solve_respects_safety_step_budget(monkeypatch):
@@ -442,7 +442,7 @@ async def test_solve_respects_safety_step_budget(monkeypatch):
     result = await solver.solve(_fake_agent(), origin="t", goal="g", max_steps=3)
 
     assert result.completed is False
-    assert result.reason == "触达安全预算上限"
+    assert result.reason == "Se alcanzó el límite del presupuesto de seguridad"
     assert result.steps == 3
 
 

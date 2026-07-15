@@ -108,13 +108,13 @@ class TestIntakeQuarantine:
     def test_quarantine_fires_for_all_severities(self, severity):
         finding = VulnerabilityFinding(title="Bare thing", severity=severity)
         assert finding.lifecycle_status == "needs_manual_review"
-        assert finding.title.startswith("[未验证]")
+        assert finding.title.startswith("[No verificado]")
         assert finding.verification_status != "verified"
 
     def test_finding_with_vuln_type_is_not_quarantined(self):
         finding = VulnerabilityFinding(title="Has type", severity="Low", vuln_type="Info Leak")
         assert finding.lifecycle_status == "candidate"
-        assert not finding.title.startswith("[未验证]")
+        assert not finding.title.startswith("[No verificado]")
 
     def test_finding_with_evidence_is_not_quarantined(self):
         finding = VulnerabilityFinding(
@@ -129,10 +129,10 @@ class TestIntakeQuarantine:
         assert finding.lifecycle_status == "verified"
 
     def test_constructed_verified_bare_finding_keeps_terminal_status(self):
-        # A finding constructed already-verified must not be re-stamped "[未验证]"
+        # A finding constructed already-verified must not be re-stamped "[No verificado]"
         # nor demoted to needs_manual_review, even with empty evidence/vuln_type.
         finding = VulnerabilityFinding(title="Confirmed", severity="High", verified=True)
-        assert not finding.title.startswith("[未验证]")
+        assert not finding.title.startswith("[No verificado]")
         assert finding.verification_status == "verified"
         assert finding.lifecycle_status == "verified"
 
@@ -140,7 +140,7 @@ class TestIntakeQuarantine:
         finding = VulnerabilityFinding(
             title="Bogus", severity="High", verification_status="rejected"
         )
-        assert not finding.title.startswith("[未验证]")
+        assert not finding.title.startswith("[No verificado]")
         assert finding.lifecycle_status == "rejected"
 
     def test_candidates_are_never_dropped(self):
