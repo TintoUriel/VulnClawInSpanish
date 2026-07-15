@@ -34,10 +34,10 @@ from vulnclaw.agent.network_scan import (
 )
 from vulnclaw.agent.roles import role_tool_violation, tool_allowed_for_role
 
-# 修改者: Nyaecho
-# 修改时间: 2026-07-08
-# 修改原因: 消除 V1 违规 — infer_port_from_url 已移至 config/url_utils.py，
-#          此处重新导出以保持向后兼容。
+# Modificado por: Nyaecho
+# Fecha de modificación: 2026-07-08
+# Motivo de la modificación: elimina la violación V1 — infer_port_from_url se
+#          movió a config/url_utils.py; aquí se reexporta por compatibilidad hacia atrás.
 from vulnclaw.config.url_utils import infer_port_from_url  # noqa: F401 — re-export
 from vulnclaw.intel.tools import (
     INTEL_TOOL_NAMES,
@@ -65,15 +65,15 @@ BLOCKED_PATTERNS: list[str] = [
 ]
 
 RESERVED_IP_RANGES: list[tuple[str, str, str]] = [
-    ("198.18.0.0", "198.19.255.255", "RFC 2544 基准测试地址"),
-    ("10.0.0.0", "10.255.255.255", "RFC 1918 私有地址"),
-    ("172.16.0.0", "172.31.255.255", "RFC 1918 私有地址"),
-    ("192.168.0.0", "192.168.255.255", "RFC 1918 私有地址"),
-    ("127.0.0.0", "127.255.255.255", "RFC 1122 环回地址"),
-    ("169.254.0.0", "169.254.255.255", "RFC 3927 链路本地"),
-    ("0.0.0.0", "0.255.255.255", "RFC 1122 当前网络"),
-    ("224.0.0.0", "239.255.255.255", "RFC 5771 多播地址"),
-    ("240.0.0.0", "255.255.255.255", "RFC 1112 保留地址"),
+    ("198.18.0.0", "198.19.255.255", "dirección de benchmarking RFC 2544"),
+    ("10.0.0.0", "10.255.255.255", "dirección privada RFC 1918"),
+    ("172.16.0.0", "172.31.255.255", "dirección privada RFC 1918"),
+    ("192.168.0.0", "192.168.255.255", "dirección privada RFC 1918"),
+    ("127.0.0.0", "127.255.255.255", "dirección de loopback RFC 1122"),
+    ("169.254.0.0", "169.254.255.255", "link-local RFC 3927"),
+    ("0.0.0.0", "0.255.255.255", "red actual RFC 1122"),
+    ("224.0.0.0", "239.255.255.255", "dirección multicast RFC 5771"),
+    ("240.0.0.0", "255.255.255.255", "dirección reservada RFC 1112"),
 ]
 
 SAFE_MODE_PATTERNS: list[str] = [
@@ -207,9 +207,9 @@ async def execute_mcp_tool(agent: AgentContext, tool_name: str, args: dict[str, 
                 if state is not None and hasattr(state, "record_loaded_reference"):
                     state.record_loaded_reference(skill_name, ref_name)
                 return content
-            return f"[!] 参考文档未找到: {skill_name}/{ref_name}"
+            return f"[!] Documento de referencia no encontrado: {skill_name}/{ref_name}"
         except Exception as e:
-            return f"[!] 加载参考文档错误: {e}"
+            return f"[!] Error al cargar el documento de referencia: {e}"
 
     if tool_name == "nmap_scan":
         return await execute_nmap(agent, args)
@@ -228,10 +228,10 @@ async def execute_mcp_tool(agent: AgentContext, tool_name: str, args: dict[str, 
                         kwargs[key] = int(args[key])
             result = crypto_execute(operation=operation, input_str=input_str, **kwargs)
             if result.get("success"):
-                return f"[✓] {operation} 结果:\n{result['result']}"
-            return f"[!] {operation} 失败: {result.get('error', '未知错误')}"
+                return f"[✓] Resultado de {operation}:\n{result['result']}"
+            return f"[!] {operation} falló: {result.get('error', 'Error desconocido')}"
         except Exception as e:
-            return f"[!] 加密工具执行错误: {e}"
+            return f"[!] Error al ejecutar la herramienta de criptografía: {e}"
 
     if tool_name == "brute_force_login":
         return await execute_brute_force(agent, args)
@@ -249,10 +249,10 @@ async def execute_mcp_tool(agent: AgentContext, tool_name: str, args: dict[str, 
         try:
             return await dispatch[tool_name](agent, args)
         except Exception as e:
-            return f"[!] 工具执行错误 ({tool_name}): {e}"
+            return f"[!] Error al ejecutar la herramienta ({tool_name}): {e}"
 
     if not agent.mcp_manager:
-        return f"[!] MCP 管理器未初始化，无法执行工具: {tool_name}"
+        return f"[!] El gestor MCP no está inicializado, no se puede ejecutar la herramienta: {tool_name}"
 
     try:
         result = await agent.mcp_manager.call_tool(tool_name, args)
@@ -280,10 +280,10 @@ async def execute_mcp_tool(agent: AgentContext, tool_name: str, args: dict[str, 
 
         text = str(result)
         if text.strip() in ("undefined", "null", "None"):
-            return f"[!] 工具 {tool_name} 返回空结果 (undefined)，调用可能失败"
+            return f"[!] La herramienta {tool_name} devolvió un resultado vacío (undefined), la llamada pudo haber fallado"
         return text
     except Exception as e:
-        return f"[!] 工具执行错误 ({tool_name}): {e}"
+        return f"[!] Error al ejecutar la herramienta ({tool_name}): {e}"
 
 
 def enforce_port_constraints(agent: AgentContext, ports: list[int], *, target: str = "") -> str | None:
@@ -384,17 +384,17 @@ def build_openai_tools(mcp_manager: Any, *, active_role: str | None = None) -> l
             "type": "function",
             "function": {
                 "name": "load_skill_reference",
-                "description": "加载指定 Skill 的参考文档，获取详细的渗透测试方法论、工作流或命令参考。当系统提示中提到'可用参考文档'时，使用此工具获取具体内容。",
+                "description": "Carga el documento de referencia de un Skill específico para obtener metodología, flujo de trabajo o referencia de comandos detallada de pentesting. Usa esta herramienta cuando el system prompt mencione 'documentos de referencia disponibles' para obtener el contenido concreto.",
                 "parameters": {
                     "type": "object",
                     "properties": {
                         "skill_name": {
                             "type": "string",
-                            "description": "Skill 名称，如 client-reverse, web-security-advanced, ai-mcp-security, intranet-pentest-advanced, pentest-tools, rapid-checklist, crypto-toolkit, ctf-web, ctf-crypto, ctf-misc, osint-recon, secknowledge-skill",
+                            "description": "Nombre del Skill, por ejemplo client-reverse, web-security-advanced, ai-mcp-security, intranet-pentest-advanced, pentest-tools, rapid-checklist, crypto-toolkit, ctf-web, ctf-crypto, ctf-misc, osint-recon, secknowledge-skill",
                         },
                         "reference_name": {
                             "type": "string",
-                            "description": "参考文档文件名，如 02-client-api-reverse-and-burp.md, web-injection.md, encoding-cheatsheet.md",
+                            "description": "Nombre del archivo de referencia, por ejemplo 02-client-api-reverse-and-burp.md, web-injection.md, encoding-cheatsheet.md",
                         },
                     },
                     "required": ["skill_name", "reference_name"],
@@ -409,22 +409,24 @@ def build_openai_tools(mcp_manager: Any, *, active_role: str | None = None) -> l
             "function": {
                 "name": "python_execute",
                 "description": (
-                    "执行 Python 代码片段。用于：构造复杂 HTTP 请求并解析响应、"
-                    "做编码转换和数据处理、批量测试不同 payload、比较响应差异、"
-                    "执行数学计算等。代码在受限环境中执行，超时 30 秒。"
-                    "预装库：requests, beautifulsoup4, pycryptodome, base64, json, re 等。"
-                    "重要：构造 HTTP 请求时请使用此工具而非猜测响应内容。"
+                    "Ejecuta un fragmento de código Python. Se usa para: construir solicitudes "
+                    "HTTP complejas y analizar la respuesta, hacer conversión de codificación y "
+                    "procesamiento de datos, probar distintos payloads en lote, comparar diferencias "
+                    "de respuesta, hacer cálculos matemáticos, etc. El código se ejecuta en un "
+                    "entorno restringido con un timeout de 30 segundos. "
+                    "Librerías preinstaladas: requests, beautifulsoup4, pycryptodome, base64, json, re, etc. "
+                    "Importante: usa esta herramienta para construir solicitudes HTTP en vez de suponer el contenido de la respuesta."
                 ),
                 "parameters": {
                     "type": "object",
                     "properties": {
                         "code": {
                             "type": "string",
-                            "description": "要执行的 Python 代码。支持多行，可 import 标准库和 requests/bs4 等。",
+                            "description": "Código Python a ejecutar. Admite varias líneas, se pueden importar librerías estándar y requests/bs4, etc.",
                         },
                         "purpose": {
                             "type": "string",
-                            "description": "简要说明执行目的（用于审计日志），如'构造HTTP请求测试弱比较绕过'",
+                            "description": "Breve descripción del propósito de la ejecución (para el registro de auditoría), por ejemplo 'construir solicitud HTTP para probar bypass de comparación débil'",
                         },
                     },
                     "required": ["code"],
@@ -439,10 +441,12 @@ def build_openai_tools(mcp_manager: Any, *, active_role: str | None = None) -> l
             "function": {
                 "name": "crypto_decode",
                 "description": (
-                    "编码解码与加解密工具。遇到 base64/hex/URL/HTML/Unicode 编码字符串、"
-                    "需要计算哈希、解密 AES/DES、解析 JWT 等场景时调用此工具。"
-                    "重要：不要自行脑补解码结果，始终使用此工具确保准确性。"
-                    "支持操作：base64_encode/decode, base32_encode/decode, base58_encode/decode, "
+                    "Herramienta de codificación/decodificación y cifrado/descifrado. Úsala ante "
+                    "cadenas codificadas en base64/hex/URL/HTML/Unicode, o cuando necesites calcular "
+                    "un hash, descifrar AES/DES, parsear un JWT, etc. "
+                    "Importante: no adivines el resultado de la decodificación por tu cuenta, usa "
+                    "siempre esta herramienta para asegurar la precisión. "
+                    "Operaciones soportadas: base64_encode/decode, base32_encode/decode, base58_encode/decode, "
                     "hex_encode/decode, url_encode/decode, html_encode/decode, unicode_encode/decode, "
                     "rot13_encode/decode, caesar_encode/decode, morse_encode/decode, "
                     "md5_hash, sha1_hash, sha256_hash, sha512_hash, "
@@ -451,21 +455,21 @@ def build_openai_tools(mcp_manager: Any, *, active_role: str | None = None) -> l
                 "parameters": {
                     "type": "object",
                     "properties": {
-                        "operation": {"type": "string", "description": "操作名称"},
+                        "operation": {"type": "string", "description": "Nombre de la operación"},
                         "input": {
                             "type": "string",
-                            "description": "待处理的输入字符串（待编码/解码/哈希/加密的文本）",
+                            "description": "Cadena de entrada a procesar (texto a codificar/decodificar/hashear/cifrar)",
                         },
                         "key": {
                             "type": "string",
-                            "description": "加密/解密密钥（AES/DES 需要，16/24/32字节）",
+                            "description": "Clave de cifrado/descifrado (necesaria para AES/DES, 16/24/32 bytes)",
                         },
-                        "iv": {"type": "string", "description": "AES 初始化向量（16字节，可选）"},
+                        "iv": {"type": "string", "description": "Vector de inicialización AES (16 bytes, opcional)"},
                         "shift": {
                             "type": "integer",
-                            "description": "Caesar 密码位移量（默认3，解码时不提供则暴力所有位移）",
+                            "description": "Desplazamiento del cifrado César (por defecto 3; si no se indica al decodificar, se prueban todos los desplazamientos por fuerza bruta)",
                         },
-                        "secret": {"type": "string", "description": "JWT 签名密钥"},
+                        "secret": {"type": "string", "description": "Clave de firma JWT"},
                     },
                     "required": ["operation", "input"],
                 },
@@ -479,37 +483,39 @@ def build_openai_tools(mcp_manager: Any, *, active_role: str | None = None) -> l
             "function": {
                 "name": "nmap_scan",
                 "description": (
-                    "nmap 网络端口扫描工具。信息收集时用于发现目标开放端口、服务版本和操作系统指纹。\n"
-                    "用法示例：\n"
-                    "  扫描常见端口: scan_type=top_ports, target=1.2.3.4\n"
-                    "  SYN扫描: scan_type=syn, target=1.2.3.4（需要管理员权限）\n"
-                    "  服务版本检测: scan_type=service, target=1.2.3.4\n"
-                    "  漏洞扫描: scan_type=vuln, target=1.2.3.4\n"
-                    "  全量扫描: scan_type=full, target=1.2.3.4\n"
-                    "优先使用 nmap_scan 而非 python_execute 构造 socket 扫描，nmap 更专业更准确。"
+                    "Herramienta de escaneo de puertos de red nmap. Se usa en la fase de "
+                    "reconocimiento para descubrir puertos abiertos, versión de servicios y huella "
+                    "del sistema operativo del objetivo.\n"
+                    "Ejemplos de uso:\n"
+                    "  Escanear puertos comunes: scan_type=top_ports, target=1.2.3.4\n"
+                    "  Escaneo SYN: scan_type=syn, target=1.2.3.4 (requiere permisos de administrador)\n"
+                    "  Detección de versión de servicio: scan_type=service, target=1.2.3.4\n"
+                    "  Escaneo de vulnerabilidades: scan_type=vuln, target=1.2.3.4\n"
+                    "  Escaneo completo: scan_type=full, target=1.2.3.4\n"
+                    "Prioriza nmap_scan en vez de construir un escaneo por socket con python_execute; nmap es más profesional y preciso."
                 ),
                 "parameters": {
                     "type": "object",
                     "properties": {
                         "target": {
                             "type": "string",
-                            "description": "目标 IP 地址或域名（必填），如 192.168.1.1 或 scanme.nmap.org",
+                            "description": "Dirección IP o dominio objetivo (obligatorio), por ejemplo 192.168.1.1 o scanme.nmap.org",
                         },
                         "scan_type": {
                             "type": "string",
-                            "description": "扫描类型：top_ports/syn/tcp/service/os/vuln/full",
+                            "description": "Tipo de escaneo: top_ports/syn/tcp/service/os/vuln/full",
                         },
                         "ports": {
                             "type": "string",
-                            "description": "指定端口或范围（可选），如 80,443,8080 或 1-1000",
+                            "description": "Puerto o rango específico (opcional), por ejemplo 80,443,8080 o 1-1000",
                         },
                         "timing": {
                             "type": "integer",
-                            "description": "扫描速度模板 0-5（默认4），数字越大越快但越容易被检测",
+                            "description": "Plantilla de velocidad de escaneo 0-5 (por defecto 4); a mayor número, más rápido pero más fácil de detectar",
                         },
                         "profile": {
                             "type": "string",
-                            "description": "可选网络扫描画像：adaptive/fast/thorough/stealth。画像会联动调整端口、速度、服务探测与安全脚本。",
+                            "description": "Perfil de escaneo de red opcional: adaptive/fast/thorough/stealth. El perfil ajusta conjuntamente puertos, velocidad, detección de servicios y scripts de seguridad.",
                         },
                     },
                     "required": ["target"],
@@ -524,53 +530,54 @@ def build_openai_tools(mcp_manager: Any, *, active_role: str | None = None) -> l
             "function": {
                 "name": "brute_force_login",
                 "description": (
-                    "对登录表单进行密码爆破。自动管理 Session Cookie、"
-                    "自动提取和更新 CSRF Token、判断登录成功/失败。"
-                    "单次调用内完成所有密码尝试，返回每个密码的结果。"
+                    "Fuerza bruta de contraseñas contra un formulario de login. Gestiona "
+                    "automáticamente la Session Cookie, extrae y actualiza automáticamente el "
+                    "CSRF Token, y determina si el login tuvo éxito o falló. "
+                    "Completa todos los intentos de contraseña en una sola llamada, devolviendo el resultado de cada una."
                 ),
                 "parameters": {
                     "type": "object",
                     "properties": {
                         "url": {
                             "type": "string",
-                            "description": "登录页面 URL",
+                            "description": "URL de la página de login",
                         },
                         "username_field": {
                             "type": "string",
-                            "description": "用户名字段名，如 'username'",
+                            "description": "Nombre del campo de usuario, por ejemplo 'username'",
                         },
                         "password_field": {
                             "type": "string",
-                            "description": "密码字段名，如 'password'",
+                            "description": "Nombre del campo de contraseña, por ejemplo 'password'",
                         },
                         "csrf_field": {
                             "type": "string",
-                            "description": "CSRF token 字段名，如 'user_token'",
+                            "description": "Nombre del campo del token CSRF, por ejemplo 'user_token'",
                         },
                         "username": {
                             "type": "string",
-                            "description": "要爆破的用户名",
+                            "description": "Nombre de usuario a atacar por fuerza bruta",
                         },
                         "passwords": {
                             "type": "array",
                             "items": {"type": "string"},
-                            "description": "要尝试的密码列表（最多 20 个）",
+                            "description": "Lista de contraseñas a probar (máximo 20)",
                         },
                         "success_keyword": {
                             "type": "string",
-                            "description": "登录成功后页面出现的特征词，如 'Welcome'、'Dashboard'",
+                            "description": "Palabra característica que aparece en la página tras un login exitoso, por ejemplo 'Welcome', 'Dashboard'",
                         },
                         "failure_keyword": {
                             "type": "string",
-                            "description": "登录失败后页面出现的特征词，如 'Login failed'",
+                            "description": "Palabra característica que aparece en la página tras un login fallido, por ejemplo 'Login failed'",
                         },
                         "submit_action": {
                             "type": "string",
-                            "description": "表单提交的目标 URL（可选，不指定则从表单 action 属性提取）",
+                            "description": "URL de destino del envío del formulario (opcional; si no se indica, se extrae del atributo action del formulario)",
                         },
                         "extra_data": {
                             "type": "object",
-                            "description": "额外表单字段，如 {\"Login\": \"Login\"}",
+                            "description": "Campos de formulario adicionales, por ejemplo {\"Login\": \"Login\"}",
                         },
                     },
                     "required": ["url", "password_field", "passwords"],
@@ -585,27 +592,28 @@ def build_openai_tools(mcp_manager: Any, *, active_role: str | None = None) -> l
             "function": {
                 "name": "space_search",
                 "description": (
-                    "空间测绘资产搜索（FOFA/Hunter/Quake/Shodan/ZoomEye/0.zone 零零信安）。"
-                    "信息收集阶段用于被动发现目标资产、IP、端口、子域、标题、组件指纹，不直接接触目标。"
-                    "给 domain 自动按各引擎语法构造 domain 查询；也可传完整 query 语法。"
-                    "engine=all 时并发查询所有已配置 key 的引擎。"
+                    "Búsqueda de activos por mapeo de superficie (FOFA/Hunter/Quake/Shodan/ZoomEye/0.zone). "
+                    "En la fase de reconocimiento se usa para descubrir de forma pasiva activos, IPs, "
+                    "puertos, subdominios, títulos y huellas de componentes del objetivo, sin contactarlo directamente. "
+                    "Al indicar domain se construye automáticamente la consulta según la sintaxis de cada motor; también se puede pasar la sintaxis completa de query. "
+                    "Con engine=all se consultan en paralelo todos los motores con clave configurada."
                 ),
                 "parameters": {
                     "type": "object",
                     "properties": {
                         "engine": {
                             "type": "string",
-                            "description": "fofa/hunter/quake/shodan/zoomeye/zerozone/all，默认 fofa",
+                            "description": "fofa/hunter/quake/shodan/zoomeye/zerozone/all, por defecto fofa",
                         },
                         "query": {
                             "type": "string",
-                            "description": "引擎原生查询语法，如 'domain=\"x.com\"'、'app=\"Struts2\"'（可选）",
+                            "description": "Sintaxis de consulta nativa del motor, por ejemplo 'domain=\"x.com\"', 'app=\"Struts2\"' (opcional)",
                         },
                         "domain": {
                             "type": "string",
-                            "description": "目标主域名，自动构造各引擎 domain 查询（query 未给时使用）",
+                            "description": "Dominio principal objetivo; construye automáticamente la consulta domain de cada motor (se usa cuando no se indica query)",
                         },
-                        "size": {"type": "integer", "description": "返回条数，默认 100"},
+                        "size": {"type": "integer", "description": "Cantidad de resultados a devolver, por defecto 100"},
                     },
                 },
             },
@@ -618,16 +626,18 @@ def build_openai_tools(mcp_manager: Any, *, active_role: str | None = None) -> l
             "function": {
                 "name": "subdomain_enum",
                 "description": (
-                    "子域名枚举。先用已配置的空间测绘引擎被动聚合，再用内置小字典做 DNS 解析爆破，"
-                    "返回去重后的存活子域名列表。优先于 python_execute 自己写爆破。"
+                    "Enumeración de subdominios. Primero agrega pasivamente con los motores de "
+                    "mapeo de superficie configurados, y luego hace fuerza bruta de resolución DNS "
+                    "con un diccionario integrado, devolviendo la lista deduplicada de subdominios "
+                    "activos. Prioriza esto sobre escribir tu propia fuerza bruta con python_execute."
                 ),
                 "parameters": {
                     "type": "object",
                     "properties": {
-                        "domain": {"type": "string", "description": "主域名，如 nju.edu.cn"},
+                        "domain": {"type": "string", "description": "Dominio principal, por ejemplo nju.edu.cn"},
                         "brute": {
                             "type": "boolean",
-                            "description": "是否启用内置字典 DNS 爆破（默认 true）",
+                            "description": "Si se habilita la fuerza bruta DNS con diccionario integrado (por defecto true)",
                         },
                     },
                     "required": ["domain"],
@@ -642,26 +652,31 @@ def build_openai_tools(mcp_manager: Any, *, active_role: str | None = None) -> l
             "function": {
                 "name": "js_recon",
                 "description": (
-                    "JS 信息收集（参考 URLFinder）。抓取目标页面及其引用的全部 .js 文件，"
-                    "提取 API 接口/路径、关联域名、绝对 URL，以及疑似硬编码密钥（AK/SK、token、JWT、私钥等）。"
-                    "默认 auto_probe=true：自动对收集到的同源接口逐个做未授权访问探测（仅安全 GET，跳过破坏性接口）。"
-                    "信息收集阶段优先调用，用真实提取的端点反哺后续测试，而非凭空猜接口。"
+                    "Reconocimiento de información en JS (inspirado en URLFinder). Descarga la "
+                    "página objetivo y todos los archivos .js que referencia, extrayendo "
+                    "interfaces/rutas de API, dominios relacionados, URLs absolutas y posibles "
+                    "claves codificadas de forma fija (AK/SK, token, JWT, clave privada, etc.). "
+                    "Por defecto auto_probe=true: sondea automáticamente cada interfaz del mismo "
+                    "origen recolectada en busca de acceso sin autorización (solo GET seguro, "
+                    "salta interfaces destructivas). "
+                    "Priorízala en la fase de reconocimiento, y usa los endpoints realmente "
+                    "extraídos para alimentar las pruebas siguientes, en vez de adivinar interfaces."
                 ),
                 "parameters": {
                     "type": "object",
                     "properties": {
-                        "url": {"type": "string", "description": "目标页面 URL"},
+                        "url": {"type": "string", "description": "URL de la página objetivo"},
                         "max_js": {
                             "type": "integer",
-                            "description": "最多抓取的 JS 文件数（默认 30）",
+                            "description": "Cantidad máxima de archivos JS a descargar (por defecto 30)",
                         },
                         "auto_probe": {
                             "type": "boolean",
-                            "description": "是否自动对收集到的接口做未授权探测（默认 true）",
+                            "description": "Si se sondean automáticamente las interfaces recolectadas en busca de acceso sin autorización (por defecto true)",
                         },
                         "auth_header": {
                             "type": "string",
-                            "description": "可选鉴权头做差分对比，如 'Authorization: Bearer xxx'，验证无 token 是否也能拿到数据",
+                            "description": "Cabecera de autenticación opcional para comparación diferencial, por ejemplo 'Authorization: Bearer xxx', para verificar si también se pueden obtener datos sin token",
                         },
                     },
                     "required": ["url"],
@@ -676,27 +691,32 @@ def build_openai_tools(mcp_manager: Any, *, active_role: str | None = None) -> l
             "function": {
                 "name": "unauth_test",
                 "description": (
-                    "未授权访问探测。对一批接口（通常来自 js_recon 收集的端点）逐个无凭据请求，"
-                    "按状态码/响应体/内容类型判定：⚠疑似未授权(返回数据) / ✓已鉴权拦截 / ↪跳转登录 / —不存在。"
-                    "提供 auth_header 时做有/无 token 差分对比，无 token 也能拿到同样数据则判定 🔴未授权确认。"
-                    "严守读写分离：仅发安全 GET，自动跳过 delete/update/sms 等破坏性接口，不批量遍历 ID。"
+                    "Sondeo de acceso sin autorización. Para un lote de interfaces (normalmente "
+                    "endpoints recolectados por js_recon), envía solicitudes sin credenciales una "
+                    "por una y determina, según el código de estado/cuerpo de respuesta/tipo de "
+                    "contenido: ⚠posible acceso sin autorización (devuelve datos) / ✓bloqueado por "
+                    "autenticación / ↪redirige a login / —no existe. "
+                    "Si se indica auth_header, hace comparación diferencial con/sin token; si sin "
+                    "token se obtienen los mismos datos, se determina 🔴acceso sin autorización confirmado. "
+                    "Cumple estrictamente la separación lectura/escritura: solo envía GET seguros, "
+                    "salta automáticamente interfaces destructivas como delete/update/sms, y no recorre IDs en lote."
                 ),
                 "parameters": {
                     "type": "object",
                     "properties": {
-                        "base_url": {"type": "string", "description": "目标基础 URL（确定同源范围）"},
+                        "base_url": {"type": "string", "description": "URL base del objetivo (determina el alcance del mismo origen)"},
                         "endpoints": {
                             "type": "array",
                             "items": {"type": "string"},
-                            "description": "待测接口路径/URL 列表（来自 js_recon 的接口/路径）",
+                            "description": "Lista de rutas/URLs de interfaces a probar (provenientes de las interfaces/rutas de js_recon)",
                         },
                         "auth_header": {
                             "type": "string",
-                            "description": "可选鉴权头做差分，如 'Authorization: Bearer xxx' 或 'Cookie: session=...'",
+                            "description": "Cabecera de autenticación opcional para comparación diferencial, por ejemplo 'Authorization: Bearer xxx' o 'Cookie: session=...'",
                         },
                         "max_endpoints": {
                             "type": "integer",
-                            "description": "最多探测的接口数（默认 60）",
+                            "description": "Cantidad máxima de interfaces a sondear (por defecto 60)",
                         },
                     },
                     "required": ["base_url", "endpoints"],
@@ -711,23 +731,25 @@ def build_openai_tools(mcp_manager: Any, *, active_role: str | None = None) -> l
             "function": {
                 "name": "dir_enum",
                 "description": (
-                    "目录/文件枚举（参考 dirsearch）。并发字典爆破，自带 404 基线与全局伪装响应识别"
-                    "（随机路径返回 200 即判定伪装并停止）、状态码与响应长度过滤。"
-                    "仅做安全的 GET 探测，不碰 delete/update 等破坏性路径。"
+                    "Enumeración de directorios/archivos (inspirada en dirsearch). Fuerza bruta de "
+                    "diccionario concurrente, con línea base de 404 y detección global de "
+                    "respuestas simuladas (si una ruta aleatoria devuelve 200, se determina que es "
+                    "simulada y se detiene), además de filtrado por código de estado y longitud de respuesta. "
+                    "Solo hace sondeo GET seguro, no toca rutas destructivas como delete/update."
                 ),
                 "parameters": {
                     "type": "object",
                     "properties": {
-                        "url": {"type": "string", "description": "目标基础 URL，如 https://x.com/"},
+                        "url": {"type": "string", "description": "URL base del objetivo, por ejemplo https://x.com/"},
                         "extensions": {
                             "type": "array",
                             "items": {"type": "string"},
-                            "description": "扩展名展开，如 ['php','jsp','bak','zip']（可选）",
+                            "description": "Expansión de extensiones, por ejemplo ['php','jsp','bak','zip'] (opcional)",
                         },
                         "wordlist": {
                             "type": "array",
                             "items": {"type": "string"},
-                            "description": "追加的自定义路径（基于命名规律的启发式字典，可选）",
+                            "description": "Rutas personalizadas adicionales (diccionario heurístico basado en patrones de nomenclatura, opcional)",
                         },
                     },
                     "required": ["url"],
@@ -763,7 +785,7 @@ def build_openai_tools(mcp_manager: Any, *, active_role: str | None = None) -> l
 async def execute_nmap(agent: AgentContext, args: dict[str, Any]) -> str:
     target = args.get("target", "").strip()
     if not target:
-        return "[!] nmap_scan 需要 target 参数（目标 IP 或域名）"
+        return "[!] nmap_scan requiere el parámetro target (IP o dominio objetivo)"
 
     host_violation = enforce_host_path_constraints(agent, host=target.lower(), target=target)
     if host_violation:
@@ -780,9 +802,9 @@ async def execute_nmap(agent: AgentContext, args: dict[str, Any]) -> str:
             is_reserved, reason = is_reserved_ip(ip)
             if is_reserved and not target_is_private_literal(target):
                 return (
-                    f"[SKIP] 目标 {target} 解析到保留/内网地址 ({reason}, IP: {ip})\n"
-                    f"跳过 nmap 扫描。建议直接通过 Web 指纹、目录枚举等方法收集信息，"
-                    f"不要在保留地址上浪费轮次。"
+                    f"[SKIP] El objetivo {target} resuelve a una dirección reservada/interna ({reason}, IP: {ip})\n"
+                    f"Se omite el escaneo nmap. Se recomienda recolectar información directamente "
+                    f"mediante huella web, enumeración de directorios, etc.; no gastes rondas en direcciones reservadas."
                 )
     except Exception:
         pass
@@ -803,7 +825,7 @@ async def execute_nmap(agent: AgentContext, args: dict[str, Any]) -> str:
         except Exception:
             pass
     if not nmap_cmd:
-        return "[!] nmap 未安装或不在 PATH 中。请确认 nmap 已安装并加入系统 PATH。"
+        return "[!] nmap no está instalado o no está en el PATH. Confirma que nmap esté instalado y agregado al PATH del sistema."
 
     if profile:
         plan = build_nmap_plan(
@@ -818,7 +840,7 @@ async def execute_nmap(agent: AgentContext, args: dict[str, Any]) -> str:
         deescalated_note = (
             ""
             if privileged or plan.args == without_privileged_nmap_args(plan.args)
-            else "[i] 非管理员权限运行：已跳过操作系统指纹识别（-O），SYN 扫描降级为 connect 扫描（-sT）。\n"
+            else "[i] Ejecutando sin permisos de administrador: se omitió la huella de sistema operativo (-O), el escaneo SYN se degradó a connect scan (-sT).\n"
         )
     else:
         plan = None
@@ -830,7 +852,7 @@ async def execute_nmap(agent: AgentContext, args: dict[str, Any]) -> str:
         elif scan_type == "syn":
             cmd.extend(["-sS" if privileged else "-sT", "-oX", "-"])
             if not privileged:
-                deescalated_note = "[i] 非管理员权限运行：使用 connect 扫描（-sT）代替 SYN 扫描（-sS）。\n"
+                deescalated_note = "[i] Ejecutando sin permisos de administrador: se usa connect scan (-sT) en vez de SYN scan (-sS).\n"
         elif scan_type == "tcp":
             cmd.extend(["-sT", "-oX", "-"])
         elif scan_type == "service":
@@ -841,7 +863,7 @@ async def execute_nmap(agent: AgentContext, args: dict[str, Any]) -> str:
             else:
                 cmd.extend(["-sV", "-oX", "-"])
                 deescalated_note = (
-                    "[i] 非管理员权限运行：操作系统指纹识别（-O）不可用，改用服务探测（-sV）。\n"
+                    "[i] Ejecutando sin permisos de administrador: la huella de sistema operativo (-O) no está disponible, se usa detección de servicios (-sV) en su lugar.\n"
                 )
         elif scan_type == "vuln":
             cmd.extend(["--script", "vuln", "-oX", "-"])
@@ -851,8 +873,8 @@ async def execute_nmap(agent: AgentContext, args: dict[str, Any]) -> str:
             else:
                 cmd.extend(["-sT", "-sV", "--script", "default,safe", "-oX", "-"])
                 deescalated_note = (
-                    "[i] 非管理员权限运行：已跳过操作系统指纹识别（-O），"
-                    "SYN 扫描降级为 connect 扫描（-sT）。\n"
+                    "[i] Ejecutando sin permisos de administrador: se omitió la huella de sistema operativo (-O), "
+                    "el escaneo SYN se degradó a connect scan (-sT).\n"
                 )
         else:
             cmd.extend(["-sV", "-oX", "-"])
@@ -885,16 +907,16 @@ async def execute_nmap(agent: AgentContext, args: dict[str, Any]) -> str:
                 fallback = subprocess.run(fallback_cmd, **kwargs)
                 if fallback.returncode == 0 or fallback.stdout:
                     result = fallback
-                    deescalated_note = "[i] 权限错误后已使用非特权 nmap 参数重试。\n"
+                    deescalated_note = "[i] Tras un error de permisos, se reintentó con parámetros nmap sin privilegios.\n"
     except subprocess.TimeoutExpired:
-        return "[!] nmap 扫描超时（120秒），请减少扫描范围或使用更快的 timing"
+        return "[!] El escaneo nmap superó el tiempo límite (120 segundos), reduce el alcance del escaneo o usa un timing más rápido"
     except PermissionError:
-        return "[!] nmap 执行被拒绝（权限不足）。Windows 请以管理员身份运行终端。"
+        return "[!] La ejecución de nmap fue rechazada (permisos insuficientes). En Windows, ejecuta la terminal como administrador."
     except Exception as e:
-        return f"[!] nmap 执行错误: {e}"
+        return f"[!] Error al ejecutar nmap: {e}"
 
     if result.returncode != 0 and not result.stdout:
-        return f"[!] nmap 扫描失败（{result.returncode}）: {result.stderr[:500]}"
+        return f"[!] El escaneo nmap falló ({result.returncode}): {result.stderr[:500]}"
     output = result.stdout or result.stderr
     human_summary = parse_nmap_xml(output, target)
     structured = parse_nmap_xml_structured(output, target)
@@ -933,10 +955,10 @@ def validate_scan_target(target: str) -> str:
         is_reserved, reason = is_reserved_ip(ip)
         if is_reserved:
             return (
-                f"\n\n⚠️ **警告：目标 {target} 解析到保留/内网地址 ({reason})\n"
+                f"\n\n⚠️ **Advertencia: el objetivo {target} resuelve a una dirección reservada/interna ({reason})\n"
                 f"   IP: {ip}\n"
-                f"   扫描此地址得到的结果不代表真实系统的安全状态。\n"
-                f"   nmap 扫描结果中的端口信息可能与真实目标无关。**"
+                f"   El resultado de escanear esta dirección no representa el estado de seguridad del sistema real.\n"
+                f"   La información de puertos en el resultado de nmap puede no tener relación con el objetivo real.**"
             )
     except Exception:
         pass
@@ -946,15 +968,15 @@ def validate_scan_target(target: str) -> str:
 def parse_nmap_xml(xml_output: str, target: str) -> str:
     if not xml_output or "<nmaprun" not in xml_output:
         lines = xml_output.strip().splitlines()[:80]
-        return "nmap 原始输出:\n" + "\n".join(lines)
+        return "Salida cruda de nmap:\n" + "\n".join(lines)
 
     try:
         root = ET.fromstring(xml_output)
     except ET.ParseError:
         lines = xml_output.strip().splitlines()[:80]
-        return "nmap 原始输出:\n" + "\n".join(lines)
+        return "Salida cruda de nmap:\n" + "\n".join(lines)
 
-    lines = [f"nmap 扫描结果 — {target}", "=" * 60]
+    lines = [f"Resultado del escaneo nmap — {target}", "=" * 60]
     for host in root.findall(".//host"):
         hostname = host.find(".//hostname[@type='user']")
         addrs = [a.get("addr", "") for a in host.findall("address")]
@@ -964,10 +986,10 @@ def parse_nmap_xml(xml_output: str, target: str) -> str:
         reserved, reason = is_reserved_ip(host_ip)
         if reserved:
             host_str = (
-                f"\n[主机] {host_ip} ⚠️ **保留地址 ({reason})，测试网络结果不代表真实目标安全状态**"
+                f"\n[Host] {host_ip} ⚠️ **dirección reservada ({reason}), el resultado de la prueba de red no representa el estado de seguridad del objetivo real**"
             )
         else:
-            host_str = f"\n[主机] {host_ip}"
+            host_str = f"\n[Host] {host_ip}"
         if hostname is not None:
             host_str += f" ({hostname.get('name', '')})"
         host_str += f" — {status_val}"
@@ -995,8 +1017,8 @@ def parse_nmap_xml(xml_output: str, target: str) -> str:
         if finished is not None:
             elapsed = finished.get("elapsed", "")
             summary = finished.get("summary", "")
-            lines.append(f"\n完成时间: {elapsed}s | {summary}")
-    return "\n".join(lines) or f"nmap 扫描完成（无输出）: {target}"
+            lines.append(f"\nTiempo de finalización: {elapsed}s | {summary}")
+    return "\n".join(lines) or f"Escaneo nmap completado (sin salida): {target}"
 
 
 def _resolve_python_execute_mode(agent: AgentContext) -> str:
@@ -1267,10 +1289,10 @@ async def execute_brute_force(agent: AgentContext, args: dict[str, Any]) -> str:
     submit_url = submit_action or url
 
     if not url or not password_field or not passwords:
-        return "[!] 缺少必需参数: url, password_field, passwords"
+        return "[!] Faltan parámetros obligatorios: url, password_field, passwords"
 
     if not isinstance(passwords, list) or not passwords:
-        return "[!] passwords 必须是非空列表"
+        return "[!] passwords debe ser una lista no vacía"
 
     passwords = passwords[:20]
     total = len(passwords)
@@ -1278,7 +1300,7 @@ async def execute_brute_force(agent: AgentContext, args: dict[str, Any]) -> str:
     try:
         import httpx
     except ImportError:
-        return "[!] httpx 未安装，无法执行爆破"
+        return "[!] httpx no está instalado, no se puede ejecutar la fuerza bruta"
 
     def extract_csrf(html: str, field_name: str) -> str | None:
         """Extract CSRF token from HTML input field."""
@@ -1321,11 +1343,11 @@ async def execute_brute_force(agent: AgentContext, args: dict[str, Any]) -> str:
             )
             html = resp.text
         except Exception as e:
-            return f"[!] 获取登录页失败: {e}"
+            return f"[!] Error al obtener la página de login: {e}"
 
         csrf_token = extract_csrf(html, csrf_field)
         if csrf_token is None and csrf_field:
-            results.append(f"[!] 警告: 未在登录页找到 CSRF 字段 '{csrf_field}'")
+            results.append(f"[!] Advertencia: no se encontró el campo CSRF '{csrf_field}' en la página de login")
 
         # Auto-detect submit button values from login page HTML.
         # Many forms (DVWA, etc.) check isset($_POST['SubmitButtonName'])
@@ -1379,13 +1401,13 @@ async def execute_brute_force(agent: AgentContext, args: dict[str, Any]) -> str:
                     reason = f"'{failure_keyword}'"
                 elif any(m in response_html.lower() for m in csrf_markers):
                     is_success = False
-                    reason = "CSRF token 错误（已自动同步新 token）"
+                    reason = "Token CSRF incorrecto (se sincronizó automáticamente el nuevo token)"
                 elif status == 302:
                     is_success = True
                     reason = "Status 302 (redirect)"
                 elif "logout" in response_html.lower() or "welcome" in response_html.lower():
                     is_success = True
-                    reason = "检测到已登录状态"
+                    reason = "Se detectó estado de sesión iniciada"
                 else:
                     # Include a short snippet from the response so the model
                     # can diagnose what the server actually returned.
@@ -1395,7 +1417,7 @@ async def execute_brute_force(agent: AgentContext, args: dict[str, Any]) -> str:
 
                 prefix = "[✓]" if is_success else "[✗]"
                 pw_preview = password[:40].replace("\n", "\\n")
-                results.append(f"{prefix} {pw_preview} → {'成功' if is_success else '失败'} ({reason})")
+                results.append(f"{prefix} {pw_preview} → {'éxito' if is_success else 'falló'} ({reason})")
 
                 # Extract new CSRF from response for next attempt
                 new_token = extract_csrf(response_html, csrf_field)
@@ -1409,7 +1431,7 @@ async def execute_brute_force(agent: AgentContext, args: dict[str, Any]) -> str:
 
             except Exception as e:
                 pw_preview = password[:30].replace("\n", "\\n")
-                results.append(f"[!] {pw_preview} → 请求失败: {e}")
+                results.append(f"[!] {pw_preview} → Solicitud fallida: {e}")
                 continue
 
         # Save cookies from the internal client for potential sharing with
@@ -1430,15 +1452,15 @@ async def execute_brute_force(agent: AgentContext, args: dict[str, Any]) -> str:
         _sync_cookies_to_shared_jar(agent, session_cookies)
 
     summary = [
-        f"[+] 爆破完成 — {url}",
-        f"    用户: {username or '(未指定)'}",
+        f"[+] Fuerza bruta completada — {url}",
+        f"    Usuario: {username or '(no especificado)'}",
         "",
-        "    结果:",
+        "    Resultados:",
     ]
     for r in results:
         summary.append(f"    {r}")
     summary.append("")
-    summary.append(f"    耗时: {elapsed:.1f}s")
-    summary.append(f"    尝试: {attempts}/{total}")
+    summary.append(f"    Tiempo: {elapsed:.1f}s")
+    summary.append(f"    Intentos: {attempts}/{total}")
 
     return "\n".join(summary)
