@@ -1,147 +1,147 @@
-# AI身份安全 - 训练阶段
+# Seguridad de identidad de IA - Fase de entrenamiento
 
-> 来源: AISS绿盟大模型安全智链社区 | 拆自 ai-identity-security.md
-> 阶段: 训练阶段（权限设计缺陷/环境认证）
+> Fuente: Comunidad de Inteligencia en Seguridad de Grandes Modelos AISS-NSFOCUS | Extraído de ai-identity-security.md
+> Fase: Fase de entrenamiento (Defectos de diseño de permisos/Autenticación del entorno)
 
-## 训练阶段
+## Fase de entrenamiento
 
-### LLMs插件：权限管控设计缺陷
+### Plugins de LLM: defectos de diseño en el control de permisos
 
-> 风险编号: GAARM.0048
-> 生命周期: 训练阶段
+> Código de riesgo: GAARM.0048
+> Ciclo de vida: Fase de entrenamiento
 
-**攻击概述**
+**Resumen del ataque**
 
-该风险指的是在LLMs插件中，存在权限管控方面的设计缺陷。LLM插件是一种提供了交互功能的Agent代理，当启用时，会在用户互动期间由模型自动调用。这种自动调用存在不受控的风险，例如一个插件可能会利用另一个插件的权限，访问和获取自己无法直接访问的敏感数据或功能，给予攻击者构造恶意请求进行攻击的可能。总而言之，这种有缺陷的访问控制允许用户直接调度敏感功能的插件或者插件之间存在错误的权限控制，最终用户提供了恶意输入，导致产生安全风险，包括数据泄露、远程代码执行和特权升级。
+Este riesgo se refiere a defectos de diseño en el control de permisos presentes en los plugins de LLM. Un plugin de LLM es un agente que ofrece funcionalidad de interacción y que, al estar habilitado, es invocado automáticamente por el modelo durante la interacción con el usuario. Esta invocación automática conlleva un riesgo de falta de control: por ejemplo, un plugin puede aprovechar los permisos de otro plugin para acceder y obtener datos o funciones sensibles a los que no tiene acceso directo, lo que brinda al atacante la posibilidad de construir solicitudes maliciosas para atacar. En resumen, este control de acceso defectuoso permite que un usuario invoque directamente plugins con funciones sensibles, o que exista un control de permisos erróneo entre plugins; cuando el usuario final proporciona una entrada maliciosa, se generan riesgos de seguridad, incluyendo filtración de datos, ejecución remota de código y escalada de privilegios.
 
-**攻击案例**
+**Casos de ataque**
 
-案例
-描述
-
-
-
-
-案例一
-LangChain提供了许多工具来构建LLM插件，当这些插件的设计没有将安全性作为首要任务时，攻击者可以使用提示注入来破坏设计不当的插件的行为
-
-**攻击风险**
-
-敏感信息泄露: 权限管控设计不当的插件可能被攻击者调用后申请另一个插件的权限，访问和获取其他插件的数据或功能，通过这种逐级调用可能会导致许多敏感信息的泄露。
-远程代码执行：通过注入恶意代码或数据，攻击者可能试图在系统中获得一个立足点，从而进一步控制或破坏系统。
-
-**缓解措施**
-
-缓解方式
-描述
+Caso
+Descripción
 
 
 
 
-强制执行严格的参数化输入
-对输入进行类型和范围检查。如果不可能进行此操作，应引入第二层类型化调用，解析请求并应用验证和净化
+Caso 1
+LangChain ofrece numerosas herramientas para construir plugins de LLM; cuando el diseño de estos plugins no prioriza la seguridad, el atacante puede usar inyección de prompts para alterar el comportamiento de plugins mal diseñados.
+
+**Riesgos del ataque**
+
+Filtración de información sensible: un plugin con un control de permisos mal diseñado puede, tras ser invocado por el atacante, solicitar los permisos de otro plugin, accediendo y obteniendo datos o funciones de otros plugins; esta cadena de invocaciones en cascada puede provocar la filtración de gran cantidad de información sensible.
+Ejecución remota de código: mediante la inyección de código o datos maliciosos, el atacante puede intentar establecer un punto de apoyo en el sistema, para controlarlo o dañarlo aún más.
+
+**Medidas de mitigación**
+
+Medida de mitigación
+Descripción
 
 
-最小权限访问控制
-尽可能少地暴露功能，同时仍然执行其所需的功能
 
-**参考**
+
+Aplicación estricta de entradas parametrizadas
+Verificar el tipo y el rango de las entradas. Si esto no es posible, se debe introducir una segunda capa de invocación tipada que analice la solicitud y aplique validación y depuración
+
+
+Control de acceso de mínimo privilegio
+Exponer la menor cantidad de funcionalidad posible, manteniendo al mismo tiempo la función requerida
+
+**Referencias**
 
 https://genai.owasp.org/wp-content/uploads/2024/05/OWASP-Top-10-for-LLM-Applications-v1_1_Chinese.pdf
 https://developer.nvidia.com/zh-cn/blog/securing-llm-systems-against-prompt-injection/
 
 ---
-### 训练环境缺少认证授权
+### Ausencia de autenticación y autorización en el entorno de entrenamiento
 
-> 风险编号: GAARM.0046
-> 生命周期: 训练阶段
+> Código de riesgo: GAARM.0046
+> Ciclo de vida: Fase de entrenamiento
 
-**攻击概述**
+**Resumen del ataque**
 
-该风险是指模型在训练阶段缺乏严格的访问控制和身份验证机制，使模型的内部训练数据、训练基础设施、训练框架等资源可以被权限不足的人员访问，从而导致模型中敏感数据泄露，使得模型的训练数据透明化，增加模型投毒的风险。
+Este riesgo se refiere a la falta de mecanismos estrictos de control de acceso y autenticación de identidad del modelo durante la fase de entrenamiento, lo que permite que personal sin los permisos suficientes acceda a recursos internos del modelo como los datos de entrenamiento, la infraestructura de entrenamiento o el framework de entrenamiento, provocando la filtración de datos sensibles del modelo, la transparencia no deseada de los datos de entrenamiento del modelo y un aumento del riesgo de envenenamiento del modelo.
 
-**攻击案例**
+**Casos de ataque**
 
-案例
-描述
-
-
-
-
-案例一
-ShadowRay事件中攻击者利用Ray框架的CVE-2023-48022漏洞，未授权调度Jobs API实现RCE攻击
-
-**攻击风险**
-
-敏感信息泄露: 未经授权访问训练数据，导致敏感信息泄露。
-模型质量下降：恶意篡改训练数据可能影响模型的学习效果，导致模型输出不准确或带有偏见。
-高价值资源滥用：攻击者利用未授权的API访问实现对高价值资源算力的控制，开展加密货币挖掘等活动。
-
-**缓解措施**
-
-缓解方式
-描述
+Caso
+Descripción
 
 
 
 
-加强身份认证和访问控制策略
-实施访问控制和身份验证机制，以防止未经授权访问LLMs训练环境及其数据
+Caso 1
+En el incidente ShadowRay, el atacante aprovechó la vulnerabilidad CVE-2023-48022 del framework Ray para programar la API de Jobs sin autorización y lograr un ataque de ejecución remota de código (RCE).
+
+**Riesgos del ataque**
+
+Filtración de información sensible: el acceso no autorizado a los datos de entrenamiento provoca la filtración de información sensible.
+Deterioro de la calidad del modelo: la manipulación maliciosa de los datos de entrenamiento puede afectar el efecto de aprendizaje del modelo, provocando que su salida sea inexacta o sesgada.
+Abuso de recursos de alto valor: el atacante aprovecha el acceso no autorizado a la API para obtener el control de recursos de cómputo de alto valor y llevar a cabo actividades como la minería de criptomonedas.
+
+**Medidas de mitigación**
+
+Medida de mitigación
+Descripción
 
 
-数据加密与脱敏
-引入训练数据的加密和隐私保护措施，防止敏感信息泄露
 
-**参考**
+
+Reforzar la política de autenticación de identidad y control de acceso
+Implementar mecanismos de control de acceso y autenticación de identidad, para evitar el acceso no autorizado al entorno de entrenamiento de LLM y sus datos
+
+
+Cifrado y desensibilización de datos
+Introducir medidas de cifrado y protección de la privacidad de los datos de entrenamiento, para evitar la filtración de información sensible
+
+**Referencias**
 
 https://blog.csdn.net/qq_43543209/article/details/135683986
 
 ---
-### 训练环境过度权限分配
+### Asignación excesiva de permisos en el entorno de entrenamiento
 
-> 风险编号: GAARM.0047
-> 生命周期: 训练阶段
+> Código de riesgo: GAARM.0047
+> Ciclo de vida: Fase de entrenamiento
 
-**攻击概述**
+**Resumen del ataque**
 
-大模型在训练阶段的过度权限分配风险主要涉及在数据访问、模型训练和系统管理过程中，由于权限分配过大导致的安全问题，可能会导致未经授权的访问或滥用风险。如果攻击者非法获取到开发人员的控制权限，可能会利用这些过度权限，对模型的训练数据进行非法访问、篡改或破坏，从而影响模型的质量和安全性。
+El riesgo de asignación excesiva de permisos durante la fase de entrenamiento de un gran modelo se refiere principalmente a problemas de seguridad derivados de una asignación de permisos excesivamente amplia durante el acceso a datos, el entrenamiento del modelo y la administración del sistema, lo que puede provocar acceso no autorizado o riesgos de abuso. Si un atacante obtiene ilegalmente los permisos de control de un desarrollador, puede aprovechar estos permisos excesivos para acceder ilegalmente, manipular o dañar los datos de entrenamiento del modelo, afectando así su calidad y seguridad.
 
-**攻击案例**
+**Casos de ataque**
 
-案例
-描述
-
-
-
-
-案例一
-攻击者通过钓鱼等方式获取到训练开发人员控制权限，利用高权限的账户凭证，实现对敏感训练数据的访问或者模型的恶意篡改
-
-**攻击风险**
-
-敏感数据泄露：如果开发人员的训练环境中控制权限过度，存在不必要的权限，则当开发人员的账户凭证泄露时，攻击者可能通过冗余的权限访问更多内部信息，进而可能导致训练数据泄露，尤其是当数据包含敏感信息时。
-模型质量下降：攻击者恶意篡改训练数据可能影响模型的学习效果，导致模型输出不准确或带有偏见。
-
-**缓解措施**
-
-缓解方式
-描述
+Caso
+Descripción
 
 
 
 
-最小权限原则
-确保每个用户或系统组件仅拥有完成其任务所必需的最小权限
+Caso 1
+El atacante obtuvo, mediante phishing u otros métodos, los permisos de control de un desarrollador de entrenamiento, y aprovechó las credenciales de la cuenta con altos privilegios para acceder a datos de entrenamiento sensibles o manipular maliciosamente el modelo.
+
+**Riesgos del ataque**
+
+Filtración de datos sensibles: si en el entorno de entrenamiento de un desarrollador existen permisos de control excesivos e innecesarios, cuando las credenciales de la cuenta del desarrollador se filtran, el atacante puede aprovechar estos permisos redundantes para acceder a más información interna, lo que puede provocar la filtración de los datos de entrenamiento, especialmente cuando estos contienen información sensible.
+Deterioro de la calidad del modelo: la manipulación maliciosa de los datos de entrenamiento por parte del atacante puede afectar el efecto de aprendizaje del modelo, provocando que su salida sea inexacta o sesgada.
+
+**Medidas de mitigación**
+
+Medida de mitigación
+Descripción
 
 
-数据加密与脱敏
-引入训练数据的加密和隐私保护措施，防止敏感信息泄露
 
 
-访问控制和审计
-实施严格的访问控制政策，并定期进行安全审计以监控和记录所有数据和模型的访问
+Principio de mínimo privilegio
+Garantizar que cada usuario o componente del sistema posea únicamente el mínimo de permisos necesarios para completar su tarea
 
-**参考**
+
+Cifrado y desensibilización de datos
+Introducir medidas de cifrado y protección de la privacidad de los datos de entrenamiento, para evitar la filtración de información sensible
+
+
+Control de acceso y auditoría
+Implementar políticas estrictas de control de acceso y realizar auditorías de seguridad periódicas para supervisar y registrar todo acceso a datos y modelos
+
+**Referencias**
 
 https://www.pulumi.com/ai/answers/mptvxaHguJ6A4yXSHi92zZ/implementing-role-based-access-to-ai-training-data-in-snowflake
 

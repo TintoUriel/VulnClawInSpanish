@@ -1,65 +1,65 @@
-# 网站信息收集参考
+# Referencia de Recopilación de Información de Sitios Web
 
-## 1. 网站架构识别
+## 1. Identificación de la arquitectura del sitio
 
-### 技术栈推断方法
-1. **HTTP 响应头** — Server、X-Powered-By、Set-Cookie 特征
-2. **HTML 源码特征** — meta generator、特定 class/id 命名
-3. **JS 文件路径** — /static/js/app.js、/wp-content/、/assets/
-4. **Cookie 名称** — PHPSESSID(php)、JSESSIONID(Java)、_rails_session(Rails)
-5. **URL 路径** — ?id= (PHP)、/api/ (REST)、/wp-admin/ (WordPress)
+### Métodos de inferencia del stack tecnológico
+1. **Cabeceras de respuesta HTTP** — características de Server, X-Powered-By, Set-Cookie
+2. **Características del código fuente HTML** — meta generator, nombres específicos de class/id
+3. **Rutas de archivos JS** — /static/js/app.js, /wp-content/, /assets/
+4. **Nombres de cookies** — PHPSESSID (php), JSESSIONID (Java), _rails_session (Rails)
+5. **Rutas de URL** — ?id= (PHP), /api/ (REST), /wp-admin/ (WordPress)
 
-### 常见架构组合
-| 语言 | 框架 | 数据库 | 服务器 | 特征 |
+### Combinaciones de arquitectura habituales
+| Lenguaje | Framework | Base de datos | Servidor | Característica |
 |------|------|--------|--------|------|
 | PHP | Laravel | MySQL | Apache/Nginx | Set-Cookie: laravel_session |
 | PHP | WordPress | MySQL | Apache | /wp-content/, /wp-admin/ |
-| Python | Django | PostgreSQL | Nginx+Gunicorn | CSRF middleware cookie |
+| Python | Django | PostgreSQL | Nginx+Gunicorn | Cookie del middleware CSRF |
 | Python | Flask | SQLite/MySQL | Nginx+uWSGI | Set-Cookie: session= |
 | Java | Spring | MySQL/Oracle | Tomcat | JSESSIONID |
 | Node.js | Express | MongoDB | Nginx | X-Powered-By: Express |
 | Ruby | Rails | PostgreSQL | Nginx+Puma | _rails_session |
 
-### python_execute 架构探测
+### Sondeo de arquitectura con python_execute
 ```python
 import requests
 
 url = "https://target.com"
 r = requests.get(url, timeout=10)
 
-# 1. 响应头分析
+# 1. Análisis de cabeceras de respuesta
 headers = r.headers
 print(f"Server: {headers.get('Server', 'N/A')}")
 print(f"X-Powered-By: {headers.get('X-Powered-By', 'N/A')}")
 
-# 2. Cookie 分析
+# 2. Análisis de cookies
 cookies = r.cookies
 for cookie in cookies:
     print(f"Cookie: {cookie.name} = {cookie.value[:20]}...")
 
-# 3. HTML 特征分析
+# 3. Análisis de características HTML
 html = r.text
 # WordPress
 if 'wp-content' in html or 'wp-includes' in html:
-    print("[+] WordPress 检测")
+    print("[+] Detección de WordPress")
 # Laravel
 if 'laravel_session' in str(cookies):
-    print("[+] Laravel 检测")
+    print("[+] Detección de Laravel")
 # Django
 if 'csrftoken' in str(cookies) or 'csrfmiddlewaretoken' in html:
-    print("[+] Django 检测")
+    print("[+] Detección de Django")
 # Hexo
 if 'hexo' in html.lower():
-    print("[+] Hexo 博客检测")
+    print("[+] Detección de blog Hexo")
 # Hugo
 if 'hugo' in html.lower():
-    print("[+] Hugo 博客检测")
+    print("[+] Detección de blog Hugo")
 ```
 
-## 2. Web 指纹识别
+## 2. Identificación de huella digital web
 
-### CMS 指纹特征
-| CMS | 特征路径 | 特征字符串 |
+### Características de huella de CMS
+| CMS | Ruta característica | Cadena característica |
 |-----|---------|-----------|
 | WordPress | /wp-login.php, /wp-content/ | wp-content, xmlrpc.php |
 | Joomla | /administrator/ | /media/jui/ |
@@ -69,16 +69,16 @@ if 'hugo' in html.lower():
 | Hexo | /archives/ | hexo |
 | Ghost | /ghost/ | ghost-frontend |
 
-### 前端框架特征
-| 框架 | 特征 |
+### Características de frameworks de frontend
+| Framework | Característica |
 |------|------|
 | React | data-reactroot, __NEXT_DATA__ |
 | Vue.js | data-v-xxx, __vue__ |
 | Angular | ng-version, _nghost |
-| jQuery | jQuery in scripts |
+| jQuery | jQuery en los scripts |
 | Bootstrap | bootstrap.css/js |
 
-### python_execute 指纹识别
+### Identificación de huella con python_execute
 ```python
 import requests, re
 
@@ -86,7 +86,7 @@ url = "https://target.com"
 r = requests.get(url, timeout=10)
 html = r.text
 
-# CMS 检测
+# Detección de CMS
 cms_signatures = {
     "WordPress": ["wp-content", "wp-includes", "wp-admin"],
     "Joomla": ["/administrator/", "media/jui"],
@@ -100,7 +100,7 @@ for cms, sigs in cms_signatures.items():
     if any(sig in html for sig in sigs):
         print(f"[+] CMS: {cms}")
 
-# 前端框架检测
+# Detección de framework de frontend
 fw_signatures = {
     "React": ["data-reactroot", "__NEXT_DATA__", "react"],
     "Vue.js": ["data-v-", "__vue__", "vue"],
@@ -111,36 +111,36 @@ fw_signatures = {
 
 for fw, sigs in fw_signatures.items():
     if any(sig.lower() in html.lower() for sig in sigs):
-        print(f"[+] 前端框架: {fw}")
+        print(f"[+] Framework de frontend: {fw}")
 
-# JS 文件提取
+# Extracción de archivos JS
 js_files = re.findall(r'src=["\']([^"\']*\.js[^"\']*)["\']', html)
-print(f"JS 文件: {js_files[:10]}")
+print(f"Archivos JS: {js_files[:10]}")
 ```
 
-## 3. WAF 检测
+## 3. Detección de WAF
 
-### 常见 WAF 特征
-| WAF | 拦截特征 |
+### Características habituales de WAF
+| WAF | Característica de bloqueo |
 |-----|---------|
-| Cloudflare | Server: cloudflare, CF-Ray header |
+| Cloudflare | Server: cloudflare, cabecera CF-Ray |
 | AWS WAF | Server: AmazonS3, x-amz-request-id |
-| 阿里云 WAF | Set-Cookie 包含 acw_tc |
-| 腾讯云 WAF | 特定拦截页面 |
-| 宝塔 WAF | 拦截页面含 "宝塔" |
-| 安全狗 | 拦截页面含 "safedog" |
-| ModSecurity | 特定 403 响应 |
+| Alibaba Cloud WAF | Set-Cookie contiene acw_tc |
+| Tencent Cloud WAF | Página de bloqueo específica |
+| BT-WAF (aaPanel) | La página de bloqueo contiene "宝塔" (BT/aaPanel) |
+| Safedog | La página de bloqueo contiene "safedog" |
+| ModSecurity | Respuesta 403 específica |
 
-### python_execute WAF 检测
+### Detección de WAF con python_execute
 ```python
 import requests
 
 url = "https://target.com"
 
-# 1. 正常请求
+# 1. Petición normal
 r1 = requests.get(url)
 
-# 2. 触发 WAF 的请求
+# 2. Petición que provoca el WAF
 waf_payloads = [
     "/?id=1' OR 1=1--",
     "/?search=<script>alert(1)</script>",
@@ -150,28 +150,28 @@ waf_payloads = [
 
 for payload in waf_payloads:
     r2 = requests.get(url + payload, allow_redirects=False)
-    # 状态码变化
+    # Cambio en el código de estado
     if r2.status_code in [403, 406, 429, 501]:
-        print(f"[!] WAF 检测: {payload} → {r2.status_code}")
-    # 响应长度显著变化
+        print(f"[!] Detección de WAF: {payload} → {r2.status_code}")
+    # Cambio significativo en la longitud de la respuesta
     if abs(len(r2.text) - len(r1.text)) > 500:
-        print(f"[!] 响应长度变化: 正常={len(r1.text)}, 攻击={len(r2.text)}")
+        print(f"[!] Cambio en la longitud de la respuesta: normal={len(r1.text)}, ataque={len(r2.text)}")
 
-# 3. 检查特定 WAF 响应头
+# 3. Comprobar cabeceras de respuesta específicas de WAF
 waf_headers = {
     "cloudflare": ["cf-ray", "server: cloudflare"],
     "aws": ["x-amz-request-id", "x-amz-cf-id"],
-    "阿里云": ["acw_tc"],
+    "alibaba_cloud": ["acw_tc"],
 }
 for waf_name, sigs in waf_headers.items():
     for sig in sigs:
         if sig in str(r1.headers).lower():
-            print(f"[+] WAF 检测: {waf_name}")
+            print(f"[+] Detección de WAF: {waf_name}")
 ```
 
-## 4. 敏感目录 & 敏感文件
+## 4. Directorios y archivos sensibles
 
-### 常见敏感路径列表
+### Lista de rutas sensibles habituales
 ```
 /robots.txt
 /sitemap.xml
@@ -196,7 +196,7 @@ for waf_name, sigs in waf_headers.items():
 /.well-known/
 ```
 
-### python_execute 目录扫描
+### Escaneo de directorios con python_execute
 ```python
 import requests
 
@@ -217,59 +217,59 @@ for path in paths:
         pass
 ```
 
-## 5. 源码泄露检查
+## 5. Comprobación de fuga de código fuente
 
-### 常见源码泄露类型
-| 类型 | 路径 | 检测方法 |
+### Tipos habituales de fuga de código fuente
+| Tipo | Ruta | Método de detección |
 |------|------|---------|
-| Git 仓库 | /.git/config, /.git/HEAD | 200 且含 git 内容 |
-| SVN 仓库 | /.svn/entries | 200 且含 svn 内容 |
-| .DS_Store | /.DS_Store | 下载后解析 |
-| .env 文件 | /.env | 含 DB_PASSWORD 等 |
-| web.config | /web.config | IIS 配置 |
-| 备份文件 | /.bak, /.swp, /.old, /~ | 直接下载 |
-| Docker | /Dockerfile, /docker-compose.yml | 容器配置 |
-| package.json | /package.json | Node.js 依赖 |
-| composer.json | /composer.json | PHP 依赖 |
+| Repositorio Git | /.git/config, /.git/HEAD | 200 y contiene contenido de git |
+| Repositorio SVN | /.svn/entries | 200 y contiene contenido de svn |
+| .DS_Store | /.DS_Store | Descargar y analizar |
+| Archivo .env | /.env | Contiene DB_PASSWORD, etc. |
+| web.config | /web.config | Configuración de IIS |
+| Archivos de respaldo | /.bak, /.swp, /.old, /~ | Descarga directa |
+| Docker | /Dockerfile, /docker-compose.yml | Configuración de contenedor |
+| package.json | /package.json | Dependencias de Node.js |
+| composer.json | /composer.json | Dependencias de PHP |
 
-### Git 仓库泄露利用
+### Explotación de fuga de repositorio Git
 ```python
 import requests
 
 target = "https://target.com"
 
-# 1. 检查 .git/HEAD
+# 1. Comprobar .git/HEAD
 r = requests.get(f"{target}/.git/HEAD")
 if r.status_code == 200 and "ref:" in r.text:
-    print("[!] Git 仓库泄露!")
-    # 2. 尝试获取 ref
+    print("[!] ¡Fuga de repositorio Git!")
+    # 2. Intentar obtener el ref
     ref_path = r.text.strip().split("ref: ")[1] if "ref: " in r.text else ""
     if ref_path:
         r2 = requests.get(f"{target}/.git/{ref_path}")
         if r2.status_code == 200:
             print(f"[+] Git ref: {r2.text.strip()}")
 
-# 3. 尝试获取 config
+# 3. Intentar obtener config
 r3 = requests.get(f"{target}/.git/config")
 if r3.status_code == 200:
     print(f"[+] Git config:\n{r3.text}")
 ```
 
-## 6. 旁站查询（同 IP 反查域名）
+## 6. Consulta de sitios vecinos (dominios que comparten la misma IP)
 
-### 查询方法
-1. **站长工具** — https://stool.chinaz.com/same
-2. **微步在线** — https://x.threatbook.cn
-3. **crt.sh** — 用 IP 查询证书关联域名
+### Métodos de consulta
+1. **Stool ChinaZ** — https://stool.chinaz.com/same
+2. **ThreatBook (Weibu)** — https://x.threatbook.cn
+3. **crt.sh** — consultar dominios asociados por IP mediante certificados
 4. **Censys** — https://search.censys.io
 
-### python_execute 旁站查询
+### Consulta de sitios vecinos con python_execute
 ```python
 import requests, json
 
 ip = "1.2.3.4"
 
-# 方法1: crt.sh 查询同 IP 证书
+# Método 1: consultar certificados de la misma IP en crt.sh
 r = requests.get(f"https://crt.sh/?q={ip}&output=json", timeout=15)
 if r.status_code == 200:
     domains = set()
@@ -277,22 +277,22 @@ if r.status_code == 200:
         for name in entry.get('name_value', '').split('\n'):
             if name.strip() and '*' not in name:
                 domains.add(name.strip())
-    print(f"[+] 同 IP 域名 ({len(domains)}):")
+    print(f"[+] Dominios en la misma IP ({len(domains)}):")
     for d in sorted(domains):
         print(f"  - {d}")
 ```
 
-## 7. C 段查询（同网段存活主机）
+## 7. Consulta de segmento C (hosts activos en la misma subred)
 
-### python_execute C 段扫描
+### Escaneo de segmento C con python_execute
 ```python
 import requests, socket
 from concurrent.futures import ThreadPoolExecutor
 
-# 从域名获取 IP
+# Obtener la IP a partir del dominio
 domain = "target.com"
 ip = socket.gethostbyname(domain)
-# 提取 C 段
+# Extraer el segmento C
 c_segment = ".".join(ip.split(".")[:3])
 
 def check_host(ip, timeout=1):
@@ -307,12 +307,12 @@ def check_host(ip, timeout=1):
         pass
     return None
 
-# 扫描 C 段（1-254）
+# Escanear el segmento C (1-254)
 alive_hosts = []
 with ThreadPoolExecutor(max_workers=50) as executor:
     ips = [f"{c_segment}.{i}" for i in range(1, 255)]
     results = executor.map(check_host, ips)
     alive_hosts = [ip for ip in results if ip]
 
-print(f"[+] C 段存活主机: {alive_hosts}")
+print(f"[+] Hosts activos en el segmento C: {alive_hosts}")
 ```

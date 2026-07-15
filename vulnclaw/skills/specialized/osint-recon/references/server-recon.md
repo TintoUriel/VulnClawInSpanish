@@ -1,23 +1,23 @@
-# 服务器信息收集参考
+# Referencia de Recopilación de Información del Servidor
 
-## 1. 开放端口 & 服务版本识别
+## 1. Puertos abiertos e identificación de versiones de servicio
 
-### nmap 常用命令
+### Comandos comunes de nmap
 ```bash
-# 全端口扫描（慢但全面）
+# Escaneo de todos los puertos (lento pero exhaustivo)
 nmap -p- -sV <target>
 
-# 常见端口快速扫描
+# Escaneo rápido de puertos comunes
 nmap -sV -top-ports 1000 <target>
 
-# UDP 端口扫描
+# Escaneo de puertos UDP
 nmap -sU --top-ports 100 <target>
 
-# 服务版本识别 + OS 检测
+# Identificación de versión de servicio + detección de SO
 nmap -sV -O <target>
 ```
 
-### python_execute 方式（无 nmap 时）
+### Método con python_execute (cuando no hay nmap)
 ```python
 import socket
 
@@ -34,10 +34,10 @@ def scan_port(host, port, timeout=2):
 host = "target.com"
 common_ports = [21,22,23,25,53,80,110,143,443,445,993,995,1433,1521,3306,3389,5432,6379,8080,8443,9200,27017]
 open_ports = [p for p in common_ports if scan_port(host, p)]
-print(f"开放端口: {open_ports}")
+print(f"Puertos abiertos: {open_ports}")
 ```
 
-### 服务版本识别（Banner Grabbing）
+### Identificación de versión de servicio (Banner Grabbing)
 ```python
 import socket
 
@@ -46,7 +46,7 @@ def grab_banner(host, port, timeout=3):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.settimeout(timeout)
         s.connect((host, port))
-        # HTTP 服务发送请求获取 banner
+        # Para servicios HTTP, enviar una solicitud para obtener el banner
         if port in [80, 443, 8080, 8443]:
             s.send(b"HEAD / HTTP/1.1\r\nHost: " + host.encode() + b"\r\n\r\n")
         else:
@@ -58,85 +58,85 @@ def grab_banner(host, port, timeout=3):
         return None
 ```
 
-## 2. 真实 IP 探测（CDN 后的源站 IP）
+## 2. Detección de la IP real (IP del servidor origen detrás de un CDN)
 
-### 方法一：DNS 历史记录
+### Método 1: Historial DNS
 - SecurityTrails (https://securitytrails.com/dns-trials)
 - DNSHistory (https://dnshistory.org)
 - ViewDNS (https://viewdns.info/iphistory/)
 - Netcraft Site Report (https://sitereport.netcraft.com/)
 
-### 方法二：全局 Ping
+### Método 2: Ping global
 ```python
 import requests
-# 使用多地 Ping 服务
+# Usar servicios de ping desde múltiples ubicaciones
 urls = [
     f"https://www.whatsmydns.net/#A/{domain}",
     f"https://ping.pe/{domain}",
     f"https://tools.keycdn.com/curl?url={domain}",
 ]
-# 如果不同地区解析到不同 IP，说明使用了 CDN
-# 如果多地解析到同一 IP，该 IP 可能是真实源站
+# Si distintas regiones resuelven a IPs diferentes, indica el uso de un CDN
+# Si múltiples regiones resuelven a la misma IP, esa IP podría ser el servidor origen real
 ```
 
-### 方法三：邮件头提取
-- 注册/登录目标网站，收取邮件
-- 查看邮件头中的 `Received:` 字段
-- 可能暴露邮件服务器的真实 IP
+### Método 3: Extracción de cabeceras de correo
+- Registrarse/iniciar sesión en el sitio objetivo y recibir un correo
+- Revisar el campo `Received:` en las cabeceras del correo
+- Puede revelar la IP real del servidor de correo
 
-### 方法四：子域名解析
-- CDN 通常只为主域名服务
-- 子域名（如 mail.ftp.dev.staging）可能直接解析到源站 IP
-- 检查所有子域名的 A 记录，排除 CDN IP
+### Método 4: Resolución de subdominios
+- Los CDN normalmente solo sirven al dominio principal
+- Los subdominios (como mail.ftp.dev.staging) pueden resolver directamente a la IP del origen
+- Revisar los registros A de todos los subdominios, descartando las IP del CDN
 
-### 方法五：SSL 证书搜索
+### Método 5: Búsqueda de certificados SSL
 ```python
 import requests
 domain = "target.com"
 r = requests.get(f"https://crt.sh/?q=%.{domain}&output=json")
 if r.status_code == 200:
-    # 查找不同子域名的证书关联的 IP
+    # Buscar las IP asociadas a certificados de distintos subdominios
     for entry in r.json():
         print(entry.get('name_value', ''))
 ```
 
-## 3. 操作系统指纹
+## 3. Huella del sistema operativo
 
-### TTL 推断
-| TTL 值 | 可能的操作系统 |
+### Inferencia por TTL
+| Valor TTL | Sistema operativo probable |
 |--------|-------------|
 | ≈ 64 | Linux / Unix / macOS |
 | ≈ 128 | Windows |
-| ≈ 255 | 网络设备 / 老式 Unix |
+| ≈ 255 | Dispositivo de red / Unix antiguo |
 
 ```python
 import subprocess
-# Ping 获取 TTL
+# Ping para obtener el TTL
 result = subprocess.run(['ping', '-c', '1', host], capture_output=True, text=True)
 # Windows: ping -n 1 host
-# 从输出中提取 TTL
+# Extraer el TTL de la salida
 import re
 ttl_match = re.search(r'TTL[=:]\s*(\d+)', result.output, re.I)
 if ttl_match:
     ttl = int(ttl_match.group(1))
     if ttl <= 64:
-        print("推测: Linux/Unix")
+        print("Inferencia: Linux/Unix")
     elif ttl <= 128:
-        print("推测: Windows")
+        print("Inferencia: Windows")
     else:
-        print("推测: 网络设备")
+        print("Inferencia: dispositivo de red")
 ```
 
-### nmap OS 检测
+### Detección de SO con nmap
 ```bash
 nmap -O <target>
-# 更激进（需要 root）
+# Modo más agresivo (requiere root)
 sudo nmap -O --osscan-guess <target>
 ```
 
-## 4. 中间件版本识别
+## 4. Identificación de versiones de middleware
 
-### HTTP 响应头分析
+### Análisis de cabeceras de respuesta HTTP
 ```
 Server: Apache/2.4.49 (Ubuntu)
 Server: nginx/1.18.0
@@ -146,47 +146,47 @@ X-Powered-By: Express
 X-AspNet-Version: 4.0.30319
 ```
 
-### 错误页面特征
-- Apache: 默认 404 页面含 "Apache" 字样
-- Nginx: 默认 404 页面含 "nginx" 字样
-- IIS: 默认错误页含 IIS 版本信息
-- Tomcat: 默认 404 页面含 Apache Tomcat 版本
+### Características de las páginas de error
+- Apache: la página 404 por defecto contiene la cadena "Apache"
+- Nginx: la página 404 por defecto contiene la cadena "nginx"
+- IIS: la página de error por defecto contiene información de versión de IIS
+- Tomcat: la página 404 por defecto contiene la versión de Apache Tomcat
 
-### 特征文件探测
+### Sondeo de archivos característicos
 ```python
 import requests
 target = "https://target.com"
 # Apache
-r = requests.get(f"{target}/server-status")  # 403 = 存在
-r = requests.get(f"{target}/server-info")    # 403 = 存在
+r = requests.get(f"{target}/server-status")  # 403 = existe
+r = requests.get(f"{target}/server-info")    # 403 = existe
 # Nginx
-r = requests.get(f"{target}/nginx_status")   # 可能暴露状态
+r = requests.get(f"{target}/nginx_status")   # puede revelar el estado
 # Tomcat
-r = requests.get(f"{target}/manager/html")   # 管理界面
+r = requests.get(f"{target}/manager/html")   # interfaz de administración
 # IIS
-r = requests.get(f"{target}/aspnet_client/") # ASP.NET 特征
+r = requests.get(f"{target}/aspnet_client/") # característica de ASP.NET
 ```
 
-## 5. 数据库识别
+## 5. Identificación de bases de datos
 
-### 端口探测
-| 数据库 | 默认端口 | 说明 |
+### Sondeo de puertos
+| Base de datos | Puerto por defecto | Nota |
 |--------|---------|------|
-| MySQL | 3306 | 最常见 |
-| PostgreSQL | 5432 | 常见于 Rails/Django |
-| MSSQL | 1433 | Windows 环境 |
+| MySQL | 3306 | La más común |
+| PostgreSQL | 5432 | Común en Rails/Django |
+| MSSQL | 1433 | Entornos Windows |
 | MongoDB | 27017 | NoSQL |
-| Redis | 6379 | 缓存/消息队列 |
-| Oracle | 1521 | 企业级 |
-| Memcached | 11211 | 缓存 |
+| Redis | 6379 | Caché/cola de mensajes |
+| Oracle | 1521 | Nivel empresarial |
+| Memcached | 11211 | Caché |
 
-### 错误信息特征
+### Características de los mensajes de error
 - MySQL: `You have an error in your SQL syntax`
 - PostgreSQL: `ERROR: syntax error at or near`
 - MSSQL: `Microsoft SQL Server`
 - Oracle: `ORA-01756`
 
-### python_execute 检测
+### Detección con python_execute
 ```python
 import socket
 
@@ -195,7 +195,7 @@ def check_db(host, port, timeout=2):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.settimeout(timeout)
         s.connect((host, port))
-        # 尝试读取 banner
+        # Intentar leer el banner
         s.send(b"\r\n")
         banner = s.recv(1024)
         s.close()

@@ -48,7 +48,7 @@ def _store_with_two(tmp_path) -> TrafficStore:
 def test_traffic_list_enumerates_and_filters(tmp_path):
     store = _store_with_two(tmp_path)
     out = dispatch_traffic_tool(store, "traffic_list", {})
-    assert "共 2 条" in out
+    assert "Total de 2" in out
     assert "GET http://app.test/login" in out
 
     filtered = dispatch_traffic_tool(store, "traffic_list", {"source": "browser"})
@@ -67,7 +67,7 @@ def test_traffic_view_returns_stored_pair(tmp_path):
 
 def test_traffic_view_missing_id(tmp_path):
     store = _store_with_two(tmp_path)
-    assert "未找到" in dispatch_traffic_tool(store, "traffic_view", {"request_id": "nope"})
+    assert "No se encontró" in dispatch_traffic_tool(store, "traffic_view", {"request_id": "nope"})
 
 
 def test_traffic_repeat_records_manual_replay(tmp_path):
@@ -121,7 +121,7 @@ async def test_execute_mcp_tool_routes_traffic(tmp_path):
     # evidence_dir points at the evidence root; resolver appends /traffic.
     agent = _DummyAgent(str(tmp_path / "evidence"))
     out = await builtin_tools.execute_mcp_tool(agent, "traffic_list", {})
-    assert "共 2 条" in out
+    assert "Total de 2" in out
 
 
 def test_build_openai_tools_includes_traffic():

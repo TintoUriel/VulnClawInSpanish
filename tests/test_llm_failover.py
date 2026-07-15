@@ -45,7 +45,7 @@ class TestIsKeyExhaustedError:
             "rate_limit_exceeded",
             "your quota has been exhausted",
             "deepseek: insufficient balance (402)",
-            "账户余额不足",
+            "账户余额不足",  # zhipu: mensaje literal de la API en chino para "saldo insuficiente" — no traducir
             "code 1302 concurrency limit",
             "code 1113 balance",
         ]:

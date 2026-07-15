@@ -1,39 +1,39 @@
-# Web 安全 - 文件上传漏洞
+# Seguridad Web - Vulnerabilidad de carga de archivos
 
-> 来源: WooYun 漏洞库 | 拆自 web-file-infra.md
+> Fuente: Base de datos de vulnerabilidades WooYun | Extraído de web-file-infra.md
 
-## 一、文件上传漏洞
+## I. Vulnerabilidad de carga de archivos
 
-### 1.1 漏洞本质
+### 1.1 Naturaleza de la vulnerabilidad
 
 ```
-攻击链: 上传点发现 → 检测绕过 → 路径获取 → 解析利用 → Webshell运行
-成功率 = P(绕过检测) × P(获取路径) × P(解析运行)
+Cadena de ataque: Descubrimiento del punto de carga → Bypass de detección → Obtención de la ruta → Explotación mediante análisis (parsing) → Ejecución de Webshell
+Tasa de éxito = P(bypass de detección) × P(obtención de la ruta) × P(ejecución vía parsing)
 ```
 
-核心矛盾: 功能需求(允许上传) vs 安全需求(限制执行)。大多数防御仅关注"绕过检测"，忽略路径泄露和解析配置。
+Contradicción central: requisito funcional (permitir la carga) vs. requisito de seguridad (restringir la ejecución). La mayoría de las defensas solo se centran en "evadir la detección", ignorando la filtración de rutas y la configuración de análisis (parsing).
 
-### 1.2 上传点识别
+### 1.2 Identificación de puntos de carga
 
-| 上传点类型 | 频率 | 风险 | 典型路径 |
+| Tipo de punto de carga | Frecuencia | Riesgo | Ruta típica |
 |-----------|------|------|---------|
-| 富文本编辑器 | 42% | 极高 | `/fckeditor/`, `/ewebeditor/`, `/ueditor/` |
-| 头像上传 | 18% | 高 | `/upload/avatar/`, `/member/uploadfile/` |
-| 附件/文档 | 15% | 高 | `/uploads/`, `/attachment/` |
-| 后台功能 | 12% | 极高 | `/admin/upload/`, `/system/upload/` |
-| 导入功能 | 5% | 高 | `/import/`, `/excelUpload/` |
+| Editor de texto enriquecido | 42% | Muy alto | `/fckeditor/`, `/ewebeditor/`, `/ueditor/` |
+| Carga de avatar | 18% | Alto | `/upload/avatar/`, `/member/uploadfile/` |
+| Adjuntos/documentos | 15% | Alto | `/uploads/`, `/attachment/` |
+| Función de backend/administración | 12% | Muy alto | `/admin/upload/`, `/system/upload/` |
+| Función de importación | 5% | Alto | `/import/`, `/excelUpload/` |
 
-编辑器测试路径:
+Rutas de prueba de editores:
 
-| 编辑器 | 测试路径 | 上传接口 |
+| Editor | Ruta de prueba | Interfaz de carga |
 |-------|---------|---------|
 | FCKeditor | `/FCKeditor/editor/filemanager/browser/default/connectors/test.html` | `/connectors/jsp/connector` |
 | eWebEditor | `/ewebeditor/admin/default.jsp` | `/uploadfile/` |
 | UEditor | `/ueditor/controller.jsp?action=config` | `/ueditor/controller.jsp` |
 
-### 1.3 绕过技巧 - 扩展名
+### 1.3 Técnicas de bypass - Extensión de archivo
 
-黑名单绕过速查表:
+Tabla de referencia rápida para bypass de listas negras:
 
 | 技巧 | PHP | ASP/ASPX | JSP |
 |-----|-----|----------|-----|

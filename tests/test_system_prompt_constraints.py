@@ -27,10 +27,10 @@ def test_prompt_includes_constraints_block_when_constraints_set():
 def test_prompt_omits_constraints_block_when_constraints_empty():
     prompt = _build(task_constraints=TaskConstraints())
 
-    assert "当前任务硬约束" not in prompt
+    assert "## Restricciones estrictas de la tarea actual" not in prompt
 
 
 def test_prompt_omits_constraints_block_when_constraints_none():
     prompt = _build(task_constraints=None)
 
-    assert "当前任务硬约束" not in prompt
+    assert "## Restricciones estrictas de la tarea actual" not in prompt

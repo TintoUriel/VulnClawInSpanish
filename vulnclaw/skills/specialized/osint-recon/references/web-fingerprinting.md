@@ -1,19 +1,19 @@
-# Web 指纹识别
+# Identificación de Huella Digital Web
 
-## 检查项清单
+## Lista de comprobación
 
-### HTTP 响应头指纹
-| 响应头 | 推断信息 | 示例 |
+### Huella en las cabeceras de respuesta HTTP
+| Cabecera | Información inferida | Ejemplo |
 |--------|---------|------|
-| `Server` | Web 服务器 | `nginx/1.18.0`、`Apache/2.4.41`、`GitHub.com` |
-| `X-Powered-By` | 后端语言/框架 | `PHP/7.4.3`、`Express`、`Next.js` |
-| `X-AspNet-Version` | .NET 版本 | `4.0.30319` |
-| `Set-Cookie` | 框架特征 | `PHPSESSID`→PHP、`JSESSIONID`→Java、`csrf_token`→Django |
-| `X-Generator` | CMS | `Hugo`、`WordPress`、`Ghost` |
+| `Server` | Servidor web | `nginx/1.18.0`, `Apache/2.4.41`, `GitHub.com` |
+| `X-Powered-By` | Lenguaje/framework de backend | `PHP/7.4.3`, `Express`, `Next.js` |
+| `X-AspNet-Version` | Versión de .NET | `4.0.30319` |
+| `Set-Cookie` | Característica del framework | `PHPSESSID`→PHP, `JSESSIONID`→Java, `csrf_token`→Django |
+| `X-Generator` | CMS | `Hugo`, `WordPress`, `Ghost` |
 | `X-DRupal-Cache` | CMS | Drupal |
-| `Via` | 代理/CDN | `1.1 varnish`→Varnish CDN |
+| `Via` | Proxy/CDN | `1.1 varnish`→CDN Varnish |
 
-### HTML 源码指纹
+### Huella en el código fuente HTML
 ```python
 import re
 
@@ -50,57 +50,57 @@ def detect_framework(html):
     return frameworks
 ```
 
-### JavaScript 文件指纹
-- 框架特有 JS 文件路径：`/wp-includes/js/` → WordPress
-- Vue/React DevTools 检测：`__VUE_DEVTOOLS_GLOBAL_HOOK__`、`__REACT_DEVTOOLS_GLOBAL_HOOK__`
-- 框架版本通常在 JS 注释或变量中
+### Huella en archivos JavaScript
+- Rutas de archivos JS propias de cada framework: `/wp-includes/js/` → WordPress
+- Detección de Vue/React DevTools: `__VUE_DEVTOOLS_GLOBAL_HOOK__`, `__REACT_DEVTOOLS_GLOBAL_HOOK__`
+- La versión del framework suele aparecer en comentarios o variables de JS
 
-### CSS 指纹
+### Huella en CSS
 - `/wp-content/themes/` → WordPress
-- Hexo 主题特征 class 名
-- Bootstrap/Tailwind class 特征
+- Nombres de clases característicos de temas Hexo
+- Características de clases de Bootstrap/Tailwind
 
-### 特征文件
-| 文件路径 | 推断信息 |
+### Archivos característicos
+| Ruta de archivo | Información inferida |
 |---------|---------|
-| `/robots.txt` | CMS 信息、隐藏路径 |
-| `/sitemap.xml` | 站点结构 |
-| `/favicon.ico` | 框架默认图标 |
-| `/.well-known/security.txt` | 安全联系方式 |
-| `/humans.txt` | 开发者信息 |
-| `/.git/HEAD` | Git 仓库泄露 |
-| `/.env` | 环境变量泄露 |
+| `/robots.txt` | Información del CMS, rutas ocultas |
+| `/sitemap.xml` | Estructura del sitio |
+| `/favicon.ico` | Icono por defecto del framework |
+| `/.well-known/security.txt` | Contacto de seguridad |
+| `/humans.txt` | Información del desarrollador |
+| `/.git/HEAD` | Fuga del repositorio Git |
+| `/.env` | Fuga de variables de entorno |
 
-## GitHub Pages 特征
-- 响应头 `Server: GitHub.com`
-- `X-GitHub-Request-Id` 存在
-- `X-Cache: HIT` + `X-Fastly-Request-ID` → Fastly CDN
-- `Via: 1.1 varnish` → Varnish 缓存
-- 常见框架：Jekyll、Hexo、Hugo
+## Características de GitHub Pages
+- Cabecera de respuesta `Server: GitHub.com`
+- Presencia de `X-GitHub-Request-Id`
+- `X-Cache: HIT` + `X-Fastly-Request-ID` → CDN Fastly
+- `Via: 1.1 varnish` → caché Varnish
+- Frameworks comunes: Jekyll, Hexo, Hugo
 
 ---
 
-## WAF 检测
+## Detección de WAF
 
-### 常见 WAF 识别特征
-| WAF | 响应头/页面特征 | 拦截状态码 |
+### Características habituales de identificación de WAF
+| WAF | Cabecera de respuesta/característica de la página | Código de estado de bloqueo |
 |-----|----------------|-----------|
 | Cloudflare | `Server: cloudflare`, `CF-Ray` | 403 |
 | AWS WAF | `x-amz-request-id`, `x-amz-cf-id` | 403 |
-| 阿里云 WAF | Cookie 含 `acw_tc` | 405/403 |
-| 腾讯云 WAF | 特定 JSON 拦截页面 | 403 |
-| 宝塔 WAF | 拦截页面含 "宝塔" | 403 |
-| 安全狗 | 拦截页面含 "safedog" | 403/404 |
-| ModSecurity | 特定 403 + Server 头 | 403 |
-| Nginx WAF | `HTTP/1.1 444` 或特殊 403 | 444/403 |
+| Alibaba Cloud WAF | Cookie contiene `acw_tc` | 405/403 |
+| Tencent Cloud WAF | Página de bloqueo JSON específica | 403 |
+| BT-WAF (aaPanel) | La página de bloqueo contiene "宝塔" (BT/aaPanel) | 403 |
+| Safedog | La página de bloqueo contiene "safedog" | 403/404 |
+| ModSecurity | 403 específico + cabecera Server | 403 |
+| Nginx WAF | `HTTP/1.1 444` o 403 especial | 444/403 |
 
-### WAF 检测方法
-1. **正常请求 vs 攻击请求对比** — 发送带攻击特征的请求，观察响应差异
-2. **响应头检查** — 某些 WAF 会添加特定响应头
-3. **Cookie 检查** — 部分 WAF 设置追踪 Cookie
-4. **状态码异常** — 攻击请求返回异常状态码（403/406/429/444）
+### Métodos de detección de WAF
+1. **Comparación entre petición normal y petición de ataque** — enviar una petición con características de ataque y observar la diferencia en la respuesta
+2. **Revisión de cabeceras de respuesta** — algunos WAF añaden cabeceras de respuesta específicas
+3. **Revisión de cookies** — algunos WAF establecen cookies de seguimiento
+4. **Códigos de estado anómalos** — las peticiones de ataque devuelven códigos de estado anómalos (403/406/429/444)
 
-### 常见 WAF 绕过触发 payload
+### Payloads habituales para provocar la detección de WAF
 ```
 /?id=1' OR 1=1--
 /?search=<script>alert(1)</script>
@@ -110,29 +110,29 @@ def detect_framework(html):
 
 ---
 
-## 源码泄露检查
+## Comprobación de fuga de código fuente
 
-### 常见源码泄露类型与检测
-| 类型 | 路径 | 检测方法 | 危害等级 |
+### Tipos habituales de fuga de código fuente y su detección
+| Tipo | Ruta | Método de detección | Nivel de gravedad |
 |------|------|---------|---------|
-| Git 仓库 | `/.git/config`, `/.git/HEAD` | 200 且含 git 内容 | 🔴 Critical |
-| SVN 仓库 | `/.svn/entries` | 200 且含 svn 内容 | 🔴 Critical |
-| .DS_Store | `/.DS_Store` | 下载后解析目录结构 | 🟡 Medium |
-| .env 文件 | `/.env` | 含 DB_PASSWORD 等 | 🔴 Critical |
-| web.config | `/web.config` | IIS 配置泄露 | 🟡 Medium |
-| 备份文件 | `/.bak`, `/.swp`, `/.old`, `/.tar.gz` | 直接下载 | 🟡 Medium |
-| Docker | `/Dockerfile`, `/docker-compose.yml` | 容器配置 | 🟡 Medium |
-| package.json | `/package.json` | Node.js 依赖 | 🟢 Low |
-| composer.json | `/composer.json` | PHP 依赖 | 🟢 Low |
-| webpack | `/webpack.json`, `/map Files` | 源码映射 | 🟡 Medium |
+| Repositorio Git | `/.git/config`, `/.git/HEAD` | 200 y contiene contenido de git | 🔴 Crítico |
+| Repositorio SVN | `/.svn/entries` | 200 y contiene contenido de svn | 🔴 Crítico |
+| .DS_Store | `/.DS_Store` | Descargar y analizar la estructura de directorios | 🟡 Medio |
+| Archivo .env | `/.env` | Contiene DB_PASSWORD, etc. | 🔴 Crítico |
+| web.config | `/web.config` | Fuga de configuración de IIS | 🟡 Medio |
+| Archivos de respaldo | `/.bak`, `/.swp`, `/.old`, `/.tar.gz` | Descarga directa | 🟡 Medio |
+| Docker | `/Dockerfile`, `/docker-compose.yml` | Configuración de contenedor | 🟡 Medio |
+| package.json | `/package.json` | Dependencias de Node.js | 🟢 Bajo |
+| composer.json | `/composer.json` | Dependencias de PHP | 🟢 Bajo |
+| webpack | `/webpack.json`, `/map Files` | Mapa de código fuente | 🟡 Medio |
 
-### Git 泄露利用流程
-1. 访问 `/.git/HEAD` → 获取 ref 路径
-2. 访问 `/.git/config` → 获取远程仓库信息
-3. 访问 `/.git/objects/` → 遍历 Git 对象
-4. 使用 GitHack/scrabble 工具自动恢复源码
+### Flujo de explotación de fuga de Git
+1. Acceder a `/.git/HEAD` → obtener la ruta ref
+2. Acceder a `/.git/config` → obtener información del repositorio remoto
+3. Acceder a `/.git/objects/` → recorrer los objetos Git
+4. Usar herramientas como GitHack/scrabble para recuperar el código fuente automáticamente
 
-### 敏感文件扫描路径列表
+### Lista de rutas de escaneo de archivos sensibles
 ```
 /.git/config
 /.git/HEAD

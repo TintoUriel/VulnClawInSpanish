@@ -63,9 +63,9 @@ def test_plugin_finding_converts_to_vuln_finding():
         title="Missing security headers",
         risk=RiskLevel.HIGH,
         vuln_type="security_headers",
-        description="缺少安全响应头",
+        description="Faltan encabezados de seguridad",
         evidence={"missing": ["x-frame-options"]},
-        remediation="补齐响应头",
+        remediation="Completar los encabezados de respuesta",
         confidence=0.9,
     )
     vuln = plugin_finding_to_vuln_finding(pf, plugin_id="builtin.web.headers")
@@ -90,7 +90,7 @@ def test_merge_plugin_results_dedups_into_session():
     added_again = merge_plugin_results_into_session(session, result)
 
     assert added_first == 1
-    assert added_again == 0  # 去重：相同 finding 不重复计入
+    assert added_again == 0  # deduplicación: el mismo finding no se cuenta dos veces
     assert len(session.findings) == 1
 
 

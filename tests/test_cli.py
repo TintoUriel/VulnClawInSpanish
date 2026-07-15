@@ -269,7 +269,7 @@ class TestCLI:
 
         result = runner.invoke(app, ["report", "https://example.com", "--target"])
         assert result.exit_code == 0
-        assert "Report generated" in result.output or "报告已生成" in result.output or "报告已生成" in result.output or result.output
+        assert "Informe generado" in result.output or result.output
 
     def test_repl_report_command_uses_current_session_or_target_state(self, runner, monkeypatch):
         import vulnclaw.cli.main as cli_main
@@ -296,7 +296,7 @@ class TestCLI:
         )
 
         assert result.exit_code == 0
-        assert "Report generated" in result.output or "报告已生成" in result.output
+        assert "Informe generado" in result.output
         assert "report.md" in result.output
 
     def test_run_uses_shared_orchestrator(self, runner, monkeypatch):
@@ -527,7 +527,7 @@ class TestCLI:
         monkeypatch.setattr(
             helpers_mod,
             "_append_cli_constraints",
-            lambda prompt, only_port, only_host, only_path, blocked_host=None, blocked_path=None: f"{prompt} 仅做信息收集。",
+            lambda prompt, only_port, only_host, only_path, blocked_host=None, blocked_path=None: f"{prompt} Solo hacer reconocimiento.",
         )
 
         result = runner.invoke(app, ["run", "https://example.com"])
@@ -631,7 +631,7 @@ class TestCLI:
         )
 
         assert result.exit_code == 0
-        assert "Final report" in result.output or "最终报告" in result.output
+        assert "Informe final" in result.output
         assert "final.md" in result.output
 
     def test_target_state_list_and_clear(self, runner, monkeypatch, tmp_path):
@@ -645,7 +645,7 @@ class TestCLI:
 
         result_list = runner.invoke(app, ["target-state", "list", "https://example.com"])
         assert result_list.exit_code == 0
-        assert "snapshot" in result_list.output.lower() or "蹇収" in result_list.output
+        assert "snapshot" in result_list.output.lower()
 
         result_clear = runner.invoke(app, ["target-state", "clear", "https://example.com"])
         assert result_clear.exit_code == 0
@@ -738,11 +738,12 @@ class TestCLI:
         result = runner.invoke(app, ["tui", "--once"])
         assert result.exit_code == 0
         assert "VulnClaw TUI" in result.output
-        assert "授权目标" in result.output
-        assert "运行概览" in result.output
-        assert "未选择目标" in result.output
-        assert "安全边界" in result.output
-        # [修改] 新版 TUI 使用 slash 命令系统替代了数字菜单, 移除 "操作菜单" 断言
+        assert "Objetivo autorizado" in result.output
+        assert "Resumen de ejecución" in result.output
+        assert "Ningún objetivo seleccionado" in result.output
+        assert "Límite de seguridad" in result.output
+        # [Modificado] La nueva TUI usa un sistema de comandos slash en lugar de un
+        #   menú numérico, se elimina la aserción de "Menú de operaciones"
 
     def test_tui_once_renders_target_overview(self, runner, monkeypatch):
         import vulnclaw.cli.tui as tui_mod

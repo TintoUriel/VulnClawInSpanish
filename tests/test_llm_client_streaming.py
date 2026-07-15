@@ -766,5 +766,5 @@ class TestCallLlmAutoStream:
             agent, "system prompt", "round context", stream_sink=spy
         )
 
-        # 验证返回值包含响应文本
+        # Verificar que el valor devuelto contiene el texto de la respuesta
         assert "Analysis complete" in result

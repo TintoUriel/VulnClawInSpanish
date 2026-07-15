@@ -53,7 +53,7 @@ def test_verified_finding_inlines_http_capture(tmp_path):
     report_path = generate_report(session, output_path=str(run_dir / "report.md"))
     text = report_path.read_text(encoding="utf-8")
 
-    assert "抓包复现证据" in text
+    assert "Evidencia de reproducción capturada" in text
     assert request_id in text
     assert "```http" in text
     assert "GET /user?id=1' HTTP/1.1" in text
