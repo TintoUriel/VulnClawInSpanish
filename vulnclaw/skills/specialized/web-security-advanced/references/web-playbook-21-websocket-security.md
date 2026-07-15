@@ -1,54 +1,54 @@
-# WebSocket安全
+# Seguridad de WebSocket
 English: WebSocket Security
 - Entry Count: 3
 - Use this file to shortlist relevant payloads, then open the linked source markdown for the full workflow and commands.
-## WebSocket跨站劫持(CSWSH)
+## Secuestro entre sitios de WebSocket (CSWSH)
 - ID: ws-hijack
 - Difficulty: intermediate
-- Subcategory: WebSocket劫持
-- Tags: WebSocket, CSWSH, Origin, 跨站, 会话劫持
+- Subcategory: Secuestro de WebSocket
+- Tags: WebSocket, CSWSH, Origin, entre sitios, secuestro de sesión
 - Original Extracted Source: original extracted web-security-wiki source/ws-hijack.md
 Description:
-利用WebSocket握手阶段缺少Origin验证的漏洞，通过恶意网页建立跨站WebSocket连接。攻击者可劫持受害者的WebSocket会话，窃取实时数据或以受害者身份发送消息。类似于CSRF但针对WebSocket协议。
+Explota la falta de validación del Origin durante la fase de handshake de WebSocket, estableciendo una conexión WebSocket entre sitios a través de una página web maliciosa. El atacante puede secuestrar la sesión WebSocket de la víctima, robar datos en tiempo real o enviar mensajes suplantando la identidad de la víctima. Es similar a CSRF pero dirigido al protocolo WebSocket.
 Prerequisites:
-- 目标使用WebSocket通信
-- WebSocket握手未验证Origin
+- El objetivo usa comunicación WebSocket
+- El handshake de WebSocket no valida el Origin
 Execution Outline:
-1. 1. 识别WebSocket端点
-2. 2. 构造跨站劫持POC页面
-3. 3. WebSocket消息注入
-4. 4. WebSocket流量分析脚本
-## WebSocket走私攻击
+1. 1. Identificar el endpoint de WebSocket
+2. 2. Construir la página POC de secuestro entre sitios
+3. 3. Inyección de mensajes WebSocket
+4. 4. Script de análisis de tráfico WebSocket
+## Ataque de contrabando de WebSocket
 - ID: ws-smuggling
 - Difficulty: expert
-- Subcategory: WebSocket走私
-- Tags: WebSocket, 走私, 反向代理, H2C, 内网穿透
+- Subcategory: Contrabando de WebSocket
+- Tags: WebSocket, contrabando, proxy inverso, H2C, pivoteo a red interna
 - Original Extracted Source: original extracted web-security-wiki source/ws-smuggling.md
 Description:
-利用反向代理/负载均衡器对WebSocket协议处理的差异，通过WebSocket升级请求走私HTTP请求到内网服务。攻击者可绕过前端安全控制直接与后端通信，访问受保护的内部API或管理接口。
+Explota las diferencias en el manejo del protocolo WebSocket por parte de proxies inversos/balanceadores de carga, realizando contrabando de solicitudes HTTP hacia servicios de la red interna a través de la solicitud de actualización (upgrade) de WebSocket. El atacante puede eludir los controles de seguridad del frontend y comunicarse directamente con el backend, accediendo a APIs internas protegidas o interfaces de administración.
 Prerequisites:
-- 目标使用反向代理(Nginx/Varnish等)
-- 代理允许WebSocket升级
-- 后端存在内部服务
+- El objetivo usa un proxy inverso (Nginx/Varnish, etc.)
+- El proxy permite la actualización (upgrade) de WebSocket
+- Existen servicios internos en el backend
 Execution Outline:
-1. 1. 检测WebSocket走私可能性
-2. 2. WebSocket隧道构造
-3. 3. H2C走私绕过访问控制
-4. 4. 反向代理差异利用
-## WebSocket认证与授权绕过
+1. 1. Detectar la posibilidad de contrabando de WebSocket
+2. 2. Construcción del túnel WebSocket
+3. 3. Contrabando H2C para eludir el control de acceso
+4. 4. Explotación de diferencias en el proxy inverso
+## Bypass de autenticación y autorización en WebSocket
 - ID: ws-auth-bypass
 - Difficulty: intermediate
-- Subcategory: 认证绕过
-- Tags: WebSocket, 认证, 授权, 越权, Token重放
+- Subcategory: Bypass de autenticación
+- Tags: WebSocket, autenticación, autorización, control de acceso indebido, repetición de token
 - Original Extracted Source: original extracted web-security-wiki source/ws-auth-bypass.md
 Description:
-利用WebSocket连接建立后缺少持续认证检查的漏洞，通过会话固定、令牌重放、频道越权订阅等方式绕过认证和授权机制。WebSocket的长连接特性使得权限变更后原连接仍可保持访问。
+Explota la falta de verificación continua de autenticación tras el establecimiento de la conexión WebSocket, eludiendo los mecanismos de autenticación y autorización mediante fijación de sesión, repetición de token, suscripción indebida a canales, etc. La naturaleza de conexión persistente de WebSocket hace que, tras un cambio de permisos, la conexión original pueda mantener el acceso.
 Prerequisites:
-- 目标使用WebSocket实时通信
-- 已获取有效会话/Token
+- El objetivo usa comunicación en tiempo real con WebSocket
+- Se dispone de una sesión/Token válido
 Execution Outline:
-1. 1. WebSocket认证机制分析
-2. 2. Token重放与会话固定
-3. 3. 频道/房间越权订阅
-4. 4. WebSocket速率限制与DoS测试
-
+1. 1. Análisis del mecanismo de autenticación de WebSocket
+2. 2. Repetición de Token y fijación de sesión
+3. 3. Suscripción indebida a canales/salas
+4. 4. Pruebas de límite de tasa y DoS en WebSocket
+</content>

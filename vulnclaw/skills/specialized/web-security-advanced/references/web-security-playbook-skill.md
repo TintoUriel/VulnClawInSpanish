@@ -29,29 +29,29 @@ Use this skill for authorized security testing, defense validation, training, or
 
 ## Category Map
 
-- 点击劫持: `references/web-playbook-01-clickjacking.md`
-- 供应链攻击: `references/web-playbook-02-supply-chain-attacks.md`
-- 缓存与CDN安全: `references/web-playbook-03-cache-and-cdn-security.md`
-- 开放重定向: `references/web-playbook-04-open-redirect.md`
-- 框架漏洞: `references/web-playbook-05-framework-vulnerabilities.md`
-- 请求走私: `references/web-playbook-06-request-smuggling.md`
-- 认证漏洞: `references/web-playbook-07-authentication-vulnerabilities.md`
-- 文件漏洞: `references/web-playbook-08-file-vulnerabilities.md`
-- 业务逻辑漏洞: `references/web-playbook-09-business-logic-vulnerabilities.md`
-- 原型链污染: `references/web-playbook-10-prototype-pollution.md`
-- 云安全漏洞: `references/web-playbook-11-cloud-security-vulnerabilities.md`
-- AI安全: `references/web-playbook-12-ai-security.md`
-- API安全: `references/web-playbook-13-api-security.md`
-- CSRF跨站请求伪造: `references/web-playbook-14-csrf-cross-site-request-forgery.md`
-- JWT安全: `references/web-playbook-15-jwt-security.md`
-- LFI/RFI文件包含: `references/web-playbook-16-lfi-rfi-file-inclusion.md`
-- RCE远程代码执行: `references/web-playbook-17-rce-remote-code-execution.md`
-- SQL/NoSQL注入: `references/web-playbook-18-sql-nosql-injection.md`
-- SSRF服务端请求伪造: `references/web-playbook-19-ssrf-server-side-request-forgery.md`
-- SSTI模板注入: `references/web-playbook-20-ssti-template-injection.md`
-- WebSocket安全: `references/web-playbook-21-websocket-security.md`
-- XSS跨站脚本: `references/web-playbook-22-xss-cross-site-scripting.md`
-- XXE实体注入: `references/web-playbook-23-xxe-entity-injection.md`
+- Clickjacking: `references/web-playbook-01-clickjacking.md`
+- Ataques a la cadena de suministro: `references/web-playbook-02-supply-chain-attacks.md`
+- Seguridad de caché y CDN: `references/web-playbook-03-cache-and-cdn-security.md`
+- Redirección abierta: `references/web-playbook-04-open-redirect.md`
+- Vulnerabilidades de frameworks: `references/web-playbook-05-framework-vulnerabilities.md`
+- Contrabando de solicitudes: `references/web-playbook-06-request-smuggling.md`
+- Vulnerabilidades de autenticación: `references/web-playbook-07-authentication-vulnerabilities.md`
+- Vulnerabilidades de archivos: `references/web-playbook-08-file-vulnerabilities.md`
+- Vulnerabilidades de lógica de negocio: `references/web-playbook-09-business-logic-vulnerabilities.md`
+- Contaminación de prototipos: `references/web-playbook-10-prototype-pollution.md`
+- Vulnerabilidades de seguridad en la nube: `references/web-playbook-11-cloud-security-vulnerabilities.md`
+- Seguridad de IA: `references/web-playbook-12-ai-security.md`
+- Seguridad de API: `references/web-playbook-13-api-security.md`
+- CSRF falsificación de solicitud entre sitios: `references/web-playbook-14-csrf-cross-site-request-forgery.md`
+- Seguridad de JWT: `references/web-playbook-15-jwt-security.md`
+- Inclusión de archivos LFI/RFI: `references/web-playbook-16-lfi-rfi-file-inclusion.md`
+- RCE ejecución remota de código: `references/web-playbook-17-rce-remote-code-execution.md`
+- Inyección SQL/NoSQL: `references/web-playbook-18-sql-nosql-injection.md`
+- SSRF falsificación de solicitud del lado del servidor: `references/web-playbook-19-ssrf-server-side-request-forgery.md`
+- Inyección de plantillas SSTI: `references/web-playbook-20-ssti-template-injection.md`
+- Seguridad de WebSocket: `references/web-playbook-21-websocket-security.md`
+- XSS cross-site scripting: `references/web-playbook-22-xss-cross-site-scripting.md`
+- Inyección de entidades XXE: `references/web-playbook-23-xxe-entity-injection.md`
 
 ## Notes
 
@@ -60,3 +60,4 @@ Use this skill for authorized security testing, defense validation, training, or
 - Use source markdown files for detailed commands and tutorial text.
 - Keep outputs scoped to the user's target stack and authorization.
 
+</content>

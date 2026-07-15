@@ -1,159 +1,159 @@
-# AI基座安全 - 容器与沙箱逃逸实战方法论
+# Seguridad de la base de IA - Metodología práctica de escape de contenedores y sandbox
 
-> 来源: AISS绿盟大模型安全智链社区 | 拆自 ai-baseline-security.md
-> 主题: 容器逃逸/持久化/横向移动 实战方法论
+> Fuente: Comunidad de Seguridad de Grandes Modelos AISS NSFOCUS | Extraído de ai-baseline-security.md
+> Tema: Metodología práctica de escape de contenedores / persistencia / movimiento lateral
 
-## 二十、容器与沙箱逃逸实战测试方法论
+## 20. Metodología de pruebas prácticas de escape de contenedores y sandbox
 
-> 针对AI应用部署环境（Docker/Sysbox/Daytona/Kubernetes）的系统化逃逸与隔离测试
-> **通用容器部署安全**: Web应用容器部署安全检查 → [web-deployment-security.md §二](web-deployment-security.md)
+> Pruebas sistemáticas de escape y aislamiento para entornos de despliegue de aplicaciones de IA (Docker/Sysbox/Daytona/Kubernetes)
+> **Seguridad general de despliegue en contenedores**: Verificación de seguridad de despliegue de aplicaciones web en contenedores → [web-deployment-security.md §2](web-deployment-security.md)
 
-### 一、测试流程总览
+### 1. Resumen general del flujo de pruebas
 
 ```
-信息收集 → 环境识别 → 隔离评估 → 逃逸尝试 → 持久化验证 → 横向移动 → 报告
+Recopilación de información → Identificación del entorno → Evaluación de aislamiento → Intento de escape → Verificación de persistencia → Movimiento lateral → Informe
 ```
 
-### 二、信息收集阶段
+### 2. Fase de recopilación de información
 
-#### 2.1 容器运行时识别
+#### 2.1 Identificación del runtime del contenedor
 
-| 检测项 | 命令 | 判断依据 |
+| Ítem de verificación | Comando | Criterio de evaluación |
 |--------|------|----------|
-| 是否在容器中 | `cat /proc/1/cgroup` | 包含`docker`/`kubepods`/`containerd` |
-| Docker标志文件 | `ls /.dockerenv` | 文件存在则为Docker容器 |
-| 容器运行时类型 | `cat /proc/1/cgroup \| head` | `sysbox-fs`→Sysbox, `docker`→Docker |
-| 内核版本 | `uname -r` | 匹配CVE影响范围 |
-| User Namespace | `cat /proc/self/uid_map` | `0 0 4294967295`→无隔离(危险) |
-| Capabilities | `cat /proc/self/status \| grep Cap` | 解码后检查危险Cap |
-| Seccomp | `cat /proc/self/status \| grep Seccomp` | 0=disabled, 2=filter |
-| AppArmor | `cat /proc/self/attr/current` | `unconfined`→无保护 |
-| 挂载点 | `mount \| grep -v overlay` | 检测宿主机敏感路径挂载 |
+| Si está en un contenedor | `cat /proc/1/cgroup` | Contiene `docker`/`kubepods`/`containerd` |
+| Archivo indicador de Docker | `ls /.dockerenv` | Si el archivo existe, es un contenedor Docker |
+| Tipo de runtime del contenedor | `cat /proc/1/cgroup \| head` | `sysbox-fs`→Sysbox, `docker`→Docker |
+| Versión del kernel | `uname -r` | Coincide con el alcance de impacto de la CVE |
+| User Namespace | `cat /proc/self/uid_map` | `0 0 4294967295`→sin aislamiento (peligroso) |
+| Capabilities | `cat /proc/self/status \| grep Cap` | Tras decodificar, verificar Caps peligrosas |
+| Seccomp | `cat /proc/self/status \| grep Seccomp` | 0=deshabilitado, 2=filtro |
+| AppArmor | `cat /proc/self/attr/current` | `unconfined`→sin protección |
+| Puntos de montaje | `mount \| grep -v overlay` | Detectar montajes de rutas sensibles del host |
 
-#### 2.2 Sysbox 特定检测
+#### 2.2 Detección específica de Sysbox
 
-| 检测项 | 方法 | 安全影响 |
+| Ítem de verificación | Método | Impacto de seguridad |
 |--------|------|----------|
-| CE vs EE版本 | `sysbox-runc --version` 或检查UID映射范围 | CE共享映射有跨租户风险 |
-| UID映射独占性 | `cat /proc/self/uid_map`, CE通常`0 165536 65536`(共享) | 共享映射→跨容器提权可能 |
-| 虚拟化/proc | `ls /proc/sys/net/` | Sysbox虚拟化程度 |
-| Docker-in-Docker | `docker ps 2>/dev/null` | 内层Docker可能无安全限制 |
-| /dev/kvm | `ls /dev/kvm` | KVM可用→嵌套虚拟化逃逸 |
+| Versión CE vs EE | `sysbox-runc --version` o verificar el rango de mapeo UID | El mapeo compartido de CE tiene riesgo entre inquilinos (tenants) |
+| Exclusividad del mapeo UID | `cat /proc/self/uid_map`, CE normalmente `0 165536 65536` (compartido) | Mapeo compartido→posible escalamiento de privilegios entre contenedores |
+| Virtualización de /proc | `ls /proc/sys/net/` | Grado de virtualización de Sysbox |
+| Docker-in-Docker | `docker ps 2>/dev/null` | El Docker interno puede no tener restricciones de seguridad |
+| /dev/kvm | `ls /dev/kvm` | KVM disponible→escape mediante virtualización anidada |
 
-### 三、隔离评估阶段
+### 3. Fase de evaluación de aislamiento
 
-#### 3.1 进程隔离
+#### 3.1 Aislamiento de procesos
 
 ```bash
-# PID Namespace检查
-ps aux   # 是否能看到其他容器/宿主机进程
-ls /proc/*/cmdline   # 枚举可见进程
+# Verificación de PID Namespace
+ps aux   # Comprobar si se pueden ver procesos de otros contenedores/del host
+ls /proc/*/cmdline   # Enumerar procesos visibles
 
-# 如果PID 1不是容器init而是systemd/dockerd → 隔离失败
+# Si el PID 1 no es el init del contenedor sino systemd/dockerd → falla de aislamiento
 cat /proc/1/cmdline | tr '\0' ' '
 ```
 
-#### 3.2 网络隔离
+#### 3.2 Aislamiento de red
 
 ```bash
-# 网络接口
-ip addr   # 检查网络接口和IP段
-ip route  # 路由表，是否能到达其他网段
+# Interfaces de red
+ip addr   # Verificar interfaces de red y segmento IP
+ip route  # Tabla de rutas, si se puede alcanzar otros segmentos de red
 
-# 同网段扫描(发现邻居容器)
+# Escaneo del mismo segmento de red (descubrir contenedores vecinos)
 for i in $(seq 1 254); do
   (ping -c 1 -W 1 $SUBNET.$i &>/dev/null && echo "$SUBNET.$i alive") &
 done; wait
 
-# 内部DNS探测
+# Sondeo de DNS interno
 cat /etc/resolv.conf
 nslookup kubernetes.default.svc.cluster.local 2>/dev/null
 ```
 
-#### 3.3 文件系统隔离
+#### 3.3 Aislamiento del sistema de archivos
 
 ```bash
-# 检查宿主机文件系统挂载
+# Verificar montajes del sistema de archivos del host
 mount | grep -E "ext4|xfs|btrfs" | grep -v overlay
 findmnt
 
-# 路径遍历测试
+# Prueba de path traversal
 ls -la /var/lib/sysbox/ 2>/dev/null
 ls -la /var/lib/docker/ 2>/dev/null
 ls -la /run/containerd/ 2>/dev/null
 
-# 符号链接逃逸
+# Escape mediante enlace simbólico
 ln -s /proc/1/root/etc/shadow /tmp/test_escape
-cat /tmp/test_escape 2>&1  # 如果成功→隔离失败
+cat /tmp/test_escape 2>&1  # Si tiene éxito→falla de aislamiento
 ```
 
-### 四、逃逸测试矩阵
+### 4. Matriz de pruebas de escape
 
-| 逃逸路径 | 前提条件 | 危险等级 | 测试方法 |
+| Ruta de escape | Condición previa | Nivel de peligro | Método de prueba |
 |----------|----------|----------|----------|
-| cgroup release_agent | CAP_SYS_ADMIN + cgroup v1 | Critical | 写release_agent执行宿主机命令 |
-| Docker Socket | /var/run/docker.sock暴露 | Critical | 通过API创建特权容器 |
-| /proc/1/root | PID Namespace未隔离 | Critical | 直接读写宿主机文件 |
-| 特权容器 | --privileged模式 | Critical | mount宿主机磁盘 |
-| runc fd泄露 | CVE-2024-21626 | High | 利用/proc/self/fd访问宿主 |
-| Dirty Pipe | CVE-2022-0847, 5.8≤kernel≤5.16.11 | High | 覆写只读文件提权 |
-| OverlayFS | CVE-2023-0386, 5.11≤kernel≤6.2 | High | SUID文件提权 |
-| 敏感挂载 | 宿主机路径被mount进容器 | High | 写入宿主机文件 |
-| CAP_DAC_READ_SEARCH | Capability未限制 | Medium | open_by_handle_at读取文件 |
-| CAP_SYS_PTRACE | Capability未限制 | Medium | 注入宿主机进程 |
-| Docker-in-Docker | 内层Docker无限制 | Medium | 内层创建特权容器 |
+| cgroup release_agent | CAP_SYS_ADMIN + cgroup v1 | Crítico | Escribir en release_agent para ejecutar comandos en el host |
+| Docker Socket | /var/run/docker.sock expuesto | Crítico | Crear un contenedor privilegiado mediante la API |
+| /proc/1/root | PID Namespace sin aislar | Crítico | Leer y escribir directamente archivos del host |
+| Contenedor privilegiado | Modo --privileged | Crítico | Montar el disco del host |
+| Fuga de fd de runc | CVE-2024-21626 | Alto | Aprovechar /proc/self/fd para acceder al host |
+| Dirty Pipe | CVE-2022-0847, 5.8≤kernel≤5.16.11 | Alto | Sobrescribir archivos de solo lectura para escalar privilegios |
+| OverlayFS | CVE-2023-0386, 5.11≤kernel≤6.2 | Alto | Escalamiento de privilegios mediante archivo SUID |
+| Montaje sensible | Ruta del host montada dentro del contenedor | Alto | Escribir en archivos del host |
+| CAP_DAC_READ_SEARCH | Capability sin limitar | Medio | open_by_handle_at para leer archivos |
+| CAP_SYS_PTRACE | Capability sin limitar | Medio | Inyectar en procesos del host |
+| Docker-in-Docker | Docker interno sin restricciones | Medio | Crear un contenedor privilegiado en la capa interna |
 
-### 五、持久化测试
+### 5. Pruebas de persistencia
 
-> 验证沙箱跨会话持久化攻击可行性（尤其适用于持久沙箱如Daytona）
+> Verificar la viabilidad de ataques de persistencia entre sesiones del sandbox (especialmente aplicable a sandboxes persistentes como Daytona)
 
-| 测试项 | 会话1操作 | 会话2验证 | 预期安全结果 |
+| Ítem de prueba | Operación en sesión 1 | Verificación en sesión 2 | Resultado de seguridad esperado |
 |--------|-----------|-----------|-------------|
-| .bashrc后门 | `echo 'malicious_cmd' >> ~/.bashrc` | 开新shell检查是否执行 | 新会话不继承/重置 |
-| Crontab | `echo "* * * * * cmd" \| crontab -` | `crontab -l` | Crontab被清理或不可用 |
-| SSH密钥 | 写入~/.ssh/authorized_keys | SSH连接测试 | SSH服务不可用或密钥清理 |
-| 后台进程 | `nohup cmd &` | `ps aux \| grep cmd` | 会话关闭后进程终止 |
-| 文件投毒 | 工作区写入恶意文件 | AI是否读取执行 | AI不自动执行文件中指令 |
-| 历史残留 | 在shell中输入敏感命令 | `cat ~/.bash_history` | 历史命令跨会话清除 |
-| 环境变量 | `export SECRET=leaked` | `echo $SECRET` | 环境变量不跨会话保留 |
+| Puerta trasera en .bashrc | `echo 'malicious_cmd' >> ~/.bashrc` | Abrir un shell nuevo y verificar si se ejecuta | La nueva sesión no hereda/se restablece |
+| Crontab | `echo "* * * * * cmd" \| crontab -` | `crontab -l` | El crontab se limpia o no está disponible |
+| Clave SSH | Escribir en ~/.ssh/authorized_keys | Prueba de conexión SSH | El servicio SSH no está disponible o la clave se limpia |
+| Proceso en segundo plano | `nohup cmd &` | `ps aux \| grep cmd` | El proceso termina al cerrar la sesión |
+| Envenenamiento de archivos | Escribir un archivo malicioso en el área de trabajo | Si la IA lo lee y ejecuta | La IA no ejecuta automáticamente instrucciones dentro de archivos |
+| Residuo de historial | Introducir un comando sensible en el shell | `cat ~/.bash_history` | El historial de comandos se limpia entre sesiones |
+| Variable de entorno | `export SECRET=leaked` | `echo $SECRET` | La variable de entorno no persiste entre sesiones |
 
-### 六、横向移动测试
+### 6. Pruebas de movimiento lateral
 
 ```
-容器内 → 内网服务发现 → 数据库/缓存/API直连 → 其他租户沙箱
+Dentro del contenedor → Descubrimiento de servicios de la red interna → Conexión directa a base de datos/caché/API → Sandbox de otros inquilinos
          ↓
-         云元数据服务(169.254.169.254) → IAM凭据窃取 → 云资源访问
+         Servicio de metadatos en la nube (169.254.169.254) → Robo de credenciales IAM → Acceso a recursos en la nube
          ↓
-         K8s API(kubernetes.default.svc) → Pod列表/Secret获取
+         API de K8s (kubernetes.default.svc) → Obtención de lista de Pods/Secrets
 ```
 
-| 目标 | 检测命令 | 利用方式 |
+| Objetivo | Comando de detección | Método de explotación |
 |------|----------|----------|
-| 云元数据 | `curl 169.254.169.254` | 获取IAM临时凭据 |
-| K8s API | `curl -k https://kubernetes.default.svc` | 列举Pod/获取Secret |
-| K8s ServiceAccount | `cat /var/run/secrets/kubernetes.io/serviceaccount/token` | 认证K8s API |
-| 内网数据库 | `echo \| nc DB_HOST 5432` | 直连数据库 |
-| Redis | `redis-cli -h REDIS_HOST ping` | 未授权访问 |
-| Docker Registry | `curl http://REGISTRY:5000/v2/_catalog` | 拉取敏感镜像 |
+| Metadatos en la nube | `curl 169.254.169.254` | Obtener credenciales temporales de IAM |
+| API de K8s | `curl -k https://kubernetes.default.svc` | Listar Pods/obtener Secrets |
+| ServiceAccount de K8s | `cat /var/run/secrets/kubernetes.io/serviceaccount/token` | Autenticarse ante la API de K8s |
+| Base de datos de la red interna | `echo \| nc DB_HOST 5432` | Conexión directa a la base de datos |
+| Redis | `redis-cli -h REDIS_HOST ping` | Acceso no autorizado |
+| Docker Registry | `curl http://REGISTRY:5000/v2/_catalog` | Extraer imágenes sensibles |
 
-### 七、防御验证Checklist
+### 7. Checklist de verificación de defensa
 
 ```
-[ ] 容器以非root用户运行(或User Namespace隔离有效)
-[ ] 无多余Capabilities(最小原则: 仅NET_BIND_SERVICE等必需项)
-[ ] Seccomp profile已启用(非disabled)
-[ ] AppArmor/SELinux非unconfined
-[ ] /var/run/docker.sock未暴露
-[ ] 不以--privileged模式运行
-[ ] 无宿主机敏感路径挂载(/、/etc、/var/run)
-[ ] 内核版本不受已知逃逸CVE影响
-[ ] cgroup v2或release_agent不可写
-[ ] PID Namespace隔离有效(仅见自身进程)
-[ ] Network Policy/防火墙限制容器间通信
-[ ] 169.254.169.254元数据服务被拦截
-[ ] 会话间敏感数据(history/credentials)被清理
-[ ] 沙箱销毁时完全清除所有用户数据
-[ ] Sysbox使用EE版或独占UID映射
+[ ] El contenedor se ejecuta con un usuario no root (o el User Namespace está aislado correctamente)
+[ ] Sin Capabilities excedentes (principio mínimo: solo elementos necesarios como NET_BIND_SERVICE)
+[ ] El perfil de Seccomp está habilitado (no deshabilitado)
+[ ] AppArmor/SELinux no está en modo unconfined
+[ ] /var/run/docker.sock no está expuesto
+[ ] No se ejecuta en modo --privileged
+[ ] No hay montajes de rutas sensibles del host (/, /etc, /var/run)
+[ ] La versión del kernel no está afectada por CVE de escape conocidas
+[ ] cgroup v2 o release_agent no es escribible
+[ ] El aislamiento del PID Namespace es efectivo (solo se ven los propios procesos)
+[ ] Network Policy/firewall limita la comunicación entre contenedores
+[ ] El servicio de metadatos 169.254.169.254 está bloqueado
+[ ] Los datos sensibles entre sesiones (historial/credenciales) se limpian
+[ ] Al destruir el sandbox se eliminan por completo todos los datos del usuario
+[ ] Sysbox usa la versión EE o mapeo UID exclusivo
 ```
 
 ---

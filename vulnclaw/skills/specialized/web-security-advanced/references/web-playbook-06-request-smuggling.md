@@ -1,68 +1,68 @@
-# 请求走私
+# Contrabando de solicitudes
 English: Request Smuggling
 - Entry Count: 4
 - Use this file to shortlist relevant payloads, then open the linked source markdown for the full workflow and commands.
-## CL-TE请求走私
+## Contrabando CL-TE
 - ID: smuggling-cl-te
 - Difficulty: advanced
 - Subcategory: CL-TE
 - Tags: smuggling, request, http
 - Original Extracted Source: original extracted web-security-wiki source/smuggling-cl-te.md
 Description:
-Content-Length与Transfer-Encoding走私
+Contrabando mediante Content-Length y Transfer-Encoding
 Prerequisites:
-- 目标使用多层代理
-- 前后端处理差异
+- El objetivo usa múltiples capas de proxy
+- Existe diferencia de procesamiento entre frontend y backend
 Execution Outline:
-1. CL-TE基础
-2. TE-CL基础
+1. CL-TE básico
+2. TE-CL básico
 3. TE-TE
-## CL-CL走私
+## Contrabando CL-CL
 - ID: smuggling-cl-cl
 - Difficulty: advanced
 - Subcategory: CL-CL
 - Tags: smuggling, cl-cl, http
 - Original Extracted Source: original extracted web-security-wiki source/smuggling-cl-cl.md
 Description:
-利用前端代理和后端服务器同时处理Content-Length头但对多个CL头的处理差异实现HTTP请求走私
+Explota que el proxy frontend y el servidor backend procesan simultáneamente la cabecera Content-Length pero difieren en el tratamiento de múltiples cabeceras CL, para lograr contrabando de solicitudes HTTP
 Prerequisites:
-- 存在前端代理(如HAProxy/Nginx)+后端服务器架构
-- 两端对Content-Length头的解析存在差异
-- 理解HTTP请求走私原理
+- Existe una arquitectura de proxy frontend (como HAProxy/Nginx) + servidor backend
+- Hay diferencias en el análisis de la cabecera Content-Length entre ambos extremos
+- Comprensión de los principios del contrabando de solicitudes HTTP
 Execution Outline:
-1. 检测CL-CL走私条件
-2. CL-CL请求走私POC
-3. 利用CL-CL走私绕过前端访问控制
-## TE-CL走私
+1. Detectar las condiciones para el contrabando CL-CL
+2. POC de contrabando de solicitudes CL-CL
+3. Explotar el contrabando CL-CL para eludir el control de acceso del frontend
+## Contrabando TE-CL
 - ID: smuggling-te-cl
 - Difficulty: expert
 - Subcategory: TE-CL
 - Tags: smuggling, te-cl, http
 - Original Extracted Source: original extracted web-security-wiki source/smuggling-te-cl.md
 Description:
-利用前端使用Transfer-Encoding而后端使用Content-Length的差异实现HTTP请求走私
+Explota la diferencia en que el frontend usa Transfer-Encoding mientras el backend usa Content-Length, para lograr contrabando de solicitudes HTTP
 Prerequisites:
-- 前端代理优先处理Transfer-Encoding
-- 后端服务器优先处理Content-Length
-- 理解chunked编码格式
+- El proxy frontend prioriza el procesamiento de Transfer-Encoding
+- El servidor backend prioriza el procesamiento de Content-Length
+- Comprensión del formato de codificación chunked
 Execution Outline:
-1. 检测TE-CL差异
-2. TE-CL走私POC
-3. TE-CL走私实现请求劫持
-## TE-TE走私
+1. Detectar la diferencia TE-CL
+2. POC de contrabando TE-CL
+3. Secuestro de solicitudes mediante contrabando TE-CL
+## Contrabando TE-TE
 - ID: smuggling-te-te
 - Difficulty: expert
 - Subcategory: TE-TE
 - Tags: smuggling, te-te, http
 - Original Extracted Source: original extracted web-security-wiki source/smuggling-te-te.md
 Description:
-利用前端和后端对Transfer-Encoding头的不同混淆变体的处理差异实现请求走私
+Explota las diferencias en el manejo de distintas variantes de ofuscación de la cabecera Transfer-Encoding entre el frontend y el backend, para lograr contrabando de solicitudes
 Prerequisites:
-- 前后端都支持Transfer-Encoding
-- 可以通过TE头混淆使一端忽略TE
-- 了解chunked编码和HTTP走私原理
+- Tanto el frontend como el backend soportan Transfer-Encoding
+- Es posible, mediante ofuscación de la cabecera TE, hacer que uno de los extremos la ignore
+- Comprensión de la codificación chunked y los principios del contrabando HTTP
 Execution Outline:
-1. TE混淆变体探测
-2. TE-TE走私利用(前端忽略混淆TE)
-3. TE-TE缓存投毒攻击
-
+1. Sondeo de variantes de ofuscación de TE
+2. Explotación de contrabando TE-TE (el frontend ignora el TE ofuscado)
+3. Ataque de envenenamiento de caché mediante TE-TE
+</content>

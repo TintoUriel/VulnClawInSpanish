@@ -1,240 +1,242 @@
 ---
 name: secknowledge-skill
 description: |
-  Web+AI 安全测试知识库。融合 WooYun 88,636 案例 + 先知 L1-L4 方法论 + GAARM 150 风险
-  + OWASP Top 10 (LLM/ASI/WSTG)。
-  TRIGGER when 任务是实战安全测试：渗透测试、漏洞挖掘/利用、红队攻防、安全审计 (SAST/DAST)、
-  CTF、AI/LLM 安全测试 (Prompt 注入/越狱/MCP/Agent/沙箱逃逸)。用户明确给出测试目标
-  (URL/代码/模型/Agent 架构) 且意图是"测试/审计/挖漏洞/利用"。
+  Base de conocimiento de seguridad Web+IA. Combina 88,636 casos de WooYun + metodología
+  Xianzhi L1-L4 + 150 riesgos GAARM + OWASP Top 10 (LLM/ASI/WSTG).
+  TRIGGER cuando la tarea es una prueba de seguridad real: pentesting, descubrimiento/explotación
+  de vulnerabilidades, red team, auditoría de seguridad (SAST/DAST), CTF, pruebas de seguridad
+  de IA/LLM (inyección de Prompt/jailbreak/MCP/Agent/escape de sandbox). El usuario da un
+  objetivo de prueba explícito (URL/código/modelo/arquitectura de Agent) y su intención es
+  "probar/auditar/buscar vulnerabilidades/explotar".
   DO NOT trigger:
-  - 安全概念讨论（"什么是 XSS"、"SQL 注入原理是什么"）→ 普通问答
-  - 非安全性质的 code review / debug / 性能优化 → code-audit-skill 或其他
-  - 修复语法错误 / 业务逻辑 bug → 普通编程协助
-  - 纯 Web 白盒代码审计（完整项目目录 / Source-Sink 污点分析）→ code-audit-skill
-  - 仅引用 CVE 编号查文档 → WebSearch
-  边界细则: CTF 短代码片段 + 利用思路 → 本 Skill；完整项目目录 + 系统白盒审计 → code-audit-skill
+  - Discusión de conceptos de seguridad ("qué es XSS", "cuál es el principio de la inyección SQL") → respuesta normal
+  - Code review / debug / optimización de rendimiento de naturaleza no relacionada con seguridad → code-audit-skill u otro
+  - Corrección de errores de sintaxis / bugs de lógica de negocio → asistencia de programación normal
+  - Auditoría de código en caja blanca puramente Web (directorio completo del proyecto / análisis de contaminación Source-Sink) → code-audit-skill
+  - Solo consultar documentación por número de CVE → WebSearch
+  Reglas de límite: fragmento de código corto de CTF + idea de explotación → este Skill; directorio completo del proyecto + auditoría sistemática en caja blanca → code-audit-skill
 routing:
   target_types: [web, ai_agent]
   task_types: [pentest, audit, bugbounty, ctf]
   broad: true
 ---
 
-# Web 和 AI 安全测试知识库
+# Base de conocimiento de seguridad Web e IA
 
-> 知识源: WooYun 88,636 漏洞 × 先知 5,600+ 文档 × GAARM 150 AI 风险 × OWASP
-> 架构: SKILL.md（路由）→ references/（按场景加载）
+> Fuente de conocimiento: 88,636 vulnerabilidades de WooYun × 5,600+ documentos de Xianzhi × 150 riesgos de IA de GAARM × OWASP
+> Arquitectura: SKILL.md (enrutamiento) → references/ (carga según escenario)
 
-## VulnClaw 集成说明
+## Notas de integración en VulnClaw
 
-- 本 Skill 集成自 `Pa55w0rd/secknowledge-skill`，在 VulnClaw 中作为 `secknowledge-skill` specialized skill 使用；上游声明为 MIT License。
-- CTF/SRC 场景先加载 `references/vulnclaw-ctf-src-routing.md` 判断资料入口，再按漏洞类型加载 `web-*`、`ai-*`、`testing-methodology.md` 或 `gaarm-risk-matrix.md`。
-- 与 VulnClaw 现有技能协同：CTF 单题技巧优先结合 `ctf-web`/`ctf-crypto`/`ctf-misc`，SRC 和实战漏洞挖掘优先使用本 Skill 的方法论、案例映射、风险矩阵和证据约束。
-- 输出时保留上游的授权边界、引用标注和"假设/确认"区分；未能从 reference 佐证的 payload、CVE、GAARM/OWASP 编号必须明确标注为未核对。
+- Este Skill está integrado desde `Pa55w0rd/secknowledge-skill`, y se usa en VulnClaw como specialized skill `secknowledge-skill`; el upstream declara licencia MIT.
+- En escenarios CTF/SRC, cargar primero `references/vulnclaw-ctf-src-routing.md` para determinar la entrada de material, y luego cargar `web-*`, `ai-*`, `testing-methodology.md` o `gaarm-risk-matrix.md` según el tipo de vulnerabilidad.
+- En colaboración con las skills existentes de VulnClaw: para técnicas de un solo reto CTF, priorizar la combinación con `ctf-web`/`ctf-crypto`/`ctf-misc`; para SRC y descubrimiento de vulnerabilidades reales, priorizar la metodología, el mapeo de casos, la matriz de riesgos y las restricciones de evidencia de este Skill.
+- En la salida, conservar los límites de autorización, las anotaciones de referencia y la distinción "hipótesis/confirmación" del upstream; todo payload, CVE o número GAARM/OWASP que no pueda respaldarse con una reference debe marcarse explícitamente como no verificado.
 
-## 触发条件
+## Condiciones de activación
 
-**触发条件（AND 组合）**：
-1. 用户意图是**执行**安全测试（渗透/挖洞/利用/审计） — 非讨论/学习
-2. 提供了**具体目标**：URL、接口、代码片段、模型/Agent 架构、MCP 配置 — 非抽象问题
-3. 任务**涉及以下领域之一**：
-   - Web: SQL 注入/XSS/命令执行/越权/文件上传/SSRF/反序列化/XXE/GraphQL/HTTP 走私
-   - AI: Prompt 注入/越狱/MCP 投毒/Agent 滥用/RAG 投毒/沙箱逃逸/模型窃取
-   - 绕过: WAF/内容过滤/Guard Rails 绕过
+**Condiciones de activación (combinación AND)**:
+1. La intención del usuario es **ejecutar** una prueba de seguridad (pentest/búsqueda de vulnerabilidades/explotación/auditoría) — no discusión/aprendizaje
+2. Se proporciona un **objetivo concreto**: URL, endpoint, fragmento de código, modelo/arquitectura de Agent, configuración MCP — no una pregunta abstracta
+3. La tarea **involucra uno de los siguientes dominios**:
+   - Web: inyección SQL/XSS/ejecución de comandos/control de acceso indebido/subida de archivos/SSRF/deserialización insegura/XXE/GraphQL/HTTP request smuggling
+   - IA: inyección de Prompt/jailbreak/envenenamiento de MCP/abuso de Agent/envenenamiento de RAG/escape de sandbox/robo de modelo
+   - Bypass: WAF/filtrado de contenido/bypass de Guard Rails
 
-**不触发**（任一命中即路由到他处）：
-- 概念讲解："什么是…"、"…原理"、"…怎么防御" → 普通问答
-- 非安全代码审查："review 代码质量"、"优化性能" → 普通 code review
-- 业务 bug：语法错误、空指针、业务逻辑错误（非安全逻辑）→ 普通 debug
-- **深度白盒代码审计**（Source-Sink 污点传播、AST 分析）→ code-audit-skill
-- 查 CVE 文档、工具文档 → WebSearch/Context7
+**No se activa** (si se cumple cualquiera, se enruta a otro lugar):
+- Explicación de conceptos: "qué es…", "principio de…", "cómo defenderse de…" → respuesta normal
+- Revisión de código no relacionada con seguridad: "revisar calidad de código", "optimizar rendimiento" → code review normal
+- Bugs de negocio: errores de sintaxis, punteros nulos, errores de lógica de negocio (no lógica de seguridad) → debug normal
+- **Auditoría de código en caja blanca profunda** (propagación de contaminación Source-Sink, análisis AST) → code-audit-skill
+- Consultar documentación de CVE o de herramientas → WebSearch/Context7
 
-**歧义处理**：目标和意图不明时，先问："目标是什么？你希望做渗透测试 / 代码审计 / 还是了解概念？"
+**Manejo de ambigüedad**: si el objetivo y la intención no están claros, preguntar primero: "¿Cuál es el objetivo? ¿Quieres hacer una prueba de penetración / auditoría de código / o entender el concepto?"
 
-## 行为准则（整个会话有效，不因对话长度放松）
+## Normas de comportamiento (válidas durante toda la sesión, no se relajan por la duración de la conversación)
 
-1. ❗ **所有 Payload/CVE 编号/风险编号必须引用 reference 文件的具体章节** — 每次输出前自检。未在 reference 中的一律标注 "UNABLE TO CITE"，禁止编造。
-2. ❗ **区分"漏洞假设"与"漏洞确认"** — 基于方法论推断的潜在风险 → 标注 `假设（需验证）`；有明确证据的 → 标注 `已确认（证据: …）`。禁止混淆。
-3. ❗ **授权边界** — 任何利用步骤输出前必须确认是 CTF/授权渗透/本人环境。无授权上下文只输出分析，不输出可直接武器化的完整 Payload。
+1. ❗ **Todo Payload/número de CVE/número de riesgo debe citar la sección concreta del archivo de reference** — autoverificación antes de cada salida. Lo que no esté en la reference debe marcarse como "UNABLE TO CITE"; queda prohibido inventar.
+2. ❗ **Distinguir entre "hipótesis de vulnerabilidad" y "vulnerabilidad confirmada"** — un riesgo potencial inferido a partir de la metodología → marcar `Hipótesis (requiere verificación)`; uno con evidencia clara → marcar `Confirmado (evidencia: …)`. Prohibido confundir ambos.
+3. ❗ **Límites de autorización** — antes de emitir cualquier paso de explotación se debe confirmar que se trata de CTF/pentest autorizado/entorno propio. Sin contexto de autorización, solo se emite el análisis, no un Payload completo listo para usarse como arma.
 
-## 幻觉防护与来源引用
+## Prevención de alucinaciones y citación de fuentes
 
-| 内容类型 | 正确输出 | 禁止输出 |
+| Tipo de contenido | Salida correcta | Salida prohibida |
 |---------|---------|---------|
-| CVE 编号 | 引用具体 reference 文件和章节，或标 "UNABLE TO CITE — 建议 WebSearch 核实" | 编造 CVE-YYYY-NNNN |
-| Payload | 从 `references/web-*.md` 或 `references/ai-*.md` 内 payload 章节引用 | 凭印象写 payload |
-| GAARM 风险编号 | 引用 `references/gaarm-risk-matrix.md` | 自造编号 |
-| OWASP 条目 | LLM01-10 / ASI01-10 / WSTG-* 引用 `testing-methodology.md §10.x` | 改写编号含义 |
-| 工具/命令 | 仅使用在 reference 中出现过的，或明确标注 "通用命令（未在 reference 中核对）" | 伪造工具参数 |
-| 无检索结果 | "UNABLE TO ASSESS：reference 未覆盖此场景，建议 WebSearch" | 凭经验推测作为结论 |
+| Número de CVE | Citar el archivo y sección concretos de reference, o marcar "UNABLE TO CITE — se recomienda verificar con WebSearch" | Inventar CVE-YYYY-NNNN |
+| Payload | Citar desde la sección de payloads de `references/web-*.md` o `references/ai-*.md` | Escribir el payload de memoria |
+| Número de riesgo GAARM | Citar `references/gaarm-risk-matrix.md` | Inventar un número |
+| Entrada OWASP | LLM01-10 / ASI01-10 / WSTG-* citar `testing-methodology.md §10.x` | Reescribir el significado del número |
+| Herramienta/comando | Usar solo lo que aparece en la reference, o marcar explícitamente "comando genérico (no verificado en la reference)" | Falsificar parámetros de herramientas |
+| Sin resultado de búsqueda | "UNABLE TO ASSESS: la reference no cubre este escenario, se recomienda WebSearch" | Especular por experiencia como si fuera conclusión |
 
-**标注分级**：
-- `[引用]` — 来自 reference 具体章节（需带 file:section）
-- `⚠️ 通用知识` — 未在本 Skill reference 中核对，仅作提示
-- `💡 建议` — 方法论推理，非事实声明
+**Niveles de anotación**:
+- `[Cita]` — proviene de una sección concreta de la reference (debe incluir file:section)
+- `⚠️ Conocimiento general` — no verificado en las reference de este Skill, solo a modo informativo
+- `💡 Sugerencia` — razonamiento metodológico, no es una afirmación factual
 
-## 输出约束
+## Restricciones de salida
 
-禁止输出：
-- 开场白："让我来分析…" / "首先我们需要…" / "根据你的需求…"
-- 工具调用描述："我将使用 Read 工具读取 XX"
-- 已知信息复述（用户刚说的 URL、目标类型）
-- 无来源引用的 Payload 或 CVE 编号
-- 未经授权场景下的完整武器化链
+Prohibido emitir:
+- Frases de apertura: "Déjame analizar…" / "Primero necesitamos…" / "Según tu solicitud…"
+- Descripción de llamadas a herramientas: "Voy a usar la herramienta Read para leer XX"
+- Repetición de información ya conocida (la URL que el usuario acaba de dar, el tipo de objetivo)
+- Payload o número de CVE sin cita de fuente
+- Cadena de explotación completa lista para usarse como arma en un escenario no autorizado
 
-输出限制：
-- 单次回复 ≤ 3 个层次的建议（避免信息膨胀）
-- Payload 示例 ≤ 5 条/漏洞类型（完整列表引用 reference）
-- 使用表格/速查格式，禁止长段落叙述
+Límites de salida:
+- Cada respuesta ≤ 3 niveles de sugerencias (evitar la inflación de información)
+- Ejemplos de Payload ≤ 5 por tipo de vulnerabilidad (la lista completa se cita desde la reference)
+- Usar formato de tabla/referencia rápida, prohibidos los párrafos largos narrativos
 
-## 工具优先级（本 Skill 自用）
+## Prioridad de herramientas (uso interno de este Skill)
 
-| 操作 | 首选 | 降级条件 | 降级工具 |
+| Operación | Preferida | Condición de degradación | Herramienta de respaldo |
 |------|------|---------|---------|
-| 读 reference | Read | Read 失败 | Bash cat |
-| 搜索关键词/CVE | Grep (reference 内) | 连续 2 次未命中 | WebSearch |
-| 代码审计目标 | 委派 code-audit-skill | — | — |
+| Leer reference | Read | Falla Read | Bash cat |
+| Buscar palabra clave/CVE | Grep (dentro de reference) | 2 fallos consecutivos | WebSearch |
+| Objetivo de auditoría de código | Delegar a code-audit-skill | — | — |
 
-单次超时 ≠ 不可用，必须重试 1 次后才能降级。
+Un timeout puntual ≠ no disponible; debe reintentarse 1 vez antes de degradar.
 
-## 使用流程
+## Flujo de uso
 
-**依赖链约束（贯穿三步，强制）**:
-- Step 2 输入 == Step 1 的"已定位 reference 列表"，不得新加文件
-- Step 3 引用集合 ⊆ Step 2 的"已加载列表"，禁止在 Step 3 重新搜索 reference
-- Step 3 Checkpoint 中的引用计数必须能在 Step 2 Checkpoint 中找到对应来源
+**Restricción de cadena de dependencias (aplica a los tres pasos, obligatoria)**:
+- La entrada del Paso 2 == la "lista de reference ya localizadas" del Paso 1, no se pueden añadir archivos nuevos
+- El conjunto de citas del Paso 3 ⊆ la "lista ya cargada" del Paso 2, prohibido volver a buscar reference en el Paso 3
+- El conteo de citas del Checkpoint del Paso 3 debe poder encontrar su origen correspondiente en el Checkpoint del Paso 2
 
-**Step 1: 目标分类 + reference 定位**
-- 判断：Web / AI / Web+AI 混合 / 容器沙箱
-- 定位：按"场景导航索引"找到对应 reference 文件，记为列表 `L1`
+**Paso 1: Clasificación del objetivo + localización de reference**
+- Determinar: Web / IA / Mezcla Web+IA / Sandbox de contenedor
+- Localizar: usar el "índice de navegación de escenarios" para encontrar el archivo de reference correspondiente, registrado como lista `L1`
 
-失败降级:
-- 目标信息不足无法分类 → 触发歧义澄清问题，不猜测；不允许默认归类为 "Web+AI 混合"
-- 场景导航索引未覆盖该场景 → 标注 "UNABLE TO CITE: 场景 {X} 不在索引内"，列表 `L1` 为空，进入 Step 3 时只能输出方法论级建议
+Degradación por fallo:
+- Información del objetivo insuficiente para clasificar → activar pregunta de aclaración de ambigüedad, no adivinar; no se permite clasificar por defecto como "Mezcla Web+IA"
+- El índice de navegación de escenarios no cubre este escenario → marcar "UNABLE TO CITE: el escenario {X} no está en el índice", lista `L1` vacía, al llegar al Paso 3 solo se pueden emitir sugerencias a nivel metodológico
 
-✅ Checkpoint: `Step 1 完成: 目标类型={X}, |L1| == 场景导航索引匹配数 = {N}`
+✅ Checkpoint: `Paso 1 completado: tipo de objetivo={X}, |L1| == número de coincidencias del índice de navegación de escenarios = {N}`
 
-**Step 2: 按需加载 Step 1 定位的 reference（懒加载）**
-- 输入: Step 1 产出的列表 `L1`；记本步加载集合为 `L2`，必须满足 `L2 ⊆ L1`
-- 每次加载 1 个文件，单次 ≤ 1000 tokens；超出预算的 reference（如 `ai-identity-app.md` 906 行、`ai-data-app.md` 903 行）必须用 Read offset/limit 或 Grep 定位后再读
-- 禁止在本步加载未在 `L1` 中的文件
+**Paso 2: Carga bajo demanda de las reference localizadas en el Paso 1 (carga perezosa)**
+- Entrada: la lista `L1` producida por el Paso 1; el conjunto cargado en este paso se registra como `L2`, debe cumplir `L2 ⊆ L1`
+- Cargar 1 archivo a la vez, ≤ 1000 tokens por vez; las reference que excedan el presupuesto (p. ej. `ai-identity-app.md` con 906 líneas, `ai-data-app.md` con 903 líneas) deben localizarse primero con Read offset/limit o Grep antes de leerse
+- Prohibido cargar en este paso archivos que no estén en `L1`
 
-失败降级:
-- Read 失败 → 重试 1 次 → 仍失败用 Bash cat → 都失败 → 标注 "UNABLE TO ASSESS: 文件不可读"，从 `L2` 移除该项，不允许跳过到 Step 3
-- Grep 无命中 → 标注 "UNABLE TO CITE: {关键词} 未在 {文件} 中检出"
-- reference 文件不存在 → 标注断链 + 列入待补 reference 清单，不编造内容
+Degradación por fallo:
+- Falla Read → reintentar 1 vez → si sigue fallando usar Bash cat → si todo falla → marcar "UNABLE TO ASSESS: archivo no legible", eliminar ese elemento de `L2`, no se permite saltar directamente al Paso 3
+- Grep sin coincidencias → marcar "UNABLE TO CITE: {palabra clave} no encontrada en {archivo}"
+- El archivo de reference no existe → marcar enlace roto + añadir a la lista de reference pendientes, no inventar contenido
 
-✅ Checkpoint: `Step 2 完成: |L2| == |L1| - 不可读文件数 = {M}, 合计 {X} tokens`
+✅ Checkpoint: `Paso 2 completado: |L2| == |L1| - número de archivos no legibles = {M}, total {X} tokens`
 
-**Step 3: 按方法论输出测试思路（L1→L4）**
-- 输入: Step 2 产出的加载集合 `L2`；本步所有引用必须 ⊆ `L2`
-- L1 攻击面识别 → L2 假设构建 → L3 深度利用 → L4 防御反推
-- 每条结论必须引用 `L2` 中某文件的具体 section/行号；无依据 → 标注 "UNABLE TO CITE" 并停止该假设线
-- 禁止重新搜索：本步发现需要新 reference → 回到 Step 1 重新定位，而不是直接 Read/Grep
+**Paso 3: Emitir la línea de prueba según la metodología (L1→L4)**
+- Entrada: el conjunto cargado `L2` producido por el Paso 2; todas las citas de este paso deben ser ⊆ `L2`
+- Identificación de superficie de ataque L1 → Construcción de hipótesis L2 → Explotación profunda L3 → Contramedidas de defensa L4
+- Cada conclusión debe citar una sección/línea concreta de algún archivo de `L2`; sin fundamento → marcar "UNABLE TO CITE" y detener esa línea de hipótesis
+- Prohibido volver a buscar: si en este paso se detecta la necesidad de una nueva reference, volver al Paso 1 a localizarla, en lugar de hacer Read/Grep directamente
 
-✅ Checkpoint: `Step 3 完成: 输出 N 条假设, 其中 已引用 M 条 + UNABLE TO CITE K 条 == N (等式验收)`
+✅ Checkpoint: `Paso 3 completado: se emitieron N hipótesis, de las cuales M citadas + K UNABLE TO CITE == N (verificación de igualdad)`
 
-**全流程交叉验证**:
-- [ ] Step 3 引用的所有文件 ∈ Step 2 的 `L2`（grep 验证）
-- [ ] 已引用条数 + UNABLE TO CITE 条数 == 总假设条数
+**Validación cruzada de todo el proceso**:
+- [ ] Todos los archivos citados en el Paso 3 ∈ `L2` del Paso 2 (verificación mediante grep)
+- [ ] Número de elementos citados + número de UNABLE TO CITE == número total de hipótesis
 
-## 场景导航索引
+## Índice de navegación de escenarios
 
-> 每行指向对应 reference。详细 Payload/案例/方法论全部在 reference 中，本 SKILL.md 不再展开。
+> Cada fila apunta a la reference correspondiente. Todos los Payloads/casos/metodología detallados están en la reference; este SKILL.md ya no los desarrolla.
 
-### 核心方法论
+### Metodología central
 
-| 场景 | reference |
+| Escenario | reference |
 |------|----------|
-| L1-L4 思维金字塔 + WooYun 漏洞公式 + GAARM 映射 | `references/testing-methodology.md` |
-| OWASP Top 10 映射（LLM/ASI/WSTG）| `testing-methodology.md §10.1-10.3` |
-| GAARM 150 条风险编号 | `references/gaarm-risk-matrix.md` |
+| Pirámide de pensamiento L1-L4 + fórmula de vulnerabilidades de WooYun + mapeo GAARM | `references/testing-methodology.md` |
+| Mapeo OWASP Top 10 (LLM/ASI/WSTG) | `testing-methodology.md §10.1-10.3` |
+| 150 números de riesgo de GAARM | `references/gaarm-risk-matrix.md` |
 
-### Web 安全（按漏洞类型）
+### Seguridad Web (por tipo de vulnerabilidad)
 
-| 场景 | reference |
+| Escenario | reference |
 |------|----------|
-| SQL 注入（含 SQLMap 速查）| `references/web-sqli.md` |
-| XSS 跨站脚本 | `references/web-xss.md` |
-| 命令执行（RCE）| `references/web-rce.md` |
-| XXE（XML 外部实体）| `references/web-xxe.md` |
-| 反序列化漏洞 | `references/web-deser.md` |
-| 文件上传（含 Webshell 免杀）| `references/web-upload.md` |
-| 文件遍历 / 文件包含 | `references/web-traversal.md` |
-| 信息泄露（.git / 备份 / 错误信息）| `references/web-leak.md` |
-| SSRF / 服务器配置错误 / CMS+URL 附录 | `references/web-ssrf-misc.md` |
-| 越权 / 支付 / 密码重置 / 会话 / API 鉴权 | `references/web-logic-auth.md` |
-| CORS / GraphQL / HTTP 走私 / WebSocket / OAuth | `references/web-modern-protocols.md` |
-| 供应链 / 云配置 / 容器 / CI/CD / 框架 CVE | `references/web-deployment-security.md` |
+| Inyección SQL (incluye referencia rápida de SQLMap) | `references/web-sqli.md` |
+| XSS (Cross-Site Scripting) | `references/web-xss.md` |
+| Ejecución de comandos (RCE) | `references/web-rce.md` |
+| XXE (entidad externa XML) | `references/web-xxe.md` |
+| Vulnerabilidades de deserialización | `references/web-deser.md` |
+| Subida de archivos (incluye evasión de webshells) | `references/web-upload.md` |
+| Traversal de directorios / inclusión de archivos | `references/web-traversal.md` |
+| Fuga de información (.git / backups / mensajes de error) | `references/web-leak.md` |
+| SSRF / errores de configuración de servidor / apéndice CMS+URL | `references/web-ssrf-misc.md` |
+| Control de acceso indebido / pagos / restablecimiento de contraseña / sesión / autenticación de API | `references/web-logic-auth.md` |
+| CORS / GraphQL / HTTP request smuggling / WebSocket / OAuth | `references/web-modern-protocols.md` |
+| Cadena de suministro / configuración cloud / contenedores / CI/CD / CVE de frameworks | `references/web-deployment-security.md` |
 
-### AI/LLM 安全（按 GAARM 阶段）
+### Seguridad de IA/LLM (por etapa GAARM)
 
-| 安全域 | 应用阶段 | 部署阶段 | 训练阶段 |
+| Dominio de seguridad | Etapa de aplicación | Etapa de despliegue | Etapa de entrenamiento |
 |--------|---------|---------|---------|
-| **AI 应用**（应用阶段按风险大类细分↓）| 见下方细分表 | `ai-app-deploy.md` | `ai-app-train.md` |
-| **AI 模型**（应用阶段按风险大类细分↓）| 见下方细分表 | `ai-model-deploy.md` | `ai-model-train.md` |
-| **AI 数据**（Prompt 泄露/窃取/推断）| `ai-data-app.md` | `ai-data-deploy.md` | `ai-data-train.md` |
-| **AI 身份**（角色逃逸/Agent 伪造）| `ai-identity-app.md` | `ai-identity-deploy.md` | `ai-identity-train.md` |
-| **AI 基座**（容器/沙箱/供应链）| `ai-baseline-app.md` | `ai-baseline-deploy.md` | `ai-baseline-train.md` |
+| **Aplicación de IA** (la etapa de aplicación se subdivide por categoría de riesgo ↓) | ver tabla detallada abajo | `ai-app-deploy.md` | `ai-app-train.md` |
+| **Modelo de IA** (la etapa de aplicación se subdivide por categoría de riesgo ↓) | ver tabla detallada abajo | `ai-model-deploy.md` | `ai-model-train.md` |
+| **Datos de IA** (fuga/robo/inferencia de Prompt) | `ai-data-app.md` | `ai-data-deploy.md` | `ai-data-train.md` |
+| **Identidad de IA** (escape de rol/suplantación de Agent) | `ai-identity-app.md` | `ai-identity-deploy.md` | `ai-identity-train.md` |
+| **Base de IA** (contenedor/sandbox/cadena de suministro) | `ai-baseline-app.md` | `ai-baseline-deploy.md` | `ai-baseline-train.md` |
 
-**AI 应用 - 应用阶段按风险大类**:
+**Aplicación de IA - etapa de aplicación por categoría de riesgo**:
 
-| 风险类别 | GAARM 编号 | reference |
+| Categoría de riesgo | Número GAARM | reference |
 |---------|----------|----------|
-| Prompt 注入与变种（直接/间接/XSS/Memory/蠕虫/混淆/编码/反向诱导/多模态）| GAARM.0039, 0040.x, 0043.x, 0044, 0045, 0061 | `ai-app-prompt.md` |
-| MCP 协议攻击（地毯式骗局/工具投毒/指令覆盖/隐藏指令）| GAARM.0046.x | `ai-app-mcp.md` |
-| Agent 与 CoT 攻击（Agent 利用/SSRF/RCE/CoT/查询注入/环境注入）| GAARM.0041.x, 0042.x, 0047, 0056.001, 0060 | `ai-app-agent-cot.md` |
+| Inyección de Prompt y variantes (directa/indirecta/XSS/Memory/gusano/ofuscación/codificación/inducción inversa/multimodal) | GAARM.0039, 0040.x, 0043.x, 0044, 0045, 0061 | `ai-app-prompt.md` |
+| Ataques al protocolo MCP (fraude tipo alfombra/envenenamiento de herramientas/sobrescritura de instrucciones/instrucciones ocultas) | GAARM.0046.x | `ai-app-mcp.md` |
+| Ataques a Agent y CoT (abuso de Agent/SSRF/RCE/CoT/inyección de consultas/inyección de entorno) | GAARM.0041.x, 0042.x, 0047, 0056.001, 0060 | `ai-app-agent-cot.md` |
 
-**AI 模型 - 应用阶段按风险大类**:
+**Modelo de IA - etapa de aplicación por categoría de riesgo**:
 
-| 风险类别 | GAARM 编号 | reference |
+| Categoría de riesgo | Número GAARM | reference |
 |---------|----------|----------|
-| 越狱（DAN/Many-shot/对抗后缀/概念激活）| GAARM.0027.x | `ai-model-jailbreak.md` |
-| 幻觉（事实/跨模态）| GAARM.0028.x, 0064 | `ai-model-hallucination.md` |
-| 非合规内容（偏见/暴力/政治/虚假/诱导）| GAARM.0029.x | `ai-model-content.md` |
-| 版权与商业违法 | GAARM.0030.x | `ai-model-copyright.md` |
-| 功能滥用与信息伪造（图/音/视频/钓鱼）| GAARM.0031.x, 0033, 0062, 0063 | `ai-model-misuse.md` |
-| 对抗样本与模型提取 | GAARM.0032.x | `ai-model-extraction.md` |
+| Jailbreak (DAN/Many-shot/sufijo adversarial/activación de conceptos) | GAARM.0027.x | `ai-model-jailbreak.md` |
+| Alucinación (factual/cross-modal) | GAARM.0028.x, 0064 | `ai-model-hallucination.md` |
+| Contenido no conforme (sesgo/violencia/político/falso/inducción) | GAARM.0029.x | `ai-model-content.md` |
+| Derechos de autor e infracciones comerciales | GAARM.0030.x | `ai-model-copyright.md` |
+| Abuso funcional y falsificación de información (imagen/audio/video/phishing) | GAARM.0031.x, 0033, 0062, 0063 | `ai-model-misuse.md` |
+| Ejemplos adversariales y extracción de modelo | GAARM.0032.x | `ai-model-extraction.md` |
 
-**专项 reference**:
-- AI Agent / MCP / Skills 2025-2026 前沿风险 → `references/ai-app-frontier.md`
-- 容器与沙箱逃逸实战方法论 → `references/ai-baseline-escape.md`
+**Reference especializadas**:
+- Riesgos de vanguardia 2025-2026 en AI Agent / MCP / Skills → `references/ai-app-frontier.md`
+- Metodología práctica de escape de contenedores y sandboxes → `references/ai-baseline-escape.md`
 
-### Payload 速查（按场景在主 reference 中查找）
+### Referencia rápida de Payloads (buscar en la reference principal según el escenario)
 
-| 场景 | reference |
+| Escenario | reference |
 |------|----------|
-| SQL 注入 Payload | `references/web-sqli.md` |
-| XSS Payload | `references/web-xss.md` |
-| RCE / 命令执行 Payload | `references/web-rce.md` |
-| 反序列化 / XXE Payload | `references/web-deser.md` / `references/web-xxe.md` |
-| 文件上传绕过 / 路径遍历 Payload | `references/web-upload.md` / `references/web-traversal.md` |
-| SSRF Payload | `references/web-ssrf-misc.md` |
-| Web 现代协议 Payload（GraphQL/HTTP 走私/WebSocket）| `references/web-modern-protocols.md` |
-| Prompt 注入 Payload | `references/ai-app-prompt.md` |
-| MCP 投毒 Payload | `references/ai-app-mcp.md` |
-| Agent / CoT 注入 Payload | `references/ai-app-agent-cot.md` |
-| 越狱 / 对抗后缀 Payload | `references/ai-model-jailbreak.md` |
-| 容器逃逸 / 持久化 / 横向移动 | `references/ai-baseline-escape.md` |
+| Payload de inyección SQL | `references/web-sqli.md` |
+| Payload de XSS | `references/web-xss.md` |
+| Payload de RCE / ejecución de comandos | `references/web-rce.md` |
+| Payload de deserialización / XXE | `references/web-deser.md` / `references/web-xxe.md` |
+| Payload de bypass de subida de archivos / traversal de rutas | `references/web-upload.md` / `references/web-traversal.md` |
+| Payload de SSRF | `references/web-ssrf-misc.md` |
+| Payload de protocolos web modernos (GraphQL/HTTP smuggling/WebSocket) | `references/web-modern-protocols.md` |
+| Payload de inyección de Prompt | `references/ai-app-prompt.md` |
+| Payload de envenenamiento de MCP | `references/ai-app-mcp.md` |
+| Payload de inyección de Agent / CoT | `references/ai-app-agent-cot.md` |
+| Payload de jailbreak / sufijo adversarial | `references/ai-model-jailbreak.md` |
+| Escape de contenedor / persistencia / movimiento lateral | `references/ai-baseline-escape.md` |
 
-## 零结果处理
+## Manejo de resultados vacíos
 
-| 情况 | 正确动作 |
+| Situación | Acción correcta |
 |------|---------|
-| Grep 未命中 reference | "UNABLE TO CITE: 该场景 {X} 未在 reference 中覆盖。建议 WebSearch 或补充 reference" |
-| 用户给的 URL 无响应 | "UNABLE TO ASSESS: 目标不可达" — 不基于 URL 结构猜测漏洞 |
-| 需要执行但无授权上下文 | "仅输出分析，不输出武器化链。如为授权测试，请明确授权范围" |
-| reference 与用户场景部分匹配 | 引用已匹配部分 + 明确标注未覆盖部分为 "UNABLE TO CITE" |
+| Grep sin coincidencias en la reference | "UNABLE TO CITE: el escenario {X} no está cubierto en la reference. Se recomienda WebSearch o complementar la reference" |
+| La URL dada por el usuario no responde | "UNABLE TO ASSESS: el objetivo no es alcanzable" — no adivinar vulnerabilidades basándose en la estructura de la URL |
+| Se requiere ejecución pero no hay contexto de autorización | "Solo se emite el análisis, no la cadena lista para usarse como arma. Si se trata de una prueba autorizada, especifique el alcance de la autorización" |
+| La reference coincide parcialmente con el escenario del usuario | Citar la parte coincidente + marcar explícitamente la parte no cubierta como "UNABLE TO CITE" |
 
-## 与其他 Skill 的路由
+## Enrutamiento hacia otros Skills
 
-| 用户诉求 | 正确路由 |
+| Solicitud del usuario | Enrutamiento correcto |
 |---------|---------|
-| 渗透测试 / 红队 / CTF / 挖洞 | **本 Skill** |
-| Java/JS 深度白盒代码审计（Source-Sink）| code-audit-skill |
-| Mirawork 平台专项测试 | mirawork-security-tester |
-| WooYun 历史漏洞分析方法论 | wooyun-legacy |
-| 先知社区研究方法论 | xianzhi-research |
+| Pentest / red team / CTF / búsqueda de vulnerabilidades | **Este Skill** |
+| Auditoría de código en caja blanca profunda Java/JS (Source-Sink) | code-audit-skill |
+| Pruebas específicas de la plataforma Mirawork | mirawork-security-tester |
+| Metodología de análisis de vulnerabilidades históricas de WooYun | wooyun-legacy |
+| Metodología de investigación de la comunidad Xianzhi | xianzhi-research |
 
 ---
 
-*v2.0 | 知识源: WooYun 88,636 × 先知 5,600+ × GAARM 150 × OWASP LLM/ASI/WSTG*
+*v2.0 | Fuente de conocimiento: WooYun 88,636 × Xianzhi 5,600+ × GAARM 150 × OWASP LLM/ASI/WSTG*
