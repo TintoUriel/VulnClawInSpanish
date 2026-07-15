@@ -515,9 +515,9 @@ class VerifierExecutor:
 
         # Comprobar marcador de confirmación
         if "[CONFIRMED]" in output or "[VERIFIED]" in output:
-            if "敏感信息" in output or "información sensible" in output_lower or "sensitive" in output_lower:
+            if "información sensible" in output_lower or "sensitive" in output_lower:
                 return VerificationResult.SENSITIVE_DATA_EXPOSED
-            if "绕过" in output or "evasión" in output_lower or "bypass" in output_lower:
+            if "evasión" in output_lower or "bypass" in output_lower:
                 return VerificationResult.SECURITY_BYPASS
             return VerificationResult.VULN_CONFIRMED
 

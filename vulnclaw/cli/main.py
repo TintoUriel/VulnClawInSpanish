@@ -115,18 +115,18 @@ async def _run_repl_agent_call(agent, *, call, after_result) -> None:
 
 
 _PHASE_LABEL_KEYS = {
-    "就绪": "phase.idle",
+    "listo": "phase.idle",
     "ready": "phase.idle",
-    "信息收集": "phase.recon",
+    "reconocimiento": "phase.recon",
     "recon": "phase.recon",
-    "漏洞发现": "phase.vuln_discovery",
+    "descubrimiento de vulnerabilidades": "phase.vuln_discovery",
     "vulnerability discovery": "phase.vuln_discovery",
-    "漏洞利用": "phase.exploitation",
+    "explotación": "phase.exploitation",
     "exploitation": "phase.exploitation",
-    "后渗透": "phase.post_exploitation",
+    "post-explotación": "phase.post_exploitation",
     "post-exploitation": "phase.post_exploitation",
     "post exploitation": "phase.post_exploitation",
-    "报告生成": "phase.reporting",
+    "generación de informe": "phase.reporting",
     "reporting": "phase.reporting",
 }
 

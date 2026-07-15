@@ -84,7 +84,7 @@ CORE_CONTRACT = """\
 # ── Phase Descriptions ──────────────────────────────────────────────
 
 PHASE_DESCRIPTIONS = {
-    "信息收集": """\
+    "Reconocimiento": """\
 ## Fase actual: Recolección de información
 
 Ejecuta recolección de información pasiva y activa:
@@ -92,7 +92,7 @@ Ejecuta recolección de información pasiva y activa:
 2. Activa: escaneo de puertos/identificación de servicios/enumeración de directorios/descubrimiento de endpoints de API
 3. Genera el perfil del objetivo y el mapa de superficie de ataque
 """,
-    "漏洞发现": """\
+    "Descubrimiento de vulnerabilidades": """\
 ## Fase actual: Descubrimiento de vulnerabilidades
 
 Descubre vulnerabilidades a partir de los resultados de la recolección de información:
@@ -101,7 +101,7 @@ Descubre vulnerabilidades a partir de los resultados de la recolección de infor
 3. Detección de fallos de configuración (credenciales por defecto/fuga de información/acceso no autorizado)
 4. Genera la lista de vulnerabilidades (con nivel de severidad)
 """,
-    "漏洞利用": """\
+    "Explotación": """\
 ## Fase actual: Explotación de vulnerabilidades
 
 Verifica y explota las vulnerabilidades descubiertas:
@@ -110,7 +110,7 @@ Verifica y explota las vulnerabilidades descubiertas:
 3. Ejecución de comandos/lectura de archivos/extracción de datos
 4. Genera evidencia de explotación + script de PoC
 """,
-    "后渗透": """\
+    "Post-explotación": """\
 ## Fase actual: Post-explotación
 
 Continúa operando sobre los privilegios ya obtenidos:
@@ -119,7 +119,7 @@ Continúa operando sobre los privilegios ya obtenidos:
 3. Persistencia de privilegios
 4. Genera el informe de post-explotación
 """,
-    "报告生成": """\
+    "Generación de informe": """\
 ## Fase actual: Generación de informe
 
 Organiza los resultados de la prueba de penetración para generar el informe:

@@ -29,12 +29,12 @@ from pydantic import BaseModel, Field
 class PentestPhase(str, Enum):
     """Penetration test phases."""
 
-    IDLE = "就绪"
-    RECON = "信息收集"
-    VULN_DISCOVERY = "漏洞发现"
-    EXPLOITATION = "漏洞利用"
-    POST_EXPLOITATION = "后渗透"
-    REPORTING = "报告生成"
+    IDLE = "Listo"
+    RECON = "Reconocimiento"
+    VULN_DISCOVERY = "Descubrimiento de vulnerabilidades"
+    EXPLOITATION = "Explotación"
+    POST_EXPLOITATION = "Post-explotación"
+    REPORTING = "Generación de informe"
 
 
 class StepStatus(str, Enum):
@@ -135,12 +135,12 @@ class VulnerabilityFinding(BaseModel):
         # actual evidence chain is attached. (Previously this fired for High/Critical
         # only and did not set a lifecycle status.) The whole unit is skipped for a
         # finding that is already verified/rejected — an explicitly promoted finding
-        # keeps its terminal status and is never re-stamped "[未验证]".
+        # keeps its terminal status and is never re-stamped "[No verificado]".
         is_bare = not self.evidence and not self.vuln_type and not self.remediation
         is_terminal = self.verified or self.verification_status in ("verified", "rejected")
         if is_bare and not is_terminal:
-            if not self.title.startswith("[未验证]"):
-                self.title = f"[未验证] {self.title}"
+            if not self.title.startswith("[No verificado]"):
+                self.title = f"[No verificado] {self.title}"
             if "carece de evidencia de verificación" not in self.description:
                 self.description = (
                     "(⚠️ Esta vulnerabilidad carece de evidencia de verificación y de los "
@@ -215,14 +215,14 @@ class VulnerabilityFinding(BaseModel):
                 location = path_match.group(0)
                 break
 
-        # Use vuln_type as dedup key; location only if non-empty (avoids "SQL注入_")
+        # Use vuln_type as dedup key; location only if non-empty (avoids "inyección_sql_")
         if location:
             return f"{self.vuln_type}_{location}"[:50]
         if self.vuln_type:
             return self.vuln_type[:50]
         # Bare finding (no vuln_type, no location): fall back to a title-derived key
         # so distinct placeholders stay distinct in state / findings.json audit.
-        base_title = re.sub(r"^\[未验证\]\s*", "", self.title).strip()
+        base_title = re.sub(r"^\[No verificado\]\s*", "", self.title).strip()
         return base_title[:50]
 
     def mark_verified(self, note: str = "", evidence_level: str = "L4") -> None:
@@ -381,13 +381,13 @@ class StepRecord(BaseModel):
         # Inferir la fase
         inferred_phase = phase
         if "cambio de fase" in step_str:
-            if "信息收集" in step_str:
+            if PentestPhase.RECON.value in step_str:
                 inferred_phase = PentestPhase.RECON
-            elif "漏洞发现" in step_str:
+            elif PentestPhase.VULN_DISCOVERY.value in step_str:
                 inferred_phase = PentestPhase.VULN_DISCOVERY
-            elif "漏洞利用" in step_str:
+            elif PentestPhase.EXPLOITATION.value in step_str:
                 inferred_phase = PentestPhase.EXPLOITATION
-            elif "报告" in step_str:
+            elif "informe" in step_str.lower():
                 inferred_phase = PentestPhase.REPORTING
 
         return cls(

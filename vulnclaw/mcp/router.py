@@ -79,16 +79,16 @@ class MCPRouter:
     def suggest_tools_for_phase(self, phase: str) -> list[dict[str, Any]]:
         """Suggest tools based on pentest phase."""
         phase_tools = {
-            "信息收集": [
+            "Reconocimiento": [
                 {"tool": "fetch", "server": "fetch", "reason": "Solicitud HTTP para sondear el objetivo"},
                 {"tool": "new_page", "server": "chrome-devtools", "reason": "Acceso al objetivo mediante navegador"},
                 {"tool": "screenshot", "server": "chrome-devtools", "reason": "Captura de pantalla para registrar la página objetivo"},
             ],
-            "漏洞发现": [
+            "Descubrimiento de vulnerabilidades": [
                 {"tool": "fetch", "server": "fetch", "reason": "Enviar solicitud de sondeo de vulnerabilidades"},
                 {"tool": "send_http1_request", "server": "burp", "reason": "Construir solicitud de detección a través del proxy"},
             ],
-            "漏洞利用": [
+            "Explotación": [
                 {"tool": "send_http1_request", "server": "burp", "reason": "Construir solicitud de explotación"},
                 {"tool": "fetch", "server": "fetch", "reason": "Enviar payload de explotación"},
                 {"tool": "evaluate_js", "server": "chrome-devtools", "reason": "Explotación dentro del navegador"},

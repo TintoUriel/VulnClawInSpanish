@@ -9,11 +9,10 @@ from vulnclaw.agent.runtime_state import RuntimeState
 from vulnclaw.agent.think_filter import strip_think_tags
 
 # NOTA: los patrones de esta sección hacen coincidencia contra el TEXTO
-# GENERADO POR EL LLM (respuesta del modelo), cuyo idioma depende de
-# agent/prompts.py y agent/system_prompt.py (fuera del alcance de esta
-# traducción). Los tercer elementos de tupla `vuln_type` que coinciden con
-# claves del diccionario de alias en config/finding_similarity.py
-# (_VULN_TYPE_ALIASES, fuera de alcance) se mantienen en chino a propósito
+# GENERADO POR EL LLM (respuesta del modelo), que ahora responde en español
+# (ver agent/prompts.py y agent/system_prompt.py). Los terceros elementos de
+# tupla `vuln_type` deben coincidir (en minúsculas) con alguna clave del
+# diccionario de alias _VULN_TYPE_ALIASES en config/finding_similarity.py,
 # para no romper la normalización/deduplicación entre módulos.
 PROOF_PATTERNS: list[str] = [
     r"diferencia[：: ]*\d+",
@@ -29,13 +28,13 @@ PROOF_PATTERNS: list[str] = [
 ]
 
 NATURAL_LANG_PATTERNS: list[tuple[str, str, str]] = [
-    (r"inyección SQL|SQLi|inyección", "High", "SQL注入"),
-    (r"RCE|ejecución remota de código|inyección de comandos|ejecución de comandos", "Critical", "远程代码执行"),
-    (r"sin autorización|sin autenticación|no requiere autenticación|bypass de autenticación|autenticación.*bypass", "High", "认证绕过"),
+    (r"inyección SQL|SQLi|inyección", "High", "Inyección SQL"),
+    (r"RCE|ejecución remota de código|inyección de comandos|ejecución de comandos", "Critical", "Ejecución remota de código"),
+    (r"sin autorización|sin autenticación|no requiere autenticación|bypass de autenticación|autenticación.*bypass", "High", "Bypass de autenticación"),
     (r"SSRF|falsificación de solicitud del lado del servidor", "High", "SSRF"),
-    (r"XSS|cross-site scripting|XSS almacenado|XSS reflejado", "Medium", "XSS跨站脚本"),
+    (r"XSS|cross-site scripting|XSS almacenado|XSS reflejado", "Medium", "XSS"),
     (r"CSRF|falsificación de petición en sitios cruzados", "Medium", "CSRF"),
-    (r"inclusión de archivos|traversal de directorios|LFI|RFI", "Medium", "文件包含/遍历"),
+    (r"inclusión de archivos|traversal de directorios|LFI|RFI", "Medium", "Inclusión de archivos/traversal"),
     (r"contraseña débil|credencial por defecto|contraseña por defecto|fuerza bruta|bruteforce", "Medium", "Contraseña débil/fuerza bruta"),
     (r"error de configuración|defecto de configuración|fuga.*configuración", "Medium", "Error de configuración"),
     (r"directorio sensible|archivo sensible.*encontrado|directorio.*encontrado", "Info", "Directorio/archivo sensible encontrado"),
@@ -44,14 +43,14 @@ NATURAL_LANG_PATTERNS: list[tuple[str, str, str]] = [
 ]
 
 ELEVATION_KEYWORDS: list[tuple[str, str, str]] = [
-    (r"fuga|información sensible|fuga de datos|información personal|\d+\s*registros de datos", "High", "数据泄露"),
-    (r"sin autorización|sin autenticación|bypass de autenticación|no requiere autenticación", "High", "未授权访问"),
-    (r"RCE|ejecución de comandos|código remoto", "Critical", "远程代码执行"),
-    (r"inyección SQL|SQLi|inyección", "High", "注入漏洞"),
+    (r"fuga|información sensible|fuga de datos|información personal|\d+\s*registros de datos", "High", "Filtración de datos"),
+    (r"sin autorización|sin autenticación|bypass de autenticación|no requiere autenticación", "High", "Acceso sin autorización"),
+    (r"RCE|ejecución de comandos|código remoto", "Critical", "Ejecución remota de código"),
+    (r"inyección SQL|SQLi|inyección", "High", "Vulnerabilidad de inyección"),
     (r"CVE-\d{4}-\d{4,}", "High", "Vulnerabilidad CVE conocida"),
     (r"contraseña débil|credencial por defecto|fuerza bruta", "High", "Contraseña débil/fuerza bruta"),
     (r"XSS|cross-site scripting", "Medium", "XSS"),
-    (r"inclusión de archivos|traversal de directorios", "High", "文件包含/遍历"),
+    (r"inclusión de archivos|traversal de directorios", "High", "Inclusión de archivos/traversal"),
     (r"devuelve 200.*no existe|200.*contenido vacío|respuesta vacía.*posición", "Medium", "Posible bypass de autorización"),
     (r"403.*endpoint|endpoint.*403", "Medium", "Bloqueo de autenticación 403"),
 ]
@@ -126,7 +125,7 @@ class FindingParser:
             evidence_pool = clean_response
 
         for pattern, severity, vuln_type in NATURAL_LANG_PATTERNS:
-            canonical_title = f"[自动] {vuln_type}"
+            canonical_title = f"[Automático] {vuln_type}"
             if canonical_title in existing_titles:
                 continue
 
@@ -183,7 +182,7 @@ class FindingParser:
         for fact in confirmed_facts:
             for pattern, severity, vuln_type in ELEVATION_KEYWORDS:
                 if re.search(pattern, fact, re.IGNORECASE):
-                    title = f"[已确认] {fact.strip()[:120]}"
+                    title = f"[Confirmado] {fact.strip()[:120]}"
                     if title not in existing_titles:
                         location = _collect_location_summary(evidence_pool)
                         evidence = (

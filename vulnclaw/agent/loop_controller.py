@@ -138,7 +138,7 @@ async def auto_pentest(
                     agent.context.state.add_constraint_violation_event(
                         source="phase",
                         action="exploit"
-                        if hasattr(new_phase, "value") and new_phase.value == "漏洞利用"
+                        if hasattr(new_phase, "value") and new_phase.value == "Explotación"
                         else "",
                         code="phase_transition_blocked",
                         severity="high",

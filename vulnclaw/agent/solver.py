@@ -313,7 +313,7 @@ def _reason_prompt(board: Blackboard, max_intents: int) -> str:
         "Reglas:\n"
         "- **El campo complete solo puede ser el booleano true o false**.\n"
         "- **La determinación de finalización debe basarse en hechos objetivos ya confirmados en facts**, no en suposiciones o deseos, y evidence debe referenciar fact ids reales.\n"
-        "- Si algún fact está marcado como [未验证]/[Finalización rechazada]/posible alucinación, jamás debe usarse para determinar que se alcanzó el objetivo.\n"
+        "- Si algún fact está marcado como [No verificado]/[Finalización rechazada]/posible alucinación, jamás debe usarse para determinar que se alcanzó el objetivo.\n"
         "- **Está terminantemente prohibido volver a proponer direcciones idénticas o muy superpuestas a los abandoned intents** — ya se exploraron y no llevan a ningún lado.\n"
         "- Si todavía hay algún intent en estado open y los facts actuales no revelan una nueva "
         "dirección más valiosa que los open intents, devuelve {\"complete\": false} (sin proponer "
@@ -412,12 +412,12 @@ def _is_duplicate_intent(board: Blackboard, new_desc: str) -> bool:
     if not abandoned:
         return False
     new_lower = new_desc.lower()
-    new_words = set(re.findall(r"[a-zA-Z一-鿿]{2,}", new_lower))
+    new_words = set(re.findall(r"[a-zA-Záéíóúñü]{2,}", new_lower))
     if len(new_words) < 3:
         return False
     for existing in abandoned:
         old_lower = existing.description.lower()
-        old_words = set(re.findall(r"[a-zA-Z一-鿿]{2,}", old_lower))
+        old_words = set(re.findall(r"[a-zA-Záéíóúñü]{2,}", old_lower))
         if len(old_words) < 3:
             continue
         overlap = len(new_words & old_words) / max(len(new_words | old_words), 1)
@@ -848,7 +848,7 @@ async def solve(
                 if fake_flags:
                     note = f"Se declaró haber obtenido el flag {fake_flags[0]} pero no aparece en la salida de ninguna herramienta real; se considera alucinación y se rechaza"
                     board.abandon_intent(intent.id, note=note)
-                    board.add_fact(f"[未验证] Exploración {intent.id}: {note}", source="verify")
+                    board.add_fact(f"[No verificado] Exploración {intent.id}: {note}", source="verify")
                     emit("hallucination", {"intent_id": intent.id, "flags": fake_flags})
                 elif advanced and fact:
                     new_fact = board.conclude_intent(intent.id, fact)

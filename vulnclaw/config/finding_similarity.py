@@ -26,61 +26,60 @@ if TYPE_CHECKING:
 _VULN_TYPE_ALIASES: dict[str, str] = {
     # Inyección SQL
     "sqli": "sql_injection",
-    "sql注入": "sql_injection",
+    "inyección sql": "sql_injection",
     "sql injection": "sql_injection",
     "blind sqli": "sql_injection",
-    "盲注": "sql_injection",
-    "注入漏洞": "sql_injection",
+    "inyección ciega": "sql_injection",
+    "vulnerabilidad de inyección": "sql_injection",
     "sql_injection": "sql_injection",
     # XSS
     "xss": "cross_site_scripting",
-    "跨站脚本": "cross_site_scripting",
-    "反射型xss": "cross_site_scripting",
-    "存储型xss": "cross_site_scripting",
-    "xss跨站脚本": "cross_site_scripting",
+    "secuencia de comandos entre sitios": "cross_site_scripting",
+    "xss reflejado": "cross_site_scripting",
+    "xss almacenado": "cross_site_scripting",
     "cross site scripting": "cross_site_scripting",
     "cross_site_scripting": "cross_site_scripting",
     # SSRF
     "ssrf": "server_side_request_forgery",
-    "服务端请求伪造": "server_side_request_forgery",
+    "falsificación de solicitud del lado del servidor": "server_side_request_forgery",
     "server side request forgery": "server_side_request_forgery",
     "server_side_request_forgery": "server_side_request_forgery",
     # RCE
     "rce": "remote_code_execution",
-    "命令执行": "remote_code_execution",
-    "远程代码执行": "remote_code_execution",
-    "命令注入": "remote_code_execution",
+    "ejecución de comandos": "remote_code_execution",
+    "ejecución remota de código": "remote_code_execution",
+    "inyección de comandos": "remote_code_execution",
     "remote code execution": "remote_code_execution",
     "remote_code_execution": "remote_code_execution",
     # LFI / inclusión de archivos
     "lfi": "local_file_inclusion",
-    "文件包含": "local_file_inclusion",
+    "inclusión de archivos": "local_file_inclusion",
     "rfi": "local_file_inclusion",
-    "路径遍历": "local_file_inclusion",
-    "文件包含/遍历": "local_file_inclusion",
+    "traversal de directorios": "local_file_inclusion",
+    "inclusión de archivos/traversal": "local_file_inclusion",
     "local file inclusion": "local_file_inclusion",
     "local_file_inclusion": "local_file_inclusion",
     # IDOR / control de acceso indebido
     "idor": "insecure_direct_object_reference",
-    "越权": "insecure_direct_object_reference",
-    "横向越权": "insecure_direct_object_reference",
-    "纵向越权": "insecure_direct_object_reference",
+    "control de acceso indebido": "insecure_direct_object_reference",
+    "control de acceso indebido horizontal": "insecure_direct_object_reference",
+    "control de acceso indebido vertical": "insecure_direct_object_reference",
     "insecure direct object reference": "insecure_direct_object_reference",
     "insecure_direct_object_reference": "insecure_direct_object_reference",
     # CSRF
     "csrf": "cross_site_request_forgery",
-    "跨站请求伪造": "cross_site_request_forgery",
+    "falsificación de petición en sitios cruzados": "cross_site_request_forgery",
     "cross site request forgery": "cross_site_request_forgery",
     # Bypass de autenticación
-    "认证绕过": "auth_bypass",
-    "未授权": "auth_bypass",
-    "未授权访问": "auth_bypass",
-    "未认证": "auth_bypass",
-    "无需认证": "auth_bypass",
+    "bypass de autenticación": "auth_bypass",
+    "sin autorización": "auth_bypass",
+    "acceso sin autorización": "auth_bypass",
+    "sin autenticación": "auth_bypass",
+    "no requiere autenticación": "auth_bypass",
     # Fuga de información
-    "信息泄露": "info_disclosure",
-    "数据泄露": "info_disclosure",
-    "敏感信息泄露": "info_disclosure",
+    "filtración de información": "info_disclosure",
+    "filtración de datos": "info_disclosure",
+    "filtración de información sensible": "info_disclosure",
     "info disclosure": "info_disclosure",
 }
 
@@ -114,10 +113,10 @@ def normalize_vuln_type(vuln_type: str) -> str:
 # ── Normalización de texto y similitud ──────────────────────────────────
 
 _URL_RE = re.compile(r'https?://[^\s<>"\')\]]+', re.IGNORECASE)
-_TOKEN_RE = re.compile(r"[a-z0-9一-鿿]+", re.IGNORECASE)
-# Las marcas delimitadoras (como [自动], [已确认]) deben eliminarse antes de
+_TOKEN_RE = re.compile(r"[a-z0-9áéíóúñü]+", re.IGNORECASE)
+# Las marcas delimitadoras (como [Automático], [Confirmado]) deben eliminarse antes de
 # tokenizar, para no contaminar el conjunto de palabras
-_NOISE_TAGS = ("[自动]", "[已确认]", "[未验证]")
+_NOISE_TAGS = ("[Automático]", "[Confirmado]", "[No verificado]")
 
 
 def _normalize_url_path(url: str) -> str:

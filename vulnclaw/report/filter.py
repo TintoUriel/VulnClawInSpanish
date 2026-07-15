@@ -345,23 +345,23 @@ def extract_findings_section(content: str) -> Optional[str]:
 def remove_unverified_findings(content: str) -> str:
     """Elimina del contenido del informe las vulnerabilidades no verificadas.
 
-    Se eliminarán las vulnerabilidades marcadas como [未验证] (no verificado).
+    Se eliminarán las vulnerabilidades marcadas como [No verificado].
     """
-    # Eliminar las secciones de vulnerabilidades marcadas como [未验证]
+    # Eliminar las secciones de vulnerabilidades marcadas como [No verificado]
     pattern = re.compile(
-        r"(###\s*\[[^\]]*\]\s*[^\n]*未验证[^\n]*\n[\s\S]*?)(?=###|\Z)",
+        r"(###\s*\[[^\]]*\]\s*[^\n]*No verificado[^\n]*\n[\s\S]*?)(?=###|\Z)",
         re.IGNORECASE,
     )
     result = pattern.sub("", content)
 
-    # Eliminar las líneas que contienen [未验证]
+    # Eliminar las líneas que contienen [No verificado]
     lines = result.split("\n")
     filtered_lines = []
     skip_section = False
 
     for line in lines:
         # Detectar el inicio de una sección no verificada
-        if "[未验证]" in line and line.strip().startswith("###"):
+        if "[No verificado]" in line and line.strip().startswith("###"):
             skip_section = True
             continue
 
