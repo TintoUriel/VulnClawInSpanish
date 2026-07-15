@@ -1,9 +1,9 @@
-# 游戏与自定义 VM 逆向
+# Ingeniería inversa de juegos y VM personalizadas
 
 ## Brainfuck
 
 ```python
-# Brainfuck 解释器
+# Intérprete de Brainfuck
 import sys
 
 def brainfuck(code, input_data=''):
@@ -58,7 +58,7 @@ def brainfuck(code, input_data=''):
 ## Ook!
 
 ```python
-# Ook! 到 Brainfuck 转换
+# Conversión de Ook! a Brainfuck
 ook_to_bf = {
     'Ook. Ook?': '>',
     'Ook? Ook.': '<',
@@ -71,26 +71,26 @@ ook_to_bf = {
 }
 ```
 
-## 自定义 VM逆向流程
+## Flujo de ingeniería inversa de una VM personalizada
 
 ```python
-# 分析自定义 VM 的步骤：
-# 1. 找到 opcode 定义表
-# 2. 找到 VM 初始化代码（寄存器、内存初始化）
-# 3. 跟踪 main loop，找到指令分发
-# 4. 分析每个 opcode 的功能
-# 5. 提取 bytecode 文件
-# 6. 写反汇编器或直接模拟执行
+# Pasos para analizar una VM personalizada:
+# 1. Localizar la tabla de definición de opcodes
+# 2. Localizar el código de inicialización de la VM (registros, inicialización de memoria)
+# 3. Rastrear el bucle principal (main loop) para encontrar el despacho de instrucciones
+# 4. Analizar la función de cada opcode
+# 5. Extraer el archivo de bytecode
+# 6. Escribir un desensamblador o simular la ejecución directamente
 
 """
-常见 opcode 模式：
+Patrones de opcode comunes:
 0x00 = NOP
-0x01 = LOAD  (加载数据)
-0x02 = STORE (存储数据)
+0x01 = LOAD  (cargar datos)
+0x02 = STORE (almacenar datos)
 0x03 = ADD
 0x04 = SUB
 0x05 = JMP
-0x06 = JZ    (条件跳转)
+0x06 = JZ    (salto condicional)
 0x07 = HALT
 """
 
@@ -98,7 +98,7 @@ class SimpleVM:
     def __init__(self, bytecode):
         self.bytecode = bytecode
         self.regs = [0] * 8
-        self.memory = bytecode[256:]  # 假设代码后是数据
+        self.memory = bytecode[256:]  # se asume que los datos van después del código
         self.pc = 0
         self.running = True
 
@@ -122,13 +122,13 @@ class SimpleVM:
             self.step()
 ```
 
-## Z3 约束求解
+## Resolución de restricciones con Z3
 
 ```python
 from z3 import *
 
 def solve_with_z3(constraints, variables):
-    """使用 Z3 求解约束"""
+    """Resolver restricciones usando Z3"""
     s = Solver()
     for constraint in constraints:
         s.add(constraint)
@@ -138,24 +138,24 @@ def solve_with_z3(constraints, variables):
     return None
 ```
 
-## WASM 分析
+## Análisis de WASM
 
 ```python
-# 常用 wasm 分析命令
+# Comandos comunes de análisis de wasm
 """
-# 提取 wasm 字符串
+# Extraer cadenas del wasm
 strings game.wasm | grep -i flag
 
-# 查看导出函数
+# Ver funciones exportadas
 wasm-objdump -h game.wasm
 
-# 反编译为 wasm 文本格式
+# Descompilar al formato de texto wasm
 wasm2wat game.wasm -o game.wat
 
-# 查看函数
+# Ver funciones
 wasm-objdump -d game.wasm
 
-# 用 wasmer 或 wasmtime 执行
+# Ejecutar con wasmer o wasmtime
 wasmer game.wasm
 """
 ```

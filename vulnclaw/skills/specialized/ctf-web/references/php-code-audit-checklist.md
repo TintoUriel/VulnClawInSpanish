@@ -1,151 +1,151 @@
-# PHP 代码审计 Checklist
+# Checklist de auditoría de código PHP
 
-## 第一步：识别输入入口
+## Paso 1: identificar los puntos de entrada de datos
 
-### 超全局变量
+### Variables superglobales
 ```php
-$_GET['param']        // URL 查询参数
-$_POST['param']       // POST 表单数据
+$_GET['param']        // Parámetros de consulta de la URL
+$_POST['param']       // Datos de formulario POST
 $_REQUEST['param']    // GET + POST + COOKIE
-$_COOKIE['param']     // Cookie 值
-$_SERVER['HTTP_X']    // HTTP 请求头
-$_FILES['file']       // 上传文件
-$_SESSION['key']      // Session 数据（如果可控）
+$_COOKIE['param']     // Valores de cookies
+$_SERVER['HTTP_X']    // Cabeceras de la petición HTTP
+$_FILES['file']       // Archivos subidos
+$_SESSION['key']      // Datos de sesión (si son controlables)
 ```
 
-### 隐蔽输入
+### Entradas ocultas
 ```php
-php://input           // POST 原始数据
-getallheaders()       // 所有 HTTP 头
-getenv()              // 环境变量
-file_get_contents()   // 从文件/URL 读取
+php://input           // Datos crudos de POST
+getallheaders()       // Todas las cabeceras HTTP
+getenv()              // Variables de entorno
+file_get_contents()   // Lectura desde archivo/URL
 ```
 
-## 第二步：识别危险函数
+## Paso 2: identificar funciones peligrosas
 
-### 代码执行
+### Ejecución de código
 ```php
-eval()                // 执行任意 PHP 代码
-assert()              // PHP < 7 可执行代码
-preg_replace(/e)      // /e 修饰符执行替换结果
-create_function()     // 创建匿名函数
-call_user_func()      // 调用回调函数
-call_user_func_array()// 调用回调函数（数组参数
-array_map()           // 对数组元素应用回调
-usort()               // 自定义排序（可注入回调
-array_filter()        // 过滤数组（可注入回调
+eval()                // Ejecuta código PHP arbitrario
+assert()              // PHP < 7 puede ejecutar código
+preg_replace(/e)      // El modificador /e ejecuta el resultado del reemplazo
+create_function()     // Crea una función anónima
+call_user_func()      // Invoca una función de callback
+call_user_func_array()// Invoca una función de callback (parámetros en array)
+array_map()           // Aplica un callback a los elementos del array
+usort()               // Ordenación personalizada (se puede inyectar el callback)
+array_filter()        // Filtra un array (se puede inyectar el callback)
 ```
 
-### 命令执行
+### Ejecución de comandos
 ```php
-system()              // 执行外部程序，输出结果
-exec()                // 执行外部程序，返回最后一行
-shell_exec()          // 执行命令，返回完整输出
-passthru()            // 执行外部程序，输出原始数据
-popen()               // 打开进程管道
-proc_open()           // 打开进程（更灵活
-pcntl_exec()          // 执行程序（需要 pcntl 扩展
-反引号 `cmd`           // 等价于 shell_exec()
+system()              // Ejecuta un programa externo y muestra el resultado
+exec()                // Ejecuta un programa externo, devuelve la última línea
+shell_exec()          // Ejecuta un comando, devuelve toda la salida
+passthru()            // Ejecuta un programa externo, salida de datos sin procesar
+popen()               // Abre una tubería de proceso
+proc_open()           // Abre un proceso (más flexible)
+pcntl_exec()          // Ejecuta un programa (requiere la extensión pcntl)
+comillas invertidas `cmd`  // Equivalente a shell_exec()
 ```
 
-### 文件操作
+### Operaciones con archivos
 ```php
-include() / require()          // 文件包含
+include() / require()          // Inclusión de archivos
 include_once() / require_once()
-file_get_contents()            // 读取文件
-file_put_contents()            // 写入文件
-fopen() + fread()              // 打开并读取
-readfile()                     // 输出文件内容
-highlight_file() / show_source()// 高亮显示源码
-unlink()                       // 删除文件
-rename()                       // 重命名文件
-copy()                         // 复制文件
-move_uploaded_file()           // 移动上传文件
+file_get_contents()            // Lee un archivo
+file_put_contents()            // Escribe un archivo
+fopen() + fread()              // Abre y lee
+readfile()                     // Muestra el contenido de un archivo
+highlight_file() / show_source()// Resalta el código fuente
+unlink()                       // Elimina un archivo
+rename()                       // Renombra un archivo
+copy()                         // Copia un archivo
+move_uploaded_file()           // Mueve un archivo subido
 ```
 
-### 反序列化
+### Deserialización
 ```php
-unserialize()        // 反序列化对象
-__wakeup()           // 反序列化时调用
-__destruct()         // 对象销毁时调用
-__toString()         // 对象被当字符串使用时调用
-__call()             // 调用不存在的方法时触发
-__get()              // 访问不存在的属性时触发
+unserialize()        // Deserializa un objeto
+__wakeup()           // Se invoca al deserializar
+__destruct()         // Se invoca al destruir el objeto
+__toString()         // Se invoca cuando el objeto se usa como cadena
+__call()             // Se dispara al invocar un método inexistente
+__get()              // Se dispara al acceder a una propiedad inexistente
 ```
 
-## 第三步：分析过滤/检查逻辑
+## Paso 3: analizar la lógica de filtrado/validación
 
-### 正则过滤分析清单
+### Lista de verificación para el análisis de filtros con expresiones regulares
 ```php
 preg_match("/pattern/flags", $input)
 
-□ 是否有 i 修饰符？  → 没有 → 可大小写绕过
-□ 是否有 m 修饰符？  → 有 → 考虑换行符绕过 ^$
-□ 是否有 s 修饰符？  → 有 → . 匹配换行
-□ 检查的是字符串还是数组？ → 数组绕过
-□ 是否可以回溯超限？  → PCRE 回溯限制绕过
+□ ¿Tiene el modificador i?  → No → posible bypass por mayúsculas/minúsculas
+□ ¿Tiene el modificador m?  → Sí → considerar bypass con salto de línea ^$
+□ ¿Tiene el modificador s?  → Sí → . coincide con saltos de línea
+□ ¿Se valida una cadena o un array? → posible bypass con array
+□ ¿Se puede superar el límite de backtracking?  → bypass del límite de backtracking de PCRE
 ```
 
-### 常见过滤函数
+### Funciones de filtrado comunes
 ```php
-str_replace()        // 字符串替换（可双写绕过）
-str_ireplace()       // 不区分大小写替换
-strstr() / strpos()  // 字符串查找（可大小写绕过 / 数组绕过）
-strlen()             // 长度检查（可利用特性绕过）
-in_array()           // 数组检查（弱类型比较）
-is_numeric()         // 数字检查（十六进制/科学计数法）
-intval()             // 整数转换（特性绕过）
-trim()               // 去空白（%0a%0d 绕过）
-htmlspecialchars()   // HTML 转义（默认不转义单引号）
-addslashes()         // 添加斜杠（宽字节/GBK 绕过）
-mysql_real_escape_string() // 转义（宽字节/GBK 绕过）
+str_replace()        // Reemplazo de cadenas (bypass por duplicación)
+str_ireplace()       // Reemplazo sin distinguir mayúsculas/minúsculas
+strstr() / strpos()  // Búsqueda de cadenas (bypass por mayúsculas/minúsculas o con array)
+strlen()             // Verificación de longitud (bypass aprovechando particularidades)
+in_array()           // Verificación en array (comparación de tipo débil)
+is_numeric()         // Verificación numérica (hexadecimal/notación científica)
+intval()             // Conversión a entero (bypass aprovechando particularidades)
+trim()               // Elimina espacios en blanco (bypass con %0a%0d)
+htmlspecialchars()   // Escapado HTML (por defecto no escapa comillas simples)
+addslashes()         // Añade barras invertidas (bypass por wide byte/GBK)
+mysql_real_escape_string() // Escapado (bypass por wide byte/GBK)
 ```
 
-## 第四步：画出数据流图
+## Paso 4: dibujar el diagrama de flujo de datos
 
 ```
-用户输入 → [过滤A] → [过滤B] → 危险函数
+Entrada del usuario → [Filtro A] → [Filtro B] → Función peligrosa
           ↓
-          被过滤？
-          ↓ 否
-          [绕过检查] → 危险函数执行
+          ¿Filtrado?
+          ↓ No
+          [Bypass de la verificación] → Ejecución de la función peligrosa
 ```
 
-### 路径选择原则
-1. **过滤最少的路径优先**
-2. **参数最少的路径优先**（3 个参数的路径 < 5 个参数的路径）
-3. **结果可见的路径优先**（system() 优先于 exec()）
-4. **简单绕过优先**（大小写绕过 < 编码绕过 < 链式绕过）
+### Principios para elegir la ruta de explotación
+1. **Priorizar la ruta con menos filtros**
+2. **Priorizar la ruta con menos parámetros** (una ruta con 3 parámetros < una ruta con 5 parámetros)
+3. **Priorizar la ruta con resultado visible** (system() antes que exec())
+4. **Priorizar el bypass más simple** (bypass por mayúsculas/minúsculas < bypass por codificación < bypass encadenado)
 
-## 第五步：输出可见性分析
+## Paso 5: análisis de visibilidad de la salida
 
-### 确认命令输出是否可见
+### Confirmar si la salida del comando es visible
 ```
-1. system() 输出 → 直接在 HTTP 响应中
-2. exec() 输出 → 需要额外 echo
-3. eval() + system() → 输出在 eval 上下文中
-4. highlight_file() + system() → 输出在源码高亮之后
+1. Salida de system() → directamente en la respuesta HTTP
+2. Salida de exec() → requiere un echo adicional
+3. eval() + system() → la salida aparece dentro del contexto de eval
+4. highlight_file() + system() → la salida aparece después del resaltado del código fuente
 ```
 
-### 不确定时先测试
+### Si hay dudas, probar primero
 ```php
-// 先用简单命令测试输出可见性
+// Probar primero con un comando simple la visibilidad de la salida
 system('id');
 system('echo TESTFLAG123');
-// 在 HTTP 响应中搜索 TESTFLAG123
+// Buscar TESTFLAG123 en la respuesta HTTP
 ```
 
-### 响应分析技巧
+### Técnicas de análisis de la respuesta
 ```python
-# 使用 python_execute 分析响应
+# Usar python_execute para analizar la respuesta
 import requests
 r = requests.get(url, params=payload)
 print(f"Status: {r.status_code}")
 print(f"Length: {len(r.text)}")
 print(f"Headers: {dict(r.headers)}")
-# 只看最后 N 字符（flag 常在末尾）
+# Ver solo los últimos N caracteres (la flag suele estar al final)
 print(f"Tail: {r.text[-500:]}")
-# 搜索 flag 模式
+# Buscar el patrón de la flag
 import re
 flags = re.findall(r'(NSSCTF\{[^}]+\}|flag\{[^}]+\}|CTF\{[^}]+\})', r.text)
 if flags:

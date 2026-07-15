@@ -445,7 +445,7 @@ class TestTerminalStreamSinkRealOutput:
         assert "World" in result
 
     def test_sink_show_thinking_true_outputs_thinking(self):
-        """测试 show_thinking=True 时 thinking 内容被输出"""
+        """Prueba que el contenido de thinking se muestre cuando show_thinking=True"""
         import io
 
         from rich.console import Console
@@ -463,7 +463,7 @@ class TestTerminalStreamSinkRealOutput:
         assert "thinking" in result
 
     def test_sink_show_thinking_false_hides_thinking(self, capsys):
-        """测试 show_thinking=False 时 thinking 内容被隐藏"""
+        """Prueba que el contenido de thinking se oculte cuando show_thinking=False"""
         import io
 
         from rich.console import Console
@@ -479,12 +479,12 @@ class TestTerminalStreamSinkRealOutput:
         sink.on_stream_end()
 
         result = output.getvalue()
-        # thinking 不应该在输出中
-        # 但 content 应该输出
+        # thinking no debería estar en la salida
+        # pero content sí debería aparecer
         assert "answer" in result
 
     def test_sink_outputs_tool_call(self):
-        """测试 on_tool_call 正确输出"""
+        """Prueba que on_tool_call produzca la salida correcta"""
         import io
 
         from rich.console import Console
@@ -503,7 +503,7 @@ class TestTerminalStreamSinkRealOutput:
         assert "example.com" in result
 
     def test_sink_outputs_tool_result(self):
-        """测试 on_tool_result 正确输出"""
+        """Prueba que on_tool_result produzca la salida correcta"""
         import io
 
         from rich.console import Console
@@ -522,7 +522,7 @@ class TestTerminalStreamSinkRealOutput:
         assert "open" in result
 
     def test_sink_truncates_long_tool_result(self):
-        """测试超长工具结果被截断"""
+        """Prueba que un resultado de herramienta demasiado largo se trunque"""
         import io
 
         from rich.console import Console
@@ -538,16 +538,16 @@ class TestTerminalStreamSinkRealOutput:
         sink.on_stream_end()
 
         result = output.getvalue()
-        # 应该被截断到 200 字符左右
+        # Debería truncarse a unos 200 caracteres
         assert len(result) < 300
 
 
 class TestStreamFallback:
-    """测试流式降级到非流式的场景"""
+    """Prueba el escenario de degradación de streaming a no-streaming"""
 
     @pytest.mark.asyncio
     async def test_stream_fallback_when_streaming_not_supported(self):
-        """测试当 Provider 不支持流式时自动降级"""
+        """Prueba la degradación automática cuando el Provider no soporta streaming"""
         from vulnclaw.agent.llm_client import call_llm_stream
 
         spy = SpySink()
@@ -561,7 +561,7 @@ class TestStreamFallback:
         agent.config.llm.max_tokens = None
         agent.config.llm.temperature = None
 
-        # Mock 非流式响应（fallback 路径）
+        # Mock de respuesta no-streaming (ruta de fallback)
         class MockMessage:
             def __init__(self):
                 self.content = "Fallback response text"
@@ -579,15 +579,15 @@ class TestStreamFallback:
         agent.context.get_messages.return_value = []
         agent._build_openai_tools.return_value = []
 
-        # Test - 应该返回 fallback 响应
+        # Test - debería devolver la respuesta de fallback
         result = await call_llm_stream(agent, "system prompt", stream_sink=spy)
 
-        # 验证返回值
+        # Verificar el valor devuelto
         assert "Fallback response text" in result
 
     @pytest.mark.asyncio
     async def test_stream_with_cancellation_returns_partial(self):
-        """测试流式中断时返回已收集的部分文本"""
+        """Prueba que al interrumpirse el streaming se devuelva el texto parcial ya recolectado"""
         from vulnclaw.agent.llm_client import call_llm_stream
 
         spy = SpySink()
@@ -601,7 +601,7 @@ class TestStreamFallback:
         agent.config.llm.max_tokens = None
         agent.config.llm.temperature = None
 
-        # 创建一个会抛出 CancelledError 的流
+        # Crear un stream que lanzará CancelledError
         class MockAsyncStream:
             def __init__(self):
                 self.yielded = False
@@ -629,20 +629,20 @@ class TestStreamFallback:
         # Test
         try:
             result = await call_llm_stream(agent, "system prompt", stream_sink=spy)
-            # 如果没有抛出异常，验证返回值
+            # Si no se lanzó ninguna excepción, verificar el valor devuelto
             assert result is not None
         except asyncio.CancelledError:
-            # 如果抛出异常，这是可接受的行为
-            # 但最好能优雅处理
+            # Si se lanza la excepción, es un comportamiento aceptable
+            # aunque lo ideal sería manejarla con elegancia
             pass
 
 
 class TestCallLlmAutoStream:
-    """测试 call_llm_auto_stream 功能"""
+    """Prueba la funcionalidad de call_llm_auto_stream"""
 
     @pytest.mark.asyncio
     async def test_auto_stream_handles_tool_calls(self):
-        """测试工具调用被正确处理"""
+        """Prueba que las llamadas a herramientas se manejen correctamente"""
         from vulnclaw.agent.llm_client import call_llm_auto_stream
 
         spy = SpySink()
@@ -656,7 +656,7 @@ class TestCallLlmAutoStream:
         agent.config.llm.max_tokens = None
         agent.config.llm.temperature = None
 
-        # Mock 流式响应，包含工具调用（同步迭代器）
+        # Mock de respuesta en streaming con llamadas a herramientas (iterador síncrono)
         class MockDelta:
             def __init__(self, content="", reasoning="", tool_calls=None):
                 self.content = content
@@ -693,7 +693,7 @@ class TestCallLlmAutoStream:
 
         mock_client.chat.completions.create.return_value = mock_stream
 
-        # Mock 工具执行
+        # Mock de la ejecución de la herramienta
         async def mock_handle_tool_calls_with_results(agent_obj, message):
             return [{"tool_call_id": "call_123", "content": "Tool executed"}], []
 
@@ -710,14 +710,14 @@ class TestCallLlmAutoStream:
             result = await call_llm_auto_stream(
                 agent, "system prompt", "round context", stream_sink=spy
             )
-            # 验证返回值
+            # Verificar el valor devuelto
             assert result is not None
         finally:
             llm_client_module.handle_tool_calls_with_results = original
 
     @pytest.mark.asyncio
     async def test_auto_stream_text_only_response(self):
-        """测试纯文本响应（无工具调用）"""
+        """Prueba una respuesta de solo texto (sin llamadas a herramientas)"""
         from vulnclaw.agent.llm_client import call_llm_auto_stream
 
         spy = SpySink()
@@ -731,7 +731,7 @@ class TestCallLlmAutoStream:
         agent.config.llm.max_tokens = None
         agent.config.llm.temperature = None
 
-        # Mock 流式响应（纯文本，同步迭代器）
+        # Mock de respuesta en streaming (solo texto, iterador síncrono)
         class MockDelta:
             def __init__(self, content="", reasoning=""):
                 self.content = content

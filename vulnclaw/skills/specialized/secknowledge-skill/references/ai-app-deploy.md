@@ -1,152 +1,128 @@
-# AI应用安全 - 部署阶段
+# Seguridad de Aplicaciones de IA - Fase de Despliegue
 
-> 来源: AISS绿盟大模型安全智链社区 | 拆自 ai-app-security.md
-> 阶段: 部署阶段（GAARM.0037-0038, 0049 API管理/源代码投毒/窃取）
+> Fuente: Comunidad AISS NSFOCUS de Seguridad de Grandes Modelos | Extraído de ai-app-security.md
+> Fase: Fase de despliegue (GAARM.0037-0038, 0049 Gestión de API / Envenenamiento del código fuente / Robo)
 
-## 部署阶段
+## Fase de Despliegue
 
-### LLMs应用API管理不当
+### Gestión Inadecuada de la API de Aplicaciones LLM
 
-> 风险编号: GAARM.0049
-> 生命周期: 部署阶段
+> Número de riesgo: GAARM.0049
+> Ciclo de vida: Fase de despliegue
 
-**攻击概述**
+**Resumen del ataque**
 
-LLMs应用API管理不当是指LLMs集成框架环境中存在敏感操作的Tools、Agents、Chains等内外部的API组件，未与LLMs环境做好正确的环境管理与配置。由于大语言模型通常需要与多种API进行交互以执行任务，如果这些API未得到适当的管理，比如未设置正确的访问权限或未实施足够的安全控制，则攻击者可以利用这些漏洞来获取敏感信息或执行恶意行为，实现未授权访问、代码执行利用等攻击。
+La gestión inadecuada de la API de aplicaciones LLM se refiere a que, en el entorno del marco de integración de LLM, existen componentes de API internos y externos con operaciones sensibles, como Tools, Agents, Chains, etc., que no cuentan con una gestión y configuración correctas del entorno junto con el entorno de LLM. Dado que los grandes modelos de lenguaje suelen necesitar interactuar con diversas API para ejecutar tareas, si estas API no se gestionan adecuadamente —por ejemplo, si no se establecen los permisos de acceso correctos o no se implementan controles de seguridad suficientes—, los atacantes pueden aprovechar estas vulnerabilidades para obtener información sensible o ejecutar acciones maliciosas, logrando ataques de acceso no autorizado, explotación de ejecución de código, etc.
 
-**攻击案例**
+**Casos de ataque**
 
-案例
-描述
+Caso
+Descripción
 
+Caso 1
+Para la explotación dirigida a las API de LLM, se presentan principalmente los siguientes dos casos.
 
+**Riesgos del ataque**
 
+Filtración de datos: el atacante puede obtener datos sensibles, incluyendo información de identidad personal, secretos comerciales, etc.
+Interrupción del servicio: la ejecución de código malicioso o el acceso no autorizado pueden provocar la interrupción del servicio o la degradación del rendimiento.
+Riesgos legales y de cumplimiento: las vulnerabilidades de seguridad pueden dar lugar a litigios legales y problemas de cumplimiento normativo.
 
-案例一
-针对LLMs api的利用主要给出以下两个
+**Medidas de mitigación**
 
-**攻击风险**
+Medida de mitigación
+Descripción
 
-数据泄露：攻击者可能获取敏感数据，包括个人身份信息、商业秘密等。
-服务中断：恶意代码执行或未授权访问可能导致服务中断或性能下降。
-法律和合规风险：安全漏洞可能引起法律诉讼和合规问题。
+Principio de mínimo privilegio
+Seguir el principio de mínimo privilegio, otorgando a los LLM únicamente los permisos de acceso mínimos necesarios para completar su tarea, evitando la autorización excesiva de agentes.
 
-**缓解措施**
+Validación de entrada/salida
+Validar exhaustivamente todas las entradas enviadas a través de la API para prevenir ataques de inyección.
 
-缓解方式
-描述
-
-
-
-
-最小权限原则
-遵循最小权限原则，只为LLMs提供完成其任务所必需的最小访问权限，避免过度代理授权
-
-
-输入/输出验证
-对所有通过API发送的输入进行彻底验证，以防止注入攻击
-
-
-监控和日志记录
-监控AI时代下的新型API活动并记录日志，以便能够快速检测和响应可疑行为
+Monitoreo y registro
+Monitorear la nueva actividad de API en la era de la IA y registrar los logs, para poder detectar y responder rápidamente a comportamientos sospechosos.
 
 ---
-### LLMs应用源代码投毒
+### Envenenamiento del Código Fuente de Aplicaciones LLM
 
-> 风险编号: GAARM.0038
-> 生命周期: 训练阶段
+> Número de riesgo: GAARM.0038
+> Ciclo de vida: Fase de entrenamiento
 
-**攻击概述**
+**Resumen del ataque**
 
-源代码在审查过程中可能存在一些漏洞，攻击者通过向大型语言模型（LLMs）应用程序的源代码注入恶意代码，通过漏洞隐藏代码逃过检查，对第三方开源或商业组件进行源代码投毒，导致应用程序在训练或者运行时出现安全问题，进而影响使用这些组件的下游模型应用业务开发厂商。
+El código fuente puede presentar ciertas vulnerabilidades durante el proceso de revisión; los atacantes inyectan código malicioso en el código fuente de aplicaciones de grandes modelos de lenguaje (LLM), ocultando el código mediante vulnerabilidades para evadir la revisión, y envenenando el código fuente de componentes de código abierto o comerciales de terceros, provocando problemas de seguridad en la aplicación durante el entrenamiento o la ejecución, lo que afecta a los fabricantes de aplicaciones de modelos posteriores que utilizan estos componentes.
 
-**攻击案例**
+**Casos de ataque**
 
-案例
-描述
+Caso
+Descripción
 
+Caso 1
+Los atacantes pueden manipular el modelo subiendo código malicioso a sitios de código abierto, afectando así diversos ámbitos como inversión, comercio, noticias, etc.
 
+**Riesgos del ataque**
 
+Inserción de puerta trasera: mediante la inyección de código de puerta trasera en los datos de entrenamiento, se permite al atacante controlar o manipular la salida del modelo durante el proceso de inferencia, provocando acceso no autorizado o manipulación de datos.
+Ataques a la cadena de suministro: mediante la inyección de código malicioso en código de código abierto, el atacante puede afectar a toda la cadena de suministro que utiliza dicho código.
+Propagación de noticias falsas: el atacante puede aprovechar esta técnica para modificar contenido, como reseñas de películas o reportajes de noticias, con el fin de difundir información falsa o propaganda.
 
-案例一
-攻击者可以通过上传恶意代码到开源网站来操纵模型，进而影响投资、交易、新闻等各个领域
+**Medidas de mitigación**
 
-**攻击风险**
+Medida de mitigación
+Descripción
 
-后门插入：通过向训练数据中注入后门代码，允许攻击者在推理过程中控制或操纵模型的输出，导致未经授权的访问或数据操纵。
-供应链攻击：通过在开源代码中注入恶意代码，攻击者可以影响使用这些代码的整个供应链。
-虚假新闻宣传：攻击者可以利用这种技术修改内容，如电影评论或新闻报道，以传播虚假信息或宣传。
+Detección de cambios que se desvían del código original
+Identificar e interceptar comportamientos anómalos provocados por modificaciones de código malicioso.
 
-**缓解措施**
+Validación y filtrado de entradas
+Realizar una validación y limpieza estricta de entradas antes de que el código se introduzca en el modelo.
 
-缓解方式
-描述
-
-
-
-
-检测偏离原始代码的变化
-识别和拦截因恶意代码修改引起的异常行为
-
-
-输入验证和过滤
-代码输入到模型之前，进行严格的输入验证和清洗
-
-**参考**
+**Referencias**
 
 https://drive.google.com/file/d/1CTVcliUblX35cWfB49Xjhf8xk-fM3QH1/edit?pli=1
 
 ---
-### LLMs应用源代码窃取
+### Robo del Código Fuente de Aplicaciones LLM
 
-> 风险编号: GAARM.0037
-> 生命周期: 训练阶段
+> Número de riesgo: GAARM.0037
+> Ciclo de vida: Fase de entrenamiento
 
-**攻击概述**
+**Resumen del ataque**
 
-该风险是指模型或大型语言模型（LLMs）的源代码保存不当，或者部署环境存在安全风险，可能会被未经授权的人员攻击到相关部署环境，实现LLMs应用源代码的窃取，从而导致企业技术竞争优势受损的风险。
+Este riesgo se refiere a que el código fuente del modelo o del gran modelo de lenguaje (LLM) no se almacena adecuadamente, o el entorno de despliegue presenta riesgos de seguridad, lo que puede permitir que personal no autorizado ataque el entorno de despliegue correspondiente, logrando el robo del código fuente de la aplicación LLM, provocando así un riesgo de deterioro de la ventaja competitiva tecnológica de la empresa.
 
-**攻击案例**
+**Casos de ataque**
 
-案例
-描述
+Caso
+Descripción
 
+Caso 1
+Se filtró el modelo de lenguaje de 65 mil millones de parámetros de Meta.
 
+Caso 2
+Se filtró una gran cantidad de información sobre GPT-4 de OpenAI, incluyendo la arquitectura del modelo, los costos de entrenamiento, los conjuntos de datos, entre otros.
 
+**Riesgos del ataque**
 
-案例一
-Meta 的 650 亿参数语言模型被泄露
+Pérdida de ventaja tecnológica: los competidores pueden copiar o modificar el código fuente filtrado, debilitando así la ventaja competitiva tecnológica de la empresa.
+Amenaza de ciberseguridad: los atacantes pueden aprovechar el código fuente filtrado para diseñar ciberataques dirigidos, por ejemplo, penetrando el sistema a través de las vulnerabilidades reveladas.
+Riesgo de correos de phishing: el código fuente filtrado puede utilizarse para crear correos de phishing más engañosos que imiten las aplicaciones internas de la empresa, aumentando el riesgo de que los usuarios caigan en el engaño.
 
+**Medidas de mitigación**
 
-案例二
-OpenAI 旗下的 GPT-4 大量模型架构、训练成本、数据集等大量信息被泄露
+Medida de mitigación
+Descripción
 
-**攻击风险**
+Protección mediante cifrado del código
+Utilizar algoritmos de cifrado fuertes para cifrar el código fuente de las aplicaciones LLM, previniendo el acceso no autorizado y la filtración.
 
-技术优势丧失：竞争对手可能复制或修改泄露的源码，从而削弱企业的技术竞争优势。
-网络安全威胁：攻击者可以利用泄露的源码来设计针对性的网络攻击，例如通过揭露的漏洞进行系统渗透。
-钓鱼邮件风险：泄露的源码可能被用来创建更具欺骗性的钓鱼邮件，这些邮件模仿企业的内部应用，增加用户上当受骗的风险。
+Control de permisos de acceso
+Restringir los permisos de acceso al código fuente de las aplicaciones LLM, garantizando que solo el personal autorizado pueda ver o modificar el código.
 
-**缓解措施**
+Monitoreo del modelo
+Monitorear el uso del modelo, garantizando que no se utilice con fines maliciosos.
 
-缓解方式
-描述
-
-
-
-
-代码加密保护
-使用强加密算法对LLMs应用程序的源代码进行加密，防止未授权访问和泄露
-
-
-访问权限控制
-限制对LLMs应用程序源代码的访问权限，确保只有经过授权的人员才能够查看或修改代码
-
-
-模型监控
-监控模型的使用情况，确保其不被用于恶意目的
-
-**参考**
+**Referencias**
 
 https://analyticsindiamag.com/metas-llama-leaked-to-the-public-thanks-to-4chan/
 https://knightcolumbia.org/blog/the-llama-is-out-of-the-bag-should-we-expect-a-tidal-wave-of-disinformation
