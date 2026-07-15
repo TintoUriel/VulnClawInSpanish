@@ -1,32 +1,32 @@
-# 🦞 War Stories — VulnClaw 实战经验库
+# 🦞 War Stories — Biblioteca de experiencias reales de VulnClaw
 
-这里存放 VulnClaw 的真实渗透测试/CTF 解题战报。
+Aquí se guardan los reportes reales de pentesting/resolución de retos CTF de VulnClaw.
 
-每份战报记录完整的攻击链：从信息收集到最终 flag，包括走了哪些弯路、关键突破口在哪里。
+Cada reporte documenta la cadena de ataque completa: desde la recopilación de información hasta la flag final, incluyendo los caminos equivocados que se tomaron y dónde estuvo el punto de quiebre clave.
 
-## 文件命名规则
+## Reglas de nomenclatura de archivos
 
 ```
-YYYY-MM-DD_题目类型_关键词.md
+YYYY-MM-DD_tipo-de-reto_palabras-clave.md
 ```
 
-例如：`2026-04-19_php-deserialization_regex-bypass.md`
+Por ejemplo: `2026-04-19_php-deserialization_regex-bypass.md`
 
-## 战报模板
+## Plantilla de reporte
 
-每份战报应包含：
+Cada reporte debe incluir:
 
-| 区块 | 内容 |
+| Sección | Contenido |
 |------|------|
-| **元信息** | 日期、目标、类型、关键词、轮数、工具链 |
-| **攻击链** | 每一步做了什么、发现了什么 |
-| **关键突破** | 哪一步是决定性的，为什么 |
-| **走的弯路** | 哪些尝试失败了，原因是什么 |
-| **Payload** | 最终可复现的利用代码 |
-| **经验总结** | 可迁移到同类题目的方法论 |
+| **Metainformación** | Fecha, objetivo, tipo, palabras clave, número de rondas, cadena de herramientas |
+| **Cadena de ataque** | Qué se hizo en cada paso y qué se descubrió |
+| **Quiebre clave** | Qué paso fue decisivo y por qué |
+| **Caminos equivocados** | Qué intentos fallaron y por qué |
+| **Payload** | Código de explotación final reproducible |
+| **Resumen de la experiencia** | Metodología transferible a retos similares |
 
-## 战报索引
+## Índice de reportes
 
-| 日期 | 题目 | 类型 | 轮数 | 链接 |
+| Fecha | Reto | Tipo | Rondas | Enlace |
 |------|------|------|------|------|
-| 2026-04-19 | NSSCTF PHP 正则绕过 | Web / PHP / 正则绕过 | 14 | [→](./2026-04-19_php-deserialization_regex-bypass.md) |
+| 2026-04-19 | NSSCTF PHP bypass de expresión regular | Web / PHP / bypass de regex | 14 | [→](./2026-04-19_php-deserialization_regex-bypass.md) |

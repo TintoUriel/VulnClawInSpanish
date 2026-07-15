@@ -1,6 +1,6 @@
 ---
 name: web-security-advanced
-description: Web高级安全测试 — 注入攻击族、协议安全、认证与逻辑漏洞、文件与部署安全、现代Web攻击面，含完整Playbook
+description: Pruebas de seguridad web avanzadas — familia de ataques de inyección, seguridad de protocolos, vulnerabilidades de autenticación y lógica, seguridad de archivos y despliegue, superficie de ataque web moderna, incluye Playbook completo
 routing:
   target_types: [web, api]
   phases: [vuln_discovery, exploitation]
@@ -29,82 +29,83 @@ routing:
   exclude_signals: ["无法重放", "签名阻塞", "重放被阻"]
 ---
 
-# Web 高级安全测试 Skill
+# Skill de Pruebas de Seguridad Web Avanzadas
 
-当目标是 Web 应用、API、网关或浏览器面向服务，且需要系统性的漏洞测试时使用本 Skill。
+Usa este Skill cuando el objetivo sea una aplicación web, API, gateway o servicio orientado a navegador, y se requieran pruebas sistemáticas de vulnerabilidades.
 
-**前置条件**：如果请求仍由客户端控制且重放未稳定，先使用 `client-reverse` Skill。
+**Requisito previo**: si la solicitud todavía está controlada por el cliente y la repetición (replay) no es estable, usa primero el Skill `client-reverse`.
 
-## CTF 场景路由
+## Enrutamiento de escenarios CTF
 
-> 当目标为 CTF 题目（已知有 flag，需要绕过特定过滤）时，优先使用 `ctf-web` Skill 获取具体绕过值和 payload：
+> Cuando el objetivo sea un reto de CTF (se sabe que hay una flag y se necesita eludir un filtro específico), utiliza primero el Skill `ctf-web` para obtener valores de bypass y payloads concretos:
 
-| CTF 场景 | 路由到 ctf-web | 参考文档 |
+| Escenario CTF | Enrutar a ctf-web | Documento de referencia |
 |---------|---------------|---------|
-| PHP 弱比较/类型绕过 | `ctf-web` | `references/php-bypass-cheatsheet.md` |
-| 命令注入空格绕过 | `ctf-web` | `references/command-injection-bypass.md` |
-| eval 回显/无回显 | `ctf-web` | `references/eval-and-rce-techniques.md` |
-| PHP 代码审计 | `ctf-web` | `references/php-code-audit-checklist.md` |
-| SSTI 注入链 | `ctf-web` | `references/ssti-injection-chains.md` |
-| 反序列化利用链 | `ctf-web` | `references/deserialization-playbook.md` |
-| 文件上传 → RCE | 本 Skill | `references/web-playbook-08-file-vulnerabilities.md` |
+| Comparación débil de PHP / bypass de tipos | `ctf-web` | `references/php-bypass-cheatsheet.md` |
+| Bypass de espacios en inyección de comandos | `ctf-web` | `references/command-injection-bypass.md` |
+| eval con/sin eco de salida | `ctf-web` | `references/eval-and-rce-techniques.md` |
+| Auditoría de código PHP | `ctf-web` | `references/php-code-audit-checklist.md` |
+| Cadenas de inyección SSTI | `ctf-web` | `references/ssti-injection-chains.md` |
+| Cadenas de explotación de deserialización | `ctf-web` | `references/deserialization-playbook.md` |
+| Subida de archivos → RCE | Este Skill | `references/web-playbook-08-file-vulnerabilities.md` |
 
-**本 Skill 侧重渗透测试方法论**，CTF 实战绕过值和 payload 模板请参考 `ctf-web`。
+**Este Skill se centra en la metodología de pentesting**; para valores de bypass y plantillas de payload de CTF en la práctica, consulta `ctf-web`.
 
-## 场景路由
+## Enrutamiento de escenarios
 
-| 攻击面类型 | 首选参考 |
+| Tipo de superficie de ataque | Referencia preferida |
 |-----------|---------|
-| 参数注入（SQLi/XSS/命令执行/SSTI/XXE） | `references/web-injection.md` |
-| 协议安全（CORS/GraphQL/WebSocket/OAuth/请求走私） | `references/web-modern-protocols.md` |
-| 认证与逻辑（IDOR/越权/支付/密码重置/鉴权绕过） | `references/web-logic-auth.md` |
-| 文件与基础设施（上传/遍历/包含/部署/缓存/CDN/云） | `references/web-file-infra.md` |
-| 部署安全 | `references/web-deployment-security.md` |
+| Inyección de parámetros (SQLi/XSS/ejecución de comandos/SSTI/XXE) | `references/web-injection.md` |
+| Seguridad de protocolos (CORS/GraphQL/WebSocket/OAuth/contrabando de solicitudes) | `references/web-modern-protocols.md` |
+| Autenticación y lógica (IDOR/control de acceso indebido/pagos/restablecimiento de contraseña/bypass de autorización) | `references/web-logic-auth.md` |
+| Archivos e infraestructura (subida/recorrido de directorios/inclusión/despliegue/caché/CDN/nube) | `references/web-file-infra.md` |
+| Seguridad de despliegue | `references/web-deployment-security.md` |
 
-## 测试流程
+## Flujo de pruebas
 
-### 1. 输入验证测试
-- SQL 注入：布尔/时间/报错/Union/堆叠
-- XSS：反射/存储/DOM/CSP 绕过
-- 命令注入：分隔符绕过、编码绕过
-- SSTI：模板引擎识别 + RCE 链
-- XXE：实体注入、OOB 数据外带
-- 反序列化：Java/PHP/Python 链
+### 1. Pruebas de validación de entrada
+- Inyección SQL: booleana/temporal/basada en errores/Union/apilada (stacked queries)
+- XSS: reflejado/almacenado/DOM/bypass de CSP
+- Inyección de comandos: bypass de separadores, bypass de codificación
+- SSTI: identificación del motor de plantillas + cadena de RCE
+- XXE: inyección de entidades, exfiltración de datos fuera de banda (OOB)
+- Deserialización: cadenas de Java/PHP/Python
 
-### 2. 认证与会话测试
-- 默认凭据、暴力破解
-- 会话管理缺陷（固定/劫持/不安全 Cookie）
-- JWT 安全（算法篡改/密钥爆破/none算法）
-- OAuth/OIDC 配置缺陷
-- MFA 绕过
+### 2. Pruebas de autenticación y sesión
+- Credenciales por defecto, fuerza bruta
+- Defectos de gestión de sesión (fijación/secuestro/cookies inseguras)
+- Seguridad de JWT (manipulación de algoritmo/fuerza bruta de clave/algoritmo "none")
+- Defectos de configuración de OAuth/OIDC
+- Bypass de MFA
 
-### 3. 逻辑漏洞测试
-- 越权访问（水平/垂直）
-- 业务逻辑绕过（支付/优惠券/投票）
-- 竞态条件
-- IDOR（不安全直接对象引用）
+### 3. Pruebas de vulnerabilidades de lógica
+- Acceso no autorizado (horizontal/vertical)
+- Bypass de lógica de negocio (pagos/cupones/votaciones)
+- Condiciones de carrera
+- IDOR (referencia directa a objetos insegura)
 
-### 4. 协议安全测试
-- CORS 配置错误
-- GraphQL 内省/注入
-- WebSocket 认证与注入
-- HTTP 请求走私
-- SSRF（内网探测/云元数据）
+### 4. Pruebas de seguridad de protocolos
+- Configuración incorrecta de CORS
+- Introspección/inyección en GraphQL
+- Autenticación e inyección en WebSocket
+- Contrabando de solicitudes HTTP (HTTP request smuggling)
+- SSRF (sondeo de red interna/metadatos de nube)
 
-### 5. 文件与部署安全
-- 文件上传绕过
-- 路径穿越
+### 5. Seguridad de archivos y despliegue
+- Bypass de subida de archivos
+- Recorrido de rutas (path traversal)
 - LFI/RFI
-- CDN/缓存投毒
-- 供应链攻击
-- 云安全配置
+- Envenenamiento de CDN/caché
+- Ataques a la cadena de suministro
+- Configuración de seguridad en la nube
 
-## 参考文档
+## Documentos de referencia
 
-- `references/web-injection.md` — 注入攻击详细参考
-- `references/web-modern-protocols.md` — 现代协议安全
-- `references/web-logic-auth.md` — 认证与逻辑漏洞
-- `references/web-file-infra.md` — 文件与基础设施安全
-- `references/web-deployment-security.md` — 部署安全
-- `references/web-ai-attack-map.md` — Web 与 AI 攻击映射
-- `references/web-playbook-*.md` — 各专项 Playbook（23 个）
+- `references/web-injection.md` — Referencia detallada de ataques de inyección
+- `references/web-modern-protocols.md` — Seguridad de protocolos modernos
+- `references/web-logic-auth.md` — Vulnerabilidades de autenticación y lógica
+- `references/web-file-infra.md` — Seguridad de archivos e infraestructura
+- `references/web-deployment-security.md` — Seguridad de despliegue
+- `references/web-ai-attack-map.md` — Mapa de ataques Web y IA
+- `references/web-playbook-*.md` — Playbooks especializados (23)
+</content>

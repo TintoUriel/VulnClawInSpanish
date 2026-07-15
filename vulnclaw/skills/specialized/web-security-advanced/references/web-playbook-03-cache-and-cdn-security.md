@@ -1,53 +1,53 @@
-# 缓存与CDN安全
+# Seguridad de caché y CDN
 English: Cache & CDN Security
 - Entry Count: 3
 - Use this file to shortlist relevant payloads, then open the linked source markdown for the full workflow and commands.
-## 缓存投毒
+## Envenenamiento de caché
 - ID: cache-poisoning
 - Difficulty: advanced
-- Subcategory: 缓存投毒
+- Subcategory: Envenenamiento de caché
 - Tags: cache, poisoning, web-cache
 - Original Extracted Source: original extracted web-security-wiki source/cache-poisoning.md
 Description:
-Web缓存投毒攻击
+Ataque de envenenamiento de caché web (Web Cache Poisoning)
 Prerequisites:
-- 目标使用缓存
-- 缓存键配置不当
+- El objetivo usa caché
+- La configuración de la clave de caché es inadecuada
 Execution Outline:
-1. 探测缓存
-2. 未键入头
-3. 缓存投毒
+1. Sondear la caché
+2. Cabeceras no incluidas en la clave (unkeyed headers)
+3. Envenenamiento de caché
 4. Fat GET
-## 缓存欺骗
+## Engaño de caché
 - ID: cache-deception
 - Difficulty: intermediate
 - Subcategory: Deception
 - Tags: cache, deception, auth
 - Original Extracted Source: original extracted web-security-wiki source/cache-deception.md
 Description:
-利用Web缓存和服务器路径解析的差异，诱导CDN/缓存层缓存包含敏感信息的动态页面
+Explotar las diferencias entre la caché web y la resolución de rutas del servidor para inducir a la capa de CDN/caché a cachear páginas dinámicas que contienen información sensible
 Prerequisites:
-- 目标使用CDN或反向代理缓存
-- 路径解析存在差异(后端忽略路径后缀)
-- 缓存策略基于URL扩展名
+- El objetivo usa CDN o caché de proxy inverso
+- Existe una diferencia en la resolución de rutas (el backend ignora el sufijo de la ruta)
+- La política de caché se basa en la extensión de la URL
 Execution Outline:
-1. 探测缓存行为
-2. 路径混淆缓存欺骗
-3. 高级缓存欺骗变体
-4. 完整攻击流程验证
-## CDN绕过
+1. Sondear el comportamiento de la caché
+2. Engaño de caché mediante confusión de rutas
+3. Variantes avanzadas de engaño de caché
+4. Verificación del flujo de ataque completo
+## Bypass de CDN
 - ID: cdn-bypass
 - Difficulty: intermediate
 - Subcategory: CDN
 - Tags: cdn, bypass, recon
 - Original Extracted Source: original extracted web-security-wiki source/cdn-bypass.md
 Description:
-绕过CDN查找真实IP
+Eludir el CDN para encontrar la IP real
 Prerequisites:
-- 目标使用CDN
+- El objetivo usa CDN
 Execution Outline:
-1. 历史DNS
-2. 邮件头
-3. DNS历史与证书透明度查询
-4. 子域名与相关服务探测真实IP
-
+1. DNS histórico
+2. Cabeceras de correo electrónico
+3. Consulta de historial DNS y transparencia de certificados
+4. Sondeo de subdominios y servicios relacionados para encontrar la IP real
+</content>

@@ -1,50 +1,50 @@
-# 开放重定向
+# Redirección abierta
 English: Open Redirect
 - Entry Count: 3
 - Use this file to shortlist relevant payloads, then open the linked source markdown for the full workflow and commands.
-## 基础开放重定向
+## Redirección abierta básica
 - ID: redirect-basic
 - Difficulty: beginner
-- Subcategory: 基础
+- Subcategory: Básico
 - Tags: redirect, url, phishing
 - Original Extracted Source: original extracted web-security-wiki source/redirect-basic.md
 Description:
-URL跳转漏洞利用
+Explotación de vulnerabilidad de salto de URL
 Prerequisites:
-- 目标参数控制跳转地址
+- El parámetro objetivo controla la dirección de salto
 Execution Outline:
-1. 直接跳转
-2. 绕过验证
-3. 斜杠绕过
-## 重定向绕过
+1. Salto directo
+2. Bypass de validación
+3. Bypass con barra
+## Bypass de redirección
 - ID: redirect-bypass
 - Difficulty: intermediate
 - Subcategory: Bypass
 - Tags: redirect, bypass
 - Original Extracted Source: original extracted web-security-wiki source/redirect-bypass.md
 Description:
-开放重定向绕过技巧
+Técnicas de bypass para redirección abierta
 Prerequisites:
-- 存在重定向参数
+- Existe un parámetro de redirección
 Execution Outline:
-1. URL编码
-2. @符号
-3. 反斜杠
-## 重定向到SSRF
+1. Codificación de URL
+2. Símbolo @
+3. Barra invertida
+## Redirección a SSRF
 - ID: redirect-ssrf
 - Difficulty: intermediate
 - Subcategory: SSRF
 - Tags: redirect, ssrf
 - Original Extracted Source: original extracted web-security-wiki source/redirect-ssrf.md
 Description:
-利用开放重定向漏洞作为跳板将SSRF探测引导到内部网络，绕过SSRF的URL白名单/黑名单限制
+Usar la vulnerabilidad de redirección abierta como trampolín para dirigir el sondeo SSRF hacia la red interna, eludiendo las restricciones de lista blanca/negra de URL del SSRF
 Prerequisites:
-- 目标存在开放重定向(Open Redirect)漏洞
-- 目标存在SSRF功能点(URL参数/Webhook等)
-- SSRF过滤仅检查初始URL而不跟踪重定向
+- El objetivo tiene una vulnerabilidad de redirección abierta (Open Redirect)
+- El objetivo tiene un punto funcional de SSRF (parámetro URL/Webhook, etc.)
+- El filtro SSRF solo verifica la URL inicial y no sigue la redirección
 Execution Outline:
-1. 识别开放重定向点
-2. 通过重定向绕过SSRF过滤
-3. 短链接和DNS重绑定辅助
-4. 完整利用链: 重定向→SSRF→内网探测
-
+1. Identificar el punto de redirección abierta
+2. Eludir el filtro SSRF mediante redirección
+3. Uso auxiliar de acortadores de URL y DNS rebinding
+4. Cadena de explotación completa: redirección → SSRF → sondeo de red interna
+</content>

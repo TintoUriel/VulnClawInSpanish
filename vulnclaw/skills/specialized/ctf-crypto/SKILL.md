@@ -1,47 +1,47 @@
 ---
 name: ctf-crypto
-description: CTF密码学攻击知识库 — RSA攻击（小指数/共模/Wiener/Coppersmith）、AES攻击（Padding Oracle/ECB字节翻转/GCM nonce重用）、ECC攻击、LFSR/LCG/PRNG攻击、古典密码、LWE格攻击
+description: Base de conocimiento de ataques criptográficos para CTF — ataques RSA (exponente pequeño/módulo común/Wiener/Coppersmith), ataques AES (Padding Oracle/volteo de bytes ECB/reutilización de nonce en GCM), ataques ECC, ataques LFSR/LCG/PRNG, cifrados clásicos, ataques de retículos LWE
 routing:
   target_types: [ctf, crypto]
   task_types: [ctf, crypto]
 ---
 
-# CTF 密码学攻击知识库
+# Base de conocimiento de ataques criptográficos para CTF
 
-针对 CTF Crypto 题目的实战攻击知识库，提供**具体攻击参数、数学公式、Python 代码片段**。
+Base de conocimiento de ataques prácticos para retos de CTF Crypto, que proporciona **parámetros de ataque concretos, fórmulas matemáticas y fragmentos de código Python**.
 
-**与 `crypto-toolkit` 的区别**：
-- `crypto-toolkit` → 编解码操作工具（base64 解码、MD5 哈希、AES 加解密）
-- `ctf-crypto` → 密码学攻击知识（RSA 小指数攻击怎么做、Padding Oracle 怎么利用）
+**Diferencia con `crypto-toolkit`**:
+- `crypto-toolkit` → herramientas de operaciones de codificación/decodificación (decodificación base64, hash MD5, cifrado/descifrado AES)
+- `ctf-crypto` → conocimiento de ataques criptográficos (cómo realizar un ataque de exponente pequeño en RSA, cómo explotar un Padding Oracle)
 
-## 核心原则
+## Principios fundamentales
 
-1. **先识别加密体系** — 看密钥长度、加密模式、已知量，确定攻击方向
-2. **工具验证** — 使用 `python_execute` 执行攻击代码，用 `crypto_decode` 做辅助编解码
-3. **参数敏感** — 密码学攻击对参数极其敏感，必须精确计算
+1. **Identificar primero el sistema criptográfico** — observar la longitud de la clave, el modo de cifrado y las cantidades conocidas para determinar la dirección del ataque
+2. **Verificación con herramientas** — usar `python_execute` para ejecutar código de ataque, y `crypto_decode` como apoyo de codificación/decodificación
+3. **Sensibilidad a los parámetros** — los ataques criptográficos son extremadamente sensibles a los parámetros, deben calcularse con precisión
 
-## 场景路由
+## Enrutamiento de escenarios
 
-| 场景 | 参考文档 | 核心攻击 |
+| Escenario | Documento de referencia | Ataques principales |
 |------|---------|---------|
-| RSA 攻击 | `rsa-attacks-cheatsheet.md` | 小e/共模/Wiener/Pollard/Fermat/Coppersmith |
-| AES/分组密码攻击 | `aes-and-block-cipher-attacks.md` | ECB翻转/Padding Oracle/GCM nonce重用 |
-| ECC 攻击 | `ecc-attacks-cheatsheet.md` | 小子群/invalid curve/Smart/Pohlig-Hellman |
-| PRNG/流密码攻击 | `prng-and-stream-cipher-attacks.md` | MT19937/LCG/LFSR/RC4 |
-| 古典密码 | `classic-cipher-attacks.md` | Vigenere/XOR频率分析/OTP重用 |
-| 格攻击 | `lattice-and-lwe-attacks.md` | LLL/BKZ/HNP/LWE embedding |
+| Ataques RSA | `rsa-attacks-cheatsheet.md` | e pequeño/módulo común/Wiener/Pollard/Fermat/Coppersmith |
+| Ataques AES/cifrado por bloques | `aes-and-block-cipher-attacks.md` | Volteo ECB/Padding Oracle/reutilización de nonce en GCM |
+| Ataques ECC | `ecc-attacks-cheatsheet.md` | Subgrupo pequeño/curva inválida/Smart/Pohlig-Hellman |
+| Ataques PRNG/cifrado de flujo | `prng-and-stream-cipher-attacks.md` | MT19937/LCG/LFSR/RC4 |
+| Cifrados clásicos | `classic-cipher-attacks.md` | Vigenère/análisis de frecuencia XOR/reutilización de OTP |
+| Ataques de retículos | `lattice-and-lwe-attacks.md` | LLL/BKZ/HNP/embedding LWE |
 
-## 快速判题指南
+## Guía rápida de identificación
 
-| 题目特征 | 可能攻击 | 推荐参考 |
+| Característica del reto | Ataque probable | Referencia recomendada |
 |---------|---------|---------|
-| 给了 n, e, c | RSA | rsa-attacks-cheatsheet.md |
-| e=3 或 e 很小 | RSA 小指数攻击 | rsa-attacks-cheatsheet.md |
-| 多组 (n, e, c) 且 n 相同 | RSA 共模攻击 | rsa-attacks-cheatsheet.md |
-| n 很大但 e 很大 | Wiener 攻击 | rsa-attacks-cheatsheet.md |
-| AES-CBC + 解密 oracle | Padding Oracle | aes-and-block-cipher-attacks.md |
-| AES-ECB + 可控明文 | ECB 字节翻转 | aes-and-block-cipher-attacks.md |
-| 椭圆曲线参数 | ECC 攻击 | ecc-attacks-cheatsheet.md |
-| 给了随机数序列 | PRNG 预测 | prng-and-stream-cipher-attacks.md |
-| 给了密文和部分明文 | XOR/流密码 | classic-cipher-attacks.md |
-| 矩阵/向量运算 | 格攻击 | lattice-and-lwe-attacks.md |
+| Se dan n, e, c | RSA | rsa-attacks-cheatsheet.md |
+| e=3 o e muy pequeño | Ataque de exponente pequeño RSA | rsa-attacks-cheatsheet.md |
+| Varios grupos (n, e, c) con el mismo n | Ataque de módulo común RSA | rsa-attacks-cheatsheet.md |
+| n muy grande pero e muy grande | Ataque de Wiener | rsa-attacks-cheatsheet.md |
+| AES-CBC + oracle de descifrado | Padding Oracle | aes-and-block-cipher-attacks.md |
+| AES-ECB + texto plano controlable | Volteo de bytes ECB | aes-and-block-cipher-attacks.md |
+| Parámetros de curva elíptica | Ataques ECC | ecc-attacks-cheatsheet.md |
+| Se da una secuencia de números aleatorios | Predicción de PRNG | prng-and-stream-cipher-attacks.md |
+| Se dan el criptograma y parte del texto plano | XOR/cifrado de flujo | classic-cipher-attacks.md |
+| Operaciones con matrices/vectores | Ataques de retículos | lattice-and-lwe-attacks.md |
