@@ -1,551 +1,550 @@
-# AI基座安全 - 部署阶段
+# Seguridad de la base de IA - Fase de despliegue
 
-> 来源: AISS绿盟大模型安全智链社区 | 拆自 ai-baseline-security.md
-> 阶段: 部署阶段（容器漏洞/云平台/供应链）
+> Fuente: Comunidad de Seguridad de Grandes Modelos AISS NSFOCUS | Extraído de ai-baseline-security.md
+> Fase: Fase de despliegue (vulnerabilidades de contenedores/plataforma en la nube/cadena de suministro)
 
-## 部署阶段
+## Fase de despliegue
 
-### CI&CD流程攻击
+### Ataque al flujo de CI&CD
 
-> 风险编号: GAARM.0004
-> 生命周期: 部署阶段
+> Número de riesgo: GAARM.0004
+> Ciclo de vida: Fase de despliegue
 
-**攻击概述**
+**Descripción del ataque**
 
-在大模型开发的全生命周期中，CI/CD流程负责将模型从开发环境推送到生产环境，自动化的将LLM大模型进行部署，并负责后续的更新与维护。CI&CD流程攻击是指，在CI/CD将模型推送到生产环境的过程中，由于CI/CD基础设施的漏洞、第三方工具的不可靠等，攻击者可以通过这些安全漏洞攻击CI/CD的流程，例如在其中提交恶意代码、污染依赖包等，导致模型被非法篡改、敏感信息泄露等严重后果。
+En todo el ciclo de vida del desarrollo de grandes modelos, el flujo de CI/CD es responsable de llevar el modelo del entorno de desarrollo al entorno de producción, desplegando automáticamente el gran modelo de LLM y encargándose de las actualizaciones y el mantenimiento posteriores. El ataque al flujo de CI&CD se refiere a que, durante el proceso en que CI/CD lleva el modelo al entorno de producción, debido a vulnerabilidades en la infraestructura de CI/CD, la poca fiabilidad de herramientas de terceros, etc., un atacante puede aprovechar estas vulnerabilidades de seguridad para atacar el flujo de CI/CD, por ejemplo, enviando código malicioso o contaminando paquetes de dependencias, provocando consecuencias graves como la alteración ilegítima del modelo o la filtración de información sensible.
 
   
 
-大模型开发生命周期CI/CD流程
+Flujo de CI/CD del ciclo de vida de desarrollo de grandes modelos
 
-**攻击案例**
+**Casos de ataque**
 
-案例
-描述
-
-
-
-
-案例一
-通过钓鱼手段获取开发人员或运维人员的凭证，进而在CI/CD流程中提交恶意代码。
-
-
-案例二
-利用服务器漏洞，如Gitlab、Jenkins等CI/CD基础设施的漏洞，进行攻击。
-
-
-案例三
-针对第三方工具和应用程序依赖性进行攻击，如通过污染依赖包或伪造依赖包名称上传恶意包到开源中心仓。
-
-**攻击风险**
-
-虚拟环境污染：持续集成环境中的虚拟环境或容器受到攻击，攻击者可能会篡改环境中的依赖项或运行时配置，以影响模型训练和部署的结果。
-构建和部署流程被篡改：攻击者可能尝试修改自动化构建和部署流程，以在模型部署过程中插入恶意代码或操作。
-敏感信息泄露：持续集成/持续交付环境中存储有敏感信息（如访问凭证、配置文件、密钥等），一旦被攻击者获取，可能导致敏感信息泄露和隐私风险。
-拒绝服务攻击：攻击者可能试图通过拒绝服务（DoS）攻击来使持续集成/持续交付系统无法正常工作，导致模型开发和部署过程中断或延迟。
-未经授权的模型访问：模型部署过程受到攻击，攻击者可能通过漏洞获取未经授权的访问权限，从而对模型进行非法操作或篡改。
-
-**缓解措施**
-
-缓解方式
-描述
+Caso
+Descripción
 
 
 
 
-加强访问控制和权限管理
-限制对持续集成/持续交付系统和相关环境的访问权限，确保只有授权人员可以访问关键资源
+Caso 1
+Obtener credenciales de desarrolladores o personal de operaciones mediante técnicas de phishing, para posteriormente enviar código malicioso en el flujo de CI/CD.
 
 
-安全更新与审计
-定期更新和审计模型部署软件以修复漏洞并增强安全性
+Caso 2
+Aprovechar vulnerabilidades de servidores, como vulnerabilidades en infraestructura de CI/CD como GitLab o Jenkins, para llevar a cabo el ataque.
 
 
-加强监控和日志记录
-及时发现异常活动和攻击行为，及时采取响应措施，以减少潜在的安全风险和损失
+Caso 3
+Atacar la dependencia de herramientas y aplicaciones de terceros, por ejemplo, contaminando paquetes de dependencias o falsificando nombres de paquetes de dependencias para subir paquetes maliciosos a repositorios centrales de código abierto.
 
-**参考**
+**Riesgos del ataque**
+
+Contaminación del entorno virtual: el entorno virtual o los contenedores del entorno de integración continua son atacados, y el atacante puede alterar las dependencias o la configuración del runtime del entorno para afectar los resultados del entrenamiento y despliegue del modelo.
+Alteración del flujo de construcción y despliegue: el atacante puede intentar modificar el flujo automatizado de construcción y despliegue para insertar código u operaciones maliciosas durante el proceso de despliegue del modelo.
+Filtración de información sensible: el entorno de integración continua/entrega continua almacena información sensible (como credenciales de acceso, archivos de configuración, claves, etc.); una vez obtenida por el atacante, puede provocar la filtración de información sensible y riesgos de privacidad.
+Ataque de denegación de servicio: el atacante puede intentar, mediante un ataque de denegación de servicio (DoS), impedir el funcionamiento normal del sistema de integración/entrega continua, provocando la interrupción o el retraso del proceso de desarrollo y despliegue del modelo.
+Acceso no autorizado al modelo: el proceso de despliegue del modelo es atacado, y el atacante puede, aprovechando una vulnerabilidad, obtener acceso no autorizado, realizando operaciones ilegítimas o alterando el modelo.
+
+**Medidas de mitigación**
+
+Medida de mitigación
+Descripción
+
+
+
+
+Reforzar el control de acceso y la gestión de permisos
+Limitar los permisos de acceso al sistema de integración/entrega continua y a los entornos relacionados, garantizando que solo el personal autorizado pueda acceder a los recursos clave.
+
+
+Actualizaciones y auditorías de seguridad
+Actualizar y auditar periódicamente el software de despliegue del modelo para corregir vulnerabilidades y reforzar la seguridad.
+
+
+Reforzar el monitoreo y el registro
+Detectar oportunamente actividades anómalas y comportamientos de ataque, tomando medidas de respuesta oportunas para reducir posibles riesgos de seguridad y pérdidas.
+
+**Referencias**
 
 https://github.com/knownsec/KCon/blob/master/2023/CICD%E6%94%BB%E5%87%BB%E5%9C%BA%E6%99%AF.pdf
 
 ---
-### 云平台多租户隔离失效
+### Fallo del aislamiento multiinquilino en la plataforma en la nube
 
-> 风险编号: GAARM.0003.001
-> 生命周期: 部署阶段
+> Número de riesgo: GAARM.0003.001
+> Ciclo de vida: Fase de despliegue
 
-**攻击概述**
+**Descripción del ataque**
 
-在多租户架构的云平台中，每个租户应拥有独立的操作环境和数据存储，确保用户行为和数据的相互隔离。隔离失效可能由设计缺陷、配置错误等引起，随着高价值算力服务的普及，攻击者可能借此突破租户边界，对其他租户的数据进行访问和篡改，甚至执行恶意操作，进而导致不同租户（用户或组织）之间的数据和资源无法得到有效保护，引发的一系列安全问题。
+En una plataforma en la nube con arquitectura multiinquilino, cada inquilino debe contar con un entorno operativo y un almacenamiento de datos independientes, garantizando el aislamiento mutuo entre el comportamiento de los usuarios y sus datos. El fallo de aislamiento puede deberse a defectos de diseño, errores de configuración, etc. Con la creciente adopción de servicios de cómputo de alto valor, un atacante puede aprovechar esto para romper los límites entre inquilinos, accediendo y alterando datos de otros inquilinos, e incluso ejecutando operaciones maliciosas, provocando que los datos y recursos de distintos inquilinos (usuarios u organizaciones) no puedan protegerse eficazmente, generando una serie de problemas de seguridad.
 
-**攻击案例**
+**Casos de ataque**
 
-案例
-描述
-
-
-
-
-案例一
-本文对“AI 模型是否在隔离环境中运行”进行了研究，Wiz利用AWS中IMDS元数据服务，完成Amazon EKS权限提升后接管整个集群服务，在EKS集群内进行横向移动，进一步可以进行跨租户访问并导致敏感数据泄露
-
-**攻击风险**
-
-数据泄露：多租户隔离失效可能导致租户之间的数据混淆或泄露，这可能包括敏感信息或个人身份信息。
-信任度下降：安全事件可能削弱用户对云服务提供商的信任。
-
-**缓解措施**
-
-缓解方式
-描述
+Caso
+Descripción
 
 
 
 
-强化访问控制
-通过访问控制列表（ACLs）、角色基础访问控制（RBAC）等权限管控机制，强化对系统资源的访问控制
+Caso 1
+Este artículo investiga si "el modelo de IA se ejecuta en un entorno aislado". Wiz aprovechó el servicio de metadatos IMDS de AWS para escalar privilegios en Amazon EKS, tomando el control de todo el clúster, moviéndose lateralmente dentro del clúster EKS, y logrando posteriormente un acceso entre inquilinos que provocó la filtración de datos sensibles.
+
+**Riesgos del ataque**
+
+Filtración de datos: el fallo del aislamiento multiinquilino puede provocar la mezcla o filtración de datos entre inquilinos, lo que puede incluir información sensible o información de identidad personal.
+Disminución de la confianza: los incidentes de seguridad pueden debilitar la confianza del usuario en el proveedor de servicios en la nube.
+
+**Medidas de mitigación**
+
+Medida de mitigación
+Descripción
 
 
-资源监控
-监控资源使用情况，及时发现异常行为，如资源抢占或滥用
 
-**参考**
+
+Reforzar el control de acceso
+Reforzar el control de acceso a los recursos del sistema mediante mecanismos de control de permisos como listas de control de acceso (ACL) y control de acceso basado en roles (RBAC).
+
+
+Monitoreo de recursos
+Monitorear el uso de recursos, detectando oportunamente comportamientos anómalos como el acaparamiento o abuso de recursos.
+
+**Referencias**
 
 https://xie.infoq.cn/article/536a3e7e776eb32b38d1a9747
 https://www.helloaliyun.com/tutorial/1039.html
 https://support.huaweicloud.com/usermanual-gaussdbformysql/gaussdbformysql_05_0347.html
 
 ---
-### 云平台安全漏洞
+### Vulnerabilidades de seguridad de la plataforma en la nube
 
-> 风险编号: GAARM.005
-> 生命周期: 部署阶段
+> Número de riesgo: GAARM.005
+> Ciclo de vida: Fase de despliegue
 
-**攻击概述**
+**Descripción del ataque**
 
-大模型应用由于对算力的高需求，通常需要依托云平台环境来完成训练和推理任务，因此云平台的安全性对于大模型的安全至关重要。但是由于云平台的技术缺陷、技术漏洞、缺乏多重身份验证等原因导致的安全隐患，攻击者可以利用这些安全问题，对部署在云上的大模型进行恶意攻击，例如读取敏感数据、非法窃取并使用账号凭证等，给平台带来一系列损失，包括但不限于数据泄露、服务中断、恶意代码执行等。这些攻击不仅影响大模型的安全性，还可能威胁到使用该云服务的其他用户。
+Debido a la alta demanda de capacidad de cómputo, las aplicaciones de grandes modelos suelen depender del entorno de plataformas en la nube para completar tareas de entrenamiento e inferencia; por lo tanto, la seguridad de la plataforma en la nube es crucial para la seguridad del gran modelo. Sin embargo, debido a defectos técnicos de la plataforma en la nube, vulnerabilidades técnicas, falta de autenticación multifactor, entre otras causas de riesgos de seguridad, un atacante puede aprovechar estos problemas de seguridad para llevar a cabo ataques maliciosos contra grandes modelos desplegados en la nube, por ejemplo, leyendo datos sensibles o robando y usando ilegítimamente credenciales de cuenta, causando a la plataforma una serie de pérdidas que incluyen, entre otras, filtración de datos, interrupción del servicio y ejecución de código malicioso. Estos ataques no solo afectan la seguridad del gran modelo, sino que también pueden amenazar a otros usuarios que usan ese servicio en la nube.
 
-**攻击案例**
+**Casos de ataque**
 
-案例
-描述
-
-
-
-
-案例一
-Amazon SageMaker Notebook服务发现CSRF漏洞，攻击者可能利用漏洞读取敏感数据并在客户环境中执行任意操作
-
-
-案例二
-由于Laravel 版本 ( CVE-2021-3129 ) 的系统存在安全隐患，易受攻击，导致有攻击者利用从Laravel窃取到的AWS凭证，非法探测该凭证可以使用的云端托管模型服务，受害者每天损失可超46000美元
-
-**攻击风险**
-
-数据泄露：由于云应用程序的安全漏洞、不安全的API等原因，可能导致敏感信息被未授权的第三方访问或公开，造成严重的隐私和合规性问题。
-模型应用未授权访问：云平台安全漏洞可能导致用户部署的模型应用出现未授权访问的风险。
-
-**缓解措施**
-
-缓解方式
-描述
+Caso
+Descripción
 
 
 
 
-严格的访问控制
-确保只有经过身份验证和授权的用户可以访问API端点
+Caso 1
+Se descubrió una vulnerabilidad CSRF en el servicio Amazon SageMaker Notebook; un atacante podría aprovechar la vulnerabilidad para leer datos sensibles y ejecutar operaciones arbitrarias en el entorno del cliente.
 
 
-最小权限原则
-实施最小权限原则，确保用户和进程仅拥有完成其任务所必需的访问权限
+Caso 2
+Debido a un riesgo de seguridad en el sistema de la versión de Laravel (CVE-2021-3129), vulnerable a ataques, un atacante aprovechó credenciales de AWS robadas de Laravel para sondear ilegítimamente los servicios de modelos alojados en la nube a los que dichas credenciales tenían acceso; la víctima llegó a perder más de 46,000 dólares por día.
 
-**参考**
+**Riesgos del ataque**
+
+Filtración de datos: debido a vulnerabilidades de seguridad de aplicaciones en la nube, API inseguras, entre otras causas, información sensible puede ser accedida o hecha pública por terceros no autorizados, provocando graves problemas de privacidad y cumplimiento.
+Acceso no autorizado a la aplicación del modelo: las vulnerabilidades de seguridad de la plataforma en la nube pueden provocar riesgos de acceso no autorizado en las aplicaciones de modelo desplegadas por el usuario.
+
+**Medidas de mitigación**
+
+Medida de mitigación
+Descripción
+
+
+
+
+Control de acceso estricto
+Garantizar que solo usuarios autenticados y autorizados puedan acceder a los endpoints de la API.
+
+
+Principio de mínimo privilegio
+Aplicar el principio de mínimo privilegio, garantizando que usuarios y procesos solo tengan los permisos de acceso necesarios para completar su tarea.
+
+**Referencias**
 
 https://developer.aliyun.com/article/1430094
 
 ---
-### 利用不安全系统配置
+### Explotación de configuración de sistema insegura
 
-> 风险编号: GAARM.0003
-> 生命周期: 部署阶段
+> Número de riesgo: GAARM.0003
+> Ciclo de vida: Fase de despliegue
 
-**攻击概述**
+**Descripción del ataque**
 
-该风险是指模型部署所在的基础设施环境下，攻击者针对ML模型部署系统、部署集群环境、部署容器环境、镜像推送管理环境等存在一系列的不安全系统配置，实施针对模型基座环境的各种攻击行为。
-
-
-未授权访问：配置不当可能导致敏感端口暴露或认证机制弱化，使得未授权用户能够访问系统资源；
+Este riesgo se refiere a que, en el entorno de infraestructura donde se despliega el modelo, existe una serie de configuraciones de sistema inseguras en el sistema de despliegue del modelo de ML, el entorno del clúster de despliegue, el entorno de contenedores de despliegue, el entorno de gestión de envío de imágenes, entre otros, y el atacante lleva a cabo diversos comportamientos de ataque contra el entorno base del modelo aprovechando dichas configuraciones.
 
 
-容器安全风险：不安全的容器配置可能包括不必要的权限、敏感文件挂载、或容器逃逸漏洞；
+Acceso no autorizado: una configuración inadecuada puede exponer puertos sensibles o debilitar los mecanismos de autenticación, permitiendo que usuarios no autorizados accedan a los recursos del sistema.
 
 
-集群安全风险：在Kubernetes等集群中，不当的RBAC配置可能导致权限提升或横向移动攻击；
+Riesgo de seguridad de contenedores: una configuración insegura de contenedores puede incluir permisos innecesarios, montaje de archivos sensibles o vulnerabilidades de escape de contenedor.
 
 
-镜像安全风险：不安全的系统配置导致镜像在传递、管理、部署等阶段出现泄露等风险；
+Riesgo de seguridad del clúster: en clústeres como Kubernetes, una configuración RBAC inadecuada puede provocar escalamiento de privilegios o ataques de movimiento lateral.
 
 
-环境隔离风险：配置错误可能导致隔离失效，使得攻击者能够访问或影响其他容器或宿主机；
-
-**攻击案例**
-
-案例
-描述
+Riesgo de seguridad de imágenes: una configuración de sistema insegura provoca riesgos de filtración en las fases de transmisión, gestión y despliegue de las imágenes.
 
 
+Riesgo de aislamiento del entorno: un error de configuración puede provocar un fallo de aislamiento, permitiendo que el atacante acceda o afecte a otros contenedores o al host.
 
+**Casos de ataque**
 
-案例一
-ShadowRay：首个已知的针对在野外被积极利用的 AI 工作负载的攻击活动
-
-**攻击风险**
-
-恶意操作：如果系统配置不当，攻击者可能会利用这些漏洞获取对系统的访问权限，进而进行恶意操作。
-数据泄露：攻击者可能获取敏感数据，如宿主机上的文件系统信息或集群内的secrets。
-服务中断：攻击者可能破坏宿主机或集群服务，导致服务不可用。
-横向移动：攻击者可能利用逃逸的容器或提权的节点作为跳板，进一步攻击内网中的其他系统。
-持久性控制：攻击者可能在宿主机或集群中安装后门，实现长期控制。
-
-**缓解措施**
-
-缓解方式
-描述
+Caso
+Descripción
 
 
 
 
-最小权限原则
-确保容器和集群组件仅拥有完成其任务所必需的最小权限
+Caso 1
+ShadowRay: la primera campaña de ataque conocida dirigida a cargas de trabajo de IA activamente explotadas en el mundo real.
+
+**Riesgos del ataque**
+
+Operación maliciosa: si la configuración del sistema es inadecuada, el atacante puede aprovechar estas vulnerabilidades para obtener acceso al sistema y realizar operaciones maliciosas.
+Filtración de datos: el atacante puede obtener datos sensibles, como información del sistema de archivos del host o secrets dentro del clúster.
+Interrupción del servicio: el atacante puede dañar el servicio del host o del clúster, provocando que el servicio no esté disponible.
+Movimiento lateral: el atacante puede usar el contenedor comprometido o el nodo con privilegios escalados como punto de apoyo para atacar otros sistemas de la red interna.
+Control persistente: el atacante puede instalar una puerta trasera en el host o el clúster, logrando un control a largo plazo.
+
+**Medidas de mitigación**
+
+Medida de mitigación
+Descripción
 
 
-确保安全的系统配置
-避免使用特权容器，合理配置RBAC，限制APIServer的访问，避免不必要的风险暴露
 
 
-定期更新与补丁管理
-及时更新容器和集群组件，应用安全补丁，减少漏洞利用的风险
+Principio de mínimo privilegio
+Garantizar que los contenedores y los componentes del clúster solo tengan el mínimo privilegio necesario para completar su tarea.
 
-**参考**
+
+Garantizar una configuración de sistema segura
+Evitar el uso de contenedores privilegiados, configurar RBAC de forma adecuada, limitar el acceso al APIServer y evitar la exposición innecesaria a riesgos.
+
+
+Actualización periódica y gestión de parches
+Actualizar oportunamente los contenedores y componentes del clúster, aplicando parches de seguridad para reducir el riesgo de explotación de vulnerabilidades.
+
+**Referencias**
 
 https://pradiptabanerjee.medium.com/confidential-containers-for-large-language-models-42477436345a
 
 ---
-### 向量数据库漏洞
+### Vulnerabilidades de la base de datos vectorial
 
-> 风险编号: GAARM.0005 (子风险-1，父风险: 部署环境组件供应链漏洞)
-> 生命周期: 部署阶段
+> Número de riesgo: GAARM.0005 (subriesgo 1, riesgo padre: vulnerabilidades de la cadena de suministro de componentes del entorno de despliegue)
+> Ciclo de vida: Fase de despliegue
 
-**攻击概述**
+**Descripción del ataque**
 
-RAG应用开发过程中，会将本地各类文档数据可以通过 Text 类划分为长度更短的段落，并利用 embedding 模型将文本内容进行向量化，最终存入向量数据库。向量数据库在RAG应用架构中扮演着重要角色，尤其是在处理高维数据和执行近似最近邻（ANN）查询时。由于向量数据库的重要性，如果它存在漏洞，攻击者可以利用其漏洞来获取未授权的数据访问、篡改数据、执行恶意代码或发起其他攻击，以此达到敏感信息获取、远程操控恶意代码等目的，带来数据方面的损失。
+Durante el desarrollo de aplicaciones RAG, los diversos documentos de datos locales pueden dividirse en párrafos más cortos mediante clases de texto, y usar un modelo de embeddings para vectorizar el contenido de texto, almacenándolo finalmente en una base de datos vectorial. La base de datos vectorial desempeña un papel importante en la arquitectura de aplicaciones RAG, especialmente al procesar datos de alta dimensión y realizar consultas de vecinos más cercanos aproximados (ANN). Debido a la importancia de la base de datos vectorial, si esta presenta una vulnerabilidad, el atacante puede aprovecharla para obtener acceso no autorizado a los datos, alterar datos, ejecutar código malicioso o iniciar otros ataques, con el fin de obtener información sensible, controlar código malicioso de forma remota, etc., causando pérdidas de datos.
 
-**攻击案例**
+**Casos de ataque**
 
-案例
-描述
-
-
-
-
-案例一
-利用Qdrant向量数据库API实现路径穿越后的文件上传，导致出现远程代码执行风险
-
-
-案例二
-anything-llm存在CVE-2024-0551漏洞，未授权的攻击者可以通过漏洞下载数据库中的文件
-
-
-案例三
-本研究提出了针对 RAG 增强 LLMs 的新攻击方式，通过向其知识数据库中注入单个恶意文档来危害受害者的 RAG 系统，从而引发多种针对生成模型的恶意攻击。
-
-**攻击风险**
-
-数据篡改：攻击者利用向量数据库漏洞对嵌入向量进行篡改，导致数据库中的数据被篡改，进而影响数据的完整性。
-用户隐私侵犯：向量数据库中可能存储个人身份等敏感信息，一旦被攻击者获取，将严重侵犯用户隐私。
-
-**缓解措施**
-
-缓解方式
-描述
+Caso
+Descripción
 
 
 
 
-定期更新补丁
-随时了解来自向量数据库提供商的最新补丁，定期更新数据库软件可确保针对已知漏洞的防护
+Caso 1
+Aprovechando la API de la base de datos vectorial Qdrant, se logró la subida de archivos tras un path traversal, provocando un riesgo de ejecución remota de código.
 
 
-数据备份
-定期备份数据，确保在数据被篡改时可以快速恢复
+Caso 2
+anything-llm presenta la vulnerabilidad CVE-2024-0551; un atacante no autorizado puede descargar archivos de la base de datos aprovechando la vulnerabilidad.
 
 
-监控和日志
-实施实时监控和日志记录，以便及时发现和响应可疑活动
+Caso 3
+Esta investigación propone un nuevo método de ataque dirigido a LLM potenciados con RAG, inyectando un único documento malicioso en su base de datos de conocimiento para comprometer el sistema RAG de la víctima, provocando así diversos ataques maliciosos contra el modelo generativo.
 
-**参考**
+**Riesgos del ataque**
+
+Alteración de datos: el atacante aprovecha la vulnerabilidad de la base de datos vectorial para alterar los vectores de embeddings, provocando que los datos de la base de datos sean modificados, afectando así la integridad de los datos.
+Violación de la privacidad del usuario: la base de datos vectorial puede almacenar información sensible como la identidad personal; una vez obtenida por el atacante, se violará gravemente la privacidad del usuario.
+
+**Medidas de mitigación**
+
+Medida de mitigación
+Descripción
+
+
+
+
+Actualización periódica de parches
+Estar al tanto de los últimos parches del proveedor de la base de datos vectorial, actualizando periódicamente el software de la base de datos para garantizar protección frente a vulnerabilidades conocidas.
+
+
+Copia de seguridad de datos
+Realizar copias de seguridad periódicas de los datos, garantizando una rápida recuperación en caso de alteración de los datos.
+
+
+Monitoreo y registro
+Implementar monitoreo y registro en tiempo real, para detectar y responder oportunamente ante actividades sospechosas.
+
+**Referencias**
 
 https://ironcorelabs.com/security-risks-rag/
 
 ---
-### 容器&&集群系统漏洞
+### Vulnerabilidades del sistema de contenedores y clústeres
 
-> 风险编号: GAARM.0005 (子风险-2，父风险: 部署环境组件供应链漏洞)
-> 生命周期: 部署阶段
+> Número de riesgo: GAARM.0005 (subriesgo 2, riesgo padre: vulnerabilidades de la cadena de suministro de componentes del entorno de despliegue)
+> Ciclo de vida: Fase de despliegue
 
-**攻击概述**
+**Descripción del ataque**
 
-大模型部署环境下的容器和集群系统漏洞风险主要涉及在大模型部署和运行环境中，容器技术及集群管理系统可能存在的安全问题。攻击者可以利用这些漏洞来执行恶意代码、窃取数据、干扰服务运行等，造成隐私信息泄露问题，从而对大模型的安全性和稳定性造成威胁。
+El riesgo de vulnerabilidades del sistema de contenedores y clústeres en el entorno de despliegue de grandes modelos se refiere principalmente a los posibles problemas de seguridad en la tecnología de contenedores y los sistemas de gestión de clústeres dentro del entorno de despliegue y ejecución de grandes modelos. Un atacante puede aprovechar estas vulnerabilidades para ejecutar código malicioso, robar datos, interferir en el funcionamiento del servicio, entre otros, provocando problemas de filtración de información privada y amenazando así la seguridad y estabilidad del gran modelo.
 
-**攻击案例**
+**Casos de ataque**
 
-案例
-描述
-
-
-
-
-案例一
-OPENAI使用的Docker镜像版本存在CVE-2023-28432漏洞，利用该漏洞可获取密钥等信息
-
-**攻击风险**
-
-容器逃逸：攻击者可能通过容器内的漏洞实现容器逃逸，获取主机或其他容器的权限。
-集群风险扩散：单个容器的漏洞可能导致整个集群的风险扩散。
-
-**缓解措施**
-
-。
-
-
-
-缓解方式
-描述
+Caso
+Descripción
 
 
 
 
-及时更新相关组件
-定期更新Kubernetes及其相关组件（如Docker、containerd等）到最新版本，以修复已知的安全漏洞
+Caso 1
+La versión de la imagen Docker usada por OpenAI presentaba la vulnerabilidad CVE-2023-28432; aprovechando esta vulnerabilidad se podía obtener información como claves.
+
+**Riesgos del ataque**
+
+Escape de contenedor: el atacante puede, mediante una vulnerabilidad dentro del contenedor, lograr un escape de contenedor, obteniendo privilegios del host o de otros contenedores.
+Propagación del riesgo en el clúster: una vulnerabilidad en un único contenedor puede provocar la propagación del riesgo a todo el clúster.
+
+**Medidas de mitigación**
 
 
-严格的访问控制
-实施严格的访问控制策略，限制容器之间和容器与集群外部的通信
 
-**参考**
+
+Medida de mitigación
+Descripción
+
+
+
+
+Actualizar oportunamente los componentes relacionados
+Actualizar periódicamente Kubernetes y sus componentes relacionados (como Docker, containerd, etc.) a la última versión, para corregir vulnerabilidades de seguridad conocidas.
+
+
+Control de acceso estricto
+Implementar una política de control de acceso estricta, limitando la comunicación entre contenedores y entre los contenedores y el exterior del clúster.
+
+**Referencias**
 
 https://www.securityweek.com/chatgpt-data-breach-confirmed-as-security-firm-warns-of-vulnerable-component-exploitation/
 
 ---
-### 模型部署服务漏洞
+### Vulnerabilidades del servicio de despliegue del modelo
 
-> 风险编号: GAARM.0004.001
-> 生命周期: 部署阶段
+> Número de riesgo: GAARM.0004.001
+> Ciclo de vida: Fase de despliegue
 
-**攻击概述**
+**Descripción del ataque**
 
-ML模型部署服务漏洞可能存在于模型的接口、支持库，或者与模型交互的应用程序中，例如通过特定漏洞进行窃取模型参数、篡改模型预测结果、直接控制托管模型的服务等。通过漏洞，攻击者可以进行对系统的攻击，例如读取任意文件、植入后门从而获取对系统的控制等。由于ML模型部署服务通常支持将模型以容器的形式，推送部署到本地、云平台ML托管服务、云端K8S集群等多种目标环境下，因此一旦ML模型部署服务被攻击，将会导致下游多个环境的控制权限存在被窃取的风险。
+Las vulnerabilidades del servicio de despliegue de modelos de ML pueden existir en la interfaz del modelo, en bibliotecas de soporte, o en aplicaciones que interactúan con el modelo, por ejemplo, permitiendo robar parámetros del modelo, alterar resultados de predicción del modelo, o controlar directamente el servicio que aloja el modelo, aprovechando una vulnerabilidad específica. Mediante la vulnerabilidad, el atacante puede llevar a cabo ataques al sistema, como leer archivos arbitrarios, implantar puertas traseras para obtener el control del sistema, etc. Dado que el servicio de despliegue de modelos de ML normalmente soporta el envío del modelo en forma de contenedor a diversos entornos objetivo, como local, servicios de alojamiento de ML en plataformas en la nube, clústeres K8S en la nube, entre otros, una vez que el servicio de despliegue de modelos de ML es atacado, existirá el riesgo de que los permisos de control de múltiples entornos posteriores sean robados.
 
-**攻击案例**
+**Casos de ataque**
 
-案例
-描述
-
-
-
-
-案例一
-MLFlow中存在文件读取漏洞，攻击者可以读取目标服务器上的任意文件
-
-
-案例二
-BentoML中存在反序列化代码执行漏洞，攻击者可以通过发送单个POST请求触发漏洞利用
-
-**攻击风险**
-
-供应链攻击：如果部署工具的供应链被攻击者渗透，他们可能会在工具中植入后门，从而获得对整个系统的控制。
-数据泄露：MLOps软件涉及多个模型训练与部署的关键阶段，一旦被控制会导致训练数据、模型参数等敏感信息的泄露。
-模型篡改：模型的参数或逻辑可能被攻击者修改，导致错误的预测结果。
-
-**缓解措施**
-
-缓解方式
-描述
+Caso
+Descripción
 
 
 
 
-安全更新与审计
-定期更新和审计模型部署软件以修复漏洞并增强安全性
+Caso 1
+MLFlow presenta una vulnerabilidad de lectura de archivos; un atacante puede leer cualquier archivo del servidor objetivo.
 
 
-访问控制
-实施严格的访问控制措施，确保只有授权用户能够访问和修改部署的模型
+Caso 2
+BentoML presenta una vulnerabilidad de ejecución de código mediante deserialización; un atacante puede activar la explotación de la vulnerabilidad enviando una única solicitud POST.
+
+**Riesgos del ataque**
+
+Ataque a la cadena de suministro: si la cadena de suministro de la herramienta de despliegue es infiltrada por un atacante, este puede implantar una puerta trasera en la herramienta, obteniendo así el control de todo el sistema.
+Filtración de datos: el software MLOps abarca múltiples fases clave del entrenamiento y despliegue del modelo; una vez comprometido, puede provocar la filtración de información sensible como datos de entrenamiento y parámetros del modelo.
+Alteración del modelo: los parámetros o la lógica del modelo pueden ser modificados por el atacante, provocando resultados de predicción erróneos.
+
+**Medidas de mitigación**
+
+Medida de mitigación
+Descripción
 
 
-监控和日志
-实施实时监控和日志记录，以便及时发现和响应可疑活动
 
-**参考**
+
+Actualizaciones y auditorías de seguridad
+Actualizar y auditar periódicamente el software de despliegue del modelo para corregir vulnerabilidades y reforzar la seguridad.
+
+
+Control de acceso
+Implementar medidas de control de acceso estrictas, garantizando que solo usuarios autorizados puedan acceder y modificar el modelo desplegado.
+
+
+Monitoreo y registro
+Implementar monitoreo y registro en tiempo real, para detectar y responder oportunamente ante actividades sospechosas.
+
+**Referencias**
 
 http://www.bimant.com/blog/top8-ml-model-deployment-tools/
 https://mlflow.org/docs/latest/deployment/index.html
 
 ---
-### 模型镜像污染
+### Contaminación de la imagen del modelo
 
-> 风险编号: GAARM.0004.002
-> 生命周期: 部署阶段
+> Número de riesgo: GAARM.0004.002
+> Ciclo de vida: Fase de despliegue
 
-**攻击概述**
+**Descripción del ataque**
 
-该风险是指模型在完成训练微调阶段后，模型镜像即将发布到生产环境进行部署（自建环境、公有云或者第三方基础设施），在此发布过程中缺乏充分的安全防护措施，（诸如对于模型镜像传输过程中的加密签名等），通过镜像污染，攻击者可以控制受感染系统的运行，存在镜像文件被劫持篡改等风险，导致影响模型的决策过程，出现安全隐患。
+Este riesgo se refiere a que, una vez que el modelo completa la fase de entrenamiento y fine-tuning, la imagen del modelo está a punto de publicarse en el entorno de producción para su despliegue (entorno propio, nube pública o infraestructura de terceros), y durante este proceso de publicación no existen medidas de protección de seguridad suficientes (como la firma cifrada durante la transmisión de la imagen del modelo). Mediante la contaminación de la imagen, el atacante puede controlar el funcionamiento del sistema infectado; existe el riesgo de que el archivo de imagen sea secuestrado y alterado, afectando el proceso de toma de decisiones del modelo y generando riesgos de seguridad.
 
   
 
-模型镜像推送部署
+Envío y despliegue de la imagen del modelo
 
-**攻击案例**
+**Casos de ataque**
 
-案例
-描述
-
-
-
-
-案例一
-攻击者通过控制CI/CD系统的镜像部署过程，在镜像中植入后门代码或者窃取敏感数据
-
-**攻击风险**
-
-命令执行：通过镜像污染，攻击者可以控制受感染系统的运行，执行任意命令。
-模型决策影响：恶意的模型镜像污染，可能导致影响模型的决策过程，出现安全隐患。
-
-**缓解措施**
-
-缓解方式
-描述
+Caso
+Descripción
 
 
 
 
-镜像签名
-使用镜像签名和验证机制，确保镜像内容的完整性
+Caso 1
+El atacante, controlando el proceso de despliegue de imágenes del sistema CI/CD, implanta código de puerta trasera en la imagen o roba datos sensibles.
+
+**Riesgos del ataque**
+
+Ejecución de comandos: mediante la contaminación de la imagen, el atacante puede controlar el funcionamiento del sistema infectado, ejecutando comandos arbitrarios.
+Impacto en la toma de decisiones del modelo: la contaminación maliciosa de la imagen del modelo puede afectar el proceso de toma de decisiones del modelo, generando riesgos de seguridad.
+
+**Medidas de mitigación**
+
+Medida de mitigación
+Descripción
 
 
-可信硬件使用
-基于机密容器等可信运行环境，确保动态运行数据的机密性、完整性以及安全性
 
 
-镜像扫描
-在部署前对容器镜像进行安全扫描，以检测和修复已知漏洞
+Firma de imágenes
+Usar mecanismos de firma y verificación de imágenes, garantizando la integridad del contenido de la imagen.
 
-**参考**
+
+Uso de hardware confiable
+Basándose en entornos de ejecución confiables como contenedores confidenciales, garantizar la confidencialidad, integridad y seguridad de los datos en ejecución dinámica.
+
+
+Escaneo de imágenes
+Realizar un escaneo de seguridad de las imágenes de contenedores antes del despliegue, para detectar y corregir vulnerabilidades conocidas.
+
+**Referencias**
 
 https://www.docker.com/blog/llm-docker-for-local-and-hugging-face-hosting/
 https://collabnix.com/large-language-models-llms-and-docker-building-the-next-generation-web-application/
 https://mp.weixin.qq.com/s/vIDHBLbA5iWoPlYTKHSZfw
 
 ---
-### 环境隔离缺陷
+### Defectos en el aislamiento del entorno
 
-> 风险编号: GAARM.0003.001
-> 生命周期: 部署阶段
+> Número de riesgo: GAARM.0003.001
+> Ciclo de vida: Fase de despliegue
 
-**攻击概述**
+**Descripción del ataque**
 
-该风险是指在容器部署阶段，LLMs业务应用的运行环境和物理环境存在沙箱环境隔离的配置或者设计缺陷，容器或虚拟机等沙箱环境中的应用程序，可能存在逃逸沙箱环境，访问或操控沙箱外部资源的安全漏洞。因此攻击者即便被限制在容器内部，也可以利用错误配置（特权容器、错误文件挂载等）来绕过隔离，访问到容器外部的资源和敏感系统，进而利用执行体实现未授权访问或者其他的LLMs意外操作，带来诸如执行未授权命令等意外风险。
+Este riesgo se refiere a que, durante la fase de despliegue de contenedores, el entorno de ejecución de la aplicación de negocio de LLM y el entorno físico presentan defectos de configuración o diseño en el aislamiento del entorno sandbox. Las aplicaciones dentro de entornos sandbox como contenedores o máquinas virtuales pueden presentar vulnerabilidades de seguridad que permiten escapar del entorno sandbox y acceder o manipular recursos fuera del sandbox. Por lo tanto, incluso si el atacante está limitado dentro del contenedor, puede aprovechar configuraciones incorrectas (contenedores privilegiados, montajes de archivos incorrectos, etc.) para eludir el aislamiento, accediendo a recursos y sistemas sensibles fuera del contenedor, y posteriormente aprovechar el ejecutor para lograr acceso no autorizado u otras operaciones no previstas del LLM, generando riesgos imprevistos como la ejecución de comandos no autorizados.
 
   
 
-执行体环境隔离架构
+Arquitectura de aislamiento del entorno del ejecutor
 
-由于LLMs需要通过执行体实现与外部环境的交互，使用集群环境下的Pod快速启动执行体实现特定的交互操作是常见的执行体环境隔离架构，在此过程中针对网络、文件、进程以及Pod存活时间等多种环境未做好隔离，导致出现意外风险。
+Dado que el LLM necesita interactuar con el entorno externo a través de un ejecutor, usar Pods en un entorno de clúster para iniciar rápidamente el ejecutor y realizar operaciones de interacción específicas es una arquitectura común de aislamiento del entorno del ejecutor. Durante este proceso, si no se realiza un aislamiento adecuado de aspectos como la red, los archivos, los procesos y el tiempo de vida del Pod, se generan riesgos imprevistos.
 
-**攻击案例**
+**Casos de ataque**
 
-案例
-描述
-
-
-
-
-案例一
-Hugging Face模型运行环境由于未做好外网访问限制，导致攻击者可以获取到生产环境的shell控制权限
-
-**攻击风险**
-
-容器逃逸：不完善的环境隔离可能导致容器逃逸问题，使得攻击者能够从容器中获取对主机系统的控制权，甚至访问其他容器中的数据。
-敏感数据库访问：攻击者通过精心构造的提示（prompts），指示LLM提取并泄露敏感数据库中的机密信息。
-系统级操作：如果LLM被允许执行系统级操作，攻击者可能会操纵它在底层系统上执行未授权的命令。
-
-**缓解措施**
-
-缓解方式
-描述
+Caso
+Descripción
 
 
 
 
-严格的访问控制
-实施基于角色的访问控制（RBAC）策略，确保只有经过授权的人员才能访问运行环境
+Caso 1
+El entorno de ejecución del modelo de Hugging Face, debido a la falta de restricciones adecuadas de acceso a la red externa, permitió que un atacante obtuviera el control de shell del entorno de producción.
+
+**Riesgos del ataque**
+
+Escape de contenedor: un aislamiento de entorno deficiente puede provocar problemas de escape de contenedor, permitiendo que el atacante obtenga el control del sistema host desde el contenedor, e incluso acceda a datos de otros contenedores.
+Acceso a bases de datos sensibles: el atacante, mediante prompts cuidadosamente construidos, indica al LLM que extraiga y filtre información confidencial de bases de datos sensibles.
+Operaciones a nivel de sistema: si se permite al LLM ejecutar operaciones a nivel de sistema, el atacante puede manipularlo para ejecutar comandos no autorizados en el sistema subyacente.
+
+**Medidas de mitigación**
+
+Medida de mitigación
+Descripción
 
 
-网络隔离
-使用网络策略限制容器间、集群间以及外部访问权限，减少潜在的攻击面和风险
 
 
-实施沙箱技术
-使用适当的沙箱技术来隔离LLM环境，防止其与关键系统和资源交互
+Control de acceso estricto
+Implementar una política de control de acceso basada en roles (RBAC), garantizando que solo el personal autorizado pueda acceder al entorno de ejecución.
 
-**参考**
+
+Aislamiento de red
+Usar políticas de red para limitar los permisos de acceso entre contenedores, entre clústeres y desde el exterior, reduciendo la superficie de ataque y el riesgo potencial.
+
+
+Implementar técnicas de sandbox
+Usar técnicas de sandbox adecuadas para aislar el entorno del LLM, evitando que interactúe con sistemas y recursos críticos.
+
+**Referencias**
 
 https://cloud.baidu.com/article/621826
 https://owasp.org/www-project-top-10-for-large-language-model-applications/Archive/0_1_vulns/Inadequate_Sandboxing.html
 
 ---
-### 部署环境组件供应链漏洞
+### Vulnerabilidades de la cadena de suministro de componentes del entorno de despliegue
 
-> 风险编号: GAARM.0005 (父风险，含子风险: 向量数据库漏洞、容器&&集群系统漏洞)
-> 生命周期: 部署阶段
+> Número de riesgo: GAARM.0005 (riesgo padre, incluye los subriesgos: vulnerabilidades de la base de datos vectorial, vulnerabilidades del sistema de contenedores y clústeres)
+> Ciclo de vida: Fase de despliegue
 
-**攻击概述**
+**Descripción del ataque**
 
-部署环境供应链漏洞（Supply Chain Vulnerabilities in Deployment Environments）是指在软件供应链和部署过程中，从原材料（如库、依赖项、开发工具）到最终产品（如部署的软件）的环节存在的安全缺陷，可能导致系统被攻击或数据泄露的漏洞风险。供应链漏洞可以在软件部署时被利用，导致系统的安全性降低，数据泄露或服务中断。主要分为三类：
-
-
-容器&&集群系统漏洞：容器技术及集群管理系统可能存在安全问题，攻击者可以利用这些漏洞来执行恶意代码、窃取数据、干扰服务运行等，造成隐私信息泄露问题，从而对大模型的安全性和稳定性造成威胁。
+Las vulnerabilidades de la cadena de suministro del entorno de despliegue (Supply Chain Vulnerabilities in Deployment Environments) se refieren a los defectos de seguridad presentes en la cadena de suministro de software y el proceso de despliegue, desde la materia prima (como bibliotecas, dependencias, herramientas de desarrollo) hasta el producto final (como el software desplegado), que pueden provocar riesgos de vulnerabilidad que dejen al sistema expuesto a ataques o filtración de datos. Las vulnerabilidades de la cadena de suministro pueden explotarse durante el despliegue del software, reduciendo la seguridad del sistema y provocando filtración de datos o interrupción del servicio. Se dividen principalmente en tres categorías:
 
 
-向量数据库漏洞：向量数据库如果存在漏洞，攻击者可以利用其漏洞来获取未授权的数据访问、篡改数据、执行恶意代码或发起其他攻击，以此达到敏感信息获取、远程操控恶意代码等目的，带来数据方面的损失。
+Vulnerabilidades del sistema de contenedores y clústeres: la tecnología de contenedores y los sistemas de gestión de clústeres pueden presentar problemas de seguridad; el atacante puede aprovechar estas vulnerabilidades para ejecutar código malicioso, robar datos, interferir en el funcionamiento del servicio, etc., provocando problemas de filtración de información privada y amenazando así la seguridad y estabilidad del gran modelo.
 
 
-云平台安全漏洞：如果云平台存在技术缺陷、技术漏洞、缺乏多重身份验证等原因导致的安全隐患，攻击者可以利用这些安全问题，对部署在云上的大模型进行恶意攻击，例如读取敏感数据、非法窃取并使用账号凭证等，给平台带来一系列损失，包括但不限于数据泄露、服务中断、恶意代码执行等。
-
-**攻击案例**
-
-具体见子风险
-
-**攻击风险**
-
-数据泄露：攻击者可能获取敏感数据，敏感信息被未授权的第三方访问或公开，会造成严重的隐私和合规性问题。
-模型应用未授权访问：云平台安全漏洞可能导致用户部署的模型应用出现未授权访问的风险。
-用户隐私侵犯：被存储的个人身份等敏感信息，一旦被攻击者获取，将严重侵犯用户隐私。
-
-**缓解措施**
-
-缓解方式
-描述
+Vulnerabilidades de la base de datos vectorial: si la base de datos vectorial presenta una vulnerabilidad, el atacante puede aprovecharla para obtener acceso no autorizado a los datos, alterar datos, ejecutar código malicioso o iniciar otros ataques, con el fin de obtener información sensible, controlar código malicioso de forma remota, etc., causando pérdidas de datos.
 
 
+Vulnerabilidades de seguridad de la plataforma en la nube: si la plataforma en la nube presenta defectos técnicos, vulnerabilidades técnicas, falta de autenticación multifactor, entre otras causas de riesgos de seguridad, el atacante puede aprovechar estos problemas de seguridad para llevar a cabo ataques maliciosos contra grandes modelos desplegados en la nube, por ejemplo, leyendo datos sensibles o robando y usando ilegítimamente credenciales de cuenta, causando a la plataforma una serie de pérdidas que incluyen, entre otras, filtración de datos, interrupción del servicio y ejecución de código malicioso.
+
+**Casos de ataque**
+
+Ver los subriesgos correspondientes para más detalle.
+
+**Riesgos del ataque**
+
+Filtración de datos: el atacante puede obtener datos sensibles; si información sensible es accedida o hecha pública por terceros no autorizados, se generarán graves problemas de privacidad y cumplimiento.
+Acceso no autorizado a la aplicación del modelo: las vulnerabilidades de seguridad de la plataforma en la nube pueden provocar riesgos de acceso no autorizado en las aplicaciones de modelo desplegadas por el usuario.
+Violación de la privacidad del usuario: información sensible almacenada, como la identidad personal; una vez obtenida por el atacante, violará gravemente la privacidad del usuario.
+
+**Medidas de mitigación**
+
+Medida de mitigación
+Descripción
 
 
-最小权限原则
-确保组件仅拥有完成其任务所必需的最小权限
 
 
-定期更新与补丁管理
-及时更新组件，应用安全补丁，减少漏洞利用的风险
+Principio de mínimo privilegio
+Garantizar que los componentes solo tengan el mínimo privilegio necesario para completar su tarea.
+
+
+Actualización periódica y gestión de parches
+Actualizar oportunamente los componentes, aplicando parches de seguridad para reducir el riesgo de explotación de vulnerabilidades.
 
 ---

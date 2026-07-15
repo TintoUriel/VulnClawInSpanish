@@ -1,134 +1,134 @@
-# CSRF跨站请求伪造
+# CSRF falsificación de solicitud entre sitios
 English: CSRF Cross-Site Request Forgery
 - Entry Count: 8
 - Use this file to shortlist relevant payloads, then open the linked source markdown for the full workflow and commands.
-## CSRF基础攻击
+## Ataque básico de CSRF
 - ID: csrf-basic
 - Difficulty: beginner
-- Subcategory: 基础攻击
+- Subcategory: Ataque básico
 - Tags: csrf, cross-site, request, forgery
 - Original Extracted Source: original extracted web-security-wiki source/csrf-basic.md
 Description:
-跨站请求伪造基础攻击技术
+Técnicas básicas de ataque de falsificación de solicitud entre sitios
 Prerequisites:
-- 目标存在敏感操作
-- 缺少CSRF保护
+- El objetivo tiene operaciones sensibles
+- Falta protección CSRF
 Execution Outline:
-1. 1. 构造CSRF表单
-2. 2. GET请求CSRF
-3. 3. JSON CSRF
-4. 4. 链接诱导
-## JSON CSRF攻击
+1. 1. Construir el formulario CSRF
+2. 2. CSRF mediante solicitud GET
+3. 3. CSRF con JSON
+4. 4. Inducción mediante enlace
+## Ataque de CSRF con JSON
 - ID: csrf-json
 - Difficulty: intermediate
 - Subcategory: JSON CSRF
 - Tags: csrf, json, api, post
 - Original Extracted Source: original extracted web-security-wiki source/csrf-json.md
 Description:
-针对JSON请求的CSRF攻击技术
+Técnicas de ataque CSRF dirigidas a solicitudes en formato JSON
 Prerequisites:
-- 目标使用JSON格式请求
-- 缺少CSRF保护
-- CORS配置不当
+- El objetivo usa solicitudes en formato JSON
+- Falta protección CSRF
+- Configuración CORS inadecuada
 Execution Outline:
-1. 1. 简单JSON CSRF
-2. 2. Flash JSON CSRF
-3. 3. XSSI攻击
-4. 4. SWF文件攻击
-## CSRF绕过技术
+1. 1. CSRF JSON simple
+2. 2. CSRF JSON con Flash
+3. 3. Ataque XSSI
+4. 4. Ataque con archivo SWF
+## Técnicas de bypass de CSRF
 - ID: csrf-bypass
 - Difficulty: intermediate
-- Subcategory: 绕过技术
+- Subcategory: Técnicas de bypass
 - Tags: csrf, bypass, token, referer
 - Original Extracted Source: original extracted web-security-wiki source/csrf-bypass.md
 Description:
-绕过CSRF防护的各种技术
+Diversas técnicas para eludir la protección CSRF
 Prerequisites:
-- 目标存在CSRF防护
-- 防护机制存在缺陷
+- El objetivo tiene protección CSRF
+- El mecanismo de protección tiene defectos
 Execution Outline:
-1. 1. Token验证绕过
-2. 2. Referer验证绕过
-3. 3. Origin验证绕过
-4. 4. SameSite绕过
-## SameSite绕过技术
+1. 1. Bypass de la validación de Token
+2. 2. Bypass de la validación de Referer
+3. 3. Bypass de la validación de Origin
+4. 4. Bypass de SameSite
+## Técnicas de bypass de SameSite
 - ID: csrf-samesite
 - Difficulty: intermediate
-- Subcategory: SameSite绕过
+- Subcategory: Bypass de SameSite
 - Tags: csrf, samesite, cookie, bypass
 - Original Extracted Source: original extracted web-security-wiki source/csrf-samesite.md
 Description:
-绕过SameSite Cookie属性的CSRF攻击
+Ataque CSRF que elude el atributo SameSite de las cookies
 Prerequisites:
-- Cookie设置了SameSite属性
-- SameSite配置存在缺陷
+- La cookie tiene configurado el atributo SameSite
+- La configuración de SameSite tiene defectos
 Execution Outline:
-1. 1. SameSite=Lax绕过
-2. 2. SameSite=Strict绕过
-3. 3. 未设置SameSite
-4. 4. 利用OAuth流程
-## Token绕过技术
+1. 1. Bypass de SameSite=Lax
+2. 2. Bypass de SameSite=Strict
+3. 3. SameSite no configurado
+4. 4. Explotación del flujo OAuth
+## Técnicas de bypass de Token
 - ID: csrf-token-bypass
 - Difficulty: intermediate
-- Subcategory: Token绕过
+- Subcategory: Bypass de Token
 - Tags: csrf, token, bypass, predictable
 - Original Extracted Source: original extracted web-security-wiki source/csrf-token-bypass.md
 Description:
-绕过CSRF Token验证的技术
+Técnicas para eludir la validación del Token CSRF
 Prerequisites:
-- 目标使用CSRF Token
-- Token机制存在缺陷
+- El objetivo usa un Token CSRF
+- El mecanismo de Token tiene defectos
 Execution Outline:
-1. 1. Token可预测
-2. 2. Token未绑定会话
-3. 3. Token泄露
-4. 4. Token重放
-## Referer绕过技术
+1. 1. Token predecible
+2. 2. Token no vinculado a la sesión
+3. 3. Fuga del Token
+4. 4. Repetición del Token
+## Técnicas de bypass de Referer
 - ID: csrf-referer-bypass
 - Difficulty: intermediate
-- Subcategory: Referer绕过
+- Subcategory: Bypass de Referer
 - Tags: csrf, referer, bypass, header
 - Original Extracted Source: original extracted web-security-wiki source/csrf-referer-bypass.md
 Description:
-绕过Referer验证的CSRF攻击
+Ataque CSRF que elude la validación de la cabecera Referer
 Prerequisites:
-- 目标验证Referer头
-- 验证逻辑存在缺陷
+- El objetivo valida la cabecera Referer
+- La lógica de validación tiene defectos
 Execution Outline:
-1. 1. 正则匹配绕过
-2. 2. 空Referer绕过
-3. 3. 子域名绕过
-4. 4. Referrer-Policy利用
-## Flash CSRF攻击
+1. 1. Bypass mediante coincidencia de expresión regular
+2. 2. Bypass con Referer vacío
+3. 3. Bypass mediante subdominio
+4. 4. Explotación de Referrer-Policy
+## Ataque de CSRF con Flash
 - ID: csrf-flash
 - Difficulty: advanced
 - Subcategory: Flash CSRF
 - Tags: csrf, flash, swf, crossdomain
 - Original Extracted Source: original extracted web-security-wiki source/csrf-flash.md
 Description:
-利用Flash进行CSRF攻击
+Realiza un ataque CSRF utilizando Flash
 Prerequisites:
-- 目标允许Flash请求
-- crossdomain.xml配置不当
+- El objetivo permite solicitudes de Flash
+- Configuración inadecuada de crossdomain.xml
 Execution Outline:
-1. 1. crossdomain.xml利用
-2. 2. 创建恶意SWF
-3. 3. 发送JSON请求
-4. 4. 自定义Header
-## CORS配置错误利用
+1. 1. Explotación de crossdomain.xml
+2. 2. Creación de un SWF malicioso
+3. 3. Envío de solicitud JSON
+4. 4. Cabecera personalizada
+## Explotación de configuración incorrecta de CORS
 - ID: csrf-cors
 - Difficulty: intermediate
-- Subcategory: CORS配置错误
+- Subcategory: Configuración incorrecta de CORS
 - Tags: csrf, cors, misconfiguration, api
 - Original Extracted Source: original extracted web-security-wiki source/csrf-cors.md
 Description:
-利用CORS配置错误进行CSRF攻击
+Realiza un ataque CSRF explotando una configuración incorrecta de CORS
 Prerequisites:
-- CORS配置错误
-- 允许跨域携带凭证
+- Configuración incorrecta de CORS
+- Se permite el envío de credenciales entre dominios
 Execution Outline:
-1. 1. 检测CORS配置
-2. 2. 反射Origin攻击
-3. 3. null源攻击
-4. 4. 正则绕过
-
+1. 1. Detectar la configuración de CORS
+2. 2. Ataque de reflexión de Origin
+3. 3. Ataque de origen null
+4. 4. Bypass mediante expresión regular
+</content>

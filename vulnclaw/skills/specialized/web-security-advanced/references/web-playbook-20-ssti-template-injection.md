@@ -1,166 +1,166 @@
-# SSTI模板注入
+# Inyección de plantillas SSTI
 English: SSTI Template Injection
 - Entry Count: 10
 - Use this file to shortlist relevant payloads, then open the linked source markdown for the full workflow and commands.
-## Jinja2模板注入
+## Inyección de plantillas Jinja2
 - ID: ssti-jinja2
 - Difficulty: advanced
 - Subcategory: Jinja2
 - Tags: ssti, jinja2, twig, template
 - Original Extracted Source: original extracted web-security-wiki source/ssti-jinja2.md
 Description:
-Jinja2/Twig模板注入攻击技术
+Técnicas de ataque de inyección de plantillas Jinja2/Twig
 Prerequisites:
-- 使用Jinja2/Twig模板引擎
-- 用户输入直接渲染到模板
+- Se usa el motor de plantillas Jinja2/Twig
+- La entrada del usuario se renderiza directamente en la plantilla
 Execution Outline:
-1. 1. 探测SSTI
-2. 2. 信息收集
-3. 3. 命令执行
-4. 4. 反弹Shell
-## FreeMarker模板注入
+1. 1. Sondear SSTI
+2. 2. Recolección de información
+3. 3. Ejecución de comandos
+4. 4. Reverse shell
+## Inyección de plantillas FreeMarker
 - ID: ssti-freemarker
 - Difficulty: intermediate
 - Subcategory: FreeMarker
 - Tags: ssti, freemarker, java, template
 - Original Extracted Source: original extracted web-security-wiki source/ssti-freemarker.md
 Description:
-FreeMarker模板引擎注入攻击技术
+Técnicas de ataque de inyección del motor de plantillas FreeMarker
 Prerequisites:
-- 使用FreeMarker模板引擎
-- 用户输入直接渲染到模板
+- Se usa el motor de plantillas FreeMarker
+- La entrada del usuario se renderiza directamente en la plantilla
 Execution Outline:
-1. 1. 探测SSTI
-2. 2. 信息收集
-3. 3. 命令执行 - new
-4. 4. 命令执行 - api
-## Velocity模板注入
+1. 1. Sondear SSTI
+2. 2. Recolección de información
+3. 3. Ejecución de comandos - new
+4. 4. Ejecución de comandos - api
+## Inyección de plantillas Velocity
 - ID: ssti-velocity
 - Difficulty: advanced
 - Subcategory: Velocity
 - Tags: ssti, velocity, java, template
 - Original Extracted Source: original extracted web-security-wiki source/ssti-velocity.md
 Description:
-Velocity模板引擎注入攻击技术
+Técnicas de ataque de inyección del motor de plantillas Velocity
 Prerequisites:
-- 使用Velocity模板引擎
-- 用户输入直接渲染到模板
+- Se usa el motor de plantillas Velocity
+- La entrada del usuario se renderiza directamente en la plantilla
 Execution Outline:
-1. 1. 探测SSTI
-2. 2. 信息收集
-3. 3. 命令执行 - ClassTool
-4. 4. 命令执行 - 反射
-## Thymeleaf模板注入
+1. 1. Sondear SSTI
+2. 2. Recolección de información
+3. 3. Ejecución de comandos - ClassTool
+4. 4. Ejecución de comandos - reflexión
+## Inyección de plantillas Thymeleaf
 - ID: ssti-thymeleaf
 - Difficulty: intermediate
 - Subcategory: Thymeleaf
 - Tags: ssti, thymeleaf, java, spring, template
 - Original Extracted Source: original extracted web-security-wiki source/ssti-thymeleaf.md
 Description:
-Thymeleaf模板引擎注入攻击技术
+Técnicas de ataque de inyección del motor de plantillas Thymeleaf
 Prerequisites:
-- 使用Thymeleaf模板引擎
-- Spring框架
-- 用户输入直接渲染到模板
+- Se usa el motor de plantillas Thymeleaf
+- Framework Spring
+- La entrada del usuario se renderiza directamente en la plantilla
 Execution Outline:
-1. 1. 探测SSTI
-2. 2. 信息收集
-3. 3. 命令执行 - Spring表达式
-4. 4. 命令执行 - ProcessBuilder
-## Smarty模板注入
+1. 1. Sondear SSTI
+2. 2. Recolección de información
+3. 3. Ejecución de comandos - expresión Spring
+4. 4. Ejecución de comandos - ProcessBuilder
+## Inyección de plantillas Smarty
 - ID: ssti-smarty
 - Difficulty: intermediate
 - Subcategory: Smarty
 - Tags: ssti, smarty, php, template
 - Original Extracted Source: original extracted web-security-wiki source/ssti-smarty.md
 Description:
-Smarty模板引擎注入攻击技术
+Técnicas de ataque de inyección del motor de plantillas Smarty
 Prerequisites:
-- 使用Smarty模板引擎
-- 用户输入直接渲染到模板
+- Se usa el motor de plantillas Smarty
+- La entrada del usuario se renderiza directamente en la plantilla
 Execution Outline:
-1. 1. 探测SSTI
-2. 2. 信息收集
-3. 3. 命令执行 - system
-4. 4. 命令执行 - passthru
-## Mako模板注入
+1. 1. Sondear SSTI
+2. 2. Recolección de información
+3. 3. Ejecución de comandos - system
+4. 4. Ejecución de comandos - passthru
+## Inyección de plantillas Mako
 - ID: ssti-mako
 - Difficulty: intermediate
 - Subcategory: Mako
 - Tags: ssti, mako, python, template
 - Original Extracted Source: original extracted web-security-wiki source/ssti-mako.md
 Description:
-Mako模板引擎注入攻击技术
+Técnicas de ataque de inyección del motor de plantillas Mako
 Prerequisites:
-- 使用Mako模板引擎
-- 用户输入直接渲染到模板
+- Se usa el motor de plantillas Mako
+- La entrada del usuario se renderiza directamente en la plantilla
 Execution Outline:
-1. 1. 探测SSTI
-2. 2. 信息收集
-3. 3. 命令执行 - os模块
-4. 4. 命令执行 - subprocess
-## Tornado模板注入
+1. 1. Sondear SSTI
+2. 2. Recolección de información
+3. 3. Ejecución de comandos - módulo os
+4. 4. Ejecución de comandos - subprocess
+## Inyección de plantillas Tornado
 - ID: ssti-tornado
 - Difficulty: intermediate
 - Subcategory: Tornado
 - Tags: ssti, tornado, python, template
 - Original Extracted Source: original extracted web-security-wiki source/ssti-tornado.md
 Description:
-Tornado模板引擎注入攻击技术
+Técnicas de ataque de inyección del motor de plantillas Tornado
 Prerequisites:
-- 使用Tornado模板引擎
-- 用户输入直接渲染到模板
+- Se usa el motor de plantillas Tornado
+- La entrada del usuario se renderiza directamente en la plantilla
 Execution Outline:
-1. 1. 探测SSTI
-2. 2. 信息收集
-3. 3. 命令执行 - os
-4. 4. 命令执行 - subprocess
-## Django模板注入
+1. 1. Sondear SSTI
+2. 2. Recolección de información
+3. 3. Ejecución de comandos - os
+4. 4. Ejecución de comandos - subprocess
+## Inyección de plantillas Django
 - ID: ssti-django
 - Difficulty: intermediate
 - Subcategory: Django
 - Tags: ssti, django, python, template
 - Original Extracted Source: original extracted web-security-wiki source/ssti-django.md
 Description:
-Django模板引擎注入攻击技术
+Técnicas de ataque de inyección del motor de plantillas Django
 Prerequisites:
-- 使用Django模板引擎
-- 用户输入直接渲染到模板
+- Se usa el motor de plantillas Django
+- La entrada del usuario se renderiza directamente en la plantilla
 Execution Outline:
-1. 1. 探测SSTI
-2. 2. 信息收集
-3. 3. 命令执行 - 通过settings
-4. 4. 命令执行 - 对象链
-## ERB模板注入
+1. 1. Sondear SSTI
+2. 2. Recolección de información
+3. 3. Ejecución de comandos - a través de settings
+4. 4. Ejecución de comandos - cadena de objetos
+## Inyección de plantillas ERB
 - ID: ssti-erb
 - Difficulty: intermediate
 - Subcategory: ERB
 - Tags: ssti, erb, ruby, template
 - Original Extracted Source: original extracted web-security-wiki source/ssti-erb.md
 Description:
-ERB(Ruby)模板引擎注入攻击技术
+Técnicas de ataque de inyección del motor de plantillas ERB (Ruby)
 Prerequisites:
-- 使用ERB模板引擎
-- 用户输入直接渲染到模板
+- Se usa el motor de plantillas ERB
+- La entrada del usuario se renderiza directamente en la plantilla
 Execution Outline:
-1. 1. 探测SSTI
-2. 2. 信息收集
-3. 3. 命令执行 - 反引号
-4. 4. 命令执行 - system
-## Pug/Jade模板注入
+1. 1. Sondear SSTI
+2. 2. Recolección de información
+3. 3. Ejecución de comandos - comillas invertidas (backticks)
+4. 4. Ejecución de comandos - system
+## Inyección de plantillas Pug/Jade
 - ID: ssti-pug
 - Difficulty: intermediate
 - Subcategory: Pug
 - Tags: ssti, pug, jade, nodejs, template
 - Original Extracted Source: original extracted web-security-wiki source/ssti-pug.md
 Description:
-Pug/Jade模板引擎注入攻击技术
+Técnicas de ataque de inyección del motor de plantillas Pug/Jade
 Prerequisites:
-- 使用Pug/Jade模板引擎
-- 用户输入直接渲染到模板
+- Se usa el motor de plantillas Pug/Jade
+- La entrada del usuario se renderiza directamente en la plantilla
 Execution Outline:
-1. 1. 探测SSTI
-2. 2. 信息收集
-3. 3. 命令执行 - child_process
-4. 4. 命令执行 - execSync
-
+1. 1. Sondear SSTI
+2. 2. Recolección de información
+3. 3. Ejecución de comandos - child_process
+4. 4. Ejecución de comandos - execSync
+</content>

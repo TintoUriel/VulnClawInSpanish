@@ -1,204 +1,204 @@
-# AI数据安全 - 训练阶段
+# Seguridad de datos de IA - Fase de entrenamiento
 
-> 来源: AISS绿盟大模型安全智链社区 | 拆自 ai-data-security.md
-> 阶段: 训练阶段（GAARM.0009-0011, 0018, 0020 内部数据保护/对话语料投毒/匿名化）
+> Fuente: Comunidad de Seguridad de Grandes Modelos AISS NSFOCUS | Extraído de ai-data-security.md
+> Fase: Fase de entrenamiento (GAARM.0009-0011, 0018, 0020 Protección de datos internos/Envenenamiento de corpus de diálogo/Anonimización)
 
-## 训练阶段
+## Fase de entrenamiento
 
-### 不正确&恶意外部数据源
+### Fuentes de datos externas incorrectas y maliciosas
 
-> 风险编号: GAARM.0010
-> 生命周期: 训练阶段
+> Número de riesgo: GAARM.0010
+> Ciclo de vida: Fase de entrenamiento
 
-**攻击概述**
+**Descripción del ataque**
 
-在大语言模型（LLM）中，不正确或恶意的外部数据源会导致多种安全风险，这些风险可能对模型的表现和系统的安全性产生负面影响。如果 LLM 依赖于不正确或恶意的外部数据源，这些数据源可能提供错误或误导的信息。模型将基于这些数据生成响应，可能导致用户获取错误的信息或做出误导性的决策。
+En los modelos de lenguaje grande (LLM), las fuentes de datos externas incorrectas o maliciosas pueden provocar diversos riesgos de seguridad que afectan negativamente el rendimiento del modelo y la seguridad del sistema. Si el LLM depende de fuentes de datos externas incorrectas o maliciosas, estas fuentes pueden proporcionar información errónea o engañosa. El modelo generará respuestas basadas en estos datos, lo que puede provocar que los usuarios obtengan información errónea o tomen decisiones equivocadas.
 
-**攻击案例**
+**Casos de ataque**
 
-案例
-描述
-
-
-
-
-案例一
-由于LLM具备分析外部数据的能力，例如分析文档，网页等，在这些外部数据源中引入对抗样本，可以诱导LLM输出毒性内容
-
-
-案例二
-这篇文章设计了名叫PoisonedRAG 的攻击方法，如果被攻击的模型对攻击者设计的目标问题，成功返回攻击者希望的目标答案，则视作攻击成功。研究中，将五篇中毒文本注入包含数百万个条目的外部数据库，其结果达到了 90% 的攻击成功率。本文体现了外部数据源被恶意篡改后带来的严重后果，导致LLM输出错误或误导性信息
-
-**攻击风险**
-
-数据完整性受损：导致数据完整性受损、隐私泄露、安全漏洞和可信度受损等问题。
-外部数据源法律风险: 在推理过程中未经授权使用受版权保护的数据源可能导致法律诉讼和罚款。
-外部数据源合规风险: 未按照行业标准和法规使用数据可能导致合规性问题。
-外部数据源受损: 外部攻击者可能篡改数据源，导致输入到模型中的数据失真。
-误导性信息泄露：模型可能被攻击者恶意篡改，导致输出错误或误导性信息，影响决策和操作。
-
-**缓解措施**
-
-缓解方式
-描述
+Caso
+Descripción
 
 
 
 
-审查数据源
-在使用外部数据源之前，进行严格的验证和审查。确保所使用的数据源是可信的、准确的，并且不包含恶意代码或攻击载荷
+Caso 1
+Dado que el LLM tiene capacidad de analizar datos externos, como documentos y páginas web, la introducción de ejemplos adversarios en estas fuentes de datos externas puede inducir al LLM a generar contenido tóxico.
 
 
-输入监控和过滤
-对LLMs的输入和输出进行实时监控，及时过滤掉不安全或不当内容
+Caso 2
+Este artículo diseña un método de ataque llamado PoisonedRAG. Si el modelo atacado, ante una pregunta objetivo diseñada por el atacante, devuelve con éxito la respuesta objetivo deseada por el atacante, se considera que el ataque tuvo éxito. En la investigación, se inyectaron cinco textos envenenados en una base de datos externa que contenía millones de entradas, alcanzando una tasa de éxito del ataque del 90%. Este artículo evidencia las graves consecuencias que trae la alteración maliciosa de fuentes de datos externas, provocando que el LLM genere información errónea o engañosa.
+
+**Riesgos del ataque**
+
+Deterioro de la integridad de los datos: provoca problemas de integridad de datos comprometida, filtración de privacidad, vulnerabilidades de seguridad y credibilidad dañada.
+Riesgo legal de fuentes de datos externas: el uso no autorizado de fuentes de datos protegidas por derechos de autor durante la inferencia puede provocar demandas y sanciones.
+Riesgo de cumplimiento de fuentes de datos externas: el uso de datos sin seguir estándares y normativas de la industria puede provocar problemas de cumplimiento.
+Compromiso de fuentes de datos externas: atacantes externos pueden alterar las fuentes de datos, provocando que los datos introducidos al modelo estén distorsionados.
+Filtración de información engañosa: el modelo puede ser alterado maliciosamente por un atacante, provocando la generación de información errónea o engañosa que afecta decisiones y operaciones.
+
+**Medidas de mitigación**
+
+Medida de mitigación
+Descripción
 
 
-访问控制
-限制模型对外部数据源的访问权限，确保仅有授权的用户或系统可以进行访问
 
-**参考**
+
+Revisión de fuentes de datos
+Realizar una validación y revisión rigurosa antes de usar fuentes de datos externas. Garantizar que las fuentes de datos utilizadas sean confiables, precisas y no contengan código malicioso ni cargas útiles de ataque.
+
+
+Monitoreo y filtrado de entradas
+Monitorear en tiempo real las entradas y salidas de los LLM, filtrando oportunamente contenido inseguro o inapropiado.
+
+
+Control de acceso
+Limitar los permisos de acceso del modelo a fuentes de datos externas, garantizando que solo usuarios o sistemas autorizados puedan acceder.
+
+**Referencias**
 
 https://mp.weixin.qq.com/s/3WAWy4ZV6Ezft_2MJHMgtg
 https://mp.weixin.qq.com/s/yiloJtlmv7MT3df9AnWNZQ
 
 ---
-### 个人隐私数据保护缺陷
+### Deficiencia en la protección de datos de privacidad personal
 
-> 风险编号: GAARM.0009.001
-> 生命周期: 训练阶段
+> Número de riesgo: GAARM.0009.001
+> Ciclo de vida: Fase de entrenamiento
 
-**攻击概述**
+**Descripción del ataque**
 
-模型可能存在个人隐私保护缺陷风险，这意味着包含个人隐私信息的数据可能未经充分脱敏或匿名化处理便被引入到模型中进行训练。敏感信息进入模型后，随着模型参数的增加，记忆和无意中输出这些私有信息的风险也会增加，从而导致潜在的隐私泄露。因此，这样的缺陷会导致模型在处理查询或输出结果时不经意间泄露个人身份、行为习惯或其他敏感信息。
+El modelo puede presentar un riesgo de deficiencia en la protección de la privacidad personal, lo que significa que datos que contienen información de privacidad personal pueden haberse introducido en el modelo para su entrenamiento sin haber sido sometidos a un anonimizado o desensibilización adecuados. Una vez que la información sensible entra al modelo, a medida que aumentan los parámetros del modelo, también aumenta el riesgo de que memorice y produzca de forma involuntaria esta información privada, provocando una potencial filtración de privacidad. Por lo tanto, esta deficiencia puede hacer que el modelo, al procesar consultas o generar resultados, filtre de forma involuntaria identidades personales, hábitos de comportamiento u otra información sensible.
 
-**攻击案例**
+**Casos de ataque**
 
-案例
-描述
-
-
-
-
-案例一
-GitHub的Copilot在训练阶段数据处理不当，导致其未经授权生成与其他人发布的开源代码一模一样的输出。由于很多开源代码中包含一些机密信息，例如API密钥，因此导致他人私有信息一并被泄露
-
-**攻击风险**
-
-敏感数据泄露：导致用户个人信息的泄露和滥用，造成严重的隐私侵犯问题。
-社会工程攻击：攻击者可以利用泄露的信息进行社会工程攻击，欺骗受害者提供更多敏感信息，进而进行欺诈活动。
-信任危机：随着LLM敏感信息泄露事件的增多，公众可能产生对人工智能技术和相关应用的安全性担忧，影响信任程度。
-
-**缓解措施**
-
-缓解方式
-描述
+Caso
+Descripción
 
 
 
 
-数据脱敏
-通过基于规则、基于模型的算法对数据进行脱敏，去除或者替换数据中的隐私数据
+Caso 1
+Copilot de GitHub, debido a un procesamiento inadecuado de los datos en la fase de entrenamiento, generó sin autorización salidas idénticas a código abierto publicado por otras personas. Dado que gran parte del código abierto contiene información confidencial, como claves de API, esto provocó que información privada de terceros también se filtrara.
+
+**Riesgos del ataque**
+
+Filtración de datos sensibles: provoca la filtración y el uso indebido de información personal de los usuarios, causando graves problemas de violación de la privacidad.
+Ataques de ingeniería social: el atacante puede aprovechar la información filtrada para llevar a cabo ataques de ingeniería social, engañando a las víctimas para que proporcionen información más sensible, y así llevar a cabo actividades fraudulentas.
+Crisis de confianza: a medida que aumentan los incidentes de filtración de información sensible en los LLM, el público puede desarrollar inquietudes sobre la seguridad de la tecnología de IA y sus aplicaciones relacionadas, afectando el nivel de confianza.
+
+**Medidas de mitigación**
+
+Medida de mitigación
+Descripción
 
 
-数据加密和访问控制
-实施数据加密和访问控制措施，确保个人隐私数据和企业敏感数据在存储和传输过程中得到充分保护。
 
-**参考**
+
+Desensibilización de datos
+Desensibilizar los datos mediante algoritmos basados en reglas o en modelos, eliminando o sustituyendo los datos privados dentro de la información.
+
+
+Cifrado de datos y control de acceso
+Implementar medidas de cifrado de datos y control de acceso, garantizando que los datos privados personales y los datos sensibles empresariales estén adecuadamente protegidos durante el almacenamiento y la transmisión.
+
+**Referencias**
 
 https://mp.weixin.qq.com/s/c_cIzecyw48MatwKBZbdUg
 https://36kr.com/p/2541963790493187
 
 ---
-### 企业敏感数据保护缺陷
+### Deficiencia en la protección de datos sensibles empresariales
 
-> 风险编号: GAARM.0009.002
-> 生命周期: 训练阶段
+> Número de riesgo: GAARM.0009.002
+> Ciclo de vida: Fase de entrenamiento
 
-**攻击概述**
+**Descripción del ataque**
 
-企业敏感数据保护缺陷是指，在人工智能模型的训练过程中，可能引入了涉及未能充分脱敏或匿名化处理商业秘密、客户信息、财务数据等敏感信息，敏感信息进入模型，导致这些数据存在被未授权访问或泄露的风险。这种风险不仅会侵害企业的经济利益和市场竞争力，还可能引发法律诉讼和信誉损失，严重威胁企业的整体安全和可持续发展。
+La deficiencia en la protección de datos sensibles empresariales se refiere a que, durante el proceso de entrenamiento del modelo de IA, pueden introducirse secretos comerciales, información de clientes, datos financieros y otra información sensible que no ha sido suficientemente desensibilizada o anonimizada. Al entrar esta información sensible al modelo, dichos datos quedan en riesgo de ser accedidos o filtrados sin autorización. Este riesgo no solo perjudica los intereses económicos y la competitividad de mercado de la empresa, sino que también puede provocar demandas legales y pérdida de reputación, amenazando gravemente la seguridad general y el desarrollo sostenible de la empresa.
 
-**攻击案例**
+**Casos de ataque**
 
-案例
-描述
-
-
-
-
-案例一
-自 ChatGPT 推出以来，有 4.7% 的员工至少将敏感数据粘贴到该工具中一次。敏感数据占员工粘贴到 ChatGPT 中的 11%。其中包括源代码，内部数据，客户数据等，均为隐私数据
-
-
-案例二
-亚马逊的公司律师称，他们在ChatGPT生成的内容中发现了与公司机密“非常相似”的文本，可能是由于一些亚马逊员工在使用ChatGPT生成代码和文本时输入了公司内部数据信息
-
-**攻击风险**
-
-敏感数据泄露： 导致企业的商业机密泄露、竞争力受损、知识产权侵犯等问题。
-经济损失： 训练数据中包含的核心代码等可能会出现在LLM生成的内容中，造成经济损失。
-信任危机：随着LLM敏感信息泄露事件的增多，公众可能产生对人工智能技术和相关应用的安全性担忧，影响信任程度。
-
-**缓解措施**
-
-缓解方式
-描述
+Caso
+Descripción
 
 
 
 
-数据脱敏
-通过基于规则、基于模型的算法对数据进行脱敏，去除或者替换数据中的隐私数据
+Caso 1
+Desde el lanzamiento de ChatGPT, el 4.7% de los empleados ha pegado datos sensibles en la herramienta al menos una vez. Los datos sensibles representan el 11% de lo que los empleados pegan en ChatGPT, incluyendo código fuente, datos internos y datos de clientes, todos ellos datos privados.
 
 
-数据加密和访问控制
-实施数据加密和访问控制措施，确保个人隐私数据和企业敏感数据在存储和传输过程中得到充分保护
+Caso 2
+Abogados corporativos de Amazon declararon haber encontrado en contenido generado por ChatGPT texto "muy similar" a secretos de la empresa, posiblemente porque algunos empleados de Amazon introdujeron información interna de la empresa al usar ChatGPT para generar código y texto.
 
-**参考**
+**Riesgos del ataque**
+
+Filtración de datos sensibles: provoca la filtración de secretos comerciales de la empresa, deterioro de la competitividad, infracción de propiedad intelectual, entre otros problemas.
+Pérdidas económicas: código central incluido en los datos de entrenamiento puede aparecer en el contenido generado por el LLM, causando pérdidas económicas.
+Crisis de confianza: a medida que aumentan los incidentes de filtración de información sensible en los LLM, el público puede desarrollar inquietudes sobre la seguridad de la tecnología de IA y sus aplicaciones relacionadas, afectando el nivel de confianza.
+
+**Medidas de mitigación**
+
+Medida de mitigación
+Descripción
+
+
+
+
+Desensibilización de datos
+Desensibilizar los datos mediante algoritmos basados en reglas o en modelos, eliminando o sustituyendo los datos privados dentro de la información.
+
+
+Cifrado de datos y control de acceso
+Implementar medidas de cifrado de datos y control de acceso, garantizando que los datos privados personales y los datos sensibles empresariales estén adecuadamente protegidos durante el almacenamiento y la transmisión.
+
+**Referencias**
 
 https://mp.weixin.qq.com/s/VCmhL-LbGfCViQrAEwyCAg
 https://mp.weixin.qq.com/s/kp1Sl5TC_uuVelhj8HPmdw
 
 ---
-### 内部数据保护缺陷
+### Deficiencia en la protección de datos internos
 
-> 风险编号: GAARM.0009
-> 生命周期: 训练阶段
+> Número de riesgo: GAARM.0009
+> Ciclo de vida: Fase de entrenamiento
 
-**攻击概述**
+**Descripción del ataque**
 
-内部数据保护缺陷是指，在训练LLM的过程中，使用了未经充分脱敏或匿名化处理的内部数据，例如个人隐私数据、企业敏感数据等，导致了这些数据存在被未授权访问或泄露的风险，甚至会带来个人以及企业的利益损失。
-内部隐私保护缺陷主要存在于三个方面：
+La deficiencia en la protección de datos internos se refiere al uso, durante el entrenamiento del LLM, de datos internos que no han sido suficientemente desensibilizados o anonimizados, como datos de privacidad personal o datos sensibles empresariales, lo que provoca que estos datos queden en riesgo de ser accedidos o filtrados sin autorización, e incluso puede acarrear pérdidas de intereses tanto personales como empresariales.
+La deficiencia de protección de la privacidad interna se manifiesta principalmente en tres aspectos:
 
-个人隐私数据保护缺陷：由于训练过程中存在安全隐患，导致模型在处理查询或输出结果时不经意间泄露个人身份、行为习惯或其他敏感信息；
-企业敏感数据保护缺陷：由于训练过程中存在安全隐患，导致企业的经济利益和市场竞争力被侵害，还可能引发法律诉讼和信誉损失，严重威胁企业的整体安全和可持续发展；
-机密敏感数据保护缺陷：由于使用了涉及政府、军事等类型的敏感数据，如敏感单位所在位置、军事部署等，未能充分保护它们，导致这些数据存在被未授权访问或泄露的风险，甚至带来战略信息层面的损失；
+Deficiencia en la protección de datos de privacidad personal: debido a riesgos de seguridad presentes durante el entrenamiento, el modelo, al procesar consultas o generar resultados, filtra de forma involuntaria identidades personales, hábitos de comportamiento u otra información sensible.
+Deficiencia en la protección de datos sensibles empresariales: debido a riesgos de seguridad presentes durante el entrenamiento, se perjudican los intereses económicos y la competitividad de mercado de la empresa, y además puede provocar demandas legales y pérdida de reputación, amenazando gravemente la seguridad general y el desarrollo sostenible de la empresa.
+Deficiencia en la protección de datos confidenciales sensibles: debido al uso de datos sensibles relacionados con el gobierno, lo militar u otros ámbitos, como la ubicación de unidades sensibles o despliegues militares, sin una protección adecuada, estos datos quedan en riesgo de ser accedidos o filtrados sin autorización, e incluso pueden acarrear pérdidas a nivel de información estratégica.
 
-**攻击案例**
+**Casos de ataque**
 
-具体见子风险
+Ver los subriesgos correspondientes para más detalle.
 
-**攻击风险**
+**Riesgos del ataque**
 
-数据泄露：LLM在不经意间大量吐出未经授权的训练数据，将带来一系列隐私泄露以及利益损失
-信任度下降：随着LLM敏感信息泄露事件的增多，公众可能产生对人工智能技术和相关应用的安全性担忧，影响信任程度，带来信任危机
+Filtración de datos: el LLM puede revelar de forma involuntaria grandes cantidades de datos de entrenamiento no autorizados, provocando una serie de filtraciones de privacidad y pérdidas de intereses.
+Disminución de la confianza: a medida que aumentan los incidentes de filtración de información sensible en los LLM, el público puede desarrollar inquietudes sobre la seguridad de la tecnología de IA y sus aplicaciones relacionadas, afectando el nivel de confianza y provocando una crisis de confianza.
 
-**缓解措施**
+**Medidas de mitigación**
 
-缓解方式
-描述
-
-
+Medida de mitigación
+Descripción
 
 
-数据脱敏
-通过基于规则、基于模型的算法对数据进行脱敏，去除或者替换数据中的隐私数据
 
 
-数据加密和访问控制
-实施数据加密和访问控制措施，确保个人隐私数据和企业敏感数据在存储和传输过程中得到充分保护
+Desensibilización de datos
+Desensibilizar los datos mediante algoritmos basados en reglas o en modelos, eliminando o sustituyendo los datos privados dentro de la información.
 
-**参考**
+
+Cifrado de datos y control de acceso
+Implementar medidas de cifrado de datos y control de acceso, garantizando que los datos privados personales y los datos sensibles empresariales estén adecuadamente protegidos durante el almacenamiento y la transmisión.
+
+**Referencias**
 
 https://mp.weixin.qq.com/s/VCmhL-LbGfCViQrAEwyCAg
 https://mp.weixin.qq.com/s/kp1Sl5TC_uuVelhj8HPmdw
@@ -206,384 +206,382 @@ https://mp.weixin.qq.com/s/c_cIzecyw48MatwKBZbdUg
 https://36kr.com/p/2541963790493187
 
 ---
-### 对话语料投毒
+### Envenenamiento del corpus de diálogo
 
-> 风险编号: GAARM.0011.001
-> 生命周期: 训练阶段
+> Número de riesgo: GAARM.0011.001
+> Ciclo de vida: Fase de entrenamiento
 
-**攻击概述**
+**Descripción del ataque**
 
-模型支持用户使用自己的数据开展微调工作，对话语料存在被投毒的风险。在LLM与用户进行对话训练的过程中，LLM存在被毒性数据进行模型微调的安全风险。攻击者可能会操纵对话语料数据，并将其发布到公开位置，被投毒的对话数据集可能是全新的数据集，也可能是现有开源数据集的被投毒。这些数据可能会通过机器学习供应链的被操纵而被引入到受害系统中，导致模型输出质量下降，例如输出包含有害、偏见或不当信息的内容。
+El modelo permite a los usuarios utilizar sus propios datos para realizar trabajos de fine-tuning, y el corpus de diálogo está en riesgo de ser envenenado. Durante el proceso de entrenamiento del diálogo entre el LLM y el usuario, existe el riesgo de seguridad de que el LLM sea sometido a fine-tuning con datos tóxicos. Un atacante puede manipular los datos del corpus de diálogo y publicarlos en un lugar público; el conjunto de datos de diálogo envenenado puede ser un conjunto de datos completamente nuevo o bien un conjunto de datos de código abierto existente que ha sido envenenado. Estos datos pueden introducirse en el sistema víctima mediante la manipulación de la cadena de suministro de aprendizaje automático, provocando una disminución en la calidad de salida del modelo, por ejemplo, generando contenido que incluye información dañina, sesgada o inapropiada.
 
-**攻击案例**
+**Casos de ataque**
 
-案例
-描述
-
-
-
-
-案例一
-OpenAI允许用户使用自己的数据对模型进行微调，用户微调使用的对话语料数据存在被投毒的风险，攻击者可以使用毒性数据对GPTs模型微调，实现对下游决策的干扰
-
-
-案例二
-本文提到了小冰的例子，它通过庞大的语料库来学习，还会将用户和它的对话数据收纳进自己的语料库里，这样的训练带来了被攻击的风险，攻击者也可以在和它们对话时进行“调教”，从而实现让其说脏话甚至发表敏感言论的目的
-
-**攻击风险**
-
-模型输出质量下降：如果微调使用的数据集含有大量的负面或有害内容，模型可能会学习并复制这些不良行为或倾向。这样，模型生成的文本可能包含有害、偏见或不适当的内容。
-泛化能力受损：过度依赖特定类型（如有毒）的数据进行微调可能使模型在这些特定领域表现得较好，但同时可能损害其在更广泛、更常规语境下的应用效果和泛化能力。
-声誉风险：如果模型被训练以生成不适当的内容，这可能会对使用这种技术的组织或个人造成严重的公关和法律风险。
-
-**缓解措施**
-
-缓解方式
-描述
+Caso
+Descripción
 
 
 
 
-数据清洗
-对使用的微调数据进行清洗，拒绝有毒数据参与微调
+Caso 1
+OpenAI permite a los usuarios hacer fine-tuning del modelo con sus propios datos; los datos del corpus de diálogo usados por el usuario para el fine-tuning están en riesgo de ser envenenados, y un atacante puede usar datos tóxicos para hacer fine-tuning de modelos GPTs, logrando interferir en decisiones posteriores.
 
 
-后处理和规则过滤
-在模型输出时实施额外的内容过滤机制。使用规则或机器学习方法来识别和过滤不适当或有害的输出，确保生成内容的安全性和适当性
+Caso 2
+Este artículo menciona el ejemplo de Xiaoice, que aprende a partir de un enorme corpus y también incorpora los datos de conversación con los usuarios a su propio corpus. Este tipo de entrenamiento conlleva un riesgo de ataque, ya que un atacante también puede "adiestrarla" durante las conversaciones para lograr que diga groserías o incluso emita comentarios sensibles.
+
+**Riesgos del ataque**
+
+Disminución de la calidad de salida del modelo: si el conjunto de datos usado para el fine-tuning contiene una gran cantidad de contenido negativo o dañino, el modelo puede aprender y reproducir estos comportamientos o tendencias inadecuadas. De esta forma, el texto generado por el modelo puede contener contenido dañino, sesgado o inapropiado.
+Deterioro de la capacidad de generalización: depender en exceso de un tipo específico de datos (por ejemplo, tóxicos) para el fine-tuning puede hacer que el modelo tenga buen desempeño en esos dominios específicos, pero al mismo tiempo puede perjudicar su efectividad y capacidad de generalización en contextos más amplios y generales.
+Riesgo reputacional: si el modelo es entrenado para generar contenido inapropiado, esto puede acarrear graves riesgos de relaciones públicas y legales para la organización o el individuo que use esta tecnología.
+
+**Medidas de mitigación**
+
+Medida de mitigación
+Descripción
 
 
-持续监控与评估
-微调后的模型应定期进行性能和偏见的评估。监控模型的输出，及时发现并纠正问题，确保其持续适应和响应社会标准的变化
 
-**参考**
+
+Limpieza de datos
+Limpiar los datos usados para el fine-tuning, rechazando que datos tóxicos participen en el proceso.
+
+
+Posprocesamiento y filtrado por reglas
+Implementar mecanismos adicionales de filtrado de contenido en la salida del modelo. Usar reglas o métodos de aprendizaje automático para identificar y filtrar salidas inapropiadas o dañinas, garantizando la seguridad y adecuación del contenido generado.
+
+
+Monitoreo y evaluación continua
+El modelo sometido a fine-tuning debe evaluarse periódicamente en cuanto a rendimiento y sesgo. Monitorear la salida del modelo, detectar y corregir problemas oportunamente, garantizando su adaptación continua y respuesta a los cambios en los estándares sociales.
+
+**Referencias**
 
 https://platform.openai.com/docs/guides/fine-tuning/preparing-your-dataset
 https://arxiv.org/abs/2310.03693
 https://blog.csdn.net/yalecaltech/article/details/117135011
 
 ---
-### 数据匿名化处理不当
+### Tratamiento inadecuado de la anonimización de datos
 
-> 风险编号: GAARM.0018.003
-> 生命周期: 训练阶段
+> Número de riesgo: GAARM.0018.003
+> Ciclo de vida: Fase de entrenamiento
 
-**攻击概述**
+**Descripción del ataque**
 
-数据匿名化处理不当可能导致个人身份信息或敏感数据在训练数据中仍然可识别或可追溯。例如，不完整的匿名化可能暴露用户的身份或其他个人信息。即使数据经过匿名化处理，攻击者仍可能通过结合其他公开或获取的数据，进行再识别攻击，恢复原始数据中的个人信息或敏感内容。导致个人隐私被泄露，用户的敏感信息可能被未经授权的人员访问，这可能导致身份盗用、个人信息滥用或其他隐私侵犯。
+Un tratamiento inadecuado de la anonimización de datos puede provocar que la información de identidad personal o los datos sensibles sigan siendo identificables o rastreables dentro de los datos de entrenamiento. Por ejemplo, una anonimización incompleta puede exponer la identidad del usuario u otra información personal. Incluso si los datos han sido sometidos a anonimización, un atacante puede realizar un ataque de reidentificación combinando otros datos públicos u obtenidos, recuperando la información personal o el contenido sensible de los datos originales. Esto provoca la filtración de la privacidad personal, ya que la información sensible del usuario podría ser accedida por personal no autorizado, lo que puede derivar en robo de identidad, uso indebido de información personal u otras violaciones de la privacidad.
 
-**攻击案例**
+**Casos de ataque**
 
-案例一：chatgpt数据匿名化处理不当导致泄露用户电话、邮箱等个人信息
+Caso 1: un tratamiento inadecuado de la anonimización de datos en ChatGPT provocó la filtración de teléfonos, correos electrónicos y otra información personal de usuarios.
 
 
   
-数据匿名化处理不当
+Tratamiento inadecuado de la anonimización de datos
 
-**攻击风险**
+**Riesgos del ataque**
 
-敏感数据泄露：如果数据匿名化处理不当，可能无法有效保护用户的个人隐私信息。
-重新识别攻击：攻击者可能通过结合外部数据或利用特定的特征进行匹配，重新识别已匿名化的数据，从而获取用户的真实身份或敏感信息。
-属性推断攻击：攻击者可能通过分析匿名化数据的属性和特征，推断出用户的敏感信息或行为模式，进而侵犯用户隐私。
+Filtración de datos sensibles: si el tratamiento de anonimización de datos es inadecuado, es posible que no se proteja eficazmente la información de privacidad personal del usuario.
+Ataque de reidentificación: el atacante puede combinar datos externos o aprovechar características específicas para realizar coincidencias, reidentificando datos anonimizados y obteniendo así la identidad real o información sensible del usuario.
+Ataque de inferencia de atributos: el atacante puede, mediante el análisis de los atributos y características de los datos anonimizados, inferir información sensible o patrones de comportamiento del usuario, violando su privacidad.
 
-**缓解措施**
+**Medidas de mitigación**
 
-缓解方式
-描述
-
-
+Medida de mitigación
+Descripción
 
 
-数据脱敏
-使用正则表达式、基于模型等方式去除隐私敏感内容，或者将隐私敏感内容替换
 
 
-匿名化策略加强
-使用差分隐私、数据扰动等数据匿名化技术
+Desensibilización de datos
+Usar expresiones regulares, métodos basados en modelos, entre otros, para eliminar contenido sensible de privacidad, o sustituir dicho contenido.
 
 
-数据掩蔽技术
-使用数据掩蔽技术对敏感信息进行替换或隐藏，确保匿名化后的数据不包含直接识别用户的信息
+Refuerzo de la estrategia de anonimización
+Usar técnicas de anonimización de datos como privacidad diferencial, perturbación de datos, etc.
 
 
-访问权限控制
-限制对匿名化数据的访问权限，确保只有经过授权的用户或系统可以访问和处理数据，减少数据泄露风险
+Técnica de enmascaramiento de datos
+Usar técnicas de enmascaramiento de datos para sustituir u ocultar información sensible, garantizando que los datos anonimizados no contengan información que identifique directamente al usuario.
 
 
-监控与审计
-定期对匿名化数据的使用和访问进行监控和审计，及时发现异常行为并采取措施保护数据安全
+Control de permisos de acceso
+Limitar los permisos de acceso a los datos anonimizados, garantizando que solo usuarios o sistemas autorizados puedan acceder y procesar los datos, reduciendo el riesgo de filtración.
 
-**参考**
+
+Monitoreo y auditoría
+Monitorear y auditar periódicamente el uso y acceso de los datos anonimizados, detectando oportunamente comportamientos anómalos y tomando medidas para proteger la seguridad de los datos.
+
+**Referencias**
 
 https://cloud.baidu.com/article/1819998
 
 ---
-### 机密敏感数据保护缺陷
+### Deficiencia en la protección de datos confidenciales sensibles
 
-> 风险编号: GAARM.0009.003
-> 生命周期: 训练阶段
+> Número de riesgo: GAARM.0009.003
+> Ciclo de vida: Fase de entrenamiento
 
-**攻击概述**
+**Descripción del ataque**
 
-机密敏感数据保护缺陷是指，在人工智能模型的开发和训练过程中，使用了涉及政府、军事等类型的敏感数据，如敏感单位所在位置、军事部署等，由于未能充分保护它们，导致这些数据存在被未授权访问或泄露的风险，甚至带来战略信息层面的损失，如ChatGPT可以生成一个假冒的政治领袖发表虚假声明的视频，并在社交媒体平台上发布。
+La deficiencia en la protección de datos confidenciales sensibles se refiere a que, durante el desarrollo y entrenamiento del modelo de IA, se utilizan datos sensibles relacionados con el gobierno, lo militar u otros ámbitos, como la ubicación de unidades sensibles o despliegues militares, y debido a que no se protegen adecuadamente, estos datos quedan en riesgo de ser accedidos o filtrados sin autorización, e incluso pueden acarrear pérdidas a nivel de información estratégica; por ejemplo, ChatGPT puede generar un video falso de un líder político haciendo una declaración falsa y publicarlo en redes sociales.
 
-**攻击案例**
+**Casos de ataque**
 
-案例
-描述
-
-
-
-
-案例一
-大型模型可以分析和解析个人数据和照片，以获取大量敏感信息，包括个人身份、位置和移动轨迹。这些信息可被用来跟踪、追踪和监视军事人员，从而导致隐私侵犯和人身安全威胁
-
-
-案例二
-该文章介绍了GPT泄露军事敏感信息的风险，并提出了研发孤立的云端LLM，禁止它连入互联网进行学习，仅可以读取指定的政府文件，以此保证模型的干净与安全
-
-**攻击风险**
-
-敏感数据泄露： 导致军事机密泄露、竞争力受损、知识产权侵犯等问题。
-经济损失： 训练数据中包含的核心代码等可能会出现在LLM生成的内容中，造成经济损失。
-
-**缓解措施**
-
-。
-
-
-
-缓解方式
-描述
+Caso
+Descripción
 
 
 
 
-数据脱敏
-通过基于规则、基于模型的算法对数据进行脱敏，去除或者替换数据中的隐私数据
+Caso 1
+Los grandes modelos pueden analizar y procesar datos personales y fotografías para obtener grandes cantidades de información sensible, incluyendo identidad personal, ubicación y trayectorias de movimiento. Esta información puede utilizarse para rastrear, seguir y vigilar a personal militar, provocando así violaciones de privacidad y amenazas a la seguridad personal.
 
 
-数据加密和访问控制
-实施数据加密和访问控制措施，确保个人隐私数据和企业敏感数据在存储和传输过程中得到充分保护
+Caso 2
+Este artículo describe el riesgo de que GPT filtre información militar sensible, y propone desarrollar un LLM aislado en la nube, prohibiéndole conectarse a internet para aprender, permitiéndole leer únicamente documentos gubernamentales designados, para así garantizar la limpieza y seguridad del modelo.
 
-**参考**
+**Riesgos del ataque**
+
+Filtración de datos sensibles: provoca la filtración de secretos militares, deterioro de la competitividad, infracción de propiedad intelectual, entre otros problemas.
+Pérdidas económicas: código central incluido en los datos de entrenamiento puede aparecer en el contenido generado por el LLM, causando pérdidas económicas.
+
+**Medidas de mitigación**
+
+
+
+
+Medida de mitigación
+Descripción
+
+
+
+
+Desensibilización de datos
+Desensibilizar los datos mediante algoritmos basados en reglas o en modelos, eliminando o sustituyendo los datos privados dentro de la información.
+
+
+Cifrado de datos y control de acceso
+Implementar medidas de cifrado de datos y control de acceso, garantizando que los datos privados personales y los datos sensibles empresariales estén adecuadamente protegidos durante el almacenamiento y la transmisión.
+
+**Referencias**
 
 https://www.eet-china.com/mp/a213535.html
 
 ---
-### 训练数据投毒
+### Envenenamiento de datos de entrenamiento
 
-> 风险编号: GAARM.0011
-> 生命周期: 训练阶段
+> Número de riesgo: GAARM.0011
+> Ciclo de vida: Fase de entrenamiento
 
-**攻击概述**
+**Descripción del ataque**
 
-训练数据投毒是指在机器学习模型的预训练、微调或嵌入过程中，所使用的数据存在安全隐患，由于缺少数据内容审查、数据清洗、数据来源审查等安全防护手段，导致训练的模型中含有漏洞、后门或偏见等风险。这将损害模型的安全性、有效性或道德行为，导致模型在实际应用时产生不公平或者歧视的结果，带来不准确的预测结果。
+El envenenamiento de datos de entrenamiento se refiere a la existencia de riesgos de seguridad en los datos utilizados durante el preentrenamiento, el fine-tuning o el proceso de embeddings de un modelo de aprendizaje automático. Debido a la falta de medidas de protección como la revisión de contenido de datos, la limpieza de datos y la revisión del origen de los datos, el modelo entrenado puede contener vulnerabilidades, puertas traseras o sesgos. Esto perjudicará la seguridad, la efectividad o el comportamiento ético del modelo, provocando resultados injustos o discriminatorios cuando se aplique en la práctica, así como predicciones inexactas.
 
-**攻击案例**
+**Casos de ataque**
 
-案例
-描述
-
-
-
-
-案例一
-该案例介绍通过访问用于训练特定数据的特殊服务来使训练数据中毒，并且真的使用毒性数据进行模型训练
-
-**攻击风险**
-
-毒性输出：攻击者可能操纵训练数据以引入偏见，导致模型在预测时产生不公平或歧视性的结果。
-模型能力下降: 恶意操纵的训练数据可能导致模型性能下降，使其在实际应用中产生不准确或低效的预测结果。
-
-**缓解措施**
-
-缓解方式
-描述
+Caso
+Descripción
 
 
 
 
-可信数据来源
-确保训练数据的完整性，通过从可信的来源获取数据并验证其质量
+Caso 1
+Este caso describe cómo, accediendo a un servicio especial utilizado para entrenar datos específicos, se envenenan los datos de entrenamiento, llevando a cabo realmente el entrenamiento del modelo con datos tóxicos.
+
+**Riesgos del ataque**
+
+Salida tóxica: un atacante puede manipular los datos de entrenamiento para introducir sesgos, provocando que el modelo genere resultados injustos o discriminatorios al hacer predicciones.
+Deterioro de la capacidad del modelo: datos de entrenamiento manipulados maliciosamente pueden provocar una disminución del rendimiento del modelo, haciendo que genere predicciones inexactas o ineficientes en aplicaciones reales.
+
+**Medidas de mitigación**
+
+Medida de mitigación
+Descripción
 
 
-数据清洗
-实施强大的数据清洗和预处理技术，以从训练数据中删除潜在的漏洞或偏见
 
 
-定期审查
-定期审查和审核LLM的训练数据和微调程序，以检测潜在的问题或恶意操纵
+Fuentes de datos confiables
+Garantizar la integridad de los datos de entrenamiento, obteniendo los datos de fuentes confiables y verificando su calidad.
 
 
-建立监控和警报机制
-利用监控和警报机制来检测LLM中的异常行为或性能问题，可能表明存在训练数据投毒的情况
+Limpieza de datos
+Implementar técnicas robustas de limpieza y preprocesamiento de datos para eliminar posibles vulnerabilidades o sesgos de los datos de entrenamiento.
 
-**参考**
+
+Revisión periódica
+Revisar y auditar periódicamente los datos de entrenamiento y los procedimientos de fine-tuning del LLM, para detectar posibles problemas o manipulaciones maliciosas.
+
+
+Establecer mecanismos de monitoreo y alerta
+Usar mecanismos de monitoreo y alerta para detectar comportamientos anómalos o problemas de rendimiento en el LLM, que puedan indicar la existencia de un envenenamiento de datos de entrenamiento.
+
+**Referencias**
 
 https://owasp.org/www-project-top-10-for-large-language-model-applications/Archive/0_1_vulns/Training_Data_Poisoning.html
 
 ---
-### 训练数据泄露
+### Filtración de datos de entrenamiento
 
-> 风险编号: GAARM.0020
-> 生命周期: 训练阶段
+> Número de riesgo: GAARM.0020
+> Ciclo de vida: Fase de entrenamiento
 
-**攻击概述**
+**Descripción del ataque**
 
-训练数据泄露可能暴露用户的个人隐私信息。如果训练数据中包含个人身份信息、健康记录、财务数据等敏感信息，泄露这些数据会导致隐私侵犯。这样的安全风险导致攻击者可以通过分析模型输出，推测训练数据的内容。特别是当模型生成的输出包含原始数据的详细信息时，攻击者可以通过反向工程获得数据内容。
+La filtración de datos de entrenamiento puede exponer información de privacidad personal de los usuarios. Si los datos de entrenamiento contienen información de identidad personal, registros de salud, datos financieros u otra información sensible, la filtración de estos datos provocará una violación de la privacidad. Este riesgo de seguridad permite que un atacante, mediante el análisis de la salida del modelo, infiera el contenido de los datos de entrenamiento. Especialmente cuando la salida generada por el modelo contiene información detallada de los datos originales, el atacante puede obtener el contenido de los datos mediante ingeniería inversa.
 
-**攻击案例**
+**Casos de ataque**
 
-案例
-描述
-
-
-
-
-案例一
-BERT等模型存储的数据存在未经充分脱敏的情况，输出结果随机表露某些训练数据的特征，可以被逆向还原，体现了数据处理不当的后果
-
-
-案例二
-该案例介绍了让ChatGPT一直重复输出"company"，GPT也会输出无关内容，疑似训练数据
-
-
-案例三
-该案例介绍了一些ChatGPT出现幻觉，输出训练数据的一些具体实例和链接
-
-**攻击风险**
-
-敏感数据泄露：训练数据中可能包含用户的个人身份信息、敏感数据或商业机密。泄露这些数据可能导致用户隐私权的侵犯。
-对抗攻击：攻击者可能利用泄露的训练数据来发动对抗性攻击，识别模型的弱点或缺陷，并通过精心设计的输入来欺骗或误导模型。
-
-**缓解措施**
-
-。
-
-
-
-缓解方式
-描述
+Caso
+Descripción
 
 
 
 
-数据脱敏
-通过基于规则、基于模型的算法对数据进行脱敏，去除或者替换数据中的隐私数据
+Caso 1
+Los datos almacenados por modelos como BERT no fueron suficientemente desensibilizados, y el resultado de la salida revela aleatoriamente ciertas características de algunos datos de entrenamiento, que pueden ser reconstruidas mediante ingeniería inversa, evidenciando las consecuencias de un tratamiento inadecuado de los datos.
 
 
-数据加密和访问控制
-实施数据加密和访问控制措施，确保个人隐私数据和企业敏感数据在存储和传输过程中得到充分保护
+Caso 2
+Este caso describe cómo, al hacer que ChatGPT repita continuamente la palabra "company", GPT también genera contenido no relacionado, presuntamente datos de entrenamiento.
 
-**参考**
+
+Caso 3
+Este caso describe algunas alucinaciones de ChatGPT, en las que se generan algunos ejemplos concretos y enlaces de los datos de entrenamiento.
+
+**Riesgos del ataque**
+
+Filtración de datos sensibles: los datos de entrenamiento pueden contener información de identidad personal de los usuarios, datos sensibles o secretos comerciales. La filtración de estos datos puede provocar una violación del derecho a la privacidad del usuario.
+Ataque adversario: un atacante puede aprovechar los datos de entrenamiento filtrados para lanzar ataques adversarios, identificando debilidades o fallos del modelo, y engañando o desviando al modelo mediante entradas cuidadosamente diseñadas.
+
+**Medidas de mitigación**
+
+
+
+
+Medida de mitigación
+Descripción
+
+
+
+
+Desensibilización de datos
+Desensibilizar los datos mediante algoritmos basados en reglas o en modelos, eliminando o sustituyendo los datos privados dentro de la información.
+
+
+Cifrado de datos y control de acceso
+Implementar medidas de cifrado de datos y control de acceso, garantizando que los datos privados personales y los datos sensibles empresariales estén adecuadamente protegidos durante el almacenamiento y la transmisión.
+
+**Referencias**
 
 https://mp.weixin.qq.com/s/C9eIW06UXKL8g9TkZzGn_w
 https://www.techpolicy.press/new-study-suggests-chatgpt-vulnerability-with-potential-privacy-implications/
 
 ---
-### 训练数据篡改
+### Alteración de datos de entrenamiento
 
-> 风险编号: GAARM.0011.002
-> 生命周期: 训练阶段
+> Número de riesgo: GAARM.0011.002
+> Ciclo de vida: Fase de entrenamiento
 
-**攻击概述**
+**Descripción del ataque**
 
-模型存在预训练数据篡改风险，这指的是在模型输入数据时缺乏可靠的验证，导致数据被恶意篡改或其中注入误导性信息，模型可能会学习到错误的模式或关联，从而影响其预测准确性和可靠性，甚至可能导致模型在实际应用中产生有害的输出。
+El modelo presenta un riesgo de alteración de los datos de preentrenamiento, lo que se refiere a la falta de una validación confiable de los datos de entrada del modelo, lo que provoca que los datos sean alterados maliciosamente o que se les inyecte información engañosa. El modelo puede aprender patrones o asociaciones erróneas, afectando así la precisión y confiabilidad de sus predicciones, e incluso puede provocar que el modelo genere salidas dañinas en aplicaciones reales.
 
-**攻击案例**
+**Casos de ataque**
 
-案例
-描述
-
-
-
-
-案例一
-由于检索模块错误地召回了与问题无关且具有误导性的信息，导致大模型“分心”了，通过添加检索到的段落给出的不正确的答案，令ChatGPT模型对“德牧能否进入机场”这一问题给出了与之前相反的错误答案
-
-
-案例一
-攻击者可以通过篡改训练数据，实现特定问题的错误回答，该模型由攻击者直接训练投递，因此训练阶段如果使用缺乏验证的预训练数据，会导致出现同样的安全风险
-
-**攻击风险**
-
-模型能力下降：通过篡改训练数据将导致模型输出准确性降低、误报或误报增加以及通常不可靠的输出。
-毒性输出：导致模型产生误导性预测，进而导致错误的决策，影响人们的生活、财务状况和依赖人工智能的机构的声誉。
-信任破坏：可能破坏用户对AI模型的信任，从而影响模型的广泛应用。
-
-**缓解措施**
-
-缓解方式
-描述
+Caso
+Descripción
 
 
 
 
-数据清洗
-对训练数据进行验证和清理，删除不正确、不完整或不相关的数据
+Caso 1
+Debido a que el módulo de recuperación recuperó erróneamente información no relacionada y engañosa respecto a la pregunta, el gran modelo se "distrajo", dando una respuesta incorrecta al añadir el fragmento recuperado, provocando que el modelo ChatGPT diera una respuesta errónea, opuesta a la anterior, a la pregunta "¿puede un pastor alemán entrar al aeropuerto?".
 
 
-安全数据管道
-设置安全数据管道，确保从收集到存储再到处理的整个数据管道是安全的
+Caso 1
+Un atacante puede, alterando los datos de entrenamiento, lograr respuestas erróneas a preguntas específicas; el modelo es entrenado y entregado directamente por el atacante, por lo que si en la fase de entrenamiento se usan datos de preentrenamiento sin validación, se producirá el mismo riesgo de seguridad.
 
-**参考**
+**Riesgos del ataque**
+
+Deterioro de la capacidad del modelo: la alteración de los datos de entrenamiento provocará una disminución de la precisión de la salida del modelo, un aumento de falsos positivos o falsos negativos, y en general una salida poco confiable.
+Salida tóxica: provoca que el modelo genere predicciones engañosas, lo que a su vez provoca decisiones erróneas, afectando la vida de las personas, su situación financiera y la reputación de las instituciones que dependen de la IA.
+Deterioro de la confianza: puede dañar la confianza del usuario en el modelo de IA, afectando su adopción generalizada.
+
+**Medidas de mitigación**
+
+Medida de mitigación
+Descripción
+
+
+
+
+Limpieza de datos
+Validar y limpiar los datos de entrenamiento, eliminando datos incorrectos, incompletos o irrelevantes.
+
+
+Canalización de datos segura
+Establecer una canalización de datos segura, garantizando que todo el proceso, desde la recolección hasta el almacenamiento y el procesamiento, sea seguro.
+
+**Referencias**
 
 https://ensarseker1.medium.com/data-poisoning-attacks-the-silent-threat-to-ai-integrity-d83900eea276
 https://www.51cto.com/article/760084.html
 
 ---
-### 预训练模型数据偏见
+### Sesgo en los datos del modelo preentrenado
 
-> 风险编号: GAARM.0010.001
-> 生命周期: 训练阶段
+> Número de riesgo: GAARM.0010.001
+> Ciclo de vida: Fase de entrenamiento
 
-**攻击概述**
+**Descripción del ataque**
 
-由于在训练阶段未对训练数据做好相关的安全审查与清洗等工作，甚至注入过度的观点数据，预训练模型可能从偏见的数据源中学习到不平等或不公正的模式，导致模型输出带有种族、性别、年龄、宗教等偏见。这些偏见会反映在模型生成的文本或预测结果中。偏见模型输出可能违反公平和反歧视法律法规。例如，模型的偏见输出可能违反雇佣平等、消费者保护或其他相关法律。这些风险对模型的公平性、准确性和用户体验产生负面影响，需在训练阶段采取措施减少和消除数据中的偏见。
+Debido a que en la fase de entrenamiento no se realizó una revisión de seguridad ni una limpieza adecuada de los datos de entrenamiento, e incluso se inyectaron datos con opiniones excesivas, el modelo preentrenado puede aprender patrones desiguales o injustos a partir de fuentes de datos sesgadas, provocando que la salida del modelo contenga sesgos de raza, género, edad, religión, entre otros. Estos sesgos se reflejarán en el texto generado por el modelo o en los resultados de sus predicciones. Una salida sesgada del modelo puede violar leyes y normativas de igualdad y antidiscriminación. Por ejemplo, la salida sesgada del modelo puede violar leyes de igualdad de empleo, protección al consumidor u otras leyes relacionadas. Estos riesgos afectan negativamente la equidad, la precisión y la experiencia del usuario del modelo, y se requiere tomar medidas durante la fase de entrenamiento para reducir y eliminar los sesgos en los datos.
 
-**攻击案例**
+**Casos de ataque**
 
-案例一：模型在生成具备赚取高额收入时倾向于男人形象，明显存在性别偏见
-
-
-  
-预训练模型数据偏见案例一
-
-案例二：Stable Diffusion 在生成与家务相关的角色时倾向于女性形象，这可能反映出社会性别角色的刻板印象
+Caso 1: al generar imágenes relacionadas con ingresos altos, el modelo tiende a mostrar figuras masculinas, evidenciando un claro sesgo de género.
 
 
   
-预训练模型数据偏见案例二
+Sesgo en los datos del modelo preentrenado, caso 1
 
-案例三：模型在生成囚犯角色时倾向于使用黑色人种形象，明显存在性别和种族偏见
+Caso 2: Stable Diffusion, al generar personajes relacionados con tareas domésticas, tiende a mostrar figuras femeninas, lo que puede reflejar estereotipos sociales de rol de género.
 
 
   
-预训练模型数据偏见案例三
+Sesgo en los datos del modelo preentrenado, caso 2
 
-**攻击风险**
-
-社会影响：带有偏见和歧视的内容可能会加剧社会分裂，引发或加剧社会冲突；
-法律风险：发布或传播仇恨言论和歧视内容可能违反法律法规，导致法律责任；
-信誉损害：企业和组织如果未能有效管理AI模型产生的不当内容，可能会损害其公众形象和信誉；
-道德责任：AI模型的开发者和运营者有道德责任确保其技术不被用于传播负面和有害的信息。
-
-**缓解措施**
-
-缓解方式
-描述
+Caso 3: el modelo, al generar personajes de presos, tiende a usar figuras de personas de raza negra, evidenciando un claro sesgo de género y racial.
 
 
+  
+Sesgo en los datos del modelo preentrenado, caso 3
+
+**Riesgos del ataque**
+
+Impacto social: contenido con sesgo y discriminación puede agravar la división social, provocando o intensificando conflictos sociales.
+Riesgo legal: publicar o difundir discursos de odio y contenido discriminatorio puede violar leyes y normativas, provocando responsabilidad legal.
+Daño reputacional: si las empresas y organizaciones no logran gestionar eficazmente el contenido inapropiado generado por los modelos de IA, pueden dañar su imagen pública y reputación.
+Responsabilidad moral: los desarrolladores y operadores de modelos de IA tienen la responsabilidad moral de garantizar que su tecnología no sea utilizada para difundir información negativa y dañina.
+
+**Medidas de mitigación**
+
+Medida de mitigación
+Descripción
 
 
-数据清洗
-对预训练的数据进行严格的清洗和预处理，识别和修正数据中的偏见
 
 
-增加数据多样性
-确保训练数据具有多样性，代表性良好，覆盖不同的群体和场景，以减少偏见的影响
+Limpieza de datos
+Realizar una limpieza y preprocesamiento riguroso de los datos de preentrenamiento, identificando y corrigiendo sesgos en los datos.
 
-**参考**
+
+Aumentar la diversidad de los datos
+Garantizar que los datos de entrenamiento tengan diversidad y buena representatividad, cubriendo diferentes grupos y escenarios, para reducir el impacto de los sesgos.
+
+**Referencias**
 
 https://home.dartmouth.edu/news/2024/01/zeroing-origins-bias-large-language-models
 

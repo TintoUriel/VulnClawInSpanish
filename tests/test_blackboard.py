@@ -50,7 +50,7 @@ def test_abandon_and_active_intents():
 def test_mark_complete_and_summary():
     board = Blackboard(goal="flag")
     board.add_fact("seed")
-    board.mark_complete("flag{found} 已验证")
+    board.mark_complete("flag{found} verificado")
     summary = board.get_summary()
     assert summary["completed"] is True
     assert summary["complete_reason"].startswith("flag{found}")

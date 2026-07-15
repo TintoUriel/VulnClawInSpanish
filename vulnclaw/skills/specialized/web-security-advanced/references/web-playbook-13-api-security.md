@@ -1,194 +1,194 @@
-# API安全
+# Seguridad de API
 English: API Security
 - Entry Count: 12
 - Use this file to shortlist relevant payloads, then open the linked source markdown for the full workflow and commands.
-## JWT安全漏洞
+## Vulnerabilidad de seguridad de JWT
 - ID: jwt-security
 - Difficulty: intermediate
 - Subcategory: JWT
 - Tags: jwt, token, authentication
 - Original Extracted Source: original extracted web-security-wiki source/jwt-security.md
 Description:
-JSON Web Token安全漏洞利用
+Explotación de vulnerabilidades de seguridad de JSON Web Token
 Prerequisites:
-- 使用JWT进行认证
-- JWT配置或验证存在问题
+- Se usa JWT para la autenticación
+- Existe un problema en la configuración o validación de JWT
 Execution Outline:
-1. 1. 解码JWT
-2. 2. None算法攻击
-3. 3. 弱密钥破解
-4. 4. 密钥混淆攻击
-## GraphQL注入攻击
+1. 1. Decodificar el JWT
+2. 2. Ataque de algoritmo None
+3. 3. Descifrado de clave débil
+4. 4. Ataque de confusión de clave
+## Ataque de inyección en GraphQL
 - ID: graphql-injection
 - Difficulty: intermediate
 - Subcategory: GraphQL
 - Tags: graphql, api, injection, introspection
 - Original Extracted Source: original extracted web-security-wiki source/graphql-injection.md
 Description:
-GraphQL API注入与信息泄露攻击
+Ataque de inyección y fuga de información en API GraphQL
 Prerequisites:
-- 目标使用GraphQL API
-- 存在未授权访问或注入点
+- El objetivo usa API GraphQL
+- Existe acceso no autorizado o un punto de inyección
 Execution Outline:
-1. 1. 探测GraphQL端点
-2. 2. 内省查询
-3. 3. 批量查询攻击
-4. 4. SQL注入
-## GraphQL内省攻击
+1. 1. Sondear el endpoint de GraphQL
+2. 2. Consulta de introspección
+3. 3. Ataque de consultas por lotes
+4. 4. Inyección SQL
+## Ataque de introspección de GraphQL
 - ID: graphql-introspection
 - Difficulty: beginner
-- Subcategory: GraphQL内省
+- Subcategory: Introspección de GraphQL
 - Tags: graphql, introspection, enumeration, api
 - Original Extracted Source: original extracted web-security-wiki source/graphql-introspection.md
 Description:
-利用GraphQL内省功能获取API结构
+Explota la funcionalidad de introspección de GraphQL para obtener la estructura de la API
 Prerequisites:
-- 目标使用GraphQL
-- 内省功能未禁用
+- El objetivo usa GraphQL
+- La funcionalidad de introspección no está deshabilitada
 Execution Outline:
-1. 1. 基础内省
-2. 2. 完整内省
-3. 3. 使用工具分析
-## GraphQL批量查询攻击
+1. 1. Introspección básica
+2. 2. Introspección completa
+3. 3. Análisis con herramientas
+## Ataque de consultas por lotes en GraphQL
 - ID: graphql-batching
 - Difficulty: intermediate
-- Subcategory: GraphQL批量查询
+- Subcategory: Consultas por lotes de GraphQL
 - Tags: graphql, batching, rate-limit, bypass
 - Original Extracted Source: original extracted web-security-wiki source/graphql-batching.md
 Description:
-利用GraphQL批量查询绕过速率限制
+Explota las consultas por lotes de GraphQL para eludir el límite de tasa
 Prerequisites:
-- 目标使用GraphQL
-- 存在速率限制
+- El objetivo usa GraphQL
+- Existe límite de tasa
 Execution Outline:
-1. 1. 别名批量查询
-2. 2. 数组批量查询
-3. 3. 暴力破解
-## REST API安全测试
+1. 1. Consulta por lotes mediante alias
+2. 2. Consulta por lotes mediante array
+3. 3. Fuerza bruta
+## Pruebas de seguridad de REST API
 - ID: rest-api-security
 - Difficulty: intermediate
 - Subcategory: REST API
 - Tags: rest, api, security, testing
 - Original Extracted Source: original extracted web-security-wiki source/rest-api-security.md
 Description:
-REST API安全测试与漏洞利用
+Pruebas de seguridad y explotación de vulnerabilidades en REST API
 Prerequisites:
-- 目标使用REST API
-- 了解API端点
+- El objetivo usa REST API
+- Se conocen los endpoints de la API
 Execution Outline:
-1. 1. API端点发现
-2. 2. 认证测试
-3. 3. HTTP方法测试
-4. 4. 参数污染
-## JWT None算法攻击
+1. 1. Descubrimiento de endpoints de la API
+2. 2. Pruebas de autenticación
+3. 3. Pruebas de métodos HTTP
+4. 4. Contaminación de parámetros
+## Ataque de algoritmo None en JWT
 - ID: jwt-none-alg
 - Difficulty: beginner
-- Subcategory: JWT安全
+- Subcategory: Seguridad de JWT
 - Tags: jwt, none, algorithm, bypass
 - Original Extracted Source: original extracted web-security-wiki source/jwt-none-alg.md
 Description:
-利用JWT None算法绕过签名验证
+Explota el algoritmo None de JWT para eludir la verificación de firma
 Prerequisites:
-- 目标使用JWT认证
-- 服务器未正确验证算法
+- El objetivo usa autenticación JWT
+- El servidor no valida correctamente el algoritmo
 Execution Outline:
-1. 1. 解码JWT
-2. 2. 构造None算法Token
-3. 3. 修改用户权限
-4. 4. 发送恶意Token
-## JWT密钥混淆攻击
+1. 1. Decodificar el JWT
+2. 2. Construir un Token con algoritmo None
+3. 3. Modificar los permisos del usuario
+4. 4. Enviar el Token malicioso
+## Ataque de confusión de clave en JWT
 - ID: jwt-key-confusion
 - Difficulty: intermediate
-- Subcategory: JWT安全
+- Subcategory: Seguridad de JWT
 - Tags: jwt, algorithm, confusion, rs256
 - Original Extracted Source: original extracted web-security-wiki source/jwt-key-confusion.md
 Description:
-利用JWT算法混淆实现签名绕过
+Explota la confusión de algoritmo de JWT para lograr el bypass de la firma
 Prerequisites:
-- 目标使用RS256算法
-- 可获取公钥
+- El objetivo usa el algoritmo RS256
+- Es posible obtener la clave pública
 Execution Outline:
-1. 1. 获取公钥
-2. 2. 算法混淆攻击
-3. 3. 发送恶意Token
-## IDOR不安全的直接对象引用
+1. 1. Obtener la clave pública
+2. 2. Ataque de confusión de algoritmo
+3. 3. Enviar el Token malicioso
+## IDOR referencia directa a objetos insegura
 - ID: api-idor
 - Difficulty: beginner
 - Subcategory: IDOR
 - Tags: idor, api, authorization, bypass
 - Original Extracted Source: original extracted web-security-wiki source/api-idor.md
 Description:
-利用IDOR漏洞访问未授权资源
+Explota la vulnerabilidad IDOR para acceder a recursos no autorizados
 Prerequisites:
-- 目标使用ID引用资源
-- 存在授权检查缺陷
+- El objetivo usa un ID para referenciar recursos
+- Existe un defecto en la verificación de autorización
 Execution Outline:
-1. 1. 识别ID参数
-2. 2. 枚举ID
-3. 3. 批量检测
-4. 4. 跨用户访问
-## API速率限制绕过
+1. 1. Identificar el parámetro ID
+2. 2. Enumerar el ID
+3. 3. Detección masiva
+4. 4. Acceso entre usuarios
+## Bypass del límite de tasa de la API
 - ID: api-rate-limit
 - Difficulty: intermediate
-- Subcategory: 速率限制
+- Subcategory: Límite de tasa
 - Tags: api, rate-limit, bypass, brute-force
 - Original Extracted Source: original extracted web-security-wiki source/api-rate-limit.md
 Description:
-绕过API速率限制进行暴力攻击
+Elude el límite de tasa de la API para realizar un ataque de fuerza bruta
 Prerequisites:
-- 目标有速率限制
-- 限制实现有缺陷
+- El objetivo tiene límite de tasa
+- La implementación del límite tiene defectos
 Execution Outline:
-1. 1. 检测速率限制
-2. 2. IP绕过
-3. 3. 分布式绕过
-4. 4. 其他绕过技术
-## 批量赋值漏洞
+1. 1. Detectar el límite de tasa
+2. 2. Bypass por IP
+3. 3. Bypass distribuido
+4. 4. Otras técnicas de bypass
+## Vulnerabilidad de asignación masiva
 - ID: api-mass-assignment
 - Difficulty: beginner
-- Subcategory: 批量赋值
+- Subcategory: Asignación masiva
 - Tags: api, mass-assignment, privilege-escalation
 - Original Extracted Source: original extracted web-security-wiki source/api-mass-assignment.md
 Description:
-利用批量赋值漏洞修改敏感字段
+Explota la vulnerabilidad de asignación masiva para modificar campos sensibles
 Prerequisites:
-- API接受JSON输入
-- 存在未过滤的字段
+- La API acepta entrada JSON
+- Existen campos sin filtrar
 Execution Outline:
-1. 1. 识别输入字段
-2. 2. 添加敏感字段
-3. 3. 更新操作
-4. 4. 嵌套对象
-## BOLA破坏对象级授权
+1. 1. Identificar los campos de entrada
+2. 2. Agregar campos sensibles
+3. 3. Operación de actualización
+4. 4. Objetos anidados
+## BOLA quebrantamiento de la autorización a nivel de objeto
 - ID: api-bola
 - Difficulty: intermediate
 - Subcategory: BOLA
 - Tags: api, bola, authorization, idor
 - Original Extracted Source: original extracted web-security-wiki source/api-bola.md
 Description:
-利用BOLA漏洞访问未授权对象
+Explota la vulnerabilidad BOLA para acceder a objetos no autorizados
 Prerequisites:
-- API使用对象ID
-- 授权检查缺陷
+- La API usa un ID de objeto
+- Existe un defecto en la verificación de autorización
 Execution Outline:
-1. 1. 识别对象访问
-2. 2. 测试授权
-3. 3. 横向访问
-4. 4. 修改/删除操作
-## API注入攻击
+1. 1. Identificar el acceso a objetos
+2. 2. Probar la autorización
+3. 3. Acceso horizontal
+4. 4. Operaciones de modificación/eliminación
+## Ataque de inyección en API
 - ID: api-injection
 - Difficulty: intermediate
-- Subcategory: API注入
+- Subcategory: Inyección en API
 - Tags: api, injection, sqli, nosqli
 - Original Extracted Source: original extracted web-security-wiki source/api-injection.md
 Description:
-API端点中的各类注入攻击
+Diversos tipos de ataques de inyección en endpoints de API
 Prerequisites:
-- API接受用户输入
-- 输入未正确过滤
+- La API acepta entrada del usuario
+- La entrada no se filtra correctamente
 Execution Outline:
-1. 1. SQL注入
-2. 2. NoSQL注入
-3. 3. LDAP注入
-4. 4. 命令注入
-
+1. 1. Inyección SQL
+2. 2. Inyección NoSQL
+3. 3. Inyección LDAP
+4. 4. Inyección de comandos
+</content>

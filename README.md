@@ -2,153 +2,153 @@
 
 # VulnClaw 🦞
 
-> *AI 驱动的渗透测试 CLI 工具 — 说人话，打漏洞。*
+> *Herramienta CLI de pentesting impulsada por IA — habla en cristiano, rompe vulnerabilidades.*
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://www.python.org/)
 [![OpenAI Compatible](https://img.shields.io/badge/API-OpenAI_Compatible-green)](https://platform.openai.com/)
 [![MCP](https://img.shields.io/badge/Toolchain-MCP-orange)](https://modelcontextprotocol.io/)
 [![PyPI](https://img.shields.io/badge/PyPI-v0.3.3-blueviolet)](https://pypi.org/project/vulnclaw/)
-[![Security](https://img.shields.io/badge/Scope-Authorized_Only-red)](#-安全声明)
+[![Security](https://img.shields.io/badge/Scope-Authorized_Only-red)](#declaración-de-seguridad)
 [![AtomGitStars](https://atomgit.com/Unclecheng-li/VulnClaw/star/badge.svg)](https://atomgit.com/Unclecheng-li/VulnClaw)
 <br>
 
-🌐 **English version**: [`README_EN.md`](README_EN.md)
+🌐 **Versión en inglés**: [`README_EN.md`](README_EN.md)
 
-**本项目是可独立运行的 AI 渗透测试 Agent。**
+**Este proyecto es un Agent de pentesting con IA que se ejecuta de forma independiente.**
 <br>
-项目官网：https://unclecheng-li.github.io/vulnclaw.com/
+Sitio oficial del proyecto: https://unclecheng-li.github.io/vulnclaw.com/
 <br>
 
-基于 LLM Agent + MCP 工具链 + 渗透 Skill 编排，
-配合 OpenAI / Anthropic / MiniMax / DeepSeek 等兼容模型，
-自然语言输入 → 自动完成「信息收集 → 漏洞发现 → 漏洞利用 → 报告生成」全流程。
+Basado en un Agent LLM + cadena de herramientas MCP + orquestación de Skills de pentesting,
+combinado con modelos compatibles como OpenAI / Anthropic / MiniMax / DeepSeek, etc.,
+entrada en lenguaje natural → flujo completo automatizado de «recopilación de información → descubrimiento de vulnerabilidades → explotación → generación de reportes».
 
-[快速开始](#快速开始) · [架构设计](#️-架构) · [Skill 体系](#-内置-skill)
+[Inicio rápido](#inicio-rápido) · [Diseño de arquitectura](#arquitectura) · [Sistema de Skills](#skills-integradas)
 
 </div>
 
 ---
 
-## 它能做什么
+## Qué puede hacer
 
-输入自然语言，AI 自动执行渗透测试全流程：
+Introduces lenguaje natural y la IA ejecuta automáticamente todo el flujo de pentesting:
 
 ```
-用户输入：帮我对 http://target.example.com 进行渗透测试
+Entrada del usuario: ayúdame a hacer un pentest a http://target.example.com
 
-VulnClaw 自动执行：
-  Round 1:  信息收集 → 指纹识别、端口扫描、目录枚举
-  Round 2:  漏洞发现 → 检测注入点、已知 CVE、配置缺陷
-  Round 3:  漏洞利用 → PoC 验证、权限获取
-  Round 4:  报告生成 → 结构化报告 + Python PoC 脚本
+VulnClaw ejecuta automáticamente:
+  Ronda 1:  Recopilación de información → fingerprinting, escaneo de puertos, enumeración de directorios
+  Ronda 2:  Descubrimiento de vulnerabilidades → detección de puntos de inyección, CVE conocidos, fallos de configuración
+  Ronda 3:  Explotación → verificación de PoC, obtención de privilegios
+  Ronda 4:  Generación de reportes → reporte estructurado + script PoC en Python
 ```
 
 <img width="1148" height="642" alt="image" src="https://github.com/user-attachments/assets/576e1cf6-25da-4969-864b-40e77d020dbf" />
 
 <img width="2529" height="1136" alt="image" src="https://github.com/user-attachments/assets/9612c633-31f3-4062-8f56-ea5b4989fd50" />
 
-适用于已授权的渗透测试、CTF 竞赛、安全教学、红队演练等场景。
+Adecuado para pentesting autorizado, competencias CTF, enseñanza de seguridad, ejercicios de equipo rojo, entre otros escenarios.
 
 ---
 
-## 特性
+## Características
 
-- **目标驱动求解引擎（默认）** — 抛弃固定轮数工作流，以「目标达成 / 探索前沿耗尽 / 安全预算」为终止条件，自动收敛
-- **黑板图状态空间搜索** — 把渗透建模为从 origin 向 goal 的搜索：Fact（已确认事实）+ Intent（探索方向），结构上杜绝"原地打转"
-- **证据级反幻觉闸门** — 声称的 flag/结论必须在真实工具输出里逐字符出现才被采信，杜绝凭空编造 flag 的假胜利
-- **自然语言驱动** — 用人话描述渗透意图，自动识别阶段和工具
-- **13 个 LLM Provider** — OpenAI / Anthropic / MiniMax / DeepSeek / 智谱 / Moonshot / 千问 / SiliconFlow / 豆包 / 百川 / 阶跃星辰 / 商汤 / 零一万物，一键切换
-- **MCP 工具链** — 4 个 MCP 服务：`fetch` / `memory` 本地实现开箱即用，`chrome-devtools` / `burp` 对接外部 MCP 服务实现浏览器自动化和 HTTP 抓包重放
-- **原生流量证据存储** — VulnClaw 自有的抓包存储：按运行内作用域过滤后以追加式 JSONL 索引 + 每请求原始报文落盘于 `evidence/traffic/`。内置 `traffic_list` / `traffic_view` / `traffic_repeat` / `traffic_sitemap` 工具直接读写该存储（`traffic_repeat` 支持带覆盖重放），已验证漏洞的报告直接内联证明它的原始请求/响应。mitmproxy 代理与 Playwright 浏览器捕获后端为可选依赖（`pip install vulnclaw[traffic]`），并按可用性检测启用；其在沙箱运行循环中的自动接入随沙箱/运行目录 PRD 落地。Burp/chrome-devtools 作为可选交互式叠加层归一化进同一存储
-- **AI Agent 核心** — OpenAI 兼容协议 + Tool Calling + 自主渗透循环
-- **结构化推理 + 自适应反思** — 已知事实/约束/攻击链结构化沉淀；失败自动归类并按 L0-L4 渐进升级 payload 绕过策略
-- **漏洞检测插件体系** — 低耦合插件运行时 + 内置只读 Web 插件，结果自动汇入报告链路（`vulnclaw plugins`）
-- **21 个渗透 Skill** — 7 核心 + 14 专项 Skill（含 CTF Web/Crypto/Misc、osint-recon、secknowledge-skill），含 180 个参考文档
-- **编解码/加解密工具** — 29 种操作（Base64/Hex/URL/AES/JWT/Morse 等），LLM 可精确调用，不再靠猜测
-- **Python 代码执行** — 内置 `python_execute` 工具，适合 payload 构造和响应解析；当前仍属高风险实验能力，不应视为强隔离沙箱
-- **持续性渗透测试** — 周期循环（默认 100 轮/周期 × 10 周期 = 1000 轮），每周期自动生成报告，直到手动终止
-- **推理过程显示控制** — `think on/off` 一键切换 LLM 思考过程的显示/隐藏，默认关闭，干净输出只看结论
-- **沙盒模式提示词** — 解锁 AI 安全测试能力，CTF / 授权渗透场景专用
-- **自动报告 & PoC** — 生成结构化 Markdown 报告和可运行的 Python PoC 脚本
-- **Web UI 模式** — `vulnclaw web` 启动本地 Web 界面，浏览器操作渗透测试全流程，默认 `127.0.0.1:7788`
-- **安全知识库** — 已内置知识库模块与基础种子数据，CLI 可维护；检索增强正在逐步接入主流程
+- **Motor de resolución orientado a objetivos (predeterminado)** — abandona el flujo de trabajo de rondas fijas, y converge automáticamente usando como criterio de finalización «objetivo alcanzado / frontera de exploración agotada / presupuesto de seguridad»
+- **Búsqueda en espacio de estados con grafo de pizarra (blackboard)** — modela el pentesting como una búsqueda desde el origin hasta el goal: Fact (hechos confirmados) + Intent (direcciones de exploración), estructuralmente evita "dar vueltas en el mismo sitio"
+- **Compuerta antialucinación a nivel de evidencia** — las flags/conclusiones declaradas deben aparecer carácter por carácter en la salida real de las herramientas para ser aceptadas, evitando victorias falsas por flags inventadas de la nada
+- **Impulsado por lenguaje natural** — describe la intención del pentesting en lenguaje humano, identifica automáticamente la fase y las herramientas
+- **13 proveedores de LLM** — OpenAI / Anthropic / MiniMax / DeepSeek / Zhipu / Moonshot / Qwen / SiliconFlow / Doubao / Baichuan / StepFun / SenseTime / 01.AI, cambio con un solo clic
+- **Cadena de herramientas MCP** — 4 servicios MCP: `fetch` / `memory` con implementación local lista para usar, `chrome-devtools` / `burp` conectados a servicios MCP externos para automatización de navegador y captura/repetición de tráfico HTTP
+- **Almacenamiento nativo de evidencia de tráfico** — almacenamiento propio de VulnClaw para capturas: filtrado por alcance dentro de la ejecución, indexado en JSONL de tipo append + los paquetes originales de cada solicitud se guardan en `evidence/traffic/`. Herramientas integradas `traffic_list` / `traffic_view` / `traffic_repeat` / `traffic_sitemap` leen y escriben directamente sobre este almacenamiento (`traffic_repeat` admite repetición con sobrescritura); los reportes de vulnerabilidades verificadas incluyen directamente en línea la solicitud/respuesta original que las demuestra. El proxy mitmproxy y el backend de captura de navegador Playwright son dependencias opcionales (`pip install vulnclaw[traffic]`) y se activan según disponibilidad detectada; su integración automática en el ciclo de ejecución en sandbox se implementará junto con el PRD de sandbox/directorio de ejecución. Burp/chrome-devtools funcionan como capa interactiva opcional superpuesta, normalizada dentro del mismo almacenamiento
+- **Núcleo de Agent de IA** — protocolo compatible con OpenAI + Tool Calling + ciclo de pentesting autónomo
+- **Razonamiento estructurado + reflexión adaptativa** — hechos/restricciones/cadenas de ataque conocidos se consolidan de forma estructurada; los fallos se clasifican automáticamente y las estrategias de bypass de payload se escalan progresivamente en niveles L0-L4
+- **Sistema de plugins de detección de vulnerabilidades** — runtime de plugins de bajo acoplamiento + plugin Web de solo lectura integrado, los resultados se incorporan automáticamente al reporte (`vulnclaw plugins`)
+- **21 Skills de pentesting** — 7 centrales + 14 especializadas (incluye CTF Web/Crypto/Misc, osint-recon, secknowledge-skill), con 180 documentos de referencia
+- **Herramientas de codificación/cifrado** — 29 operaciones (Base64/Hex/URL/AES/JWT/Morse, etc.), el LLM puede invocarlas con precisión, sin depender de adivinar
+- **Ejecución de código Python** — herramienta integrada `python_execute`, útil para construir payloads y analizar respuestas; actualmente sigue siendo una capacidad experimental de alto riesgo, no debe considerarse un sandbox de aislamiento fuerte
+- **Pentesting continuo** — ciclos periódicos (por defecto 100 rondas/ciclo × 10 ciclos = 1000 rondas), genera reportes automáticamente en cada ciclo, hasta que se termine manualmente
+- **Control de visualización del proceso de razonamiento** — `think on/off` alterna con un solo comando la visualización/ocultación del proceso de pensamiento del LLM, desactivado por defecto, salida limpia mostrando solo conclusiones
+- **Prompt de modo sandbox** — desbloquea capacidades de pruebas de seguridad de IA, exclusivo para escenarios de CTF / pentesting autorizado
+- **Reporte automático y PoC** — genera reportes estructurados en Markdown y scripts PoC ejecutables en Python
+- **Modo Web UI** — `vulnclaw web` inicia una interfaz Web local, opera todo el flujo de pentesting desde el navegador, por defecto en `127.0.0.1:7788`
+- **Base de conocimiento de seguridad** — módulo de base de conocimiento integrado con datos semilla básicos, mantenible desde el CLI; la recuperación aumentada se está integrando gradualmente al flujo principal
 
 ---
 
-## 架构升级：从「固定轮数工作流」到「目标驱动求解」
+## Actualización de arquitectura: de «flujo de trabajo de rondas fijas» a «resolución orientada a objetivos»
 
-旧版自主渗透是**固定轮数循环**（跑满 N 轮才停），在弱模型上容易陷入"反复请求同一页面、嘴上说要测注入却不发包"的死循环。新版把渗透重构为**状态空间搜索**，这是本次重构的核心。
+La versión anterior del pentesting autónomo era un **ciclo de rondas fijas** (se ejecutaba hasta agotar N rondas), lo que en modelos débiles caía fácilmente en bucles infinitos del tipo "solicitar repetidamente la misma página, decir que va a probar inyección pero nunca enviar el paquete". La nueva versión reconstruye el pentesting como una **búsqueda en espacio de estados**, y esto es el núcleo de esta refactorización.
 
-### 黑板图 + OODA 求解循环（默认引擎 `solve`）
+### Ciclo de resolución de grafo de pizarra + OODA (motor predeterminado `solve`)
 
-把渗透看作从 **origin**（目标）向 **goal**（拿到 flag / shell / 确认高危漏洞）的有向搜索，用两个原语驱动：
+Se concibe el pentesting como una búsqueda dirigida desde el **origin** (objetivo) hasta el **goal** (obtener la flag / shell / confirmar una vulnerabilidad de alto riesgo), impulsada por dos primitivas:
 
-| 原语 | 含义 |
+| Primitiva | Significado |
 |------|------|
-| **Fact** | 已被真实工具输出证实的客观事实（探索的落脚点） |
-| **Intent** | 声明的探索方向（尚未执行的一步），从 Fact 出发，结论后产出新 Fact |
+| **Fact** | Un hecho objetivo confirmado por la salida real de una herramienta (el punto de apoyo de la exploración) |
+| **Intent** | Una dirección de exploración declarada (un paso aún no ejecutado), que parte de un Fact y, al concluir, produce un nuevo Fact |
 
-循环结构（`vulnclaw/agent/solver.py`）：
+Estructura del ciclo (`vulnclaw/agent/solver.py`):
 
 ```
-REASON（读全图）→ 目标达成? / 提出新探索方向 / 不提出
+REASON (lee todo el grafo) → ¿objetivo alcanzado? / propone nueva dirección de exploración / no propone nada
         │
-EXPLORE（领一个 Intent）→ 用工具实际执行 → 把确认的结论写回为一个 Fact
+EXPLORE (toma un Intent) → lo ejecuta realmente con herramientas → escribe la conclusión confirmada como un nuevo Fact
         │
-终止：目标达成 / 探索前沿耗尽（Reason 不再提方向）/ 触达安全预算
+Finalización: objetivo alcanzado / frontera de exploración agotada (Reason ya no propone direcciones) / se alcanza el presupuesto de seguridad
 ```
 
-**为什么结构上杜绝打转**：一旦"首页是登录框"成为一个 Fact，Reason 就不会再提"去看首页"，而是提"测 SQL 注入"；每个 Intent 领取一次、结论一次即标记 `concluded`/`abandoned`，**不可能重复**。终止由目标驱动，不再是数死轮数。
+**Por qué estructuralmente se evita dar vueltas en círculos**: una vez que "la página de inicio es un formulario de login" se convierte en un Fact, Reason ya no volverá a proponer "revisar la página de inicio", sino que propondrá "probar inyección SQL"; cada Intent se toma una sola vez y concluye una sola vez, marcándose como `concluded`/`abandoned`, **es imposible repetirlo**. La finalización está orientada por el objetivo, ya no se cuentan rondas fijas.
 
-### 证据级反幻觉闸门
+### Compuerta antialucinación a nivel de evidencia
 
-弱模型常凭空编造 flag。新引擎在 `solve()` 里录制**所有真实工具输出**（HTTP 响应体、`python_execute` 输出）作为唯一可信证据：
+Los modelos débiles a menudo inventan flags de la nada. El nuevo motor registra en `solve()` **toda la salida real de las herramientas** (cuerpos de respuesta HTTP, salida de `python_execute`) como única evidencia confiable:
 
-- **结论闸门**：Explore 结论里声称的 flag，若未在真实工具输出里逐字符出现 → 判定幻觉、丢弃、标记 `[未验证]`。
-- **完成闸门**：Reason 宣布"目标达成"时，若目标要 flag 但真实输出里从无 flag → 拒绝完成、继续探索。
-- **即时收敛**：一旦拿到经证据验证的 flag，立即完成，不再空跑验证轮。
+- **Compuerta de conclusión**: si la flag declarada en la conclusión de Explore no aparece carácter por carácter en la salida real de la herramienta → se determina como alucinación, se descarta y se marca `[no verificado]`.
+- **Compuerta de finalización**: cuando Reason declara "objetivo alcanzado", si el objetivo requiere una flag pero la salida real nunca contuvo ninguna → se rechaza la finalización y se continúa explorando.
+- **Convergencia inmediata**: en cuanto se obtiene una flag verificada por evidencia, se finaliza de inmediato, sin rondas de verificación vacías adicionales.
 
-> 这套机制对弱模型尤其友好：旧的固定轮数循环容易在重复请求里空转，而「目标驱动 + 证据反幻觉」会逼着 Agent 用真实工具输出一步步逼近目标，并拒绝任何无证据支撑的「完成」。
+> Este mecanismo es especialmente amigable con modelos débiles: el antiguo ciclo de rondas fijas caía fácilmente en bucles vacíos de solicitudes repetidas, mientras que «orientado a objetivos + antialucinación por evidencia» obliga al Agent a acercarse al objetivo paso a paso usando salida real de herramientas, y rechaza cualquier "finalización" sin respaldo de evidencia.
 
-### 结构化推理 + 自适应反思
+### Razonamiento estructurado + reflexión adaptativa
 
-- **推理状态层**（`reasoning_state.py`）：已知事实（带置信度）、推理障碍（WAF/过滤等）、候选攻击链，结构化沉淀并注入提示词。
-- **反思引擎**（`reflexion.py`）：失败自动归类（环境限制/路径错误/参数错误/信息不足），按 **L0-L4 渐进升级** payload 绕过策略（原始 → URL 编码 → 双写注释 → Unicode/hex → 多层混淆/换攻击面），persistent 模式跨周期保留失败记忆。
+- **Capa de estado de razonamiento** (`reasoning_state.py`): hechos conocidos (con nivel de confianza), obstáculos de razonamiento (WAF/filtros, etc.), cadenas de ataque candidatas, consolidados de forma estructurada e inyectados en el prompt.
+- **Motor de reflexión** (`reflexion.py`): los fallos se clasifican automáticamente (limitación de entorno/ruta incorrecta/parámetro incorrecto/información insuficiente), y las estrategias de bypass de payload se escalan progresivamente en **niveles L0-L4** (original → codificación URL → comentario de doble escritura → Unicode/hex → ofuscación multicapa/cambio de superficie de ataque), el modo persistent conserva la memoria de fallos entre ciclos.
 
-### 漏洞检测插件体系
+### Sistema de plugins de detección de vulnerabilidades
 
-低耦合插件运行时（`vulnclaw/plugins/`）+ 内置只读 Web 插件（安全响应头 / JWT / JS 端点分析），插件结果可去重合并进 `SessionState.findings` 进入报告链路。
+Runtime de plugins de bajo acoplamiento (`vulnclaw/plugins/`) + plugin Web de solo lectura integrado (encabezados de seguridad HTTP / JWT / análisis de endpoints JS), los resultados de los plugins pueden deduplicarse y fusionarse en `SessionState.findings` para entrar al flujo de reportes.
 
-> 切回旧的固定轮数引擎：`vulnclaw config set session.engine rounds`
+> Para volver al antiguo motor de rondas fijas: `vulnclaw config set session.engine rounds`
 
 ---
 
-## 快速开始
+## Inicio rápido
 
-### 安装
+### Instalación
 
 ```bash
-# 从 PyPI 安装（推荐）
+# Instalar desde PyPI (recomendado)
 pip install vulnclaw
 
-# 从源码安装
+# Instalar desde el código fuente
 git clone https://github.com/Unclecheng-li/VulnClaw.git
 cd VulnClaw
 pip install -e .
 ```
 
-### Docker 运行（可选）
+### Ejecución con Docker (opcional)
 
-镜像已内置 Web UI 以及默认 MCP 服务所需的运行时（`npx` / `uvx`），所有状态（配置、会话、目标、报告）持久化到 `/data` 数据卷。
+La imagen ya incluye la Web UI y el runtime necesario para los servicios MCP predeterminados (`npx` / `uvx`); todo el estado (configuración, sesiones, objetivos, reportes) se persiste en el volumen `/data`.
 
 ```bash
-cp .env.example .env          # 填入 VULNCLAW_LLM_API_KEY 等
-docker compose up --build      # 构建镜像并启动 Web UI
-# 打开 http://127.0.0.1:7788
+cp .env.example .env          # completa VULNCLAW_LLM_API_KEY, etc.
+docker compose up --build      # construye la imagen e inicia la Web UI
+# abre http://127.0.0.1:7788
 ```
 
-也可用纯 docker 运行某条 CLI 命令：
+También puedes ejecutar un comando CLI específico con docker puro:
 
 ```bash
 docker run --rm -it \
@@ -157,66 +157,66 @@ docker run --rm -it \
   vulnclaw:latest scan <target>
 ```
 
-> ⚠️ 容器内的 `localhost` 指向容器自身。扫描宿主机服务请使用 `host.docker.internal`，扫描其它容器请共享网络并用容器名访问。详见 [DOCKER.md](DOCKER.md)。
+> ⚠️ El `localhost` dentro del contenedor apunta al propio contenedor. Para escanear servicios del host, usa `host.docker.internal`; para escanear otros contenedores, comparte la red y accede por el nombre del contenedor. Más detalles en [DOCKER.md](DOCKER.md).
 
-### 四步启动
+### Inicio en cuatro pasos
 
 ```bash
-# 1. 选择提供商（自动填充 Base URL 和模型名）
-vulnclaw config provider minimax   (或 openai/anthropic/deepseek/zhipu/moonshot/qwen/siliconflow)
+# 1. Elige el proveedor (rellena automáticamente Base URL y nombre del modelo)
+vulnclaw config provider minimax   (o openai/anthropic/deepseek/zhipu/moonshot/qwen/siliconflow)
 
-# 1.2（可选）自定义 Base URL 或模型名
+# 1.2 (opcional) personaliza Base URL o nombre del modelo
 vulnclaw config set llm.base_url https://your-own-api.example.com/v1 
 vulnclaw config set llm.model your-model-name
 
-# 2. 设置 API Key
+# 2. Configura la API Key
 vulnclaw config set llm.api_key sk-your-key-here
-#    — 或改用 ChatGPT 订阅登录（无需 API Key）：
-#      vulnclaw login   （浏览器登录；详见 docs/keyless-auth.md，注意 ToS 风险）
+#    — o usa el inicio de sesión con suscripción ChatGPT (sin necesidad de API Key):
+#      vulnclaw login   (inicio de sesión por navegador; ver docs/keyless-auth.md, presta atención a los riesgos de ToS)
 
-# 3. 默认：打开原 CLI / REPL
+# 3. Predeterminado: abre el CLI / REPL original
 vulnclaw
 
-# 4. 可选：打开 TUI 工作台
+# 4. Opcional: abre el panel de trabajo TUI
 vulnclaw tui
 ```
 
-### 环境检查
+### Verificación del entorno
 
 ```bash
 vulnclaw doctor
 ```
 
-输出示例：
+Ejemplo de salida:
 
 ```
-🦞 VulnClaw 环境检查
+🦞 Verificación del entorno de VulnClaw
 
   Python: 3.14.4
   Node.js: v24.14.1
-  npx: 已安装
-  nmap: 已安装
+  npx: instalado
+  nmap: instalado
 
-LLM 配置:
+Configuración LLM:
   Provider: openai
   Auth Mode: static
-  Credentials: configured
+  Credentials: configurado
   Base URL: https://api.openai.com/v1
   Model: gpt-4o
 
-MCP 服务:
-  fetch: 已启用 [P0]
-  memory: 已启用 [P0]
+Servicios MCP:
+  fetch: habilitado [P0]
+  memory: habilitado [P0]
   ...
 
-✅ 环境就绪，运行 vulnclaw 开始
+✅ Entorno listo, ejecuta vulnclaw para comenzar
 ```
 
 ---
 
-## CLI 命令速查
+## Referencia rápida de comandos CLI
 
-`vulnclaw --help` 查看所有命令：
+`vulnclaw --help` muestra todos los comandos:
 
 ```bash
 $ vulnclaw --help
@@ -230,48 +230,48 @@ $ vulnclaw --help
    --help     Show this message and exit.
 
  Commands:
-   run           🚀 一键全流程渗透测试
-   persistent    🔄 持续性渗透测试（100轮/周期）
-   recon         🔍 仅信息收集阶段
-   scan          🔎 执行漏洞扫描阶段
-   exploit       💥 执行漏洞利用阶段
-   report        📝 从会话记录生成报告
-   repl          💬 启动经典 REPL 交互界面
-   config        ⚙️  管理配置（set/get/list/provider）
-   init          🔧 初始化配置
-   doctor        🏥  检查运行环境
-   tui           🖥️  打开终端图形化工作台
-   web           🌐 启动本地 Web UI
+   run           🚀 Pentesting de flujo completo con un clic
+   persistent    🔄 Pentesting continuo (100 rondas/ciclo)
+   recon         🔍 Solo fase de recopilación de información
+   scan          🔎 Ejecutar fase de escaneo de vulnerabilidades
+   exploit       💥 Ejecutar fase de explotación
+   report        📝 Generar reporte a partir del registro de sesión
+   repl          💬 Iniciar la interfaz REPL clásica interactiva
+   config        ⚙️  Gestionar la configuración (set/get/list/provider)
+   init          🔧 Inicializar configuración
+   doctor        🏥  Verificar el entorno de ejecución
+   tui           🖥️  Abrir el panel de trabajo TUI en terminal
+   web           🌐 Iniciar la Web UI local
 ```
 
-### 命令详解
+### Detalle de comandos
 
-| 命令 | 说明 | 示例 |
+| Comando | Descripción | Ejemplo |
 |------|------|------|
-| `vulnclaw` | 默认打开原 CLI / REPL 交互界面 | `vulnclaw` |
-| `vulnclaw tui` | 显式打开终端图形化工作台 | `vulnclaw tui` / `vulnclaw tui --target target.com` |
-| `vulnclaw repl` | 启动经典 REPL 交互界面 | `vulnclaw repl` |
-| `vulnclaw solve <target>` | 目标驱动求解（无固定轮数，拿到目标即停） | `vulnclaw solve target.com --goal "拿到flag"` |
-| `vulnclaw run <target>` | 一键全流程渗透（默认走 solve 引擎） | `vulnclaw run 192.168.1.1` |
-| `vulnclaw persistent <target>` | 持续性渗透（100轮/周期） | `vulnclaw persistent 192.168.1.1` |
-| `vulnclaw recon <target>` | 仅信息收集（不利用漏洞） | `vulnclaw recon target.com` |
-| `vulnclaw scan <target>` | 漏洞扫描阶段 | `vulnclaw scan target.com --ports 80,443` |
-| `vulnclaw exploit <target>` | 漏洞利用阶段 | `vulnclaw exploit target.com --cve CVE-2024-1234` |
-| `vulnclaw report <session>` | 从会话 JSON 生成报告 | `vulnclaw report session_xxx.json` |
-| `vulnclaw config set <key> <value>` | 设置配置项 | `vulnclaw config set llm.api_key sk-xxx` |
-| `vulnclaw config get <key>` | 查看配置项 | `vulnclaw config get llm.model` |
-| `vulnclaw config list` | 列出所有配置 | `vulnclaw config list` |
-| `vulnclaw config provider <name>` | 切换 LLM 提供商 | `vulnclaw config provider minimax` |
-| `vulnclaw init` | 初始化配置文件 | `vulnclaw init` |
-| `vulnclaw doctor` | 检查运行环境 | `vulnclaw doctor` |
-| `vulnclaw plugins list` | 列出漏洞检测插件 | `vulnclaw plugins list --stage discovery` |
-| `vulnclaw plugins info <id>` | 查看插件元信息 | `vulnclaw plugins info builtin.web.headers` |
-| `vulnclaw plugins run <id>` | 运行插件（仅分析传入数据） | `vulnclaw plugins run builtin.web.headers --input headers.json --session s.json` |
-| `vulnclaw web` | 启动本地 Web UI | `vulnclaw web` / `vulnclaw web --port 8080` |
+| `vulnclaw` | Abre por defecto la interfaz interactiva CLI / REPL original | `vulnclaw` |
+| `vulnclaw tui` | Abre explícitamente el panel de trabajo TUI en terminal | `vulnclaw tui` / `vulnclaw tui --target target.com` |
+| `vulnclaw repl` | Inicia la interfaz REPL clásica interactiva | `vulnclaw repl` |
+| `vulnclaw solve <target>` | Resolución orientada a objetivos (sin rondas fijas, se detiene al alcanzar el objetivo) | `vulnclaw solve target.com --goal "obtener flag"` |
+| `vulnclaw run <target>` | Pentesting de flujo completo con un clic (por defecto usa el motor solve) | `vulnclaw run 192.168.1.1` |
+| `vulnclaw persistent <target>` | Pentesting continuo (100 rondas/ciclo) | `vulnclaw persistent 192.168.1.1` |
+| `vulnclaw recon <target>` | Solo recopilación de información (sin explotar vulnerabilidades) | `vulnclaw recon target.com` |
+| `vulnclaw scan <target>` | Fase de escaneo de vulnerabilidades | `vulnclaw scan target.com --ports 80,443` |
+| `vulnclaw exploit <target>` | Fase de explotación | `vulnclaw exploit target.com --cve CVE-2024-1234` |
+| `vulnclaw report <session>` | Genera reporte a partir del JSON de sesión | `vulnclaw report session_xxx.json` |
+| `vulnclaw config set <key> <value>` | Establece un elemento de configuración | `vulnclaw config set llm.api_key sk-xxx` |
+| `vulnclaw config get <key>` | Consulta un elemento de configuración | `vulnclaw config get llm.model` |
+| `vulnclaw config list` | Lista toda la configuración | `vulnclaw config list` |
+| `vulnclaw config provider <name>` | Cambia el proveedor LLM | `vulnclaw config provider minimax` |
+| `vulnclaw init` | Inicializa el archivo de configuración | `vulnclaw init` |
+| `vulnclaw doctor` | Verifica el entorno de ejecución | `vulnclaw doctor` |
+| `vulnclaw plugins list` | Lista los plugins de detección de vulnerabilidades | `vulnclaw plugins list --stage discovery` |
+| `vulnclaw plugins info <id>` | Consulta los metadatos de un plugin | `vulnclaw plugins info builtin.web.headers` |
+| `vulnclaw plugins run <id>` | Ejecuta un plugin (solo analiza los datos de entrada) | `vulnclaw plugins run builtin.web.headers --input headers.json --session s.json` |
+| `vulnclaw web` | Inicia la Web UI local | `vulnclaw web` / `vulnclaw web --port 8080` |
 
-### TUI 工作台
+### Panel de trabajo TUI
 
-`vulnclaw tui` 是可选的终端图形化工作台入口。它会在终端中展示授权目标、检查模式、运行概览、安全边界、命令预览、历史状态、报告和内联环境诊断，让用户先确认范围再启动任务。
+`vulnclaw tui` es el punto de entrada opcional al panel de trabajo TUI en terminal. Muestra en la terminal el objetivo autorizado, el modo de verificación, la vista general de ejecución, los límites de seguridad, la vista previa de comandos, el estado histórico, los reportes y los diagnósticos de entorno en línea, permitiendo al usuario confirmar el alcance antes de iniciar la tarea.
 
 ```bash
 vulnclaw tui
@@ -279,18 +279,18 @@ vulnclaw tui --target https://target.example --mode quick --only-port 443
 vulnclaw tui --dry-run --target https://target.example --mode deep --only-path /admin
 ```
 
-默认 `vulnclaw` 仍然进入原 CLI / REPL 交互；只有显式输入 `vulnclaw tui` 才会进入 TUI。
-运行概览会读取已选目标的历史快照、风险数量、持久化约束和约束拦截次数，帮助用户在继续测试前确认上下文没有衰减。
-在 TUI 的“设置测试范围”中可以直接编辑允许动作和禁止动作，例如只允许 `recon,scan`，或禁止 `exploit,post_exploitation`。
+Por defecto `vulnclaw` sigue entrando al CLI / REPL original; solo entrando explícitamente `vulnclaw tui` se accede al TUI.
+La vista general de ejecución lee las instantáneas históricas, cantidad de riesgos, restricciones persistentes y número de bloqueos por restricción del objetivo seleccionado, ayudando al usuario a confirmar que el contexto no se ha degradado antes de continuar las pruebas.
+En "Configurar alcance de pruebas" del TUI se pueden editar directamente las acciones permitidas y prohibidas, por ejemplo permitir solo `recon,scan`, o prohibir `exploit,post_exploitation`.
 
-### 配置管理
+### Gestión de configuración
 
 ```bash
-# 查看所有提供商并切换
-vulnclaw config provider --list    # 查看所有可用提供商
-vulnclaw config provider minimax   # 切换到 MiniMax
+# Ver todos los proveedores y cambiar
+vulnclaw config provider --list    # ver todos los proveedores disponibles
+vulnclaw config provider minimax   # cambiar a MiniMax
 
-# 手动设置（custom 模式）
+# Configuración manual (modo custom)
 vulnclaw config set llm.base_url https://your-api.com/v1
 vulnclaw config set llm.model your-model-name
 vulnclaw config set llm.api_key sk-your-key
@@ -298,49 +298,49 @@ vulnclaw config set llm.api_key sk-your-key
 
 ---
 
-## 使用方式
+## Modos de uso
 
-### 方式一：原 CLI / REPL 交互模式（默认）
+### Modo uno: interacción CLI / REPL original (predeterminado)
 
 ```bash
 $ vulnclaw
 ```
 
-无参数启动会进入原本的 🦞 交互界面，用自然语言对话：
+Al iniciar sin parámetros se entra a la interfaz interactiva 🦞 original, dialogando en lenguaje natural:
 
 ```
-🦞 vulnclaw> 对 192.168.1.100 进行渗透测试，这是我授权的靶场
+🦞 vulnclaw> haz un pentest a 192.168.1.100, este es mi laboratorio autorizado
 
-[*] 进入自主渗透模式，按 Ctrl+C 可随时中断
-── Round 1 ──
-  [+] 目标: 192.168.1.100
-  [+] 开放端口: 22, 80, 443, 8080
+[*] Entrando al modo de pentesting autónomo, presiona Ctrl+C para interrumpir en cualquier momento
+── Ronda 1 ──
+  [+] Objetivo: 192.168.1.100
+  [+] Puertos abiertos: 22, 80, 443, 8080
 ```
 
-### 方式二：TUI 工作台（显式启用）
+### Modo dos: panel de trabajo TUI (activación explícita)
 
 ```bash
 $ vulnclaw tui
 ```
 
-TUI 会先展示目标、检查模式、运行概览和安全边界，让你确认授权范围后再启动任务：
+El TUI primero muestra el objetivo, el modo de verificación, la vista general de ejecución y los límites de seguridad, permitiéndote confirmar el alcance autorizado antes de iniciar la tarea:
 
 ```text
-VulnClaw TUI 工作台
+Panel de trabajo TUI de VulnClaw
 
-授权目标        https://example.com
-检查模式        快速摸底 / recon
-运行概览        历史快照、风险数量、持久化约束、约束拦截
-安全边界        仅测试端口 443，禁止 exploit/persistent/post_exploitation
+Objetivo autorizado        https://example.com
+Modo de verificación        Sondeo rápido / recon
+Vista general de ejecución  Instantáneas históricas, cantidad de riesgos, restricciones persistentes, bloqueos por restricción
+Límites de seguridad        Solo probar puerto 443, prohibido exploit/persistent/post_exploitation
 
-1 设置授权目标
-2 选择检查模式
-3 设置测试范围
-4 开始授权安全检查
-8 模型/API 配置
+1 Configurar objetivo autorizado
+2 Seleccionar modo de verificación
+3 Configurar alcance de pruebas
+4 Iniciar verificación de seguridad autorizada
+8 Configuración de modelo/API
 ```
 
-常用启动方式：
+Formas de inicio habituales:
 
 ```bash
 vulnclaw tui
@@ -348,257 +348,262 @@ vulnclaw tui --target https://target.example --mode quick --only-port 443
 vulnclaw tui --dry-run --target https://target.example --mode deep --only-path /admin
 ```
 
-菜单 3 “设置测试范围”可编辑主机、端口、路径、排除项、允许动作和禁止动作；这些边界会进入启动前确认和实际任务命令。
-菜单 7 “环境诊断入口”会在 TUI 内显示 Python、Node/npx/uvx/nmap、LLM 配置和 MCP 服务/工具摘要；需要完整详情时再运行 `vulnclaw doctor`。
-菜单 8 “模型/API 配置”可直接切换 Provider、Base URL、Model 和 API Key，保存后工作台会立刻使用新配置。
+El menú 3 "Configurar alcance de pruebas" permite editar host, puertos, rutas, exclusiones, acciones permitidas y prohibidas; estos límites se incluyen en la confirmación previa al inicio y en el comando de tarea real.
+El menú 7 "Entrada de diagnóstico del entorno" muestra dentro del TUI un resumen de Python, Node/npx/uvx/nmap, configuración LLM y servicios/herramientas MCP; para el detalle completo, ejecuta `vulnclaw doctor`.
+El menú 8 "Configuración de modelo/API" permite cambiar directamente Provider, Base URL, Model y API Key; tras guardar, el panel de trabajo usa de inmediato la nueva configuración.
 
-### 方式三：经典 REPL 子命令
+### Modo tres: subcomando REPL clásico
 
 ```bash
 $ vulnclaw repl
 ```
 
-进入经典 🦞 交互界面，用自然语言对话：
+Entra a la interfaz interactiva 🦞 clásica, dialogando en lenguaje natural:
 
 ```
-🦞 vulnclaw> 对 192.168.1.100 进行渗透测试，这是我授权的靶场
+🦞 vulnclaw> haz un pentest a 192.168.1.100, este es mi laboratorio autorizado
 
-[*] 进入自主渗透模式，按 Ctrl+C 可随时中断
-── Round 1 ──
-  [+] 目标: 192.168.1.100
-  [+] 开放端口: 22, 80, 443, 8080
-  [+] Web 指纹: Apache/2.4.62
-── Round 2 ──
-  [+] 发现 /manager/html (Tomcat Manager)
-  [+] 命中 CVE-202X-XXXX: Apache Tomcat 认证绕过
-── Round 3 ──
-  [+] 漏洞验证成功
+[*] Entrando al modo de pentesting autónomo, presiona Ctrl+C para interrumpir en cualquier momento
+── Ronda 1 ──
+  [+] Objetivo: 192.168.1.100
+  [+] Puertos abiertos: 22, 80, 443, 8080
+  [+] Fingerprint Web: Apache/2.4.62
+── Ronda 2 ──
+  [+] Se descubrió /manager/html (Tomcat Manager)
+  [+] Coincide con CVE-202X-XXXX: bypass de autenticación de Apache Tomcat
+── Ronda 3 ──
+  [+] Verificación de vulnerabilidad exitosa
 
-🦞 192.168.1.100 | 报告> 生成渗透报告
-[+] 报告已保存: ./reports/192.168.1.100_20260418.md
-[+] PoC 脚本已保存: ./pocs/CVE-202X-XXXX.py
+🦞 192.168.1.100 | Reporte> generar reporte de pentesting
+[+] Reporte guardado en: ./reports/192.168.1.100_20260418.md
+[+] Script PoC guardado en: ./pocs/CVE-202X-XXXX.py
 ```
 
-#### 经典 REPL 内置命令
+#### Comandos integrados del REPL clásico
 
-| 命令                  | 说明                                       |
+| Comando                  | Descripción                                       |
 | --------------------- | ------------------------------------------ |
-| `target <host>`       | 设置渗透测试目标                           |
-| `status`              | 查看当前状态（目标、阶段、工具、推理显示） |
-| `tools`               | 列出当前可用 MCP 工具                      |
-| `think`               | 切换推理过程显示/隐藏                      |
-| `think on` / `off`    | 精确控制推理过程显示                       |
-| `persistent`          | 启动持续性渗透测试（100轮/周期，自动报告） |
-| `persistent <host>`   | 对指定目标启动持续性渗透                   |
-| `clear`               | 清空当前会话                               |
-| `help`                | 显示帮助信息                               |
-| `exit` / `quit` / `q` | 退出 VulnClaw                              |
+| `target <host>`       | Establece el objetivo del pentesting                           |
+| `status`              | Consulta el estado actual (objetivo, fase, herramientas, visualización de razonamiento) |
+| `tools`               | Lista las herramientas MCP disponibles actualmente                      |
+| `think`               | Alterna mostrar/ocultar el proceso de razonamiento      |
+| `think on` / `off`    | Controla con precisión la visualización del proceso de razonamiento      |
+| `persistent`          | Inicia el pentesting continuo (100 rondas/ciclo, reporte automático) |
+| `persistent <host>`   | Inicia el pentesting continuo sobre un objetivo específico                   |
+| `clear`               | Limpia la sesión actual                       |
+| `help`                | Muestra información de ayuda                       |
+| `exit` / `quit` / `q` | Sale de VulnClaw                              |
 
-#### 自主渗透模式
+#### Modo de pentesting autónomo
 
-VulnClaw 检测到以下关键词 + 目标时，自动进入多轮自主渗透循环：
+VulnClaw entra automáticamente en un ciclo de pentesting autónomo de múltiples rondas al detectar las siguientes palabras clave junto con un objetivo:
 
-| 触发方式 | 示例 |
+| Forma de activación | Ejemplo |
 | -------- | ---- |
-| 渗透指令 | `对 http://target.com 进行渗透测试` |
-| CTF / 找 flag | `帮我对 http://ctf.site 找出flag` |
-| 爆破 / 绕过 | `对 http://target.com 弱口令爆破` |
-| **显式触发** | `目标：http://target.com，进入自主渗透模式` |
+| Instrucción de pentesting | `haz un pentest a http://target.com` |
+| CTF / buscar flag | `ayúdame a encontrar la flag en http://ctf.site` |
+| Fuerza bruta / bypass | `haz fuerza bruta de contraseñas débiles en http://target.com` |
+| **Activación explícita** | `objetivo: http://target.com, entra en modo de pentesting autónomo` |
 
-> 💡 在 REPL 中输入 `Ctrl+C` 可随时中断自主循环。切换目标时自动重置会话上下文。
+> 💡 En el REPL, presiona `Ctrl+C` para interrumpir el ciclo autónomo en cualquier momento. Al cambiar de objetivo, el contexto de la sesión se reinicia automáticamente.
 
-### 方式二：单命令模式
+### Modo dos: modo de comando único
 
 ```bash
-# 一键全流程渗透测试
+# Pentesting de flujo completo con un clic
 vulnclaw run 192.168.1.100
 
-# 持续性渗透测试（每周期100轮，最多10周期，自动生成报告）
+# Pentesting continuo (100 rondas por ciclo, hasta 10 ciclos, reporte automático)
 vulnclaw persistent 192.168.1.100
 
-# 自定义周期参数
+# Parámetros de ciclo personalizados
 vulnclaw persistent 192.168.1.100 --rounds 200 --cycles 5
 
-# 仅信息收集
+# Solo recopilación de información
 vulnclaw recon 192.168.1.100
 
-# 漏洞扫描（可指定端口）
+# Escaneo de vulnerabilidades (se puede indicar el puerto)
 vulnclaw scan 192.168.1.100 --ports 80,443,8080
 
-# 漏洞利用（可指定 CVE）
+# Explotación (se puede indicar el CVE)
 vulnclaw exploit 192.168.1.100 --cve CVE-2024-1234 --cmd id
 
-# 生成报告
+# Generar reporte
 vulnclaw report session.json
 ```
 
-### 方式三：持续性渗透模式
+### Modo tres: modo de pentesting continuo
 
-适用于需要长时间深度渗透的场景。VulnClaw 以**周期循环**方式运行：
+Adecuado para escenarios que requieren pentesting profundo de larga duración. VulnClaw se ejecuta en **ciclos periódicos**:
 
 ```
 ┌──────────────────────────────────────────────┐
-│  Cycle 1 (100轮) → 自动报告 → 继续          │
-│  Cycle 2 (100轮) → 自动报告 → 继续          │
-│  Cycle 3 (100轮) → 自动报告 → 继续          │
+│  Ciclo 1 (100 rondas) → reporte automático → continúa │
+│  Ciclo 2 (100 rondas) → reporte automático → continúa │
+│  Ciclo 3 (100 rondas) → reporte automático → continúa │
 │  ...                                         │
-│  直到 Ctrl+C 或达到最大周期数（默认10）      │
+│  Hasta Ctrl+C o alcanzar el número máximo de ciclos (10 por defecto) │
 └──────────────────────────────────────────────┘
 ```
 
-**特点**：
-- **跨周期状态保持** — 每个周期保留之前的所有发现、漏洞和步骤记录
-- **周期报告** — 每个周期结束自动生成独立的 Markdown 报告（含新增漏洞和累计汇总）
-- **灵活中断** — Ctrl+C 随时中断，中断时仍生成本周期报告
-- **增量发现** — 报告区分"本周期新增"和"累计总计"，清晰追踪进展
-- **可配置** — 每周期轮数、最大周期数、是否自动报告均可配置
+**Características**:
+- **Mantiene el estado entre ciclos** — cada ciclo conserva todos los hallazgos, vulnerabilidades y registros de pasos anteriores
+- **Reporte por ciclo** — al terminar cada ciclo se genera automáticamente un reporte Markdown independiente (con nuevas vulnerabilidades y resumen acumulado)
+- **Interrupción flexible** — Ctrl+C interrumpe en cualquier momento, y aun así se genera el reporte del ciclo en curso
+- **Descubrimiento incremental** — el reporte distingue entre "nuevo en este ciclo" y "total acumulado", permitiendo un seguimiento claro del progreso
+- **Configurable** — el número de rondas por ciclo, el número máximo de ciclos y si se genera reporte automático son configurables
 
 ```bash
-# CLI 方式
-vulnclaw persistent 192.168.1.100              # 默认 100轮/周期 × 10周期
-vulnclaw persistent 192.168.1.100 -r 200 -c 5  # 200轮/周期 × 5周期
-vulnclaw persistent 192.168.1.100 --no-report   # 不自动生成报告
+# Modo CLI
+vulnclaw persistent 192.168.1.100              # 100 rondas/ciclo × 10 ciclos por defecto
+vulnclaw persistent 192.168.1.100 -r 200 -c 5  # 200 rondas/ciclo × 5 ciclos
+vulnclaw persistent 192.168.1.100 --no-report   # no genera reporte automático
 
-# TUI 方式
+# Modo TUI
 vulnclaw tui --target 192.168.1.100 --mode continuous
 
-# REPL 方式
+# Modo REPL
 🦞 vulnclaw> target 192.168.1.100
 🦞 vulnclaw> persistent
-# 或直接
+# o directamente
 🦞 vulnclaw> persistent 192.168.1.100
 ```
 
-### 方式四：Web UI 模式
+### Modo cuatro: modo Web UI
 
-通过浏览器操作渗透测试全流程，适合偏好图形界面的用户。
+Opera todo el flujo de pentesting desde el navegador, adecuado para usuarios que prefieren una interfaz gráfica.
 
 ```bash
-# 安装 Web 依赖
+# Instalar las dependencias de Web
 pip install 'vulnclaw[web]'
 
-# 启动 Web UI（默认 127.0.0.1:7788）
+# Iniciar la Web UI (por defecto 127.0.0.1:7788)
 vulnclaw web
 
-# 自定义端口
+# Puerto personalizado
 vulnclaw web --port 8080
 
-# 仅检查启动信息（不实际启动服务）
+# Solo revisar la información de inicio (sin iniciar realmente el servicio)
 vulnclaw web --dry-run
 ```
 
-启动后浏览器访问 `http://127.0.0.1:7788` 即可使用。
+Tras iniciar, accede desde el navegador a `http://127.0.0.1:7788`.
 
-> ⚠️ 默认仅绑定本地回环地址。如需远程访问须显式指定 `--host 0.0.0.0 --allow-remote`，请确保网络环境安全。
+> ⚠️ Por defecto solo se vincula a la dirección de loopback local. Para acceso remoto es necesario indicar explícitamente `--host 0.0.0.0 --allow-remote`; asegúrate de que el entorno de red sea seguro.
 
 ---
 
-## LLM 提供商配置
+## Configuración de proveedores LLM
 
-VulnClaw 支持 OpenAI 兼容协议的 API，内置 13 个提供商预设并支持自定义端点：
+VulnClaw soporta APIs con protocolo compatible con OpenAI, con 13 preajustes de proveedores integrados y soporte para endpoints personalizados:
 
 ```bash
-vulnclaw config provider --list    # 查看所有提供商
-vulnclaw config provider minimax   # 一键切换
+vulnclaw config provider --list    # ver todos los proveedores
+vulnclaw config provider minimax   # cambiar con un clic
 ```
 
-| 提供商      | 命令                   | 默认模型              |
+| Proveedor      | Comando                   | Modelo predeterminado              |
 | ----------- | ---------------------- | --------------------- |
 | OpenAI      | `provider openai`      | gpt-4o                |
 | Anthropic Claude | `provider anthropic` | claude-sonnet-5   |
 | MiniMax     | `provider minimax`     | MiniMax-M3            |
 | DeepSeek    | `provider deepseek`    | deepseek-v4-pro       |
-| 智谱 GLM    | `provider zhipu`       | glm-4.7               |
+| Zhipu GLM    | `provider zhipu`       | glm-4.7               |
 | Kimi        | `provider moonshot`    | kimi-k2.6             |
-| 通义千问    | `provider qwen`        | qwen3-max             |
+| Qwen (Tongyi)    | `provider qwen`        | qwen3-max             |
 | SiliconFlow | `provider siliconflow` | DeepSeek-V4-Flash     |
-| 豆包        | `provider doubao`      | Doubao-Seed-2.0-Pro   |
-| 百川        | `provider baichuan`    | Baichuan4-Turbo       |
-| 阶跃星辰    | `provider stepfun`     | step-3.5-flash        |
-| 商汤        | `provider sensetime`   | SenseNova-6.7-Flash-Lite |
-| 零一万物    | `provider yi`          | yi-lightning          |
-| 自定义      | `provider custom`      | 手动填写              |
+| Doubao        | `provider doubao`      | Doubao-Seed-2.0-Pro   |
+| Baichuan        | `provider baichuan`    | Baichuan4-Turbo       |
+| StepFun    | `provider stepfun`     | step-3.5-flash        |
+| SenseTime        | `provider sensetime`   | SenseNova-6.7-Flash-Lite |
+| 01.AI (Yi)    | `provider yi`          | yi-lightning          |
+| Personalizado      | `provider custom`      | rellenar manualmente              |
 
 ---
 
-## 架构
+## Arquitectura
 
 ```
 ┌─────────────────────────────────────────────┐
 │                VulnClaw CLI                  │
 │  ┌─────────┐  ┌─────────┐  ┌────────────┐  │
-│  │  自然语言 │  │  任务编排 │  │ 报告 & PoC │  │
-│  │  交互层  │  │  引擎    │  │   生成器   │  │
+│  │ Lenguaje │  │ Motor de │  │ Reporte y  │  │
+│  │ natural  │  │ orquest. │  │   PoC      │  │
+│  │  (capa)  │  │ de tareas│  │ (generador)│  │
 │  └────┬────┘  └────┬────┘  └─────┬──────┘  │
 │       └─────────────┼─────────────┘        │
 │               ┌─────▼──────┐                │
 │               │ LLM Agent  │                │
-│               │ (越狱+Skill)│               │
+│               │(jailbreak+ │               │
+│               │  Skill)    │               │
 │               └─────┬──────┘                │
 │               ┌─────▼──────┐                │
-│               │ MCP 编排层  │                │
-│               │ (4 服务)   │                │
+│               │ Capa de    │                │
+│               │ orquest.   │                │
+│               │ MCP (4 svc)│                │
 │               └─────┬──────┘                │
 │               ┌─────▼──────┐                │
-│               │ 安全知识库  │                │
+│               │ Base de    │                │
+│               │ conocim.   │                │
+│               │ de seguri. │                │
 │               └────────────┘                │
 └─────────────────────────────────────────────┘
 ```
 
-### 核心模块
+### Módulos centrales
 
-| 模块           | 文件                                             | 说明                                          |
+| Módulo           | Archivo                                             | Descripción                                          |
 | -------------- | ------------------------------------------------ | --------------------------------------------- |
-| **CLI/TUI 入口** | `cli/main.py` + `cli/tui.py`                   | Typer 命令 + 默认原 CLI/REPL + 显式 TUI       |
-| **Agent 核心** | `agent/core.py`                                  | AgentCore 协调入口（核心重构后主要保留少量协调职责） |
-| **求解引擎（默认）** | `agent/solver.py` + `agent/blackboard.py`  | 目标驱动 OODA 循环 + Fact/Intent 黑板图 + 证据级反幻觉闸门 |
-| **推理 / 反思**   | `agent/reasoning_state.py` + `reflexion.py`   | 结构化事实/约束/攻击链 + 失败归类与 L0-L4 升级 |
-| **插件体系**   | `plugins/`（registry/runtime/web）                | 低耦合漏洞检测插件运行时 + 内置只读 Web 插件   |
-| **动态提示词** | `agent/prompts.py`                               | 基础身份 + 核心契约 + Skill + MCP 工具列表    |
-| **Prompt 组装** | `agent/system_prompt.py` + `prompt_context.py`  | system prompt / round context / attack summary 组装 |
-| **输入分析**   | `agent/input_analysis.py`                        | 目标识别、阶段识别、用户漏洞提示提取          |
-| **反死循环 / CTF** | `agent/anti_loop.py` + `ctf_mode.py`        | 完成信号、攻击路径、失败目标、flag 状态机      |
-| **会话状态**   | `agent/context.py`                               | 阶段追踪 + 漏洞发现 + 步骤记录                |
-| **Skill / KB 上下文** | `agent/skill_context.py` + `kb_context.py` | Skill 选择与知识库 prompt 注入                |
-| **目标状态继承** | `target_state/store.py`                        | 同目标成果沉淀、恢复、快照、回滚、target 报告 |
-| **MCP 编排**   | `mcp/registry.py` + `lifecycle.py` + `router.py` | 服务注册 + 生命周期 + 自然语言→工具路由       |
-| **Skill 调度** | `skills/loader.py` + `dispatcher.py`             | 目录格式 Skill + CTF/SRC/AI/Web 等意图动态调度 |
-| **编解码工具** | `skills/crypto_tools.py`                         | 29 种编解码/加解密操作，注册为内置 Agent 工具  |
-| **配置管理**   | `config/schema.py` + `settings.py`               | Pydantic 模型 + YAML 持久化 + 13 Provider 预设 |
-| **报告生成**   | `report/generator.py` + `poc_builder.py`         | Markdown 报告 + Python PoC 模板               |
-| **安全知识库** | `kb/store.py` + `retriever.py`                   | JSON 存储 + CVE/技术/工具检索                 |
+| **Entrada CLI/TUI** | `cli/main.py` + `cli/tui.py`                   | Comandos Typer + CLI/REPL original por defecto + TUI explícito       |
+| **Núcleo del Agent** | `agent/core.py`                                  | Punto de coordinación de AgentCore (tras la refactorización central conserva principalmente pocas responsabilidades de coordinación) |
+| **Motor de resolución (predeterminado)** | `agent/solver.py` + `agent/blackboard.py`  | Ciclo OODA orientado a objetivos + grafo de pizarra Fact/Intent + compuerta antialucinación a nivel de evidencia |
+| **Razonamiento / reflexión**   | `agent/reasoning_state.py` + `reflexion.py`   | Hechos/restricciones/cadenas de ataque estructurados + clasificación de fallos y escalado L0-L4 |
+| **Sistema de plugins**   | `plugins/` (registry/runtime/web)                | Runtime de plugins de detección de vulnerabilidades de bajo acoplamiento + plugin Web de solo lectura integrado   |
+| **Prompt dinámico** | `agent/prompts.py`                               | Identidad base + contrato central + Skill + lista de herramientas MCP    |
+| **Ensamblaje de prompts** | `agent/system_prompt.py` + `prompt_context.py`  | Ensamblaje del system prompt / contexto de ronda / resumen de ataque |
+| **Análisis de entrada**   | `agent/input_analysis.py`                        | Identificación de objetivo, fase, extracción de pistas de vulnerabilidad del usuario          |
+| **Anti-bucle infinito / CTF** | `agent/anti_loop.py` + `ctf_mode.py`        | Señal de finalización, ruta de ataque, objetivos fallidos, máquina de estados de flag      |
+| **Estado de sesión**   | `agent/context.py`                               | Seguimiento de fase + hallazgos de vulnerabilidad + registro de pasos                |
+| **Contexto de Skill / KB** | `agent/skill_context.py` + `kb_context.py` | Selección de Skill e inyección de prompt de base de conocimiento |
+| **Herencia de estado de objetivo** | `target_state/store.py`                        | Consolidación de resultados del mismo objetivo, recuperación, instantáneas, rollback, reporte de objetivo |
+| **Orquestación MCP**   | `mcp/registry.py` + `lifecycle.py` + `router.py` | Registro de servicios + ciclo de vida + enrutamiento de lenguaje natural → herramientas       |
+| **Despacho de Skill** | `skills/loader.py` + `dispatcher.py`             | Skill en formato de directorio + despacho dinámico de intenciones CTF/SRC/AI/Web etc. |
+| **Herramientas de codificación** | `skills/crypto_tools.py`                         | 29 operaciones de codificación/cifrado, registradas como herramientas integradas del Agent  |
+| **Gestión de configuración**   | `config/schema.py` + `settings.py`               | Modelos Pydantic + persistencia YAML + 13 preajustes de Provider |
+| **Generación de reportes**   | `report/generator.py` + `poc_builder.py`         | Reporte Markdown + plantilla PoC en Python               |
+| **Base de conocimiento de seguridad** | `kb/store.py` + `retriever.py`                   | Almacenamiento JSON + recuperación de CVE/técnicas/herramientas                 |
 
 ---
 
-## MCP 工具链
+## Cadena de herramientas MCP
 
-| MCP 服务 | 工具数 | 模式 | 用途 | 状态 |
+| Servicio MCP | N.º de herramientas | Modo | Uso | Estado |
 |---|---|---|---|---|
-| fetch | 1 | 本地 (httpx) | HTTP 请求、API 测试 | 开箱即用 |
-| memory | 2 | 本地 (JSON) | 上下文记忆、状态持久化 | 开箱即用 |
-| chrome-devtools | 31+ | stdio MCP | 浏览器自动化、截图、JS 执行 | 需部署 |
-| burp | 多个 | stdio MCP | HTTP 抓包、重放、漏洞扫描 | 需部署 |
+| fetch | 1 | Local (httpx) | Solicitudes HTTP, pruebas de API | Listo para usar |
+| memory | 2 | Local (JSON) | Memoria de contexto, persistencia de estado | Listo para usar |
+| chrome-devtools | 31+ | stdio MCP | Automatización de navegador, capturas de pantalla, ejecución de JS | Requiere despliegue |
+| burp | Varias | stdio MCP | Captura HTTP, repetición, escaneo de vulnerabilidades | Requiere despliegue |
 
-> 另有 5 个内置 Agent 工具（`python_execute` + `nmap_scan` + `crypto_decode` + `brute_force_login` + `load_skill_reference`），无需 MCP 即可调用。
+> Además hay 5 herramientas de Agent integradas (`python_execute` + `nmap_scan` + `crypto_decode` + `brute_force_login` + `load_skill_reference`), invocables sin necesidad de MCP.
 
-### Chrome DevTools MCP 部署
+### Despliegue de Chrome DevTools MCP
 
-[仓库: ChromeDevTools/chrome-devtools-mcp](https://github.com/ChromeDevTools/chrome-devtools-mcp) — 31+ 工具，覆盖点击/表单/截图/JS执行/网络监控/性能分析
+[Repositorio: ChromeDevTools/chrome-devtools-mcp](https://github.com/ChromeDevTools/chrome-devtools-mcp) — más de 31 herramientas, cubre clic/formularios/capturas de pantalla/ejecución de JS/monitoreo de red/análisis de rendimiento
 
-**前置条件**: Node.js LTS (v20+) + Chrome 浏览器
+**Prerrequisitos**: Node.js LTS (v20+) + navegador Chrome
 
 ```bash
-# Step 1: 启动 Chrome 远程调试
+# Paso 1: iniciar la depuración remota de Chrome
 # Windows
 "C:\Program Files\Google\Chrome\Application\chrome.exe" --remote-debugging-port=9222 --user-data-dir=C:\tmp\chrome-debug
 # Linux/Mac
 google-chrome --remote-debugging-port=9222 --user-data-dir=/tmp/chrome-debug
 
-# Step 2: 启用 VulnClaw 配置（自动通过 npx 拉取，无需手动安装）
+# Paso 2: habilitar la configuración de VulnClaw (se descarga automáticamente vía npx, sin instalación manual)
 vulnclaw config set mcp.servers.chrome-devtools.enabled true
 ```
 
-VulnClaw 配置已内置 `npx -y chrome-devtools-mcp@latest`，启用后自动连接。如需指定 Chrome 调试地址，编辑 `~/.vulnclaw/config.yaml`：
+La configuración de VulnClaw ya incluye `npx -y chrome-devtools-mcp@latest`; al habilitarse se conecta automáticamente. Si necesitas indicar una dirección de depuración de Chrome específica, edita `~/.vulnclaw/config.yaml`:
 
 ```yaml
 mcp:
@@ -611,29 +616,29 @@ mcp:
         args: ["-y", "chrome-devtools-mcp@latest", "--browser-url=http://127.0.0.1:9222"]
 ```
 
-### Burp Suite MCP 部署
+### Despliegue de Burp Suite MCP
 
-[仓库: PortSwigger/mcp-server](https://github.com/PortSwigger/mcp-server) — 官方 MCP 扩展，支持 SSE + Stdio 协议
+[Repositorio: PortSwigger/mcp-server](https://github.com/PortSwigger/mcp-server) — extensión MCP oficial, soporta protocolos SSE + Stdio
 
-**前置条件**: Java 11+ + Burp Suite Professional
+**Prerrequisitos**: Java 11+ + Burp Suite Professional
 
 ```bash
-# Step 1: 克隆并构建
+# Paso 1: clonar y construir
 git clone https://github.com/PortSwigger/mcp-server.git burp-mcp
 cd burp-mcp
 ./gradlew embedProxyJar    # Windows: gradlew.bat embedProxyJar
-# 产物: build/libs/burp-mcp-all.jar
+# Artefacto: build/libs/burp-mcp-all.jar
 
-# Step 2: 加载到 Burp Suite
-# Burp → Extensions → Add → Type: Java → 选择 burp-mcp-all.jar
+# Paso 2: cargar en Burp Suite
+# Burp → Extensions → Add → Type: Java → selecciona burp-mcp-all.jar
 
-# Step 3: 在 Burp 的 MCP 标签页勾选 "Enabled"（默认监听 127.0.0.1:9876）
+# Paso 3: en la pestaña MCP de Burp marca "Enabled" (escucha por defecto en 127.0.0.1:9876)
 
-# Step 4: 启用 VulnClaw 配置
+# Paso 4: habilitar la configuración de VulnClaw
 vulnclaw config set mcp.servers.burp.enabled true
 ```
 
-建议将 JAR 复制到固定位置并更新配置：
+Se recomienda copiar el JAR a una ubicación fija y actualizar la configuración:
 
 ```yaml
 mcp:
@@ -646,193 +651,191 @@ mcp:
         args: ["-jar", "~/.vulnclaw/tools/burp-mcp-all.jar", "--sse-url", "http://127.0.0.1:9876"]
 ```
 
-> 详细部署说明参见 [docs/mcp-deployment.md](docs/mcp-deployment.md)
+> Ver instrucciones de despliegue detalladas en [docs/mcp-deployment.md](docs/mcp-deployment.md)
 
 ---
 
-## 内置 Skill
+## Skills integradas
 
-### 核心 Skill (7)
+### Skills centrales (7)
 
-| Skill             | 说明               |
+| Skill             | Descripción               |
 | ----------------- | ------------------ |
-| pentest-flow      | 渗透测试全流程编排 |
-| recon             | 信息收集流程       |
-| vuln-discovery    | 漏洞发现流程       |
-| exploitation      | 漏洞利用流程       |
-| post-exploitation | 后渗透流程         |
-| reporting         | 报告生成流程       |
-| waf-bypass        | WAF 绕过技巧库     |
+| pentest-flow      | Orquestación del flujo completo de pentesting |
+| recon             | Flujo de recopilación de información       |
+| vuln-discovery    | Flujo de descubrimiento de vulnerabilidades       |
+| exploitation      | Flujo de explotación       |
+| post-exploitation | Flujo de post-explotación         |
+| reporting         | Flujo de generación de reportes         |
+| waf-bypass        | Biblioteca de técnicas de bypass de WAF     |
 
-### 专项 Skill (14)
+### Skills especializadas (14)
 
-| Skill                     | 参考文档数 | 说明                                         |
+| Skill                     | N.º de documentos de referencia | Descripción                                         |
 | ------------------------- | ---------- | -------------------------------------------- |
-| web-pentest               | 4          | Web 应用渗透                                 |
-| android-pentest           | 9          | 安卓应用渗透                                 |
-| client-reverse            | 20         | 客户端逆向分析                               |
-| web-security-advanced     | 34         | Web 安全进阶（注入、绕过、利用链）           |
-| ai-mcp-security           | 7          | AI/MCP 安全测试                              |
-| intranet-pentest-advanced | 15         | 内网渗透进阶                                 |
-| pentest-tools             | 18         | 渗透工具速查                                 |
-| rapid-checklist           | 3          | 快速检查清单                                 |
-| crypto-toolkit            | 3          | 编解码/加解密（29 种操作，注册为内置工具）   |
-| **ctf-web**               | 9          | CTF Web 攻击知识库（PHP绕过/RCE/SSTI/反序列化） |
-| **ctf-crypto**            | 6          | CTF 密码学攻击知识库（RSA/AES/ECC/PRNG/格攻击） |
-| **ctf-misc**              | 6          | CTF 杂项知识库（PyJail/BashJail/编码链/VM逆向） |
-| **osint-recon**           | 7          | OSINT 开源情报收集（四维模型：服务器/网站/域名/人员） |
-| **secknowledge-skill**    | 39         | Web+AI 安全测试知识库，面向 CTF/SRC/众测场景（WooYun/先知/GAARM/OWASP 方法论） |
+| web-pentest               | 4          | Pentesting de aplicaciones Web                                 |
+| android-pentest           | 9          | Pentesting de aplicaciones Android                                 |
+| client-reverse            | 20         | Análisis de ingeniería inversa de cliente                               |
+| web-security-advanced     | 34         | Seguridad Web avanzada (inyección, bypass, cadenas de explotación)           |
+| ai-mcp-security           | 7          | Pruebas de seguridad de AI/MCP                              |
+| intranet-pentest-advanced | 15         | Pentesting avanzado de intranet                                 |
+| pentest-tools             | 18         | Referencia rápida de herramientas de pentesting                                 |
+| rapid-checklist            | 3          | Lista de verificación rápida                                 |
+| crypto-toolkit            | 3          | Codificación/cifrado (29 operaciones, registradas como herramientas integradas)   |
+| **ctf-web**               | 9          | Base de conocimiento de ataques Web CTF (bypass PHP/RCE/SSTI/deserialización) |
+| **ctf-crypto**            | 6          | Base de conocimiento de ataques de criptografía CTF (RSA/AES/ECC/PRNG/ataques de retículos) |
+| **ctf-misc**              | 6          | Base de conocimiento de misceláneos CTF (PyJail/BashJail/cadenas de codificación/ingeniería inversa de VM) |
+| **osint-recon**           | 7          | Recopilación de inteligencia de fuentes abiertas OSINT (modelo de cuatro dimensiones: servidor/sitio web/dominio/personal) |
+| **secknowledge-skill**    | 39         | Base de conocimiento de pruebas de seguridad Web+AI, orientada a escenarios CTF/SRC/bug bounty masivo (metodologías WooYun/Xianzhi/GAARM/OWASP) |
 
-Skill 会根据用户输入自动调度，无需手动选择。专项 Skill 含 `references/` 目录下的详细方法论文档，LLM 可通过 `load_skill_reference` 工具按需加载。
+Las Skills se despachan automáticamente según la entrada del usuario, sin necesidad de selección manual. Las Skills especializadas incluyen documentos detallados de metodología en el directorio `references/`, que el LLM puede cargar bajo demanda con la herramienta `load_skill_reference`.
 
-`secknowledge-skill` 集成自 [`Pa55w0rd/secknowledge-skill`](https://github.com/Pa55w0rd/secknowledge-skill)，上游 `references/` 的 38 个文档已完整纳入，并额外增加 `vulnclaw-ctf-src-routing.md` 作为 VulnClaw 的 CTF/SRC 场景导航。它会在 `SRC`、`漏洞挖掘`、`众测`、`GAARM`、`OWASP LLM/ASI/WSTG`、`Web+AI` 等强信号输入下触发，用于按需加载 SQLi、XSS、RCE、SSRF、AI/MCP、Agent、风险矩阵和测试方法论等资料。
+`secknowledge-skill` se integra desde [`Pa55w0rd/secknowledge-skill`](https://github.com/Pa55w0rd/secknowledge-skill); los 38 documentos de `references/` del upstream han sido incorporados por completo, y se agregó adicionalmente `vulnclaw-ctf-src-routing.md` como guía de navegación de VulnClaw para escenarios CTF/SRC. Se activa con entradas de señal fuerte como `SRC`, `descubrimiento de vulnerabilidades`, `bug bounty masivo`, `GAARM`, `OWASP LLM/ASI/WSTG`, `Web+AI`, y se usa para cargar bajo demanda materiales de SQLi, XSS, RCE, SSRF, AI/MCP, Agent, matrices de riesgo y metodologías de prueba.
 
-### 内置编解码/加解密工具 (crypto_decode)
+### Herramienta integrada de codificación/cifrado (crypto_decode)
 
-`crypto_decode` 注册为 Agent 内置工具，LLM 在任何上下文中均可调用，不再靠猜测解码结果：
+`crypto_decode` está registrada como herramienta integrada del Agent, el LLM puede invocarla en cualquier contexto, sin depender de adivinar el resultado de la decodificación:
 
-| 类别     | 操作                                                                                     |
+| Categoría     | Operaciones                                                                                     |
 | -------- | ---------------------------------------------------------------------------------------- |
-| 编解码   | base64, base32, base58, hex, url, html, unicode, rot13, caesar, morse（各有 encode/decode） |
-| 哈希     | md5, sha1, sha256, sha512                                                                |
-| 加解密   | aes_encrypt, aes_decrypt（CBC 模式，PKCS7 填充）                                          |
+| Codificación   | base64, base32, base58, hex, url, html, unicode, rot13, caesar, morse (cada uno con encode/decode) |
+| Hash     | md5, sha1, sha256, sha512                                                                |
+| Cifrado/descifrado   | aes_encrypt, aes_decrypt (modo CBC, padding PKCS7)                                          |
 | JWT      | jwt_decode, jwt_encode                                                                   |
-| 自动识别 | auto_decode — 尝试所有常见编码，返回匹配结果                                              |
+| Reconocimiento automático | auto_decode — prueba todas las codificaciones comunes, devuelve el resultado coincidente                                              |
 
 ---
 
-## 配置管理
+## Gestión de configuración
 
-### 命令行配置
+### Configuración por línea de comandos
 
 ```bash
-vulnclaw config list                          # 查看所有配置
-vulnclaw config get llm.model                 # 查看单项
-vulnclaw config set llm.api_key sk-xx         # 设置 API Key
-vulnclaw config set session.max_rounds 30     # 设置自主渗透最大轮数（默认 15）
-vulnclaw config set session.stale_rounds_threshold 8  # 设置死循环检测阈值（默认 5）
-vulnclaw config set session.show_thinking false # 隐藏推理过程（也可在 REPL 中用 think off）
+vulnclaw config list                          # ver toda la configuración
+vulnclaw config get llm.model                 # ver un elemento
+vulnclaw config set llm.api_key sk-xx         # establecer la API Key
+vulnclaw config set session.max_rounds 30     # establecer el número máximo de rondas del pentesting autónomo (15 por defecto)
+vulnclaw config set session.stale_rounds_threshold 8  # establecer el umbral de detección de bucle infinito (5 por defecto)
+vulnclaw config set session.show_thinking false # ocultar el proceso de razonamiento (también se puede con think off en el REPL)
 ```
 
-### 可配置项
+### Elementos configurables
 
-| 配置项                   | 默认值 | 说明                                     |
-| ------------------------ | ------ | ---------------------------------------- |
-| `llm.provider`           | openai | LLM 提供商（13 个内置 + custom）         |
-| `llm.api_key`            | 空     | API Key（auth_mode=static）              |
-| `llm.auth_mode`          | static | `static`（api_key）或 `oauth`（`vulnclaw login`） |
-| `llm.chatgpt_auto_proxy` | false  | 自动启动内置 ChatGPT 后端桥接代理         |
-| `llm.base_url`           | 按 provider | API 基础 URL，可自定义              |
-| `llm.model`              | 按 provider | 模型名称，可自定义                   |
-| `llm.temperature`        | 0.1    | 采样温度                                 |
-| `llm.max_tokens`         | 4096   | 单次最大输出 token                       |
-| `session.engine`         | solve  | 自主引擎：`solve`（目标驱动，默认）/ `rounds`（旧固定轮数） |
-| `session.solve_max_steps` | 40    | solve 探索步数安全上限（兜底，非固定工作流长度） |
-| `session.solve_max_intents` | 3   | 每次 Reason 最多提出的新探索方向数        |
-| `session.solve_max_tool_rounds` | 6 | 每个 Intent 探索的最大工具调用轮数        |
-| `session.max_rounds`     | 15     | 旧 `rounds` 引擎的最大轮数（建议 10-50）  |
-| `session.output_dir`     | ./vulnclaw-output | 报告输出目录                    |
-| `session.report_format`  | markdown | 报告格式（markdown / html）            |
-| `session.poc_language`   | python | PoC 生成语言（python / bash）            |
-| `session.show_thinking`  | false  | 显示 LLM 推理过程（think 标签内容，默认关闭） |
-| `session.persistent_rounds_per_cycle` | 100 | 持续性渗透每周期轮数 |
-| `session.persistent_max_cycles` | 10 | 持续性渗透最大周期数（0=无限） |
-| `session.persistent_auto_report` | true | 持续性渗透每周期自动生成报告 |
-| `session.stale_rounds_threshold` | 5 | 死循环检测阈值 — 连续无新发现轮数达到此值时触发强制策略切换 |
+| Elemento de configuración                   | Valor predeterminado | Descripción                                     |
+| ------------------------ | ------ | ----------------------------------------- |
+| `llm.provider`           | openai | Proveedor LLM (13 integrados + custom)         |
+| `llm.api_key`            | vacío     | API Key (auth_mode=static)              |
+| `llm.auth_mode`          | static | `static` (api_key) o `oauth` (`vulnclaw login`) |
+| `llm.chatgpt_auto_proxy` | false  | Inicia automáticamente el proxy puente de backend ChatGPT integrado         |
+| `llm.base_url`           | según provider | URL base de la API, personalizable              |
+| `llm.model`              | según provider | Nombre del modelo, personalizable                   |
+| `llm.temperature`        | 0.1    | Temperatura de muestreo                                 |
+| `llm.max_tokens`         | 4096   | Máximo de tokens de salida por solicitud                       |
+| `session.engine`         | solve  | Motor autónomo: `solve` (orientado a objetivos, predeterminado) / `rounds` (antiguo de rondas fijas) |
+| `session.solve_max_steps` | 40    | Límite máximo de seguridad de pasos de exploración de solve (respaldo, no una longitud fija de flujo) |
+| `session.solve_max_intents` | 3   | Número máximo de nuevas direcciones de exploración que Reason puede proponer por vez        |
+| `session.solve_max_tool_rounds` | 6 | Número máximo de rondas de llamadas a herramientas por exploración de cada Intent        |
+| `session.max_rounds`     | 15     | Número máximo de rondas del antiguo motor `rounds` (se recomienda 10-50)  |
+| `session.output_dir`     | ./vulnclaw-output | Directorio de salida de reportes                    |
+| `session.report_format`  | markdown | Formato de reporte (markdown / html)            |
+| `session.poc_language`   | python | Lenguaje de generación de PoC (python / bash)            |
+| `session.show_thinking`  | false  | Muestra el proceso de razonamiento del LLM (contenido de la etiqueta think, oculto por defecto) |
+| `session.persistent_rounds_per_cycle` | 100 | Número de rondas por ciclo en el pentesting continuo |
+| `session.persistent_max_cycles` | 10 | Número máximo de ciclos del pentesting continuo (0=ilimitado) |
+| `session.persistent_auto_report` | true | Genera reporte automático en cada ciclo del pentesting continuo |
+| `session.stale_rounds_threshold` | 5 | Umbral de detección de bucle infinito — al alcanzar este número de rondas consecutivas sin nuevos hallazgos, se activa un cambio forzado de estrategia |
 
-### 环境变量
+### Variables de entorno
 
-| 变量                          | 说明                   |
+| Variable                          | Descripción                   |
 | ----------------------------- | ---------------------- |
-| `VULNCLAW_LLM_PROVIDER`       | LLM 提供商名称         |
+| `VULNCLAW_LLM_PROVIDER`       | Nombre del proveedor LLM         |
 | `VULNCLAW_LLM_API_KEY`        | API Key                |
 | `VULNCLAW_LLM_AUTH_MODE`      | static / oauth         |
-| `VULNCLAW_LLM_CHATGPT_AUTO_PROXY` | 内置 ChatGPT 代理  |
-| `VULNCLAW_LLM_BASE_URL`       | API 基础 URL           |
-| `VULNCLAW_LLM_MODEL`          | 模型名称               |
-| `VULNCLAW_SESSION_MAX_ROUNDS`| 自主渗透最大轮数       |
-| `VULNCLAW_SESSION_STALE_ROUNDS_THRESHOLD` | 死循环检测阈值 |
-| `VULNCLAW_SESSION_REASONING_STATE_ENABLED` | 结构化推理状态开关 |
-| `VULNCLAW_SESSION_REFLEXION_ENABLED` | 自适应反思引擎开关 |
-| `VULNCLAW_SESSION_REFLEXION_MAX_SAME_VULN_FAILS` | 同类漏洞连败触发反思阈值 |
-| `VULNCLAW_SESSION_ESCALATION_MAX_LEVEL` | Payload 升级上限（0-4） |
-| `VULNCLAW_SESSION_PLUGIN_RUNTIME_ENABLED` | 插件运行时开关 |
-| `VULNCLAW_SESSION_PLUGIN_MAX_REQUESTS_PER_TARGET` | 单目标插件请求预算 |
+| `VULNCLAW_LLM_CHATGPT_AUTO_PROXY` | Proxy ChatGPT integrado  |
+| `VULNCLAW_LLM_BASE_URL`       | URL base de la API           |
+| `VULNCLAW_LLM_MODEL`          | Nombre del modelo               |
+| `VULNCLAW_SESSION_MAX_ROUNDS`| Número máximo de rondas del pentesting autónomo       |
+| `VULNCLAW_SESSION_STALE_ROUNDS_THRESHOLD` | Umbral de detección de bucle infinito |
+| `VULNCLAW_SESSION_REASONING_STATE_ENABLED` | Interruptor del estado de razonamiento estructurado |
+| `VULNCLAW_SESSION_REFLEXION_ENABLED` | Interruptor del motor de reflexión adaptativa |
+| `VULNCLAW_SESSION_REFLEXION_MAX_SAME_VULN_FAILS` | Umbral de fallos consecutivos del mismo tipo de vulnerabilidad para activar reflexión |
+| `VULNCLAW_SESSION_ESCALATION_MAX_LEVEL` | Límite máximo de escalado de payload (0-4) |
+| `VULNCLAW_SESSION_PLUGIN_RUNTIME_ENABLED` | Interruptor del runtime de plugins |
+| `VULNCLAW_SESSION_PLUGIN_MAX_REQUESTS_PER_TARGET` | Presupuesto de solicitudes de plugin por objetivo |
 
-优先级：**环境变量 > 配置文件 > 内置默认值**
+Prioridad: **variable de entorno > archivo de configuración > valor predeterminado integrado**
 
-配置文件位于 `~/.vulnclaw/config.yaml`。
+El archivo de configuración se encuentra en `~/.vulnclaw/config.yaml`.
 
 ---
 
-## 更新日志
+## Registro de cambios
 
 ### v0.4.1
 
-**并行探索 + 记忆引擎 + 信息收集工具链 + MCP streamable-http**
+**Exploración paralela + motor de memoria + cadena de herramientas de recopilación de información + MCP streamable-http**
 
-- **多 intent 并行探索** — solve 引擎支持同时探索多个方向（默认 max_parallel=3），单个方向异常不影响其他，每个 intent 有独立的证据缓冲区和工具调用记录。
-- **agent 记忆引擎** — blackboard 新增工具调用日志（跨 intent 可见），reason 阶段显式列出已放弃方向并禁止重复提出，explore 上下文带"已执行工具"摘要；checkpoint 机制在图状态没变时跳过 reason 避免空转；已放弃方向做 Jaccard 去重兜底。
-- **conclude 判定优化** — 放宽了"有进展"的标准（发现新接口、确认未授权都算推进），不再轻易丢弃有价值的发现；最后一步注入 conclude override 指令防止空转；证据兜底防止 conclude 误判丢弃实际有数据返回的探索。
-- **完成判定否定闸门** — 模型在 complete 字段里写"未达到完成标准"等否定结论时不会再被误判为已完成；显式要求 complete=true 布尔值 + evidence fact 引用。
-- **JS 信息收集（js_recon）** — 抓取页面及全部 JS 文件，提取 API 路径 / 关联域名 / 硬编码密钥；动态发现 PascalCase 实体名并与 base path + CRUD 动词排列组合推断隐藏接口；收集到的接口自动做 GET+POST 未授权探测。
-- **未授权探测（unauth_test）** — 批量无凭据请求，按状态码/响应体/内容类型判定；支持有/无 token 差分对比确认未授权；自动跳过 delete/save/sms 等破坏性接口。
-- **目录枚举（dir_enum）** — 并发字典爆破，带 404 基线与全局伪装 200 识别（随机路径返回 200 自动停止），状态码与响应长度过滤。
-- **空间测绘（space_search）** — FOFA / Hunter / Quake / Shodan / ZoomEye / 0.zone 六引擎统一查询，engine=all 时并发查询所有已配置 key 的引擎。
-- **子域名枚举（subdomain_enum）** — 空间测绘被动聚合 + 内置字典 DNS 爆破，自动去重。
-- **MCP streamable-http 支持** — 支持 Chrome DevTools MCP 等 HTTP 传输的 MCP 服务器；惰性连接（启动时不占 session slot）；首次调用时自动建连 + 工具发现；连接失败降级为 service_unavailable 不影响 solve 循环。
-- **Chrome MCP 工具名修正** — 占位工具改为真实 Chrome MCP 工具名（chrome_navigate / chrome_read_page / chrome_pentest_* 等）。
-- 工具返回 undefined 标记为失败而非静默成功；fact_seq / intent_seq session 恢复后正确续接；新增 ReconConfig 配置区块与 solve_max_parallel 配置项。
+- **Exploración paralela de múltiples intents** — el motor solve admite explorar varias direcciones a la vez (por defecto max_parallel=3), una excepción en una dirección no afecta a las demás, cada intent tiene su propio buffer de evidencia y registro de llamadas a herramientas.
+- **Motor de memoria del agent** — el blackboard agrega un registro de llamadas a herramientas (visible entre intents), la fase reason lista explícitamente las direcciones ya abandonadas y prohíbe volver a proponerlas, el contexto de explore incluye un resumen de "herramientas ya ejecutadas"; el mecanismo de checkpoint omite reason cuando el estado del grafo no cambió, evitando ciclos vacíos; se agregó deduplicación Jaccard como respaldo para direcciones abandonadas.
+- **Optimización del criterio de conclude** — se relajó el estándar de "hay progreso" (descubrir una nueva interfaz o confirmar acceso no autorizado ahora cuentan como avance), ya no se descartan fácilmente hallazgos valiosos; se inyecta una instrucción de conclude override en el último paso para evitar ciclos vacíos; se agregó un respaldo de evidencia para evitar que conclude descarte por error exploraciones que sí tuvieron datos de retorno.
+- **Compuerta de negación en el criterio de finalización** — cuando el modelo escribe conclusiones negativas como "no se alcanzó el criterio de finalización" en el campo complete, ya no se interpreta erróneamente como completado; se exige explícitamente el valor booleano complete=true + referencia a un evidence fact.
+- **Recopilación de información JS (js_recon)** — captura la página y todos los archivos JS, extrae rutas de API / dominios relacionados / claves embebidas; descubre dinámicamente nombres de entidades en PascalCase y los combina con la ruta base y verbos CRUD para inferir interfaces ocultas; las interfaces recopiladas se someten automáticamente a pruebas de acceso no autorizado GET+POST.
+- **Prueba de acceso no autorizado (unauth_test)** — solicitudes masivas sin credenciales, evaluación por código de estado/cuerpo de respuesta/tipo de contenido; soporta comparación diferencial con/sin token para confirmar el acceso no autorizado; omite automáticamente interfaces destructivas como delete/save/sms.
+- **Enumeración de directorios (dir_enum)** — fuerza bruta concurrente de diccionario, con línea base de 404 e identificación de camuflaje global 200 (si una ruta aleatoria devuelve 200, se detiene automáticamente), filtrado por código de estado y longitud de respuesta.
+- **Mapeo del espacio (space_search)** — consulta unificada con seis motores FOFA / Hunter / Quake / Shodan / ZoomEye / 0.zone, con engine=all se consultan en paralelo todos los motores con key configurada.
+- **Enumeración de subdominios (subdomain_enum)** — agregación pasiva de mapeo del espacio + fuerza bruta DNS con diccionario integrado, deduplicación automática.
+- **Soporte de MCP streamable-http** — soporta servidores MCP de transporte HTTP como Chrome DevTools MCP; conexión perezosa (no ocupa slot de sesión al iniciar); establece conexión y descubre herramientas automáticamente en la primera llamada; ante fallo de conexión, degrada a service_unavailable sin afectar el ciclo solve.
+- **Corrección de nombres de herramientas Chrome MCP** — las herramientas placeholder se cambiaron por nombres reales de herramientas Chrome MCP (chrome_navigate / chrome_read_page / chrome_pentest_* etc.).
+- Cuando una herramienta devuelve undefined ahora se marca como fallo en lugar de éxito silencioso; fact_seq / intent_seq continúan correctamente tras la recuperación de sesión; se agregó el bloque de configuración ReconConfig y el elemento de configuración solve_max_parallel.
 
 ### v0.4.0
 
-**核心：自主引擎从「固定轮数工作流」重构为「目标驱动求解」**
+**Núcleo: el motor autónomo se refactorizó de «flujo de trabajo de rondas fijas» a «resolución orientada a objetivos»**
 
-- **新增目标驱动求解引擎（默认）** — 基于 Fact/Intent 黑板图的 OODA 循环，以「目标达成 / 探索前沿耗尽 / 安全预算」为终止条件，结构上杜绝"原地打转"；新增 `vulnclaw solve` 命令，`run`/REPL 自主模式默认改走该引擎（`session.engine=rounds` 可回退旧逻辑）。
-- **新增证据级反幻觉闸门** — 录制所有真实工具输出作为唯一可信证据；声称的 flag/完成必须在真实输出里逐字符出现才被采信，否则判定幻觉并继续探索；拿到验证过的 flag 即时收敛。
-- **新增结构化推理 + 自适应反思** — 已知事实（带置信度）/约束/攻击链结构化沉淀并注入提示词；失败自动归类并按 L0–L4 渐进升级 payload 绕过策略，persistent 模式跨周期保留失败记忆。
-- **新增漏洞检测插件体系** — 低耦合插件运行时 + 内置只读 Web 插件（安全响应头 / JWT / JS 端点），结果可去重合并进 findings 与报告链路；新增 `vulnclaw plugins list/info/run` 命令。
-- **修复 #45 工具被误约束** — 动作约束不再把 HTTP 方法（OPTIONS/POST）或使用 `requests` 误判为「利用」；只有实际攻击载荷（SQLi/RCE/路径穿越等）才算 exploit；`load_skill_reference`/`crypto_decode` 等纯本地工具豁免范围约束。
-- 新增 `session.engine` / `solve_*` / `reflexion_*` / `plugin_*` 等配置项，均支持环境变量注入。
-
----
-
-## 安全声明
-
-**公开 Alpha 阶段**：VulnClaw 是面向已授权安全测试、CTF、实验环境与可控研究场景的公开
-Alpha 软件，不应作为生产环境的安全控制手段或授权机制。使用前请阅读
-[SECURITY.md](SECURITY.md)。
-
-VulnClaw 仅用于**已授权的安全测试**。使用本工具前，请确保：
-
-1. 你已获得目标系统的**明确授权**
-2. 测试范围已与目标所有者**书面确认**
-3. 你遵守当地**法律法规**
-
-未经授权对系统进行渗透测试是违法行为。本工具作者不对滥用行为承担责任。
+- **Nuevo motor de resolución orientado a objetivos (predeterminado)** — ciclo OODA basado en el grafo de pizarra Fact/Intent, con criterio de finalización de «objetivo alcanzado / frontera de exploración agotada / presupuesto de seguridad», estructuralmente evita "dar vueltas en el mismo sitio"; nuevo comando `vulnclaw solve`, el modo autónomo de `run`/REPL ahora usa este motor por defecto (`session.engine=rounds` permite volver a la lógica antigua).
+- **Nueva compuerta antialucinación a nivel de evidencia** — registra toda la salida real de herramientas como única evidencia confiable; la flag/finalización declarada debe aparecer carácter por carácter en la salida real para ser aceptada, de lo contrario se determina como alucinación y se continúa explorando; al obtener una flag verificada, se converge de inmediato.
+- **Nuevo razonamiento estructurado + reflexión adaptativa** — los hechos conocidos (con nivel de confianza)/restricciones/cadenas de ataque se consolidan de forma estructurada e inyectan en el prompt; los fallos se clasifican automáticamente y las estrategias de bypass de payload se escalan progresivamente en niveles L0-L4, el modo persistent conserva la memoria de fallos entre ciclos.
+- **Nuevo sistema de plugins de detección de vulnerabilidades** — runtime de plugins de bajo acoplamiento + plugin Web de solo lectura integrado (encabezados de seguridad HTTP / JWT / endpoints JS), los resultados se pueden deduplicar y fusionar en findings y en el flujo de reportes; nuevos comandos `vulnclaw plugins list/info/run`.
+- **Corrección de #45, restricción errónea de herramientas** — las restricciones de acción ya no interpretan erróneamente los métodos HTTP (OPTIONS/POST) o el uso de `requests` como "explotación"; solo los payloads de ataque reales (SQLi/RCE/path traversal, etc.) cuentan como exploit; herramientas puramente locales como `load_skill_reference`/`crypto_decode` quedan exentas de la restricción de alcance.
+- Nuevos elementos de configuración `session.engine` / `solve_*` / `reflexion_*` / `plugin_*`, todos con soporte de inyección por variable de entorno.
 
 ---
 
-## 许可证
+## Declaración de seguridad
 
-[MIT License](LICENSE)
+**Fase de Alpha pública**: VulnClaw es software de Alpha pública orientado a pruebas de seguridad autorizadas, CTF, entornos experimentales y escenarios de investigación controlada; no debe usarse como medio de control de seguridad o mecanismo de autorización en entornos de producción. Lee [SECURITY.md](SECURITY.md) antes de usarlo.
+
+VulnClaw se destina únicamente a **pruebas de seguridad autorizadas**. Antes de usar esta herramienta, asegúrate de que:
+
+1. Has obtenido **autorización explícita** del sistema objetivo
+2. El alcance de las pruebas ha sido **confirmado por escrito** con el propietario del objetivo
+3. Cumples con las **leyes y reglamentos** locales
+
+Realizar pentesting a un sistema sin autorización es ilegal. Los autores de esta herramienta no se hacen responsables del uso indebido.
 
 ---
 
-## 加入社区
+## Licencia
 
-与更多安全爱好者一起交流、分享与成长
+[Licencia MIT](LICENSE)
 
-| 社区交流群 | 开发者群聊 |
+---
+
+## Únete a la comunidad
+
+Intercambia, comparte y crece junto a más entusiastas de la seguridad
+
+| Grupo de comunidad | Grupo de desarrolladores |
 |:--:|:--:|
-| 欢迎加入讨论分享，获取最新产品动态与使用技巧 | 加入我们，参与开源贡献与技术深度探讨 |
-| ![VulnClaw 社区交流群](assets/社区交流群.jpg) | ![VulnClaw 开发者群聊](assets/VulnClaw开发者群聊.png) |
-| **QQ 群号：954402631** | **QQ 群号：1065858551** |
+| Únete a la discusión y comparte, entérate de las últimas novedades y consejos de uso | Únete a nosotros para participar en contribuciones de código abierto y debates técnicos en profundidad |
+| ![Grupo de comunidad de VulnClaw](assets/社区交流群.jpg) | ![Grupo de desarrolladores de VulnClaw](assets/VulnClaw开发者群聊.png) |
+| **Grupo QQ: 954402631** | **Grupo QQ: 1065858551** |
 
 ---
 
 <div align="center">
 
-> 🦞 **VulnClaw** — 让每一次渗透都有章可循。
+> 🦞 **VulnClaw** — que cada pentesting tenga un método a seguir.
 
 </div>

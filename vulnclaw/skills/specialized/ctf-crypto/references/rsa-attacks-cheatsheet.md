@@ -1,39 +1,39 @@
-# RSA 攻击速查表
+# Hoja de referencia rápida de ataques RSA
 
-## 攻击选择决策树
+## Árbol de decisión de selección de ataque
 
 ```
-已知 n, e, c
-├── e 很小 (e=3)?
-│   ├── 同一明文多次加密 (多组c)? → Håstad 广播攻击
-│   └── 只有一组? → 小指数开根攻击 (低概率)
-├── 多组 (n, e, c)?
-│   ├── n 相同? → 共模攻击
-│   ├── e 相同? → Håstad 广播攻击
-│   └── p 或 q 有公因子? → GCD 分解
-├── e 很大 (>65537)?
-│   └── d 可能很小 → Wiener 攻击
-├── n 可分解?
-│   ├── Fermat 分解 (p≈q)
-│   ├── Pollard p-1 (p-1 因子小)
-│   ├── Williams p+1 (p+1 因子小)
-│   └── 在线查询 (factordb)
-└── 已知部分信息?
-    ├── 部分明文 → Coppersmith
-    ├── 部分p → Coppersmith
-    └── 部分d → 直接构造
+Se conocen n, e, c
+├── ¿e es muy pequeño (e=3)?
+│   ├── ¿Mismo texto plano cifrado varias veces (varios c)? → Ataque de difusión de Håstad
+│   └── ¿Solo un grupo? → Ataque de raíz de exponente pequeño (baja probabilidad)
+├── ¿Varios grupos (n, e, c)?
+│   ├── ¿n es igual? → Ataque de módulo común
+│   ├── ¿e es igual? → Ataque de difusión de Håstad
+│   └── ¿p o q comparten factor común? → Factorización por MCD
+├── ¿e es muy grande (>65537)?
+│   └── d puede ser muy pequeño → Ataque de Wiener
+├── ¿n se puede factorizar?
+│   ├── Factorización de Fermat (p≈q)
+│   ├── Pollard p-1 (factores de p-1 pequeños)
+│   ├── Williams p+1 (factores de p+1 pequeños)
+│   └── Consulta en línea (factordb)
+└── ¿Se conoce información parcial?
+    ├── Texto plano parcial → Coppersmith
+    ├── p parcial → Coppersmith
+    └── d parcial → Construcción directa
 ```
 
-## 小指数攻击 (e=3)
+## Ataque de exponente pequeño (e=3)
 
-### 低指数广播攻击 (Håstad)
+### Ataque de difusión de exponente bajo (Håstad)
 ```python
 from gmpy2 import iroot
 from functools import reduce
 
 def hastard_broadcast(cs, ns, e=3):
-    """当同一明文被 e 组不同 n 加密时"""
-    # CRT 求解
+    """Cuando el mismo texto plano se cifra con e grupos de distintos n"""
+    # Resolución por CRT
     N = reduce(lambda a, b: a * b, ns)
     x = 0
     for i in range(e):
@@ -47,13 +47,13 @@ def hastard_broadcast(cs, ns, e=3):
     return None
 ```
 
-## 共模攻击
+## Ataque de módulo común
 
 ```python
 from gmpy2 import gcd
 
 def common_modulus_attack(c1, c2, e1, e2, n):
-    """同一明文、同一n、不同e加密"""
+    """Mismo texto plano, mismo n, cifrado con distintos e"""
     g, s1, s2 = extended_gcd(e1, e2)
     if s1 < 0:
         c1 = pow(c1, -1, n)
@@ -71,18 +71,18 @@ def extended_gcd(a, b):
     return g, y - (b // a) * x, x
 ```
 
-## Wiener 攻击 (e 很大, d 很小)
+## Ataque de Wiener (e muy grande, d muy pequeño)
 
 ```python
 def wiener_attack(e, n):
-    """当 d < n^(1/4) 时有效"""
+    """Válido cuando d < n^(1/4)"""
     cf = continued_fraction(e, n)
     convergents = get_convergents(cf)
     for k, d in convergents:
         if k == 0:
             continue
         phi = (e * d - 1) // k
-        # 检查是否是有效的 phi
+        # Comprobar si es un phi válido
         x = n - phi + 1
         disc = x * x - 4 * n
         if disc >= 0:
@@ -92,13 +92,13 @@ def wiener_attack(e, n):
     return None
 ```
 
-## Fermat 分解 (p ≈ q)
+## Factorización de Fermat (p ≈ q)
 
 ```python
 from gmpy2 import is_square, iroot
 
 def fermat_factor(n):
-    """当 p 和 q 很接近时有效"""
+    """Válido cuando p y q están muy cerca entre sí"""
     a = iroot(n, 2)[0] + 1
     b2 = a * a - n
     while not is_square(b2):
@@ -109,13 +109,13 @@ def fermat_factor(n):
     return int(p), int(q)
 ```
 
-## Pollard p-1 攻击
+## Ataque Pollard p-1
 
 ```python
 from math import gcd
 
 def pollard_p1(n, B=100000):
-    """当 p-1 的因子都小于 B 时有效"""
+    """Válido cuando todos los factores de p-1 son menores que B"""
     a = 2
     for j in range(2, B):
         a = pow(a, j, n)
@@ -125,15 +125,15 @@ def pollard_p1(n, B=100000):
     return None
 ```
 
-## Coppersmith 攻击 (已知部分明文)
+## Ataque de Coppersmith (texto plano parcialmente conocido)
 
 ```python
-# 使用 SageMath
-# 当已知明文的高位或低位时
-# m = known_part + unknown_part
-# unknown_part < n^(1/e)
+# Usando SageMath
+# Cuando se conocen los bits altos o bajos del texto plano
+# m = parte_conocida + parte_desconocida
+# parte_desconocida < n^(1/e)
 
-# Sage 实现：
+# Implementación en Sage:
 P.<x> = PolynomialRing(Zmod(n))
 f = (known_prefix + x)^e - c
 f = f.monic()
@@ -142,7 +142,7 @@ if roots:
     m = known_prefix + roots[0]
 ```
 
-## 在线分解工具
+## Herramientas de factorización en línea
 
-- https://factordb.com — 查询已分解的 n
-- http://sagecell.sagemath.org — 在线 Sage 计算
+- https://factordb.com — consultar valores de n ya factorizados
+- http://sagecell.sagemath.org — cálculo en línea con Sage

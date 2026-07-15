@@ -77,9 +77,9 @@ def test_build_round_context_injects_reasoning_and_reflexion(tmp_path):
 
     context = build_round_context(_fake_agent(tmp_path, state, reflexion), 2, 5)
 
-    assert "🧭 当前推理状态" in context
+    assert "🧭 Estado de razonamiento actual" in context
     assert "admin search looks injectable" in context
     assert "admin search sqli" in context
-    assert "🔁 反思状态：" in context
+    assert "🔁 Estado de reflexión:" in context
     assert "/admin/search?q='" in context
-    assert "当前升级级别" in context
+    assert "Nivel de escalado actual" in context

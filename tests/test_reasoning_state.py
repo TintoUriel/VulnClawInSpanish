@@ -105,7 +105,7 @@ def test_prompt_block_and_summary_include_state():
     prompt = state.to_prompt_block()
     summary = state.get_summary()
 
-    assert "🧭 当前推理状态" in prompt
+    assert "🧭 Estado de razonamiento actual" in prompt
     assert "server=nginx" in prompt
     assert "[auth/blocking] 403 on admin" in prompt
     assert "[active] auth bypass" in prompt

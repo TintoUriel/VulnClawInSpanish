@@ -1,139 +1,139 @@
-# XXE实体注入
+# Inyección de entidades XXE
 English: XXE Entity Injection
 - Entry Count: 9
 - Use this file to shortlist relevant payloads, then open the linked source markdown for the full workflow and commands.
-## XXE基础攻击
+## Ataque básico de XXE
 - ID: xxe-basic
 - Difficulty: intermediate
-- Subcategory: 基础攻击
+- Subcategory: Ataque básico
 - Tags: xxe, xml, external, entity
 - Original Extracted Source: original extracted web-security-wiki source/xxe-basic.md
 Description:
-XML外部实体注入基础攻击技术
+Técnicas básicas de ataque de inyección de entidades externas XML
 Prerequisites:
-- 存在XML解析功能
-- 外部实体未被禁用
+- Existe funcionalidad de análisis de XML
+- Las entidades externas no están deshabilitadas
 Execution Outline:
-1. 1. 探测XXE
-2. 2. 读取文件
-3. 3. 读取PHP源码
-4. 4. SSRF攻击
-## 盲注XXE攻击
+1. 1. Sondear XXE
+2. 2. Lectura de archivos
+3. 3. Lectura del código fuente PHP
+4. 4. Ataque SSRF
+## Ataque de XXE ciego
 - ID: xxe-blind
 - Difficulty: intermediate
-- Subcategory: 盲注XXE
+- Subcategory: XXE ciego
 - Tags: xxe, blind, oob, xml
 - Original Extracted Source: original extracted web-security-wiki source/xxe-blind.md
 Description:
-无回显的XXE攻击技术
+Técnicas de ataque XXE sin eco de salida
 Prerequisites:
-- 存在XML解析
-- 无直接回显
+- Existe análisis de XML
+- No hay eco directo
 Execution Outline:
-1. 1. 外部实体探测
-2. 2. 参数实体
-3. 3. OOB外带数据
-## XXE OOB外带攻击
+1. 1. Sondeo de entidad externa
+2. 2. Entidad de parámetro
+3. 3. Exfiltración de datos OOB
+## Ataque de exfiltración OOB con XXE
 - ID: xxe-oob
 - Difficulty: intermediate
-- Subcategory: OOB外带
+- Subcategory: Exfiltración OOB
 - Tags: xxe, oob, exfiltration, xml
 - Original Extracted Source: original extracted web-security-wiki source/xxe-oob.md
 Description:
-利用OOB技术外带XXE数据
+Explota técnicas OOB para exfiltrar datos vía XXE
 Prerequisites:
-- 存在XXE漏洞
-- 可发起外部请求
+- Existe una vulnerabilidad XXE
+- Es posible iniciar solicitudes externas
 Execution Outline:
-1. 1. HTTP外带
-2. 2. FTP外带
-3. 3. DNS外带
-## XXE+SSRF组合攻击
+1. 1. Exfiltración por HTTP
+2. 2. Exfiltración por FTP
+3. 3. Exfiltración por DNS
+## Ataque combinado XXE+SSRF
 - ID: xxe-ssrf
 - Difficulty: intermediate
 - Subcategory: XXE+SSRF
 - Tags: xxe, ssrf, combination, xml
 - Original Extracted Source: original extracted web-security-wiki source/xxe-ssrf.md
 Description:
-利用XXE实现SSRF攻击
+Explota XXE para lograr un ataque SSRF
 Prerequisites:
-- 存在XXE漏洞
-- 内网可访问
+- Existe una vulnerabilidad XXE
+- Es posible acceder a la red interna
 Execution Outline:
-1. 1. 扫描内网端口
-2. 2. 访问内网服务
-## XXE到RCE
+1. 1. Escaneo de puertos de la red interna
+2. 2. Acceso a servicios de la red interna
+## De XXE a RCE
 - ID: xxe-rce
 - Difficulty: advanced
-- Subcategory: XXE到RCE
+- Subcategory: De XXE a RCE
 - Tags: xxe, rce, php, expect
 - Original Extracted Source: original extracted web-security-wiki source/xxe-rce.md
 Description:
-利用XXE实现远程代码执行
+Explota XXE para lograr ejecución remota de código
 Prerequisites:
-- 存在XXE漏洞
-- PHP expect扩展加载
+- Existe una vulnerabilidad XXE
+- La extensión expect de PHP está cargada
 Execution Outline:
-1. 1. Expect扩展RCE
-2. 2. 写入WebShell
-## XXE文件读取
+1. 1. RCE mediante la extensión Expect
+2. 2. Escritura de WebShell
+## Lectura de archivos mediante XXE
 - ID: xxe-file-read
 - Difficulty: beginner
-- Subcategory: 文件读取
+- Subcategory: Lectura de archivos
 - Tags: xxe, file, read, lfi
 - Original Extracted Source: original extracted web-security-wiki source/xxe-file-read.md
 Description:
-利用XXE读取服务器文件
+Explota XXE para leer archivos del servidor
 Prerequisites:
-- 存在XXE漏洞
-- 有文件读取权限
+- Existe una vulnerabilidad XXE
+- Se tienen permisos de lectura de archivos
 Execution Outline:
-1. 1. 读取Linux文件
-2. 2. 读取Windows文件
-3. 3. 读取Web配置
-4. 4. 读取源代码
-## XXE外部DTD利用
+1. 1. Lectura de archivos Linux
+2. 2. Lectura de archivos Windows
+3. 3. Lectura de configuración web
+4. 4. Lectura del código fuente
+## Explotación de DTD externo mediante XXE
 - ID: xxe-dtd
 - Difficulty: intermediate
-- Subcategory: 外部DTD
+- Subcategory: DTD externo
 - Tags: xxe, dtd, external, xml
 - Original Extracted Source: original extracted web-security-wiki source/xxe-dtd.md
 Description:
-利用外部DTD文件进行XXE攻击
+Explota un archivo DTD externo para realizar un ataque XXE
 Prerequisites:
-- 存在XXE漏洞
-- 可访问外部DTD
+- Existe una vulnerabilidad XXE
+- Es posible acceder a un DTD externo
 Execution Outline:
-1. 1. 托管恶意DTD
-2. 2. 引用外部DTD
-3. 3. 多步骤外带
-4. 4. 错误消息泄露
-## XLSX文件XXE
+1. 1. Alojar un DTD malicioso
+2. 2. Referenciar el DTD externo
+3. 3. Exfiltración en varios pasos
+4. 4. Fuga mediante mensajes de error
+## XXE en archivos XLSX
 - ID: xxe-xlsx
 - Difficulty: intermediate
-- Subcategory: XLSX文件XXE
+- Subcategory: XXE en archivos XLSX
 - Tags: xxe, xlsx, excel, office
 - Original Extracted Source: original extracted web-security-wiki source/xxe-xlsx.md
 Description:
-利用XLSX文件进行XXE攻击
+Explota archivos XLSX para realizar un ataque XXE
 Prerequisites:
-- 应用解析XLSX文件
-- 存在XXE漏洞
+- La aplicación analiza archivos XLSX
+- Existe una vulnerabilidad XXE
 Execution Outline:
-1. 1. 解压XLSX文件
-2. 2. 注入XXE Payload
-## DOCX文件XXE
+1. 1. Descomprimir el archivo XLSX
+2. 2. Inyectar el payload XXE
+## XXE en archivos DOCX
 - ID: xxe-docx
 - Difficulty: intermediate
-- Subcategory: DOCX文件XXE
+- Subcategory: XXE en archivos DOCX
 - Tags: xxe, docx, word, office
 - Original Extracted Source: original extracted web-security-wiki source/xxe-docx.md
 Description:
-利用DOCX文件进行XXE攻击
+Explota archivos DOCX para realizar un ataque XXE
 Prerequisites:
-- 应用解析DOCX文件
-- 存在XXE漏洞
+- La aplicación analiza archivos DOCX
+- Existe una vulnerabilidad XXE
 Execution Outline:
-1. 1. 解压DOCX文件
-2. 2. 注入XXE Payload
-
+1. 1. Descomprimir el archivo DOCX
+2. 2. Inyectar el payload XXE
+</content>
