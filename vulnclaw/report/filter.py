@@ -45,7 +45,7 @@ class ReportContentFilter:
         re.compile(r"──\s*Round\s*\d+\s*──", re.DOTALL),
         re.compile(r"Cycle\s*\d+\s*\|\s*Round\s*\d+", re.IGNORECASE),
         re.compile(r"Round\s+\d+:", re.IGNORECASE),
-        re.compile(r"第\s*\d+\s*轮", re.IGNORECASE),
+        re.compile(r"Ronda\s*\d+", re.IGNORECASE),
     ]
 
     # Etiquetas think (proceso de razonamiento del LLM)
@@ -60,8 +60,8 @@ class ReportContentFilter:
         re.compile(r"<reasoning>[\s\S]*?</reasoning>?", re.IGNORECASE),
         re.compile(r"<reasoning>?[\s\S]*", re.IGNORECASE),
         re.compile(r"\[think\]", re.IGNORECASE),
-        re.compile(r"##\s*思考\s*", re.IGNORECASE),
-        re.compile(r"###\s*推理\s*", re.IGNORECASE),
+        re.compile(r"##\s*Pensamiento\s*", re.IGNORECASE),
+        re.compile(r"###\s*Razonamiento\s*", re.IGNORECASE),
     ]
 
     # Bloques de código Python (varios formatos)
@@ -85,8 +85,8 @@ class ReportContentFilter:
     DEBUG_PATTERNS = [
         re.compile(r"^\s*──.*──\s*$", re.MULTILINE),  # Línea separadora
         re.compile(r"^\s*\[=\]+\s*$", re.MULTILINE),  # Estilo =====
-        re.compile(r"工具调用|tool_call", re.IGNORECASE),
-        re.compile(r"调用工具|调用结果", re.IGNORECASE),
+        re.compile(r"llamada a herramienta|tool_call", re.IGNORECASE),
+        re.compile(r"invocar herramienta|resultado de invocación", re.IGNORECASE),
         re.compile(r"\[LLM\s+[A-Z_]+\]", re.IGNORECASE),  # [LLM THINKING], etc.
     ]
 
@@ -98,9 +98,9 @@ class ReportContentFilter:
 
     # Marcadores de cambio de fase
     PHASE_PATTERNS = [
-        re.compile(r"阶段切换\s*[→\-]>\s*\w+", re.IGNORECASE),
-        re.compile(r"进入\s*\w+\s*阶段", re.IGNORECASE),
-        re.compile(r"当前阶段:\s*\w+", re.IGNORECASE),
+        re.compile(r"cambio de fase\s*[→\-]>\s*\w+", re.IGNORECASE),
+        re.compile(r"entra en fase\s*\w+", re.IGNORECASE),
+        re.compile(r"fase actual:\s*\w+", re.IGNORECASE),
     ]
 
     @classmethod
@@ -236,8 +236,8 @@ class ReportContentFilter:
             result = pattern.sub("", result)
 
         # Eliminar marcadores de resultado de herramienta
-        result = re.sub(r"\[结果\]\s*:?\s*", "", result)
-        result = re.sub(r"\[输出\]\s*:?\s*", "", result)
+        result = re.sub(r"\[Resultado\]\s*:?\s*", "", result)
+        result = re.sub(r"\[Salida\]\s*:?\s*", "", result)
 
         return result
 
@@ -329,8 +329,8 @@ def extract_findings_section(content: str) -> Optional[str]:
     Si no se encuentra una lista de vulnerabilidades dedicada, devuelve None.
     """
     patterns = [
-        r"(##\s*漏洞列表\s*\n[\s\S]*?)(?=##|\Z)",
-        r"(##\s*详细发现\s*\n[\s\S]*?)(?=##|\Z)",
+        r"(##+\s*(?:\d+\.\s*)?Hallazgos de Vulnerabilidades[^\n]*\n[\s\S]*?)(?=##|\Z)",
+        r"(##+\s*(?:\d+\.\s*)?Hallazgos Detallados[^\n]*\n[\s\S]*?)(?=##|\Z)",
         r"(##\s*Findings\s*\n[\s\S]*?)(?=##|\Z)",
     ]
 

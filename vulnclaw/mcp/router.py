@@ -9,33 +9,33 @@ from typing import Any, Optional
 
 INTENT_TOOL_MAP: dict[str, list[dict[str, Any]]] = {
     # Browser automation
-    "打开网页|访问url|访问页面|navigate": [
+    "abrir página|acceder a url|visitar página|navigate": [
         {"tool": "new_page", "server": "chrome-devtools"},
         {"tool": "navigate", "server": "chrome-devtools"},
     ],
-    "截图|screenshot|截屏": [
+    "captura de pantalla|screenshot|capturar pantalla": [
         {"tool": "screenshot", "server": "chrome-devtools"},
     ],
-    "执行js|eval js|运行javascript": [
+    "ejecutar js|eval js|ejecutar javascript": [
         {"tool": "evaluate_js", "server": "chrome-devtools"},
     ],
     # HTTP requests
-    "发请求|http请求|fetch|访问接口|调用api": [
+    "enviar solicitud|solicitud http|fetch|acceder a la api|llamar api": [
         {"tool": "fetch", "server": "fetch"},
         {"tool": "send_http1_request", "server": "burp"},
     ],
     # Burp Suite
-    "抓包|查看请求|拦截请求|proxy": [
+    "capturar tráfico|ver solicitudes|interceptar solicitud|proxy": [
         {"tool": "get_proxy_http_history", "server": "burp"},
     ],
-    "修改数据包|重放|replay|篡改": [
+    "modificar paquete|repetir|replay|manipular": [
         {"tool": "send_http1_request", "server": "burp"},
     ],
     # Memory
-    "记住|记录|save memory": [
+    "recordar|guardar|save memory": [
         {"tool": "save", "server": "memory"},
     ],
-    "回忆|查询记录|retrieve memory": [
+    "recuperar|consultar historial|retrieve memory": [
         {"tool": "retrieve", "server": "memory"},
     ],
 }

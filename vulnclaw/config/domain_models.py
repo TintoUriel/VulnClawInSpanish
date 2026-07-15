@@ -279,27 +279,27 @@ class TaskConstraints(BaseModel):
         if self.is_empty():
             return ""
 
-        lines = ["## 当前任务硬约束"]
+        lines = ["## Restricciones estrictas de la tarea actual"]
         if self.allowed_ports:
-            lines.append(f"- 仅允许测试端口: {', '.join(str(p) for p in self.allowed_ports)}")
+            lines.append(f"- Puertos permitidos exclusivamente: {', '.join(str(p) for p in self.allowed_ports)}")
         if self.blocked_ports:
-            lines.append(f"- 禁止测试端口: {', '.join(str(p) for p in self.blocked_ports)}")
+            lines.append(f"- Puertos prohibidos: {', '.join(str(p) for p in self.blocked_ports)}")
         if self.allowed_hosts:
-            lines.append(f"- 仅允许测试主机: {', '.join(self.allowed_hosts)}")
+            lines.append(f"- Hosts permitidos exclusivamente: {', '.join(self.allowed_hosts)}")
         if self.blocked_hosts:
-            lines.append(f"- 禁止测试主机: {', '.join(self.blocked_hosts)}")
+            lines.append(f"- Hosts prohibidos: {', '.join(self.blocked_hosts)}")
         if self.allowed_paths:
-            lines.append(f"- 仅允许测试路径: {', '.join(self.allowed_paths)}")
+            lines.append(f"- Rutas permitidas exclusivamente: {', '.join(self.allowed_paths)}")
         if self.blocked_paths:
-            lines.append(f"- 禁止测试路径: {', '.join(self.blocked_paths)}")
+            lines.append(f"- Rutas prohibidas: {', '.join(self.blocked_paths)}")
         if self.allowed_actions:
-            lines.append(f"- 仅允许动作: {', '.join(self.allowed_actions)}")
+            lines.append(f"- Acciones permitidas exclusivamente: {', '.join(self.allowed_actions)}")
         if self.blocked_actions:
-            lines.append(f"- 禁止动作: {', '.join(self.blocked_actions)}")
+            lines.append(f"- Acciones prohibidas: {', '.join(self.blocked_actions)}")
         if self.notes:
-            lines.append(f"- 其他限制: {'; '.join(self.notes)}")
+            lines.append(f"- Otras restricciones: {'; '.join(self.notes)}")
         if self.strict_mode:
-            lines.append("- 严格模式: 超出范围时只记录，不主动测试，不调用工具执行。")
+            lines.append("- Modo estricto: fuera del alcance solo se registra, no se prueba activamente ni se invocan herramientas de ejecución.")
         return "\n".join(lines)
 
 
@@ -380,7 +380,7 @@ class StepRecord(BaseModel):
 
         # Inferir la fase
         inferred_phase = phase
-        if "阶段切换" in step_str:
+        if "cambio de fase" in step_str:
             if "信息收集" in step_str:
                 inferred_phase = PentestPhase.RECON
             elif "漏洞发现" in step_str:
