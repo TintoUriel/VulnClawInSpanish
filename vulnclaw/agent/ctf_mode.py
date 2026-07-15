@@ -30,32 +30,30 @@ def update_ctf_state(agent: AgentContext, response_text: str, result_should_cont
     """Update flag claim/verification state and return should_continue."""
     if agent.runtime.claimed_flag and not agent.runtime.flag_verified:
         # NOTA: estos marcadores detectan frases en el TEXTO GENERADO POR EL LLM
-        # (response_text), cuyo idioma está determinado por agent/prompts.py y
-        # agent/system_prompt.py (fuera del alcance de esta traducción y aún en
-        # chino). Se mantienen en chino intencionalmente para no romper la
-        # detección en tiempo de ejecución contra la salida real del modelo.
+        # (response_text). El system prompt (agent/prompts.py y
+        # agent/system_prompt.py) ahora instruye al modelo a responder en
+        # español, así que los marcadores están en español para seguir
+        # detectando estas frases en la salida real del modelo.
         verification_markers = [
-            "验证成功",
-            "验证通过",
-            "已验证",
-            "复现成功",
-            "确认flag",
+            "verificación exitosa",
+            "verificación aprobada",
+            "verificado",
+            "reproducción exitosa",
+            "flag confirmado",
             "verified",
             "confirmed",
-            "flag正确",
-            "提交成功",
-            "flag 获取成功",
-            "flag获取成功",
-            "获取成功",
-            "找到flag",
+            "flag correcto",
+            "envío exitoso",
+            "flag obtenido con éxito",
+            "obtenido con éxito",
+            "flag encontrado",
             "flag found",
-            "成功获取",
-            "获取了flag",
-            "拿到了flag",
-            "成功拿到",
-            "成功找到",
-            "解题完成",
-            "解题成功",
+            "se obtuvo el flag",
+            "se consiguió el flag",
+            "se consiguió con éxito",
+            "se encontró con éxito",
+            "reto completado",
+            "reto resuelto con éxito",
         ]
         if any(marker in response_text.lower() for marker in verification_markers):
             agent.runtime.flag_verified = True

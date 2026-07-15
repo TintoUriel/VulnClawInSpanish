@@ -14,20 +14,20 @@ from vulnclaw.agent.context import PentestPhase
 FAILED_ACCESS_PATTERNS = [
     "SSLError",
     "ReadTimeout",
-    "连接超时",
-    "连接失败",
+    "tiempo de conexión agotado",
+    "conexión fallida",
     "502 Bad Gateway",
     "502",
     "503",
-    "无法访问",
-    "访问失败",
+    "no se puede acceder",
+    "acceso fallido",
     "Connection refused",
     "ConnectionError",
     "TimeoutError",
     "Name or service not known",
     "No route to host",
     "SSL: CERTIFICATE_VERIFY_FAILED",
-    "超时",
+    "tiempo agotado",
 ]
 
 
@@ -37,19 +37,19 @@ def detect_phase_from_output(output: str) -> Optional[PentestPhase]:
     transitions = [
         (
             PentestPhase.VULN_DISCOVERY,
-            ["进入漏洞发现", "开始漏洞扫描", "漏洞检测", "切换到漏洞发现", "phase: vuln_discovery"],
+            ["entrando en descubrimiento de vulnerabilidades", "iniciando escaneo de vulnerabilidades", "detección de vulnerabilidades", "cambiando a descubrimiento de vulnerabilidades", "phase: vuln_discovery"],
         ),
         (
             PentestPhase.EXPLOITATION,
-            ["进入漏洞利用", "开始利用", "尝试利用", "切换到漏洞利用", "phase: exploitation"],
+            ["entrando en explotación", "iniciando explotación", "intentando explotar", "cambiando a explotación", "phase: exploitation"],
         ),
         (
             PentestPhase.POST_EXPLOITATION,
-            ["进入后渗透", "内网渗透", "横向移动", "切换到后渗透", "phase: post_exploitation"],
+            ["entrando en post-explotación", "penetración de red interna", "movimiento lateral", "cambiando a post-explotación", "phase: post_exploitation"],
         ),
         (
             PentestPhase.REPORTING,
-            ["生成报告", "整理结果", "渗透测试完成", "切换到报告", "phase: reporting"],
+            ["generando informe", "organizando resultados", "pentest completado", "cambiando a informe", "phase: reporting"],
         ),
     ]
 
@@ -64,9 +64,9 @@ def is_completion_signal(output: str) -> bool:
     completion_signals = [
         "[DONE]",
         "[COMPLETE]",
-        "渗透测试已完成",
-        "测试结束",
-        "任务完成",
+        "pentest completado",
+        "prueba finalizada",
+        "tarea completada",
     ]
     return any(signal in output for signal in completion_signals)
 
@@ -100,29 +100,29 @@ def is_meaningful_step(step: str) -> bool:
     failure_only_keywords = [
         "SSLError",
         "ReadTimeout",
-        "连接超时",
-        "连接失败",
+        "tiempo de conexión agotado",
+        "conexión fallida",
         "502 Bad Gateway",
-        "无法访问",
-        "访问失败",
+        "no se puede acceder",
+        "acceso fallido",
         "Connection refused",
         "ConnectionError",
         "TimeoutError",
-        "请求失败",
+        "solicitud fallida",
     ]
     progress_keywords = [
-        "发现",
-        "确认",
-        "漏洞",
-        "端口",
-        "路径",
+        "hallazgo",
+        "confirmación",
+        "vulnerabilidad",
+        "puerto",
+        "ruta",
         "flag",
-        "成功",
+        "éxito",
         "CVE",
-        "泄露",
-        "绕过",
-        "验证通过",
-        "已确认",
+        "filtración",
+        "bypass",
+        "verificación aprobada",
+        "confirmado",
     ]
 
     if any(keyword in step for keyword in progress_keywords):
@@ -138,21 +138,21 @@ def detect_attack_path(output: str) -> Optional[str]:
     path_patterns = [
         (
             "regex_bypass",
-            ["preg_replace", "preg_match", "正则绕过", "大小写绕过", "数组绕过", "双写绕过"],
+            ["preg_replace", "preg_match", "bypass de regex", "bypass de mayúsculas/minúsculas", "bypass con array", "bypass de doble escritura"],
         ),
         (
             "file_inclusion",
-            ["php://filter", "文件包含", "include", "require", "伪协议", "php://input", "data://"],
+            ["php://filter", "inclusión de archivos", "include", "require", "pseudo-protocolo", "php://input", "data://"],
         ),
-        ("rce", ["eval(", "system(", "exec(", "passthru(", "shell_exec(", "命令执行", "rce"]),
-        ("sqli", ["sql注入", "union select", "information_schema", "sqli", "sqlmap"]),
-        ("ssti", ["ssti", "template", "jinja2", "twig", "{{", "模板注入"]),
-        ("deserialization", ["反序列化", "unserialize", "serialize", "pop链", "wakeup"]),
-        ("file_upload", ["文件上传", "upload", "webshell", "一句话木马"]),
-        ("ssrf", ["ssrf", "gopher://", "dict://", "内网访问"]),
-        ("xxe", ["xxe", "xml外部实体", "entity"]),
-        ("info_leak", ["源码泄露", ".git", ".svn", "备份文件", "目录遍历", "robots.txt"]),
-        ("brute_force", ["爆破", "弱口令", "字典", "brute"]),
+        ("rce", ["eval(", "system(", "exec(", "passthru(", "shell_exec(", "ejecución de comandos", "rce"]),
+        ("sqli", ["inyección sql", "union select", "information_schema", "sqli", "sqlmap"]),
+        ("ssti", ["ssti", "template", "jinja2", "twig", "{{", "inyección de plantillas"]),
+        ("deserialization", ["deserialización", "unserialize", "serialize", "cadena pop", "wakeup"]),
+        ("file_upload", ["subida de archivos", "upload", "webshell", "webshell de una línea"]),
+        ("ssrf", ["ssrf", "gopher://", "dict://", "acceso a red interna"]),
+        ("xxe", ["xxe", "entidad externa xml", "entity"]),
+        ("info_leak", ["filtración de código fuente", ".git", ".svn", "archivo de respaldo", "traversal de directorios", "robots.txt"]),
+        ("brute_force", ["fuerza bruta", "contraseña débil", "diccionario", "brute"]),
     ]
 
     for path_name, keywords in path_patterns:

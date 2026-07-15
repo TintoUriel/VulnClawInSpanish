@@ -1,11 +1,11 @@
-"""黑板图模型 — Fact / Intent 双原语驱动的状态空间搜索。
+"""Modelo de pizarra (blackboard) — búsqueda en espacio de estados impulsada por los primitivos Fact / Intent.
 
-渗透测试视为从 origin 向 goal 的有向状态空间搜索：
-- Fact:   已确认的客观事实（探索的落脚点）
-- Intent: 声明的探索方向（尚未执行的一步）；从一个或多个 Fact 出发，结论后产出一个新 Fact
-- 终止条件由「目标达成 / 探索前沿耗尽 / 安全预算」决定，而非固定轮数
+El pentest se modela como una búsqueda dirigida en un espacio de estados desde origin hacia goal:
+- Fact:   hecho objetivo ya confirmado (punto de apoyo de la exploración)
+- Intent: dirección de exploración declarada (un paso aún no ejecutado); parte de uno o más Fact y, al concluir, produce un nuevo Fact
+- La condición de término la determina «meta alcanzada / frontera de exploración agotada / presupuesto de seguridad», no un número fijo de rondas
 
-该模型是纯数据结构，挂载到 SessionState 持久化，由 solver.py 的 OODA 循环驱动。
+Este modelo es una estructura de datos pura, se adjunta a SessionState para persistirse, y lo impulsa el bucle OODA de solver.py.
 """
 
 from __future__ import annotations
@@ -17,29 +17,29 @@ from pydantic import BaseModel, Field
 
 
 class IntentStatus(str, Enum):
-    OPEN = "open"  # 已声明，待探索
-    EXPLORING = "exploring"  # 正在探索
-    CONCLUDED = "concluded"  # 已结论，产出了 Fact
-    ABANDONED = "abandoned"  # 探索后未推进目标，放弃
+    OPEN = "open"  # declarado, pendiente de exploración
+    EXPLORING = "exploring"  # en exploración
+    CONCLUDED = "concluded"  # concluido, produjo un Fact
+    ABANDONED = "abandoned"  # explorado pero no hizo avanzar la meta, abandonado
 
 
 class BoardFact(BaseModel):
     id: str
     description: str
-    source: str = ""  # 来源（bootstrap / explore:i003 / hint ...）
+    source: str = ""  # origen (bootstrap / explore:i003 / hint ...)
 
 
 class BoardIntent(BaseModel):
     id: str
-    from_facts: list[str] = Field(default_factory=list)  # 出发的 Fact id
+    from_facts: list[str] = Field(default_factory=list)  # ids de los Fact de partida
     description: str
     status: IntentStatus = IntentStatus.OPEN
-    result_fact: str | None = None  # 结论后产出的 Fact id
-    note: str = ""  # 放弃原因 / 备注
+    result_fact: str | None = None  # id del Fact producido al concluir
+    note: str = ""  # motivo de abandono / nota
 
 
 class ToolCallRecord(BaseModel):
-    """已执行工具调用的紧凑记录——防止跨 intent 重复调用同一工具+同一参数。"""
+    """Registro compacto de una llamada a herramienta ya ejecutada — evita repetir la misma herramienta+parámetros entre intents."""
     tool: str
     key_args: str = ""
     intent_id: str = ""
@@ -48,11 +48,13 @@ class ToolCallRecord(BaseModel):
 
 
 class Blackboard(BaseModel):
-    """Fact/Intent 图。从 origin 增长到 goal。
+    """Grafo de Fact/Intent. Crece desde origin hasta goal.
 
-    参考 Cairn：除了 Fact/Intent，还维护一份 **tool_calls 执行日志**，
-    每次 explore 中调用的工具都会记录到这里。Reason 和 Explore 的上下文
-    prompt 均包含此日志的摘要，使 LLM 能看到"已经做过什么"并避免重复。
+    Inspirado en Cairn: además de Fact/Intent, mantiene un **registro de
+    ejecución tool_calls**; cada herramienta invocada durante un explore
+    se registra aquí. Los prompts de contexto de Reason y Explore incluyen
+    un resumen de este registro, para que el LLM pueda ver "qué ya se hizo"
+    y evitar repeticiones.
     """
 
     origin: str = ""
@@ -105,7 +107,7 @@ class Blackboard(BaseModel):
         return [i for i in self.intents if i.status == IntentStatus.OPEN]
 
     def active_intents(self) -> list[BoardIntent]:
-        """未结论的 Intent（open + exploring），用于判断探索前沿是否耗尽。"""
+        """Intents sin concluir (open + exploring), para determinar si la frontera de exploración se agotó."""
         return [i for i in self.intents if i.status in (IntentStatus.OPEN, IntentStatus.EXPLORING)]
 
     def claim_intent(self, intent_id: str) -> BoardIntent | None:
@@ -115,7 +117,7 @@ class Blackboard(BaseModel):
         return intent
 
     def conclude_intent(self, intent_id: str, fact_description: str, source: str = "") -> BoardFact | None:
-        """探索得到了有价值的结论 → 产出一个 Fact 并链接。"""
+        """La exploración llegó a una conclusión valiosa → produce un Fact y lo enlaza."""
         intent = self.get_intent(intent_id)
         if intent is None:
             return None
@@ -167,10 +169,10 @@ class Blackboard(BaseModel):
         lines = list(seen.values())[-max_lines:]
         return "\n".join(lines)
 
-    # ── 渲染 ────────────────────────────────────────────────────────
+    # ── Renderizado ────────────────────────────────────────────────────────────
     def to_prompt_graph(self, *, include_concluded: bool = True) -> str:
-        """把图渲染成给 LLM 阅读的紧凑文本（YAML 风格）。"""
-        lines: list[str] = [f"goal: {self.goal or '(未设定)'}", f"origin: {self.origin or '(未设定)'}"]
+        """Renderiza el grafo como texto compacto (estilo YAML) para que lo lea el LLM."""
+        lines: list[str] = [f"goal: {self.goal or '(sin definir)'}", f"origin: {self.origin or '(sin definir)'}"]
 
         lines.append("facts:")
         if self.facts:
@@ -178,7 +180,7 @@ class Blackboard(BaseModel):
                 src = f"  ({fact.source})" if fact.source else ""
                 lines.append(f"  - {fact.id}: {fact.description}{src}")
         else:
-            lines.append("  (暂无)")
+            lines.append("  (ninguno todavía)")
 
         lines.append("intents:")
         shown = self.intents if include_concluded else self.active_intents()
@@ -189,11 +191,11 @@ class Blackboard(BaseModel):
                 note = f"  // {intent.note}" if intent.note else ""
                 lines.append(f"  - {intent.id} [{intent.status.value}]{frm}{res}: {intent.description}{note}")
         else:
-            lines.append("  (暂无)")
+            lines.append("  (ninguno todavía)")
 
         tc_summary = self.tool_call_summary(30)
         if tc_summary:
-            lines.append("executed_tools (禁止重复调用已执行的工具+参数):")
+            lines.append("executed_tools (prohibido repetir una herramienta+parámetros ya ejecutada):")
             lines.append(tc_summary)
 
         return "\n".join(lines)
