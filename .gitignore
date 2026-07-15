@@ -82,7 +82,7 @@ CLAUDE.md
 # Local docs / local-only artifacts
 docs/
 .test-tmp/
-版本号文件.png
+version-file.png
 
-# 开发中途产生的临时文件
+# Archivos temporales generados durante el desarrollo
 .projectHelp/
