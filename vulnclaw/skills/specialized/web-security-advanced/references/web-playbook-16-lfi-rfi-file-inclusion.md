@@ -1,207 +1,207 @@
-# LFI/RFI文件包含
+# LFI/RFI Inclusión de Archivos
 English: LFI/RFI File Inclusion
 - Entry Count: 12
 - Use this file to shortlist relevant payloads, then open the linked source markdown for the full workflow and commands.
-## 本地文件包含
+## Inclusión Local de Archivos (LFI)
 - ID: lfi-basic
 - Difficulty: intermediate
-- Subcategory: 本地包含
+- Subcategory: Inclusión local
 - Tags: lfi, local, file, inclusion
 - Original Extracted Source: original extracted web-security-wiki source/lfi-basic.md
 Description:
-本地文件包含漏洞利用技术
+Técnica de explotación de vulnerabilidad de inclusión local de archivos
 Prerequisites:
-- 存在文件包含功能
-- 用户可控制包含路径
+- Existe funcionalidad de inclusión de archivos
+- El usuario puede controlar la ruta de inclusión
 Execution Outline:
-1. 1. 探测LFI
-2. 2. 读取敏感文件
-3. 3. PHP伪协议
-4. 4. 日志投毒
-## 远程文件包含
+1. 1. Detectar LFI
+2. 2. Leer archivos sensibles
+3. 3. Pseudo-protocolos PHP
+4. 4. Envenenamiento de logs
+## Inclusión Remota de Archivos (RFI)
 - ID: rfi-basic
 - Difficulty: intermediate
-- Subcategory: 远程包含
+- Subcategory: Inclusión remota
 - Tags: rfi, remote, file, inclusion
 - Original Extracted Source: original extracted web-security-wiki source/rfi-basic.md
 Description:
-远程文件包含漏洞利用技术
+Técnica de explotación de vulnerabilidad de inclusión remota de archivos
 Prerequisites:
-- 存在文件包含功能
+- Existe funcionalidad de inclusión de archivos
 - allow_url_include=On
-- 用户可控制包含路径
+- El usuario puede controlar la ruta de inclusión
 Execution Outline:
-1. 1. 探测RFI
-2. 2. 托管恶意文件
-3. 3. 反弹Shell
-4. 4. 使用data协议
-## 日志投毒LFI
+1. 1. Detectar RFI
+2. 2. Alojar archivo malicioso
+3. 3. Shell inversa
+4. 4. Usar el protocolo data
+## Envenenamiento de Logs LFI
 - ID: lfi-log-poison
 - Difficulty: intermediate
-- Subcategory: 日志投毒
+- Subcategory: Envenenamiento de logs
 - Tags: lfi, log, poison, rce
 - Original Extracted Source: original extracted web-security-wiki source/lfi-log-poison.md
 Description:
-通过日志投毒实现LFI到RCE
+Lograr RCE a partir de LFI mediante envenenamiento de logs
 Prerequisites:
-- 存在LFI漏洞
-- 可包含日志文件
-- 日志文件可写
+- Existe una vulnerabilidad LFI
+- Se puede incluir el archivo de log
+- El archivo de log es escribible
 Execution Outline:
-1. 1. 探测日志文件位置
-2. 2. 投毒User-Agent
-3. 3. 投毒请求路径
-4. 4. 执行命令
-## PHP伪协议利用
+1. 1. Detectar la ubicación del archivo de log
+2. 2. Envenenar el User-Agent
+3. 3. Envenenar la ruta de la solicitud
+4. 4. Ejecutar comandos
+## Explotación de Pseudo-protocolos PHP
 - ID: lfi-wrapper
 - Difficulty: intermediate
-- Subcategory: 伪协议
+- Subcategory: Pseudo-protocolos
 - Tags: lfi, wrapper, php, protocol
 - Original Extracted Source: original extracted web-security-wiki source/lfi-wrapper.md
 Description:
-利用PHP伪协议进行LFI攻击
+Explotar los pseudo-protocolos de PHP para realizar ataques LFI
 Prerequisites:
-- 存在LFI漏洞
-- PHP环境
-- 伪协议未禁用
+- Existe una vulnerabilidad LFI
+- Entorno PHP
+- Los pseudo-protocolos no están deshabilitados
 Execution Outline:
 1. 1. php://filter
 2. 2. php://input
-3. 3. data://协议
-4. 4. phar://协议
-## 目录遍历技术
+3. 3. Protocolo data://
+4. 4. Protocolo phar://
+## Técnicas de Recorrido de Directorios
 - ID: lfi-traversal
 - Difficulty: beginner
-- Subcategory: 目录遍历
+- Subcategory: Recorrido de directorios
 - Tags: lfi, traversal, bypass, path
 - Original Extracted Source: original extracted web-security-wiki source/lfi-traversal.md
 Description:
-LFI目录遍历绕过技术
+Técnica de bypass de recorrido de directorios en LFI
 Prerequisites:
-- 存在LFI漏洞
-- 存在路径过滤
+- Existe una vulnerabilidad LFI
+- Existe filtrado de rutas
 Execution Outline:
-1. 1. 基础遍历
-2. 2. 绕过删除../
-3. 3. URL编码绕过
-4. 4. Unicode编码绕过
-## PHP Filter链攻击
+1. 1. Recorrido básico
+2. 2. Bypass eliminando ../
+3. 3. Bypass mediante codificación URL
+4. 4. Bypass mediante codificación Unicode
+## Ataque de Cadena de Filtros PHP
 - ID: lfi-php-filter
 - Difficulty: intermediate
 - Subcategory: PHP Filter
 - Tags: lfi, php, filter, chain
 - Original Extracted Source: original extracted web-security-wiki source/lfi-php-filter.md
 Description:
-利用PHP Filter链进行LFI攻击
+Explotar la cadena de filtros PHP para realizar ataques LFI
 Prerequisites:
-- 存在LFI漏洞
-- PHP环境
-- filter伪协议可用
+- Existe una vulnerabilidad LFI
+- Entorno PHP
+- El pseudo-protocolo filter está disponible
 Execution Outline:
-1. 1. 读取源码
-2. 2. 多重过滤器
-3. 3. Filter链RCE
-4. 4. 读取配置文件
-## PHP Input执行
+1. 1. Leer el código fuente
+2. 2. Filtros múltiples
+3. 3. RCE mediante cadena de filtros
+4. 4. Leer archivos de configuración
+## Ejecución mediante PHP Input
 - ID: lfi-php-input
 - Difficulty: intermediate
 - Subcategory: PHP Input
 - Tags: lfi, php, input, rce
 - Original Extracted Source: original extracted web-security-wiki source/lfi-php-input.md
 Description:
-利用php://input执行PHP代码
+Ejecutar código PHP mediante php://input
 Prerequisites:
-- 存在LFI漏洞
+- Existe una vulnerabilidad LFI
 - allow_url_include=On
-- POST方法可用
+- El método POST está disponible
 Execution Outline:
-1. 1. 基础执行
-2. 2. 命令执行
-3. 3. 文件操作
-4. 4. 反弹Shell
-## PHP Data协议攻击
+1. 1. Ejecución básica
+2. 2. Ejecución de comandos
+3. 3. Operaciones sobre archivos
+4. 4. Shell inversa
+## Ataque mediante Protocolo PHP Data
 - ID: lfi-php-data
 - Difficulty: intermediate
 - Subcategory: PHP Data
 - Tags: lfi, php, data, protocol
 - Original Extracted Source: original extracted web-security-wiki source/lfi-php-data.md
 Description:
-利用data://协议执行PHP代码
+Ejecutar código PHP mediante el protocolo data://
 Prerequisites:
-- 存在LFI漏洞
+- Existe una vulnerabilidad LFI
 - allow_url_include=On
-- data协议可用
+- El protocolo data está disponible
 Execution Outline:
-1. 1. 基础执行
-2. 2. Base64编码
-3. 3. 命令执行
-4. 4. 反弹Shell
-## PHP Zip协议攻击
+1. 1. Ejecución básica
+2. 2. Codificación Base64
+3. 3. Ejecución de comandos
+4. 4. Shell inversa
+## Ataque mediante Protocolo PHP Zip
 - ID: lfi-php-zip
 - Difficulty: intermediate
 - Subcategory: PHP Zip
 - Tags: lfi, php, zip, archive
 - Original Extracted Source: original extracted web-security-wiki source/lfi-php-zip.md
 Description:
-利用zip://协议进行LFI攻击
+Explotar el protocolo zip:// para realizar ataques LFI
 Prerequisites:
-- 存在LFI漏洞
-- 可上传zip文件
-- zip协议可用
+- Existe una vulnerabilidad LFI
+- Se puede subir un archivo zip
+- El protocolo zip está disponible
 Execution Outline:
-1. 1. 创建恶意Zip
-2. 2. 上传Zip文件
-3. 3. 包含Zip文件
-4. 4. 图片马
-## Phar反序列化攻击
+1. 1. Crear un Zip malicioso
+2. 2. Subir el archivo Zip
+3. 3. Incluir el archivo Zip
+4. 4. Webshell disfrazada de imagen
+## Ataque de Deserialización Phar
 - ID: lfi-phar
 - Difficulty: advanced
-- Subcategory: Phar反序列化
+- Subcategory: Deserialización Phar
 - Tags: lfi, phar, deserialization, rce
 - Original Extracted Source: original extracted web-security-wiki source/lfi-phar.md
 Description:
-利用Phar反序列化进行RCE
+Explotar la deserialización de Phar para lograr RCE
 Prerequisites:
-- 存在LFI漏洞
-- PHP环境
-- phar扩展可用
+- Existe una vulnerabilidad LFI
+- Entorno PHP
+- La extensión phar está disponible
 Execution Outline:
-1. 1. 创建Phar文件
-2. 2. 触发反序列化
-3. 3. 图片马Phar
-4. 4. 常见Gadget链
-## Session文件包含
+1. 1. Crear un archivo Phar
+2. 2. Desencadenar la deserialización
+3. 3. Phar disfrazado de imagen
+4. 4. Cadenas de gadgets comunes
+## Inclusión de Archivos de Sesión
 - ID: lfi-session
 - Difficulty: intermediate
-- Subcategory: Session包含
+- Subcategory: Inclusión de sesión
 - Tags: lfi, session, file, inclusion
 - Original Extracted Source: original extracted web-security-wiki source/lfi-session.md
 Description:
-利用Session文件进行LFI攻击
+Explotar el archivo de sesión para realizar ataques LFI
 Prerequisites:
-- 存在LFI漏洞
-- 可控制Session内容
-- 知道Session路径
+- Existe una vulnerabilidad LFI
+- Se puede controlar el contenido de la sesión
+- Se conoce la ruta de la sesión
 Execution Outline:
-1. 1. 探测Session路径
-2. 2. 控制Session内容
-3. 3. 包含Session文件
-4. 4. Session竞争条件
-## Proc文件系统利用
+1. 1. Detectar la ruta de la sesión
+2. 2. Controlar el contenido de la sesión
+3. 3. Incluir el archivo de sesión
+4. 4. Condición de carrera de sesión
+## Explotación del Sistema de Archivos Proc
 - ID: lfi-proc
 - Difficulty: intermediate
-- Subcategory: Proc文件系统
+- Subcategory: Sistema de archivos Proc
 - Tags: lfi, proc, linux, environ
 - Original Extracted Source: original extracted web-security-wiki source/lfi-proc.md
 Description:
-利用/proc文件系统进行LFI攻击
+Explotar el sistema de archivos /proc para realizar ataques LFI
 Prerequisites:
-- 存在LFI漏洞
-- Linux系统
-- /proc可访问
+- Existe una vulnerabilidad LFI
+- Sistema Linux
+- /proc es accesible
 Execution Outline:
-1. 1. 读取进程信息
-2. 2. 读取环境变量
-3. 3. 通过fd读取日志
-4. 4. 读取其他进程
+1. 1. Leer información de procesos
+2. 2. Leer variables de entorno
+3. 3. Leer logs mediante fd
+4. 4. Leer otros procesos
 
