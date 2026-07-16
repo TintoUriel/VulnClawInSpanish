@@ -775,12 +775,12 @@ class TestCLI:
 
         result = runner.invoke(app, ["tui", "--once", "--target", "https://example.com"])
         assert result.exit_code == 0
-        assert "2 个快照" in result.output
-        assert "3 个风险" in result.output
-        assert "限定端口: 443" in result.output
-        assert "限定路径: /admin" in result.output
-        assert "严格模式" in result.output
-        assert "1 次" in result.output
+        assert "2 capturas" in result.output
+        assert "3 riesgos" in result.output
+        assert "Puertos permitidos: 443" in result.output
+        assert "Rutas permitidas: /admin" in result.output
+        assert "Modo estricto" in result.output
+        assert "1 veces" in result.output
 
     def test_tui_once_accepts_prefilled_target(self, runner):
         from vulnclaw.cli.main import app
@@ -800,7 +800,7 @@ class TestCLI:
         )
         assert result.exit_code == 0
         assert "https://example.com" in result.output
-        assert "快速摸底" in result.output
+        assert "Reconocimiento rápido" in result.output
         assert "443" in result.output
 
     def test_tui_dry_run_renders_launch_summary(self, runner):
@@ -828,7 +828,7 @@ class TestCLI:
             ],
         )
         assert result.exit_code == 0
-        assert "启动摘要" in result.output
+        assert "Resumen de inicio" in result.output
         assert "vulnclaw scan https://example.com" in result.output
         assert "--only-port 443" in result.output
         assert "--only-path /admin" in result.output
@@ -1092,11 +1092,11 @@ class TestCLI:
         rendered.print(tui_mod.build_runtime_diagnostic_panel(config))
         output = rendered.export_text()
 
-        assert "环境诊断" in output
+        assert "Diagnóstico del entorno" in output
         assert "v20.0.0" in output
         assert "openai" in output
         assert "gpt-test" in output
-        assert "已配置" in output
+        assert "Configurada" in output
         assert "3 registered" in output
         assert "5" in output
 
@@ -1249,18 +1249,21 @@ class TestClassicReplSlashPalette:
         import vulnclaw.cli.tui as tui_mod
         from vulnclaw.i18n import init_i18n
 
-        skill = {"name": "recon", "description": "信息收集流程 — 被动+主动侦察"}
+        skill = {
+            "name": "recon",
+            "description": "Flujo de recopilación de información — reconocimiento pasivo y activo",
+        }
         try:
             init_i18n(lang="en")
             english = tui_mod.skill_display_description(skill)
-            init_i18n(lang="zh")
-            chinese = tui_mod.skill_display_description(skill)
+            init_i18n(lang="es")
+            spanish = tui_mod.skill_display_description(skill)
         finally:
             init_i18n()  # restore auto-detected default
 
-        # English catalog override applies; zh falls back to the frontmatter.
+        # English catalog override applies; es falls back to the frontmatter.
         assert english == "Reconnaissance workflow — passive and active recon"
-        assert chinese == "信息收集流程 — 被动+主动侦察"
+        assert spanish == "Flujo de recopilación de información — reconocimiento pasivo y activo"
 
     def test_skill_description_falls_back_when_untranslated(self):
         import vulnclaw.cli.tui as tui_mod

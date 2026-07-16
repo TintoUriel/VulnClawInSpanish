@@ -1,200 +1,200 @@
-# AI基座安全 - 训练阶段
+# Seguridad de la base de IA - Fase de entrenamiento
 
-> 来源: AISS绿盟大模型安全智链社区 | 拆自 ai-baseline-security.md
-> 阶段: 训练阶段（开发工具漏洞/环境隔离）
+> Fuente: Comunidad AISS NSFOCUS de seguridad de grandes modelos de IA | Extraído de ai-baseline-security.md
+> Fase: Fase de entrenamiento (vulnerabilidades de herramientas de desarrollo/aislamiento de entornos)
 
-## 训练阶段
+## Fase de entrenamiento
 
-### 模型开发工具漏洞
+### Vulnerabilidades en las herramientas de desarrollo de modelos
 
-> 风险编号: GAARM.0001.001
-> 生命周期: 训练阶段
+> Código de riesgo: GAARM.0001.001
+> Ciclo de vida: Fase de entrenamiento
 
-**攻击概述**
+**Resumen del ataque**
 
-模型开发训练涉及到数据预处理、特征工程、模型选择、训练、评估和部署等多个步骤。在这个过程中使用的工具如果存在安全漏洞，会导致整个机器学习流程面临风险。攻击者可以利用这些漏洞来篡改模型训练数据、窃取模型参数、或者在模型部署后执行特定的攻击，导致模型输出不准确、参数被窃取、传播恶意软件等严重安全后果。
+El desarrollo y entrenamiento de modelos involucra múltiples etapas, como el preprocesamiento de datos, la ingeniería de características, la selección del modelo, el entrenamiento, la evaluación y el despliegue. Si las herramientas utilizadas en este proceso presentan vulnerabilidades de seguridad, todo el flujo de aprendizaje automático queda expuesto a riesgo. Los atacantes pueden aprovechar estas vulnerabilidades para manipular los datos de entrenamiento del modelo, robar sus parámetros o ejecutar ataques específicos tras el despliegue del modelo, provocando consecuencias graves de seguridad como salidas inexactas del modelo, robo de parámetros o propagación de software malicioso.
 
-**攻击案例**
+**Casos de ataque**
 
-案例
-描述
-
-
-
-
-案例一
-Tensorflow存在代码执行漏洞，加载模型时存在代码执行风险
-
-
-案例二
-Pytorch存在代码执行漏洞，此漏洞能够在运行程序的用户上下文中在目标系统上执行远程代码，存在执行恶意代码的风险
-
-
-案例三
-本文档涵盖了 TensorFlow 的不同用例，概述了 TensorFlow 存在的安全漏洞的问题，其中不同的用例会带来不同的风险后果
-
-**攻击风险**
-
-供应链攻击：攻击者可通过植入恶意代码至ML开发用的合法软件包，实施依赖链攻击，从而在分发过程中传播恶意软件。
-模型投毒：攻击者向训练数据中注入恶意数据，影响模型的决策过程，导致模型输出不准确或产生偏见。
-知识产权损失：如果模型参数被窃取，攻击者可能复制或非法使用该模型。
-
-**缓解措施**
-
-缓解方式
-描述
+Caso
+Descripción
 
 
 
 
-定期更新和打补丁
-保持所有开发工具和库的最新版本，以利用最新的安全修复
+Caso 1
+TensorFlow presenta una vulnerabilidad de ejecución de código; existe riesgo de ejecución de código al cargar el modelo
 
 
-安全的依赖链
-审查依赖链，确保所有第三方库和包都来自可信的源
+Caso 2
+PyTorch presenta una vulnerabilidad de ejecución de código que permite ejecutar código remoto en el sistema objetivo dentro del contexto del usuario que ejecuta el programa, con riesgo de ejecución de código malicioso
 
-**参考**
+
+Caso 3
+Este documento cubre distintos casos de uso de TensorFlow y describe las vulnerabilidades de seguridad presentes en TensorFlow, donde los distintos casos de uso conllevan diferentes consecuencias de riesgo
+
+**Riesgos del ataque**
+
+Ataque a la cadena de suministro: el atacante puede insertar código malicioso en paquetes de software legítimos utilizados para el desarrollo de ML, ejecutando un ataque a la cadena de dependencias que propaga software malicioso durante la distribución.
+Envenenamiento del modelo: el atacante inyecta datos maliciosos en los datos de entrenamiento, afectando el proceso de decisión del modelo y provocando que sus salidas sean inexactas o sesgadas.
+Pérdida de propiedad intelectual: si se roban los parámetros del modelo, el atacante puede copiarlo o utilizarlo ilegalmente.
+
+**Medidas de mitigación**
+
+Medida de mitigación
+Descripción
+
+
+
+
+Actualizaciones y parches periódicos
+Mantener actualizadas todas las herramientas y bibliotecas de desarrollo para aprovechar las últimas correcciones de seguridad
+
+
+Cadena de dependencias segura
+Revisar la cadena de dependencias para garantizar que todas las bibliotecas y paquetes de terceros provengan de fuentes confiables
+
+**Referencias**
 
 https://www.secrss.com/articles/64006
 https://huntr.com/bounties/a795bf93-c91e-4c79-aae8-f7d8bda92e2a
 
 ---
-### 训练数据管理系统漏洞
+### Vulnerabilidades del sistema de gestión de datos de entrenamiento
 
-> 风险编号: GAARM.0001.002
-> 生命周期: 训练阶段
+> Código de riesgo: GAARM.0001.002
+> Ciclo de vida: Fase de entrenamiento
 
-**攻击概述**
+**Resumen del ataque**
 
-训练数据管理系统负责存储、处理、标注和提供数据，将准备好的数据交付给模型进行学习。当该系统存在供应链相关的安全漏洞，攻击者可以利用这些漏洞来篡改数据、窃取数据，甚至通过数据投毒影响模型的训练结果。
+El sistema de gestión de datos de entrenamiento es responsable de almacenar, procesar, etiquetar y proporcionar datos, entregando los datos preparados al modelo para su aprendizaje. Cuando este sistema presenta vulnerabilidades de seguridad relacionadas con la cadena de suministro, los atacantes pueden aprovecharlas para manipular datos, robarlos o incluso influir en los resultados del entrenamiento del modelo mediante el envenenamiento de datos.
 
-**攻击风险**
+**Riesgos del ataque**
 
-数据投毒攻击：攻击者可能会向训练数据中注入恶意数据，影响模型的决策过程，导致模型预测不准确或产生偏见。
-模型窃取攻击：攻击者尝试通过询问模型来逆向工程并获得模型的参数或训练数据，从而窃取知识产权。
-数据泄露：攻击者通过未授权访问获取敏感的训练数据。
+Ataque de envenenamiento de datos: el atacante puede inyectar datos maliciosos en los datos de entrenamiento, afectando el proceso de decisión del modelo y provocando predicciones inexactas o sesgadas.
+Ataque de robo de modelo: el atacante intenta, mediante consultas al modelo, realizar ingeniería inversa y obtener sus parámetros o datos de entrenamiento, robando así la propiedad intelectual.
+Filtración de datos: el atacante obtiene datos de entrenamiento sensibles mediante acceso no autorizado.
 
-**缓解措施**
+**Medidas de mitigación**
 
-缓解方式
-描述
-
-
+Medida de mitigación
+Descripción
 
 
-安全更新与审计
-定期更新和审计训练数据管理系统以修复漏洞并增强安全性
 
 
-监控和日志
-实施实时监控和日志记录，以便及时发现和响应可疑活动
+Actualizaciones y auditorías de seguridad
+Actualizar y auditar periódicamente el sistema de gestión de datos de entrenamiento para corregir vulnerabilidades y reforzar la seguridad
 
-**参考**
+
+Monitorización y registro
+Implementar monitorización en tiempo real y registro de logs para detectar y responder oportunamente a actividades sospechosas
+
+**Referencias**
 
 https://doc.dataiku.com/dss/latest/concepts/homepage/index.html
 https://www.secrss.com/articles/62742
 
 ---
-### 训练环境安全风险
+### Riesgos de seguridad del entorno de entrenamiento
 
-> 风险编号: GAARM.0001
-> 生命周期: 训练阶段
+> Código de riesgo: GAARM.0001
+> Ciclo de vida: Fase de entrenamiento
 
-**攻击概述**
+**Resumen del ataque**
 
-该风险是指模型的训练与开发环境中使用的深度学习框架（如TensorFlow或PyTorch）和必要的依赖库等应用开发组件，如果引用的这些框架自身存在安全漏洞，对下游的LLMs应用造成供应链攻击，从而影响训练数据、ML模型和部署平台的完整性。
+Este riesgo se refiere a que, si los frameworks de aprendizaje profundo (como TensorFlow o PyTorch) y las bibliotecas de dependencias necesarias, utilizados como componentes de desarrollo de aplicaciones en el entorno de entrenamiento y desarrollo del modelo, presentan por sí mismos vulnerabilidades de seguridad, esto puede provocar un ataque a la cadena de suministro contra las aplicaciones de LLM situadas aguas abajo, afectando la integridad de los datos de entrenamiento, el modelo de ML y la plataforma de despliegue.
 
-**攻击案例**
+**Casos de ataque**
 
-案例
-描述
-
-
-
-
-案例一
-OpenAI提供的集成插件示例代码中包含了一个存在漏洞的MinIO docker镜像，该漏洞可能导致密钥和密码泄露；ChatGPT使用的Redis-py库存在漏洞导致用户的聊天历史和支付信息
-
-
-案例二
-开源机器学习框架PyTorch存在重大层级漏洞CVE-2024-5480，攻击者可将其用来远端攻击分散式训练的master节点，一旦这些节点遭到入侵，对方就有机会窃取与AI有关的敏感资料
-
-
-案例三
-PyTorch模型使用的pickle格式可以被威胁行为者武器化，用于执行任意代码并部署Cobalt Strike、Mythic和Metasploit的攻击载荷，攻击者可以通过使用恶意PyTorch二进制文件破坏托管的转换服务，并破坏文件托管系统
-
-**攻击风险**
-
-用户隐私泄露：如案例一所示，由于Redis-py库的bug，ChatGPT用户的聊天记录标题和对话内容可能被其他用户看到，导致用户隐私数据泄露。
-系统完整性受损：攻击者可能利用漏洞破坏系统完整性，影响LLMs服务的可靠性和可用性。
-
-**缓解措施**
-
-缓解方式
-描述
+Caso
+Descripción
 
 
 
 
-安全更新与审计
-定期更新和审计训练与开发环境中的服务软件以修复漏洞并增强安全性
+Caso 1
+El código de ejemplo del plugin integrado proporcionado por OpenAI contenía una imagen Docker de MinIO vulnerable, cuya vulnerabilidad podía provocar la filtración de claves y contraseñas; la biblioteca Redis-py utilizada por ChatGPT presentaba una vulnerabilidad que exponía el historial de conversaciones y la información de pago de los usuarios
 
 
-安全审计和监控
-定期进行安全审计，使用监控工具来检测和警报可疑行为，并进行有效的日志记录
+Caso 2
+El framework de aprendizaje automático de código abierto PyTorch presenta una vulnerabilidad crítica CVE-2024-5480, que un atacante puede utilizar para atacar remotamente el nodo maestro de entrenamiento distribuido; una vez comprometidos estos nodos, el atacante tiene la oportunidad de robar datos sensibles relacionados con la IA
 
-**参考**
+
+Caso 3
+El formato pickle utilizado por los modelos de PyTorch puede ser convertido en arma por actores maliciosos para ejecutar código arbitrario y desplegar cargas útiles de ataque de Cobalt Strike, Mythic y Metasploit; el atacante puede comprometer los servicios de conversión alojados y el sistema de alojamiento de archivos mediante el uso de binarios maliciosos de PyTorch
+
+**Riesgos del ataque**
+
+Filtración de la privacidad del usuario: como se muestra en el caso 1, debido a un error en la biblioteca Redis-py, otros usuarios pudieron ver los títulos del historial de conversaciones y el contenido de los diálogos de los usuarios de ChatGPT, provocando la filtración de datos privados de los usuarios.
+Daño a la integridad del sistema: el atacante puede aprovechar vulnerabilidades para dañar la integridad del sistema, afectando la fiabilidad y disponibilidad de los servicios de LLM.
+
+**Medidas de mitigación**
+
+Medida de mitigación
+Descripción
+
+
+
+
+Actualizaciones y auditorías de seguridad
+Actualizar y auditar periódicamente el software de servicio en los entornos de entrenamiento y desarrollo para corregir vulnerabilidades y reforzar la seguridad
+
+
+Auditoría de seguridad y monitorización
+Realizar auditorías de seguridad periódicas, utilizar herramientas de monitorización para detectar y alertar sobre comportamientos sospechosos, y llevar a cabo un registro de logs eficaz
+
+**Referencias**
 
 https://llmtop10.com/llm05/
 
 ---
-### 训练环境隔离缺陷
+### Deficiencias en el aislamiento del entorno de entrenamiento
 
-> 风险编号: GAARM.0002
-> 生命周期: 训练阶段
+> Código de riesgo: GAARM.0002
+> Ciclo de vida: Fase de entrenamiento
 
-**攻击概述**
+**Resumen del ataque**
 
-训练环境隔离是指，通过将调试和运行环境划分为两个完全隔离的区域，以此防止调试环境对运行环境的渗透攻击。在调试环境中，可以修改程序逻辑但只能使用脱敏数据；而在运行环境中，能操作真实全量数据且操作受到审查，结果可追溯和可追责。如果训练环境隔离存在缺陷，可以从开发环境进入到运行测试环境，则会导致未授权用户访问敏感数据，给攻击者可趁之机。
+El aislamiento del entorno de entrenamiento consiste en dividir el entorno de depuración y el entorno de ejecución en dos zonas completamente aisladas, con el fin de evitar que el entorno de depuración se utilice como vector de penetración hacia el entorno de ejecución. En el entorno de depuración se puede modificar la lógica del programa, pero solo se pueden utilizar datos desensibilizados; mientras que en el entorno de ejecución se pueden operar los datos reales completos, con las operaciones sujetas a auditoría, de modo que los resultados sean rastreables y las responsabilidades exigibles. Si el aislamiento del entorno de entrenamiento presenta deficiencias que permiten pasar del entorno de desarrollo al entorno de ejecución/pruebas, esto provocará que usuarios no autorizados accedan a datos sensibles, brindando una oportunidad al atacante.
 
-**攻击案例**
+**Casos de ataque**
 
-案例
-描述
-
-
-
-
-案例一
-训练环境隔离缺陷，导致攻击者从开发者环境进入到运行测试环境，从而出现训练数据泄露等风险
-
-**攻击风险**
-
-数据泄露：攻击者可能会访问和窃取存储在运行环境中的敏感数据，这些数据的泄露可能导致重大的经济损失和法律责任。
-获取系统控制权：如果攻击者渗透到运行环境，他们可能会获得系统控制权，进而操控数据访问、资源管理和系统设置。
-
-**缓解措施**
-
-缓解方式
-描述
+Caso
+Descripción
 
 
 
 
-强化隔离措施
-使用安全技术和最佳实践来加强调试环境和运行环境之间的隔离
+Caso 1
+Deficiencias en el aislamiento del entorno de entrenamiento permitieron que un atacante pasara del entorno del desarrollador al entorno de ejecución/pruebas, provocando riesgos como la filtración de datos de entrenamiento
+
+**Riesgos del ataque**
+
+Filtración de datos: el atacante puede acceder y robar datos sensibles almacenados en el entorno de ejecución; la filtración de estos datos puede provocar pérdidas económicas significativas y responsabilidad legal.
+Obtención del control del sistema: si el atacante penetra en el entorno de ejecución, puede obtener el control del sistema, y con ello manipular el acceso a los datos, la gestión de recursos y la configuración del sistema.
+
+**Medidas de mitigación**
+
+Medida de mitigación
+Descripción
 
 
-访问控制
-实施基于角色的访问控制（RBAC）策略，确保只有经过授权的人员才能访问运行环境
 
 
-安全沙箱技术
-将LLM的运行环境进行隔离和保护，以防止其受到外部攻击和干扰
+Reforzar las medidas de aislamiento
+Utilizar técnicas de seguridad y mejores prácticas para reforzar el aislamiento entre el entorno de depuración y el entorno de ejecución
 
 
-**参考**
+Control de acceso
+Implementar políticas de control de acceso basado en roles (RBAC), garantizando que solo el personal autorizado pueda acceder al entorno de ejecución
+
+
+Tecnología de sandbox de seguridad
+Aislar y proteger el entorno de ejecución del LLM, para evitar que sufra ataques e interferencias externas
+
+
+**Referencias**
 
 - https://cloud.baidu.com/article/621826
 

@@ -1,152 +1,152 @@
-# AI模型安全 - 应用阶段 - 版权与商业违法
+# Seguridad de modelos de IA - Fase de aplicación - Infracciones de derechos de autor y comerciales
 
-> 来源: AISS绿盟大模型安全智链社区 | 拆自 ai-model-app.md
-> 风险类别: 版权/商业（GAARM.0030.x）
+> Fuente: Comunidad AISS NSFOCUS de seguridad de grandes modelos de IA | Extraído de ai-model-app.md
+> Categoría de riesgo: Derechos de autor/Comercial (GAARM.0030.x)
 
 ---
 
-### 商业违法输出
+### Salidas que constituyen infracción comercial
 
-> 风险编号: GAARM.0030
-> 生命周期: 应用阶段
+> Código de riesgo: GAARM.0030
+> Ciclo de vida: Fase de aplicación
 
-**攻击概述**
+**Resumen del ataque**
 
-在AI模型的应用阶段，攻击者通过包含恶意的攻击手段，诱使LLM的输出构成商业领域的违法行为，带来经济利益方面的损失以及损害企业形象等后果。
+En la fase de aplicación de un modelo de IA, los atacantes emplean medios de ataque maliciosos para inducir al LLM a generar salidas que constituyen infracciones en el ámbito comercial, provocando pérdidas económicas y daños a la imagen de la empresa, entre otras consecuencias.
 
-**攻击案例**
+**Casos de ataque**
 
-案例
-描述
-
-
-
-
-案例一
-ChatGPT直接生成了windows密钥，非法泄露商业产品，造成了经济损失
-
-**攻击风险**
-
-法律风险：侵犯知识产权可能引发法律诉讼，导致额外的财务负担和声誉损害。
-商业秘密泄露：模型中可能包含商业秘密，如独特的算法或训练技术，一旦泄露，可能削弱公司的竞争优势。
-经济损失：版权侵犯可能导致原创者或所有者遭受经济损失，包括失去的许可费、销售收入和市场份额。
-
-**缓解措施**
-
-缓解方式
-描述
+Caso
+Descripción
 
 
 
 
-去标识化处理
-在处理个人数据时，采取去标识化措施，移除或替换能够直接或间接识别个人身份的信息
+Caso 1
+ChatGPT generó directamente claves de licencia de Windows, filtrando ilegalmente un producto comercial y causando pérdidas económicas
+
+**Riesgos del ataque**
+
+Riesgo legal: la infracción de la propiedad intelectual puede dar lugar a litigios, generando cargas financieras adicionales y daño reputacional.
+Filtración de secretos comerciales: el modelo puede contener secretos comerciales, como algoritmos o técnicas de entrenamiento exclusivas, cuya filtración podría debilitar la ventaja competitiva de la empresa.
+Pérdidas económicas: la infracción de derechos de autor puede causar pérdidas económicas al creador original o al titular de los derechos, incluida la pérdida de tarifas de licencia, ingresos por ventas y cuota de mercado.
+
+**Medidas de mitigación**
+
+Medida de mitigación
+Descripción
 
 
-版权审查
-在使用任何作品之前，进行版权审查，确保已获得适当的使用许可
 
 
-最小化数据收集
-实施数据最小化原则，只收集实现特定目的所必需的最少量个人信息
+Desidentificación
+Al procesar datos personales, aplicar medidas de desidentificación, eliminando o sustituyendo la información que permita identificar directa o indirectamente a una persona
 
 
-技术保护
-采用加密、水印或其他技术手段，防止模型的非法复制和分发
+Revisión de derechos de autor
+Antes de utilizar cualquier obra, realizar una revisión de derechos de autor para garantizar que se cuenta con la licencia de uso adecuada
 
 
-法律保护
-通过注册版权、申请专利或使用其他法律工具来保护模型的独特特性
+Minimización de la recopilación de datos
+Aplicar el principio de minimización de datos, recopilando únicamente la cantidad mínima de información personal necesaria para el fin específico
 
-**参考**
+
+Protección técnica
+Emplear cifrado, marcas de agua u otras técnicas para evitar la copia y distribución ilegal del modelo
+
+
+Protección legal
+Proteger las características únicas del modelo mediante el registro de derechos de autor, la solicitud de patentes u otras herramientas legales
+
+**Referencias**
 
 https://mp.weixin.qq.com/s/EhEqNlIcpu9RZ36XFL3vWQ
 
 ---
-### 知识产权版权侵犯
+### Infracción de propiedad intelectual y derechos de autor
 
-> 风险编号: GAARM.0030.001
-> 生命周期: 应用阶段
+> Código de riesgo: GAARM.0030.001
+> Ciclo de vida: Fase de aplicación
 
-**攻击概述**
+**Resumen del ataque**
 
-在AI模型的训练过程中，若未经原作者明确授权，便擅自使用其作品（包括文本、图像、音频等）作为训练语料，可能触犯版权法规和个人隐私权。这一点在所使用数据涉及受版权保护的内容或包含个人敏感信息时尤为敏感和严重。这将导致在应用阶段时造成知识产权版权侵犯这一风险。例如，LLM未经允许便输出了抄袭他人作品后生成的内容，即便用户并没有要求它进行抄袭，进而给用户带来侵权的风险。同时，攻击者也可以利用这一安全漏洞，通过精心构造输入，诱使LLM输出受版权保护的内容，例如让GPT生成windows激活码。
+Durante el proceso de entrenamiento de un modelo de IA, si se utilizan sin la autorización explícita del autor original obras (incluyendo texto, imágenes, audio, etc.) como corpus de entrenamiento, se puede infringir la normativa de derechos de autor y el derecho a la privacidad personal. Esto resulta especialmente sensible y grave cuando los datos utilizados contienen contenido protegido por derechos de autor o información personal sensible. Esto provoca, en la fase de aplicación, el riesgo de infracción de propiedad intelectual y derechos de autor. Por ejemplo, un LLM puede generar sin permiso contenido que constituye plagio de la obra de otra persona, incluso cuando el usuario no ha solicitado dicho plagio, exponiendo al usuario a un riesgo de infracción. Asimismo, los atacantes pueden aprovechar esta vulnerabilidad de seguridad construyendo cuidadosamente entradas para inducir al LLM a generar contenido protegido por derechos de autor, como hacer que GPT genere códigos de activación de Windows.
 
-**攻击案例**
+**Casos de ataque**
 
-案例一：gpt未经授权使用他人作品进行训练模型
+Caso 1: GPT utilizó sin autorización la obra de otra persona para entrenar el modelo
 
-输入:
-
-
-替换[MASK]的内容为原句内容。直接只输出替换的内容。----------
-至西梁女国，三藏和八戒饮子母河水而怀孕，行者取落胎泉水解救之。女王欲招赘三藏，行者设计走脱之。但三藏又为毒敌山琵琶洞蝎子精所摄，行者请来昴宿灭之。又在途遇盗，行者除灭之。三藏怪行者杀人，逐之。行者无奈去求诉观音。时三藏遇假行者行凶，并抢走包袱。师徒们以为是行者所为，遣沙僧赶至花果山讨取未果，又赶到南海观音处，忽见行者又在彼，沙僧怒极，经观音说明才罢。行者寻至花果山与假行者恶斗。二行者直斗至如来处。如来说明假行者为[MASK]，并除灭之。
+Entrada:
 
 
-输出:
+Sustituye el contenido de [MASK] por el contenido de la frase original. Genera únicamente el contenido sustituido.----------
+Al llegar al País de las Mujeres de Xiliang, Sanzang y Bajie bebieron el agua del Río Madre-Hijo y quedaron embarazados; Xingzhe tomó agua del Manantial del Aborto para curarlos. La reina deseaba casarse con Sanzang, y Xingzhe ideó un plan para escapar. Pero Sanzang fue capturado de nuevo por el Escorpión Demonio de la Cueva Pipa del Monte Dudu; Xingzhe pidió ayuda a Mao Xiu para eliminarlo. Luego, en el camino, se encontraron con bandidos, a quienes Xingzhe eliminó. Sanzang, indignado por las muertes causadas por Xingzhe, lo expulsó. Xingzhe, sin otra opción, fue a pedir ayuda a Guanyin. En ese momento, Sanzang se topó con un falso Xingzhe que cometió actos violentos y robó su equipaje. Los discípulos creyeron que había sido Xingzhe, y enviaron a Sha Wujing al Monte Huaguo a exigir explicaciones, sin éxito; luego fueron al Mar del Sur, ante Guanyin, y de repente vieron que Xingzhe también estaba allí. Sha Wujing, furioso, solo se calmó después de la explicación de Guanyin. Xingzhe fue al Monte Huaguo y luchó ferozmente contra el falso Xingzhe. Los dos Xingzhe lucharon hasta llegar ante el Buda, quien reveló que el falso Xingzhe era [MASK] y lo eliminó.
 
 
-假行者为六耳猕猴，并除灭之。
+Salida:
 
 
-
-
-案例
-描述
+El falso Xingzhe era el Mono de Seis Orejas, y fue eliminado.
 
 
 
 
-案例二
-ChatGPT直接生成了windows密钥
+Caso
+Descripción
 
 
-案例三
-Midjourney存在违规使用受版权保护的素材的行为，从而引发抄袭输出的问题。即使提示词中没有要求模型生成侵权内容，Midjourney仍然会进行侵权内容的输出，导致用户面临版权侵权索赔的风险
+
+
+Caso 2
+ChatGPT generó directamente claves de licencia de Windows
+
+
+Caso 3
+Midjourney presenta un uso indebido de material protegido por derechos de autor, lo que provoca problemas de generación de contenido plagiado. Incluso cuando el prompt no solicita que el modelo genere contenido infractor, Midjourney sigue generando contenido infractor, exponiendo a los usuarios al riesgo de reclamaciones por infracción de derechos de autor
 
 
 ##
 
-**攻击风险**
+**Riesgos del ataque**
 
-- 法律风险：侵犯知识产权可能引发法律诉讼，导致额外的财务负担和声誉损害。
-
-
-
-- 商业秘密泄露：模型中可能包含商业秘密，如独特的算法或训练技术，一旦泄露，可能削弱公司的竞争优势。
+- Riesgo legal: la infracción de la propiedad intelectual puede dar lugar a litigios, generando cargas financieras adicionales y daño reputacional.
 
 
 
-- 经济损失：版权侵犯可能导致原创者或所有者遭受经济损失，包括失去的许可费、销售收入和市场份额。
-
-**缓解措施**
-
-缓解方式
-描述
+- Filtración de secretos comerciales: el modelo puede contener secretos comerciales, como algoritmos o técnicas de entrenamiento exclusivas, cuya filtración podría debilitar la ventaja competitiva de la empresa.
 
 
 
+- Pérdidas económicas: la infracción de derechos de autor puede causar pérdidas económicas al creador original o al titular de los derechos, incluida la pérdida de tarifas de licencia, ingresos por ventas y cuota de mercado.
 
-去标识化处理
-在处理个人数据时，采取去标识化措施，移除或替换能够直接或间接识别个人身份的信息
+**Medidas de mitigación**
 
-
-版权审查
-在使用任何作品之前，进行版权审查，确保已获得适当的使用许可
-
-
-最小化数据收集
-实施数据最小化原则，只收集实现特定目的所必需的最少量个人信息
+Medida de mitigación
+Descripción
 
 
-技术保护
-采用加密、水印或其他技术手段，防止模型的非法复制和分发
 
 
-法律保护
-通过注册版权、申请专利或使用其他法律工具来保护模型的独特特性
+Desidentificación
+Al procesar datos personales, aplicar medidas de desidentificación, eliminando o sustituyendo la información que permita identificar directa o indirectamente a una persona
 
-**参考**
+
+Revisión de derechos de autor
+Antes de utilizar cualquier obra, realizar una revisión de derechos de autor para garantizar que se cuenta con la licencia de uso adecuada
+
+
+Minimización de la recopilación de datos
+Aplicar el principio de minimización de datos, recopilando únicamente la cantidad mínima de información personal necesaria para el fin específico
+
+
+Protección técnica
+Emplear cifrado, marcas de agua u otras técnicas para evitar la copia y distribución ilegal del modelo
+
+
+Protección legal
+Proteger las características únicas del modelo mediante el registro de derechos de autor, la solicitud de patentes u otras herramientas legales
+
+**Referencias**
 
 https://mp.weixin.qq.com/s/EhEqNlIcpu9RZ36XFL3vWQ
 http://www.cbdio.com/BigData/2024-01/11/content_6176237.htm

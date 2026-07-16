@@ -1,46 +1,46 @@
-# MCP 能力总文档
+# Documento Maestro de Capacidades MCP
 
-## 1. 文档目的
+## 1. Propósito del documento
 
-本文档整理了当前会话里我可以直接调用的 MCP 能力，目标不是只做一份“工具清单”，而是提供一份适合后续编写 `skills` 的参考底稿。  
-重点覆盖以下内容：
+Este documento organiza las capacidades MCP que puedo invocar directamente en la sesión actual. El objetivo no es solo elaborar una "lista de herramientas", sino ofrecer un borrador de referencia adecuado para escribir `skills` posteriormente.
+Se cubre principalmente lo siguiente:
 
-- 每个 MCP 服务器/命名空间的定位
-- 每个方法的调用方式
-- 主要参数的含义
-- 返回结果大致会包含什么
-- 典型使用场景
-- 与其他 MCP 组合时的常见工作流
+- El propósito de cada servidor/espacio de nombres MCP
+- La forma de invocar cada método
+- El significado de los principales parámetros
+- Qué contiene aproximadamente el resultado devuelto
+- Escenarios de uso típicos
+- Flujos de trabajo comunes al combinarlo con otros MCP
 
-本文默认面向 Codex / Agent 类工具编排，不是通用 SDK 文档。因此会更强调“什么时候用它”“写 skill 时怎么描述调用策略”。
+Este documento está orientado por defecto a la orquestación de herramientas tipo Codex/Agent, no es documentación genérica de SDK. Por eso se hace más hincapié en "cuándo usarlo" y "cómo describir la estrategia de invocación al escribir un skill".
 
 ---
 
-## 2. 通用调用约定
+## 2. Convenciones generales de invocación
 
-### 2.1 工具命名格式
+### 2.1 Formato de nomenclatura de herramientas
 
-当前环境里的 MCP 工具名大多遵循下面格式：
+La mayoría de los nombres de herramientas MCP en el entorno actual siguen el siguiente formato:
 
 ```text
 mcp__<server_name>__<tool_name>
 ```
 
-例如：
+Por ejemplo:
 
 - `mcp__adb_mcp__list_devices`
 - `mcp__chrome_devtools__navigate_page`
 - `mcp__ida_pro_mcp__decompile`
 
-少数与 MCP 资源访问相关的函数不带 `mcp__` 前缀，但本质上也是 MCP 生态能力：
+Unas pocas funciones relacionadas con el acceso a recursos MCP no llevan el prefijo `mcp__`, pero en esencia también son capacidades del ecosistema MCP:
 
 - `list_mcp_resources`
 - `list_mcp_resource_templates`
 - `read_mcp_resource`
 
-### 2.2 调用参数格式
+### 2.2 Formato de los parámetros de invocación
 
-所有 MCP 工具都使用 JSON 风格参数对象。典型格式：
+Todas las herramientas MCP usan objetos de parámetros en estilo JSON. Formato típico:
 
 ```json
 {
@@ -49,81 +49,81 @@ mcp__<server_name>__<tool_name>
 }
 ```
 
-注意点：
+Puntos a tener en cuenta:
 
-- 只传需要的字段，不要无意义地塞空数组或 `null`
-- `optional` 参数一般可省略
-- 某些工具要求绝对路径，尤其是截图、保存源码、拉取文件、录屏输出路径等
-- 某些工具使用分页参数，如 `offset`、`count`、`pageIdx`、`pageSize`
+- Solo pasa los campos necesarios, no incluyas arrays vacíos o `null` sin sentido
+- Los parámetros `optional` generalmente se pueden omitir
+- Algunas herramientas requieren rutas absolutas, especialmente para capturas de pantalla, guardado de código fuente, descarga de archivos, rutas de salida de grabación de pantalla, etc.
+- Algunas herramientas usan parámetros de paginación, como `offset`, `count`, `pageIdx`, `pageSize`
 
-### 2.3 写 skill 时建议描述的要点
+### 2.3 Puntos recomendados al describir en un skill
 
-如果你要把这些能力写成 skill，建议每个 skill 明确写出：
+Si vas a convertir estas capacidades en un skill, se recomienda que cada skill especifique claramente:
 
-1. 触发条件  
-2. 优先使用的 MCP  
-3. 工具之间的先后顺序  
-4. 哪些参数是必须补全的  
-5. 什么情况下切换到其他 MCP  
-6. 如果输出为空/失败，下一步应该怎么补救
+1. Condiciones de activación
+2. MCP prioritario a usar
+3. Orden de secuencia entre herramientas
+4. Qué parámetros deben completarse obligatoriamente
+5. En qué casos cambiar a otro MCP
+6. Si la salida está vacía/falla, cuál debe ser el siguiente paso de remediación
 
-### 2.4 MCP 选型速查
+### 2.4 Referencia rápida de selección de MCP
 
-| 任务类型 | 优先 MCP |
+| Tipo de tarea | MCP prioritario |
 | --- | --- |
-| Android 设备管理、安装 APK、点击滑动、拉文件 | `adb_mcp` |
-| Android 可视化控制、UI 树定位、无线 ADB、实时画面 | `scrcpy_vision` |
-| Android 抓 HTTP/HTTPS 流量、Charles 会话分析 | `charles` |
-| Burp 历史、Repeater、Collaborator、Intruder | `burp` |
-| 网页自动化、截图、表单、网络请求、控制台 | `chrome_devtools` |
-| JS 断点、源码搜索、XHR 发起链、函数追踪 | `js_reverse` |
-| 官方文档检索、代码示例查询 | `context7` |
-| 通用网页抓取/拉取网页内容 | `fetch` |
-| 本地文件极速搜索 | `everything_search` |
-| Android 动态注入、Frida attach/spawn | `frida_mcp` |
-| 二进制静态分析、IDA 批量重命名/反编译/类型修复 | `ida_pro_mcp` |
-| APK 反编译、Manifest、类/方法/xref 查询 | `jadx` |
-| 记忆图谱、长期结构化记忆 | `memory` |
-| 复杂问题分步思考 | `sequential_thinking` |
+| Gestión de dispositivos Android, instalación de APK, clics y deslizamientos, descarga de archivos | `adb_mcp` |
+| Control visual de Android, localización de árbol UI, ADB inalámbrico, imagen en tiempo real | `scrcpy_vision` |
+| Captura de tráfico HTTP/HTTPS de Android, análisis de sesión de Charles | `charles` |
+| Historial de Burp, Repeater, Collaborator, Intruder | `burp` |
+| Automatización web, capturas de pantalla, formularios, solicitudes de red, consola | `chrome_devtools` |
+| Breakpoints de JS, búsqueda de código fuente, cadena de origen de XHR, rastreo de funciones | `js_reverse` |
+| Búsqueda de documentación oficial, consulta de ejemplos de código | `context7` |
+| Descarga/extracción genérica de contenido de páginas web | `fetch` |
+| Búsqueda local de archivos ultrarrápida | `everything_search` |
+| Inyección dinámica de Android, Frida attach/spawn | `frida_mcp` |
+| Análisis estático de binarios, renombrado por lotes en IDA/descompilación/reparación de tipos | `ida_pro_mcp` |
+| Descompilación de APK, Manifest, consulta de clases/métodos/xref | `jadx` |
+| Grafo de memoria, memoria estructurada de largo plazo | `memory` |
+| Pensamiento paso a paso para problemas complejos | `sequential_thinking` |
 
-### 2.5 常见组合工作流
+### 2.5 Flujos de trabajo combinados comunes
 
-#### Android App 分析
+#### Análisis de App Android
 
-- 静态：`jadx`
-- 动态：`frida_mcp`
-- 抓包：`charles`
-- 设备控制：`adb_mcp`
-- 可视化/UI 自动化：`scrcpy_vision`
+- Estático: `jadx`
+- Dinámico: `frida_mcp`
+- Captura de tráfico: `charles`
+- Control de dispositivo: `adb_mcp`
+- Visualización/automatización de UI: `scrcpy_vision`
 
-#### Web 前端逆向
+#### Ingeniería inversa del frontend Web
 
-- 页面操作：`chrome_devtools`
-- JS 断点与源码搜索：`js_reverse`
-- HTTP 重放与安全测试：`burp`
+- Operación de página: `chrome_devtools`
+- Breakpoints de JS y búsqueda de código fuente: `js_reverse`
+- Reenvío HTTP y pruebas de seguridad: `burp`
 
-#### Native / APK So 逆向
+#### Ingeniería inversa de Native / So de APK
 
-- IDA 静态分析：`ida_pro_mcp`
-- 运行时 hook：`frida_mcp`
-- 设备端协助：`adb_mcp` / `scrcpy_vision`
+- Análisis estático con IDA: `ida_pro_mcp`
+- Hook en tiempo de ejecución: `frida_mcp`
+- Asistencia del lado del dispositivo: `adb_mcp` / `scrcpy_vision`
 
 ---
 
-## 3. MCP 资源类通用接口
+## 3. Interfaz genérica de recursos MCP
 
-这三类函数不是具体业务服务器，而是“访问 MCP 服务器暴露资源”的通用能力。
+Estas tres funciones no son un servidor de negocio específico, sino capacidades genéricas para "acceder a los recursos que expone un servidor MCP".
 
 ### 3.1 `list_mcp_resources`
 
-- 作用：列出某个 MCP 服务器或所有服务器公开的资源
-- 典型用途：找可直接读取的文件、上下文、数据库 schema、配置片段
-- 参数：
-  - `server`：可选，指定服务器名
-  - `cursor`：可选，分页游标
-- 适合 skill 的描述：先枚举资源，再决定是否调用 `read_mcp_resource`
+- Función: listar los recursos que expone un servidor MCP específico o todos los servidores
+- Uso típico: encontrar archivos, contexto, esquemas de base de datos, fragmentos de configuración que se puedan leer directamente
+- Parámetros:
+  - `server`: opcional, especifica el nombre del servidor
+  - `cursor`: opcional, cursor de paginación
+- Descripción adecuada para un skill: primero enumerar los recursos, luego decidir si invocar `read_mcp_resource`
 
-示例：
+Ejemplo:
 
 ```json
 {
@@ -133,26 +133,26 @@ mcp__<server_name>__<tool_name>
 
 ### 3.2 `list_mcp_resource_templates`
 
-- 作用：列出参数化资源模板
-- 典型用途：发现“带参数读取”的资源，例如按表名、按主键、按路径查询的资源
-- 参数：
+- Función: listar plantillas de recursos parametrizadas
+- Uso típico: descubrir recursos de "lectura con parámetros", por ejemplo recursos consultados por nombre de tabla, clave primaria o ruta
+- Parámetros:
   - `server`
   - `cursor`
-- 适合 skill 的描述：当资源不是固定 URI，而是“模板 URI”时先查这个
+- Descripción adecuada para un skill: cuando el recurso no es un URI fijo sino un "URI de plantilla", consulta esto primero
 
 ### 3.3 `read_mcp_resource`
 
-- 作用：读取具体资源内容
-- 参数：
-  - `server`：服务器名
-  - `uri`：资源 URI
-- 适合场景：
-  - 读配置
-  - 读 schema
-  - 读服务上下文
-  - 读共享状态
+- Función: leer el contenido de un recurso específico
+- Parámetros:
+  - `server`: nombre del servidor
+  - `uri`: URI del recurso
+- Escenarios adecuados:
+  - Leer configuración
+  - Leer esquema
+  - Leer contexto de servicio
+  - Leer estado compartido
 
-示例：
+Ejemplo:
 
 ```json
 {
@@ -163,63 +163,63 @@ mcp__<server_name>__<tool_name>
 
 ---
 
-## 4. `adb_mcp`：Android 设备控制与文件交互
+## 4. `adb_mcp`: control de dispositivos Android e interacción con archivos
 
-### 4.1 定位
+### 4.1 Posicionamiento
 
-`adb_mcp` 是最基础的 Android 设备交互层，适合做：
+`adb_mcp` es la capa de interacción con dispositivos Android más básica, adecuada para:
 
-- 设备列表与状态确认
-- 安装/卸载 APK
-- 截图、录屏
-- 输入文本、点击、滑动、发按键
-- 拉取/推送文件
-- 读取 logcat、电池、内存、存储信息
+- Lista y estado de dispositivos
+- Instalación/desinstalación de APK
+- Capturas de pantalla, grabación de pantalla
+- Entrada de texto, clics, deslizamientos, envío de teclas
+- Descarga/subida de archivos
+- Lectura de logcat, batería, memoria, información de almacenamiento
 
-如果你的 skill 需要“控制设备本身”，优先考虑它。
+Si tu skill necesita "controlar el dispositivo en sí", considérala primero.
 
-### 4.2 常见工作流
+### 4.2 Flujo de trabajo común
 
-1. `list_devices` 确认设备  
-2. `get_device_info` / `get_battery_info` 判断环境  
-3. `install_app` 或 `list_packages`  
-4. `send_tap` / `send_swipe` / `send_text` 驱动交互  
-5. `take_screenshot` / `record_screen` 留证据  
-6. `get_logcat` 排错  
+1. `list_devices` para confirmar el dispositivo
+2. `get_device_info` / `get_battery_info` para evaluar el entorno
+3. `install_app` o `list_packages`
+4. `send_tap` / `send_swipe` / `send_text` para dirigir la interacción
+5. `take_screenshot` / `record_screen` para dejar evidencia
+6. `get_logcat` para depuración
 
-### 4.3 方法清单
+### 4.3 Lista de métodos
 
-| 工具 | 主要参数 | 作用 | 典型用途 |
+| Herramienta | Parámetros principales | Función | Uso típico |
 | --- | --- | --- | --- |
-| `mcp__adb_mcp__list_devices` | 无 | 列出连接的 Android 设备 | 任务入口，先确认设备是否在线 |
-| `mcp__adb_mcp__get_device_info` | `device_id?` | 读取设备详细信息 | 看型号、系统版本、序列号 |
-| `mcp__adb_mcp__get_battery_info` | `device_id?` | 读取电池状态 | 长时测试前确认电量 |
-| `mcp__adb_mcp__get_memory_info` | `device_id?` | 读取内存信息 | 性能/稳定性排查 |
-| `mcp__adb_mcp__get_storage_info` | `device_id?` | 读取存储信息 | 看空间是否足够安装/录屏 |
-| `mcp__adb_mcp__clear_logcat` | `device_id?` | 清空 logcat | 做一次干净抓日志 |
-| `mcp__adb_mcp__get_logcat` | `device_id?`, `filter_tag?`, `lines?` | 读取日志 | 崩溃、网络、SSL、调试排错 |
-| `mcp__adb_mcp__install_app` | `apk_path`, `device_id?` | 安装 APK | 部署测试包 |
-| `mcp__adb_mcp__uninstall_app` | `package_name`, `device_id?` | 卸载应用 | 清理环境 |
-| `mcp__adb_mcp__list_packages` | `device_id?`, `system_apps?` | 列出安装包名 | 找目标包名 |
-| `mcp__adb_mcp__list_files` | `remote_path`, `device_id?` | 查看设备目录 | 找缓存、配置、导出文件 |
-| `mcp__adb_mcp__pull_file` | `remote_path`, `local_path`, `device_id?` | 从设备拉文件到本地 | 导出数据库、日志、缓存 |
-| `mcp__adb_mcp__push_file` | `local_path`, `remote_path`, `device_id?` | 推文件到设备 | 推证书、脚本、补丁 |
-| `mcp__adb_mcp__send_keyevent` | `keycode`, `device_id?` | 发送按键事件 | 返回键、Home、菜单键 |
-| `mcp__adb_mcp__send_tap` | `x`, `y`, `device_id?` | 点击坐标 | 自动化操作 |
-| `mcp__adb_mcp__send_swipe` | `x1`,`y1`,`x2`,`y2`,`duration?`,`device_id?` | 滑动 | 滚动列表、解锁、切页 |
-| `mcp__adb_mcp__send_text` | `text`, `device_id?` | 输入文本 | 搜索、登录、表单输入 |
-| `mcp__adb_mcp__take_screenshot` | `save_path`, `device_id?` | 截图到本地 | 证据保留、UI 状态确认 |
-| `mcp__adb_mcp__record_screen` | `duration?`, `save_path?`, `device_id?` | 录屏 | 复现流程留证 |
+| `mcp__adb_mcp__list_devices` | Ninguno | Lista los dispositivos Android conectados | Punto de entrada de la tarea, confirmar primero si el dispositivo está en línea |
+| `mcp__adb_mcp__get_device_info` | `device_id?` | Lee información detallada del dispositivo | Ver modelo, versión del sistema, número de serie |
+| `mcp__adb_mcp__get_battery_info` | `device_id?` | Lee el estado de la batería | Confirmar la carga antes de pruebas largas |
+| `mcp__adb_mcp__get_memory_info` | `device_id?` | Lee información de memoria | Diagnóstico de rendimiento/estabilidad |
+| `mcp__adb_mcp__get_storage_info` | `device_id?` | Lee información de almacenamiento | Ver si hay espacio suficiente para instalar/grabar |
+| `mcp__adb_mcp__clear_logcat` | `device_id?` | Limpia el logcat | Hacer una captura de log limpia |
+| `mcp__adb_mcp__get_logcat` | `device_id?`, `filter_tag?`, `lines?` | Lee los logs | Depuración de fallos, red, SSL |
+| `mcp__adb_mcp__install_app` | `apk_path`, `device_id?` | Instala el APK | Desplegar el paquete de prueba |
+| `mcp__adb_mcp__uninstall_app` | `package_name`, `device_id?` | Desinstala la app | Limpiar el entorno |
+| `mcp__adb_mcp__list_packages` | `device_id?`, `system_apps?` | Lista los nombres de paquete instalados | Encontrar el nombre de paquete objetivo |
+| `mcp__adb_mcp__list_files` | `remote_path`, `device_id?` | Ver el directorio del dispositivo | Buscar caché, configuración, archivos exportados |
+| `mcp__adb_mcp__pull_file` | `remote_path`, `local_path`, `device_id?` | Descarga un archivo del dispositivo al local | Exportar base de datos, logs, caché |
+| `mcp__adb_mcp__push_file` | `local_path`, `remote_path`, `device_id?` | Sube un archivo al dispositivo | Subir certificados, scripts, parches |
+| `mcp__adb_mcp__send_keyevent` | `keycode`, `device_id?` | Envía un evento de tecla | Tecla de retroceso, Home, menú |
+| `mcp__adb_mcp__send_tap` | `x`, `y`, `device_id?` | Clic en coordenadas | Operación automatizada |
+| `mcp__adb_mcp__send_swipe` | `x1`,`y1`,`x2`,`y2`,`duration?`,`device_id?` | Deslizar | Desplazar listas, desbloquear, cambiar de página |
+| `mcp__adb_mcp__send_text` | `text`, `device_id?` | Ingresar texto | Búsqueda, inicio de sesión, formularios |
+| `mcp__adb_mcp__take_screenshot` | `save_path`, `device_id?` | Captura de pantalla al local | Conservación de evidencia, confirmación del estado de la UI |
+| `mcp__adb_mcp__record_screen` | `duration?`, `save_path?`, `device_id?` | Grabar pantalla | Dejar evidencia de la reproducción del flujo |
 
-### 4.4 典型调用示例
+### 4.4 Ejemplos de invocación típicos
 
-列设备：
+Listar dispositivos:
 
 ```json
 {}
 ```
 
-截图：
+Captura de pantalla:
 
 ```json
 {
@@ -228,7 +228,7 @@ mcp__<server_name>__<tool_name>
 }
 ```
 
-读取最近 200 行日志：
+Leer las últimas 200 líneas de log:
 
 ```json
 {
@@ -237,77 +237,77 @@ mcp__<server_name>__<tool_name>
 }
 ```
 
-### 4.5 写 skill 时的注意点
+### 4.5 Puntos a tener en cuenta al escribir un skill
 
-- 任何 Android 任务几乎都应该先跑一次 `list_devices`
-- `take_screenshot` 明确要求本地绝对路径
-- `get_logcat` 在复杂场景里建议先 `clear_logcat`
-- `send_tap` / `send_swipe` 完全依赖坐标，适合固定界面，不适合强动态布局
-- `push_file` 与 `pull_file` 是做证书安装、日志导出、数据留证的高频工具
+- Casi cualquier tarea de Android debería empezar con `list_devices`
+- `take_screenshot` requiere explícitamente una ruta absoluta local
+- Se recomienda ejecutar `clear_logcat` antes de `get_logcat` en escenarios complejos
+- `send_tap` / `send_swipe` dependen totalmente de coordenadas, adecuado para interfaces fijas, no para layouts muy dinámicos
+- `push_file` y `pull_file` son herramientas de alta frecuencia para instalación de certificados, exportación de logs y conservación de datos como evidencia
 
 ---
 
-## 5. `charles`：Charles 抓包与会话分析
+## 5. `charles`: captura de tráfico y análisis de sesión de Charles
 
-### 5.1 定位
+### 5.1 Posicionamiento
 
-`charles` 负责读取和分析 Charles Proxy 已捕获的流量，重点不是“直接控制 Android 代理”，而是：
+`charles` se encarga de leer y analizar el tráfico ya capturado por Charles Proxy; el foco no es "controlar directamente el proxy de Android", sino:
 
-- 检查 Charles 是否在线、是否已有活动抓包会话
-- 启动或接管 live capture，拿到 `capture_id`
-- 结构化筛选 live traffic 或已保存 recording
-- 下钻单条请求，查看头、状态码、请求体/响应体预览
-- 对流量按 host、path、status、resource class 分组分析
-- 结束抓包并持久化快照，方便后续复盘
+- Verificar si Charles está en línea y si ya hay una sesión de captura activa
+- Iniciar o retomar una live capture, obteniendo el `capture_id`
+- Filtrar de forma estructurada el tráfico en vivo o las grabaciones ya guardadas
+- Profundizar en una solicitud individual, ver headers, código de estado, vista previa de cuerpo de solicitud/respuesta
+- Agrupar y analizar el tráfico por host, path, status, clase de recurso
+- Finalizar la captura y persistir un snapshot, para facilitar la revisión posterior
 
-### 5.2 适合的 skill 类型
+### 5.2 Tipos de skill adecuados
 
-- Android API 逆向
-- HTTPS 抓包
-- App 接口行为分析
-- 参数签名前后对比
-- 查找 token、session、加密字段
-- 会话录制、筛选与证据留存
+- Ingeniería inversa de API de Android
+- Captura de tráfico HTTPS
+- Análisis de comportamiento de interfaces de App
+- Comparación de parámetros de firma antes/después
+- Búsqueda de token, session, campos cifrados
+- Grabación de sesión, filtrado y conservación de evidencia
 
-### 5.3 方法清单
+### 5.3 Lista de métodos
 
-| 工具 | 主要参数 | 作用 | 典型用途 |
+| Herramienta | Parámetros principales | Función | Uso típico |
 | --- | --- | --- | --- |
-| `mcp__charles__charles_status` | 无 | 检查 Charles 连通性与 live capture 状态 | 确认环境是否就绪 |
-| `mcp__charles__reset_environment` | 无 | 重置 Charles 环境并恢复保存的配置 | 做干净实验 |
-| `mcp__charles__start_live_capture` | `adopt_existing?`,`include_existing?`,`reset_session?` | 启动或接管 live capture | 获取后续分析要用的 `capture_id` |
-| `mcp__charles__query_live_capture_entries` | `capture_id`,`cursor?`,`preset?`,`host_contains?`,`path_contains?`,`method_in?`,`status_in?`,`request_body_contains?`,`response_body_contains?`,`max_items?` | 结构化筛选 live 流量 | 推荐的实时检索入口 |
-| `mcp__charles__peek_live_capture` | `capture_id`,`cursor?`,`limit?` | 预览当前 live capture 里的新条目 | 轻量查看最近请求 |
-| `mcp__charles__read_live_capture` | `capture_id`,`cursor?`,`limit?` | 增量读取并推进 live cursor | 需要流式读取新流量时使用 |
-| `mcp__charles__get_traffic_entry_detail` | `source`,`entry_id`,`capture_id?`,`recording_path?`,`include_full_body?`,`max_body_chars?` | 下钻单条流量详情 | 看头、body 预览、请求响应细节 |
-| `mcp__charles__group_capture_analysis` | `source`,`capture_id?`,`recording_path?`,`group_by`,`preset?`,`host_contains?`,`path_contains?`,`status_in?` | 按 host/path/status/resource class 分组 | 快速找热点接口 |
-| `mcp__charles__get_capture_analysis_stats` | `source`,`capture_id?`,`recording_path?`,`preset?` | 返回粗粒度统计 | 看抓包全局分布 |
-| `mcp__charles__stop_live_capture` | `capture_id`,`persist?` | 停止 live capture 并可持久化 | 结束实验并保存快照 |
-| `mcp__charles__list_recordings` | 无 | 列出已保存录制文件 | 选择历史流量包 |
-| `mcp__charles__list_sessions` | 无 | 兼容方式列出历史 session | 兼容旧命名 |
-| `mcp__charles__get_recording_snapshot` | `path?` | 读取已保存录制的快照元信息 | 离线检查 recording |
-| `mcp__charles__analyze_recorded_traffic` | `recording_path?`,`preset?`,`host_contains?`,`path_contains?`,`method_in?`,`status_in?`,`request_body_contains?`,`response_body_contains?`,`max_items?` | 分析历史录制 | 离线回看与复盘 |
-| `mcp__charles__query_recorded_traffic` | `host_contains?`,`http_method?`,`keyword_regex?`,`keep_request?`,`keep_response?` | 查询最新保存的 recording | 快速过滤历史流量 |
-| `mcp__charles__proxy_by_time` | `record_seconds` | 按固定时长抓取或读取最新历史包 | 快速时间窗分析 |
-| `mcp__charles__filter_func` | `capture_seconds`,`host_contains?`,`http_method?`,`keyword_regex?`,`keep_request?`,`keep_response?` | 按时间窗和条件过滤流量 | 快速缩小范围 |
-| `mcp__charles__throttling` | `preset` | 设置 Charles 弱网/限速预设 | 弱网复现与行为验证 |
+| `mcp__charles__charles_status` | Ninguno | Verifica la conectividad de Charles y el estado de la live capture | Confirmar que el entorno está listo |
+| `mcp__charles__reset_environment` | Ninguno | Reinicia el entorno de Charles y restaura la configuración guardada | Hacer un experimento limpio |
+| `mcp__charles__start_live_capture` | `adopt_existing?`,`include_existing?`,`reset_session?` | Inicia o retoma una live capture | Obtener el `capture_id` para el análisis posterior |
+| `mcp__charles__query_live_capture_entries` | `capture_id`,`cursor?`,`preset?`,`host_contains?`,`path_contains?`,`method_in?`,`status_in?`,`request_body_contains?`,`response_body_contains?`,`max_items?` | Filtra de forma estructurada el tráfico en vivo | Punto de entrada recomendado para búsqueda en tiempo real |
+| `mcp__charles__peek_live_capture` | `capture_id`,`cursor?`,`limit?` | Vista previa de las entradas nuevas en la live capture actual | Vistazo ligero a las solicitudes recientes |
+| `mcp__charles__read_live_capture` | `capture_id`,`cursor?`,`limit?` | Lee de forma incremental y avanza el cursor en vivo | Usar cuando se necesite lectura en streaming de tráfico nuevo |
+| `mcp__charles__get_traffic_entry_detail` | `source`,`entry_id`,`capture_id?`,`recording_path?`,`include_full_body?`,`max_body_chars?` | Profundiza en el detalle de una entrada de tráfico | Ver headers, vista previa de body, detalles de solicitud/respuesta |
+| `mcp__charles__group_capture_analysis` | `source`,`capture_id?`,`recording_path?`,`group_by`,`preset?`,`host_contains?`,`path_contains?`,`status_in?` | Agrupa por host/path/status/clase de recurso | Encontrar rápidamente interfaces con más actividad |
+| `mcp__charles__get_capture_analysis_stats` | `source`,`capture_id?`,`recording_path?`,`preset?` | Devuelve estadísticas de granularidad gruesa | Ver la distribución global de la captura |
+| `mcp__charles__stop_live_capture` | `capture_id`,`persist?` | Detiene la live capture y opcionalmente persiste | Finalizar el experimento y guardar el snapshot |
+| `mcp__charles__list_recordings` | Ninguno | Lista los archivos de grabación guardados | Elegir un paquete de tráfico histórico |
+| `mcp__charles__list_sessions` | Ninguno | Lista las sesiones históricas de forma compatible | Compatibilidad con nomenclatura antigua |
+| `mcp__charles__get_recording_snapshot` | `path?` | Lee los metadatos del snapshot de una grabación guardada | Inspeccionar una recording sin conexión |
+| `mcp__charles__analyze_recorded_traffic` | `recording_path?`,`preset?`,`host_contains?`,`path_contains?`,`method_in?`,`status_in?`,`request_body_contains?`,`response_body_contains?`,`max_items?` | Analiza una grabación histórica | Revisión sin conexión |
+| `mcp__charles__query_recorded_traffic` | `host_contains?`,`http_method?`,`keyword_regex?`,`keep_request?`,`keep_response?` | Consulta la recording guardada más reciente | Filtrar rápidamente el tráfico histórico |
+| `mcp__charles__proxy_by_time` | `record_seconds` | Captura o lee el paquete histórico más reciente durante un tiempo fijo | Análisis rápido por ventana de tiempo |
+| `mcp__charles__filter_func` | `capture_seconds`,`host_contains?`,`http_method?`,`keyword_regex?`,`keep_request?`,`keep_response?` | Filtra el tráfico por ventana de tiempo y condiciones | Reducir rápidamente el alcance |
+| `mcp__charles__throttling` | `preset` | Configura un preset de red débil/limitación de velocidad en Charles | Reproducción y verificación de comportamiento en red débil |
 
-### 5.4 推荐工作流
+### 5.4 Flujo de trabajo recomendado
 
-1. `charles_status`  
-2. 确认 Charles 已开启监听，Android 代理已指向抓包机，HTTPS 需要时已安装 Charles 证书  
-3. `reset_environment`（可选，做干净实验）  
-4. `start_live_capture`  
-5. 操作 App  
-6. `query_live_capture_entries`  
-7. `get_traffic_entry_detail`  
-8. `group_capture_analysis` / `get_capture_analysis_stats`  
-9. `stop_live_capture`，必要时设置 `persist: true`  
+1. `charles_status`
+2. Confirmar que Charles ya está escuchando, que el proxy de Android apunta a la máquina de captura, y que el certificado de Charles está instalado si se necesita HTTPS
+3. `reset_environment` (opcional, para un experimento limpio)
+4. `start_live_capture`
+5. Operar la App
+6. `query_live_capture_entries`
+7. `get_traffic_entry_detail`
+8. `group_capture_analysis` / `get_capture_analysis_stats`
+9. `stop_live_capture`, con `persist: true` si es necesario
 10. `analyze_recorded_traffic` / `query_recorded_traffic`
 
-### 5.5 调用示例
+### 5.5 Ejemplos de invocación
 
-启动实时抓包：
+Iniciar captura en vivo:
 
 ```json
 {
@@ -316,7 +316,7 @@ mcp__<server_name>__<tool_name>
 }
 ```
 
-筛选实时接口流量：
+Filtrar el tráfico de interfaces en vivo:
 
 ```json
 {
@@ -327,63 +327,63 @@ mcp__<server_name>__<tool_name>
 }
 ```
 
-### 5.6 注意点
+### 5.6 Puntos a tener en cuenta
 
-- `charles` MCP 不会替你配置 Android 系统代理；要先完成 Charles 监听、设备代理和证书准备
-- 实时检索优先用 `query_live_capture_entries`，不要默认用会推进游标的 `read_live_capture`
-- `get_traffic_entry_detail` 默认只看预览更省上下文，只有确实需要原文时再开 `include_full_body`
-- 如果想复盘抓包结果，结束 live capture 时建议 `persist: true`
-- 如果 Charles 已经在运行并且你不想清空当前会话，用 `adopt_existing: true`
+- El MCP `charles` no configura por ti el proxy del sistema Android; primero hay que completar la escucha de Charles, el proxy del dispositivo y la preparación del certificado
+- Para la búsqueda en tiempo real, prioriza `query_live_capture_entries`, no uses por defecto `read_live_capture` que avanza el cursor
+- `get_traffic_entry_detail` por defecto solo muestra la vista previa para ahorrar contexto; solo activa `include_full_body` cuando realmente necesites el contenido original
+- Si quieres revisar el resultado de la captura, se recomienda `persist: true` al finalizar la live capture
+- Si Charles ya está en ejecución y no quieres vaciar la sesión actual, usa `adopt_existing: true`
 
 ---
 
-## 6. `burp`：Burp Suite 协同操作
+## 6. `burp`: operación conjunta con Burp Suite
 
-### 6.1 定位
+### 6.1 Posicionamiento
 
-`burp` MCP 是面向 Burp Suite 的控制与数据访问层，适合：
+El MCP `burp` es la capa de control y acceso a datos orientada a Burp Suite, adecuada para:
 
-- 读取代理历史
-- 把请求送到 Repeater / Intruder
-- 发 HTTP/1.1、HTTP/2 请求
-- 生成 Collaborator 载荷
-- 看扫描器问题
-- 读写当前编辑器内容
-- 调整代理拦截、任务执行状态
-- 读写 Burp 配置
+- Leer el historial del proxy
+- Enviar solicitudes a Repeater / Intruder
+- Enviar solicitudes HTTP/1.1, HTTP/2
+- Generar payloads de Collaborator
+- Ver los hallazgos del scanner
+- Leer y escribir el contenido del editor actual
+- Ajustar la intercepción del proxy y el estado de ejecución de tareas
+- Leer y escribir la configuración de Burp
 
-### 6.2 方法清单
+### 6.2 Lista de métodos
 
-| 工具 | 主要参数 | 作用 | 典型用途 |
+| Herramienta | Parámetros principales | Función | Uso típico |
 | --- | --- | --- | --- |
-| `mcp__burp__base64_encode` | `content` | Base64 编码 | 构造 payload |
-| `mcp__burp__base64_decode` | `content` | Base64 解码 | 看编码数据 |
-| `mcp__burp__url_encode` | `content` | URL 编码 | 构造参数 |
-| `mcp__burp__url_decode` | `content` | URL 解码 | 还原参数 |
-| `mcp__burp__generate_random_string` | `length`,`characterSet` | 生成随机串 | token、边界值、探测串 |
-| `mcp__burp__get_active_editor_contents` | 无 | 获取当前编辑器内容 | 读取手工编辑请求 |
-| `mcp__burp__set_active_editor_contents` | `text` | 设置当前编辑器内容 | 自动填入请求模板 |
-| `mcp__burp__create_repeater_tab` | `content`,`targetHostname`,`targetPort`,`usesHttps`,`tabName?` | 新建 Repeater 标签页 | 送请求到 Repeater |
-| `mcp__burp__send_to_intruder` | `content`,`targetHostname`,`targetPort`,`usesHttps`,`tabName?` | 送到 Intruder | 爆破/批量测试 |
-| `mcp__burp__send_http1_request` | `content`,`targetHostname`,`targetPort`,`usesHttps` | 发 HTTP/1.1 请求 | 精确重放 |
-| `mcp__burp__send_http2_request` | `pseudoHeaders`,`headers`,`requestBody`,`targetHostname`,`targetPort`,`usesHttps` | 发 HTTP/2 请求 | H2 特定场景 |
-| `mcp__burp__generate_collaborator_payload` | `customData?` | 生成 OOB 域名 | SSRF / RCE / Blind XXE 测试 |
-| `mcp__burp__get_collaborator_interactions` | `payloadId?` | 轮询 OOB 交互 | 看是否出站 |
-| `mcp__burp__get_proxy_http_history` | `count`,`offset` | 读取代理 HTTP 历史 | 回看请求 |
-| `mcp__burp__get_proxy_http_history_regex` | `count`,`offset`,`regex` | 按正则过滤 HTTP 历史 | 精确筛选 |
-| `mcp__burp__get_proxy_websocket_history` | `count`,`offset` | 读取 WS 历史 | 分析 WebSocket |
-| `mcp__burp__get_proxy_websocket_history_regex` | `count`,`offset`,`regex` | 正则过滤 WS 历史 | 查 token、命令字段 |
-| `mcp__burp__get_scanner_issues` | `count`,`offset` | 列出扫描器发现 | 漏洞巡检 |
-| `mcp__burp__output_project_options` | 无 | 导出项目级配置 | 查看配置 schema |
-| `mcp__burp__output_user_options` | 无 | 导出用户级配置 | 查看配置 schema |
-| `mcp__burp__set_project_options` | `json` | 设置项目级配置 | 自动化调优 |
-| `mcp__burp__set_user_options` | `json` | 设置用户级配置 | 用户全局配置 |
-| `mcp__burp__set_proxy_intercept_state` | `intercepting` | 开关代理拦截 | 开/关 Intercept |
-| `mcp__burp__set_task_execution_engine_state` | `running` | 开关任务执行引擎 | 暂停/恢复扫描任务 |
+| `mcp__burp__base64_encode` | `content` | Codificación Base64 | Construir payload |
+| `mcp__burp__base64_decode` | `content` | Decodificación Base64 | Ver datos codificados |
+| `mcp__burp__url_encode` | `content` | Codificación URL | Construir parámetros |
+| `mcp__burp__url_decode` | `content` | Decodificación URL | Restaurar parámetros |
+| `mcp__burp__generate_random_string` | `length`,`characterSet` | Genera una cadena aleatoria | Token, valores límite, cadenas de sondeo |
+| `mcp__burp__get_active_editor_contents` | Ninguno | Obtiene el contenido del editor actual | Leer una solicitud editada manualmente |
+| `mcp__burp__set_active_editor_contents` | `text` | Establece el contenido del editor actual | Rellenar automáticamente una plantilla de solicitud |
+| `mcp__burp__create_repeater_tab` | `content`,`targetHostname`,`targetPort`,`usesHttps`,`tabName?` | Crea una nueva pestaña de Repeater | Enviar solicitud a Repeater |
+| `mcp__burp__send_to_intruder` | `content`,`targetHostname`,`targetPort`,`usesHttps`,`tabName?` | Envía a Intruder | Fuerza bruta/pruebas por lotes |
+| `mcp__burp__send_http1_request` | `content`,`targetHostname`,`targetPort`,`usesHttps` | Envía una solicitud HTTP/1.1 | Reenvío preciso |
+| `mcp__burp__send_http2_request` | `pseudoHeaders`,`headers`,`requestBody`,`targetHostname`,`targetPort`,`usesHttps` | Envía una solicitud HTTP/2 | Escenarios específicos de H2 |
+| `mcp__burp__generate_collaborator_payload` | `customData?` | Genera un dominio OOB | Pruebas de SSRF / RCE / Blind XXE |
+| `mcp__burp__get_collaborator_interactions` | `payloadId?` | Consulta las interacciones OOB | Ver si hubo salida |
+| `mcp__burp__get_proxy_http_history` | `count`,`offset` | Lee el historial HTTP del proxy | Revisar solicitudes |
+| `mcp__burp__get_proxy_http_history_regex` | `count`,`offset`,`regex` | Filtra el historial HTTP por regex | Filtrado preciso |
+| `mcp__burp__get_proxy_websocket_history` | `count`,`offset` | Lee el historial WS | Analizar WebSocket |
+| `mcp__burp__get_proxy_websocket_history_regex` | `count`,`offset`,`regex` | Filtra el historial WS por regex | Buscar token, campos de comando |
+| `mcp__burp__get_scanner_issues` | `count`,`offset` | Lista los hallazgos del scanner | Revisión de vulnerabilidades |
+| `mcp__burp__output_project_options` | Ninguno | Exporta la configuración a nivel de proyecto | Ver el esquema de configuración |
+| `mcp__burp__output_user_options` | Ninguno | Exporta la configuración a nivel de usuario | Ver el esquema de configuración |
+| `mcp__burp__set_project_options` | `json` | Establece la configuración a nivel de proyecto | Ajuste automatizado |
+| `mcp__burp__set_user_options` | `json` | Establece la configuración a nivel de usuario | Configuración global de usuario |
+| `mcp__burp__set_proxy_intercept_state` | `intercepting` | Activa/desactiva la intercepción del proxy | Activar/desactivar Intercept |
+| `mcp__burp__set_task_execution_engine_state` | `running` | Activa/desactiva el motor de ejecución de tareas | Pausar/reanudar tareas de escaneo |
 
-### 6.3 典型调用示例
+### 6.3 Ejemplos de invocación típicos
 
-创建 Repeater：
+Crear Repeater:
 
 ```json
 {
@@ -395,7 +395,7 @@ mcp__<server_name>__<tool_name>
 }
 ```
 
-生成 Collaborator：
+Generar Collaborator:
 
 ```json
 {
@@ -403,95 +403,95 @@ mcp__<server_name>__<tool_name>
 }
 ```
 
-### 6.4 注意点
+### 6.4 Puntos a tener en cuenta
 
-- `send_http2_request` 的请求体和头是拆开的，不要把头写进 body
-- 改配置前建议先 `output_project_options` / `output_user_options`
-- OOB 检测一般是：`generate_collaborator_payload` -> 注入业务点 -> `get_collaborator_interactions`
-- `get_proxy_http_history_regex` 很适合写 skill 时做“自动筛选相关历史请求”
+- El cuerpo y los headers de `send_http2_request` están separados, no escribas los headers dentro del body
+- Antes de cambiar la configuración se recomienda primero `output_project_options` / `output_user_options`
+- La detección OOB generalmente sigue este patrón: `generate_collaborator_payload` -> inyectar en el punto de negocio -> `get_collaborator_interactions`
+- `get_proxy_http_history_regex` es muy adecuado para escribir un skill que "filtre automáticamente el historial de solicitudes relevantes"
 
 ---
 
-## 7. `chrome_devtools`：浏览器自动化、页面诊断与性能分析
+## 7. `chrome_devtools`: automatización de navegador, diagnóstico de páginas y análisis de rendimiento
 
-### 7.1 定位
+### 7.1 Posicionamiento
 
-`chrome_devtools` 负责浏览器页面的自动化控制与 DevTools 级观测。核心能力包括：
+`chrome_devtools` se encarga del control automatizado de páginas del navegador y la observación a nivel de DevTools. Las capacidades principales incluyen:
 
-- 打开/关闭/选择页面
-- 导航、刷新、模拟设备
-- DOM 快照、截图
-- 点击、输入、上传文件
-- 列表化网络请求和控制台信息
-- 执行页面脚本
-- Lighthouse 审计
-- 性能 trace
-- 堆快照
+- Abrir/cerrar/seleccionar páginas
+- Navegación, actualización, simulación de dispositivos
+- Snapshot del DOM, capturas de pantalla
+- Clics, entrada de texto, subida de archivos
+- Listar solicitudes de red e información de consola
+- Ejecutar scripts en la página
+- Auditoría con Lighthouse
+- Trace de rendimiento
+- Snapshot de heap
 
-如果你要“像人在浏览器里操作页面”，它是首选。
+Si necesitas "operar la página como lo haría una persona en el navegador", es la primera opción.
 
-### 7.2 页面与上下文控制
+### 7.2 Control de página y contexto
 
-| 工具 | 主要参数 | 作用 |
+| Herramienta | Parámetros principales | Función |
 | --- | --- | --- |
-| `mcp__chrome_devtools__list_pages` | 无 | 列出当前打开的页面 |
-| `mcp__chrome_devtools__new_page` | `url`,`background?`,`isolatedContext?`,`timeout?` | 新建标签页并访问 URL |
-| `mcp__chrome_devtools__select_page` | `pageId`,`bringToFront?` | 切换当前操作页面 |
-| `mcp__chrome_devtools__close_page` | `pageId` | 关闭页面 |
-| `mcp__chrome_devtools__navigate_page` | `type`,`url?`,`timeout?`,`ignoreCache?`,`handleBeforeUnload?`,`initScript?` | URL 导航、前进、后退、刷新 |
-| `mcp__chrome_devtools__resize_page` | `width`,`height` | 调整浏览器尺寸 |
-| `mcp__chrome_devtools__emulate` | `viewport?`,`colorScheme?`,`geolocation?`,`networkConditions?`,`userAgent?`,`cpuThrottlingRate?` | 设备/网络/UA 模拟 |
+| `mcp__chrome_devtools__list_pages` | Ninguno | Lista las páginas abiertas actualmente |
+| `mcp__chrome_devtools__new_page` | `url`,`background?`,`isolatedContext?`,`timeout?` | Crea una nueva pestaña y accede a la URL |
+| `mcp__chrome_devtools__select_page` | `pageId`,`bringToFront?` | Cambia la página de operación actual |
+| `mcp__chrome_devtools__close_page` | `pageId` | Cierra la página |
+| `mcp__chrome_devtools__navigate_page` | `type`,`url?`,`timeout?`,`ignoreCache?`,`handleBeforeUnload?`,`initScript?` | Navegación por URL, avanzar, retroceder, actualizar |
+| `mcp__chrome_devtools__resize_page` | `width`,`height` | Ajusta el tamaño del navegador |
+| `mcp__chrome_devtools__emulate` | `viewport?`,`colorScheme?`,`geolocation?`,`networkConditions?`,`userAgent?`,`cpuThrottlingRate?` | Simulación de dispositivo/red/UA |
 
-### 7.3 页面结构与截图
+### 7.3 Estructura de página y capturas de pantalla
 
-| 工具 | 主要参数 | 作用 |
+| Herramienta | Parámetros principales | Función |
 | --- | --- | --- |
-| `mcp__chrome_devtools__take_snapshot` | `filePath?`,`verbose?` | 获取页面 a11y 树快照，返回元素 `uid` |
-| `mcp__chrome_devtools__take_screenshot` | `filePath?`,`format?`,`fullPage?`,`quality?`,`uid?` | 页面或元素截图 |
-| `mcp__chrome_devtools__wait_for` | `text`,`timeout?` | 等待某些文本出现 |
+| `mcp__chrome_devtools__take_snapshot` | `filePath?`,`verbose?` | Obtiene el snapshot del árbol de accesibilidad de la página, devuelve el `uid` de los elementos |
+| `mcp__chrome_devtools__take_screenshot` | `filePath?`,`format?`,`fullPage?`,`quality?`,`uid?` | Captura de pantalla de página o elemento |
+| `mcp__chrome_devtools__wait_for` | `text`,`timeout?` | Espera a que aparezca cierto texto |
 
-说明：
+Notas:
 
-- 先 `take_snapshot`，再使用里面的 `uid` 去做 click/fill/hover，通常最稳
-- `uid` 是当前快照上下文里的元素标识，快照更新后可能变化
+- Primero `take_snapshot`, luego usa el `uid` obtenido para hacer click/fill/hover; esto suele ser lo más estable
+- El `uid` es un identificador de elemento dentro del contexto del snapshot actual, puede cambiar después de actualizar el snapshot
 
-### 7.4 页面交互
+### 7.4 Interacción con la página
 
-| 工具 | 主要参数 | 作用 |
+| Herramienta | Parámetros principales | Función |
 | --- | --- | --- |
-| `mcp__chrome_devtools__click` | `uid`,`dblClick?`,`includeSnapshot?` | 点击元素 |
-| `mcp__chrome_devtools__hover` | `uid`,`includeSnapshot?` | 悬停元素 |
-| `mcp__chrome_devtools__drag` | `from_uid`,`to_uid`,`includeSnapshot?` | 拖拽 |
-| `mcp__chrome_devtools__fill` | `uid`,`value`,`includeSnapshot?` | 填单个输入框 |
-| `mcp__chrome_devtools__fill_form` | `elements`,`includeSnapshot?` | 批量填表单 |
-| `mcp__chrome_devtools__type_text` | `text`,`submitKey?` | 向当前焦点输入文本 |
-| `mcp__chrome_devtools__press_key` | `key`,`includeSnapshot?` | 键盘快捷键、特殊按键 |
-| `mcp__chrome_devtools__upload_file` | `uid`,`filePath`,`includeSnapshot?` | 上传文件 |
-| `mcp__chrome_devtools__handle_dialog` | `action`,`promptText?` | 处理 alert/confirm/prompt |
+| `mcp__chrome_devtools__click` | `uid`,`dblClick?`,`includeSnapshot?` | Clic en el elemento |
+| `mcp__chrome_devtools__hover` | `uid`,`includeSnapshot?` | Pasar el cursor sobre el elemento |
+| `mcp__chrome_devtools__drag` | `from_uid`,`to_uid`,`includeSnapshot?` | Arrastrar |
+| `mcp__chrome_devtools__fill` | `uid`,`value`,`includeSnapshot?` | Rellenar un solo campo de entrada |
+| `mcp__chrome_devtools__fill_form` | `elements`,`includeSnapshot?` | Rellenar formulario por lotes |
+| `mcp__chrome_devtools__type_text` | `text`,`submitKey?` | Escribir texto en el foco actual |
+| `mcp__chrome_devtools__press_key` | `key`,`includeSnapshot?` | Atajos de teclado, teclas especiales |
+| `mcp__chrome_devtools__upload_file` | `uid`,`filePath`,`includeSnapshot?` | Subir archivo |
+| `mcp__chrome_devtools__handle_dialog` | `action`,`promptText?` | Gestionar alert/confirm/prompt |
 
-### 7.5 页面脚本与调试信息
+### 7.5 Scripts de página e información de depuración
 
-| 工具 | 主要参数 | 作用 |
+| Herramienta | Parámetros principales | Función |
 | --- | --- | --- |
-| `mcp__chrome_devtools__evaluate_script` | `function`,`args?` | 在页面内执行 JS |
-| `mcp__chrome_devtools__list_console_messages` | `includePreservedMessages?`,`pageIdx?`,`pageSize?`,`types?` | 查看控制台日志 |
-| `mcp__chrome_devtools__get_console_message` | `msgid` | 获取单条控制台消息详情 |
-| `mcp__chrome_devtools__list_network_requests` | `includePreservedRequests?`,`pageIdx?`,`pageSize?`,`resourceTypes?` | 查看网络请求列表 |
-| `mcp__chrome_devtools__get_network_request` | `reqid?`,`requestFilePath?`,`responseFilePath?` | 查看或导出请求详情/体 |
+| `mcp__chrome_devtools__evaluate_script` | `function`,`args?` | Ejecutar JS dentro de la página |
+| `mcp__chrome_devtools__list_console_messages` | `includePreservedMessages?`,`pageIdx?`,`pageSize?`,`types?` | Ver los logs de consola |
+| `mcp__chrome_devtools__get_console_message` | `msgid` | Obtener el detalle de un mensaje de consola específico |
+| `mcp__chrome_devtools__list_network_requests` | `includePreservedRequests?`,`pageIdx?`,`pageSize?`,`resourceTypes?` | Ver la lista de solicitudes de red |
+| `mcp__chrome_devtools__get_network_request` | `reqid?`,`requestFilePath?`,`responseFilePath?` | Ver o exportar el detalle/cuerpo de una solicitud |
 
-### 7.6 审计与性能
+### 7.6 Auditoría y rendimiento
 
-| 工具 | 主要参数 | 作用 |
+| Herramienta | Parámetros principales | Función |
 | --- | --- | --- |
-| `mcp__chrome_devtools__lighthouse_audit` | `device?`,`mode?`,`outputDirPath?` | 跑 Lighthouse（不含性能分） |
-| `mcp__chrome_devtools__performance_start_trace` | `autoStop?`,`filePath?`,`reload?` | 启动性能 trace |
-| `mcp__chrome_devtools__performance_stop_trace` | `filePath?` | 停止性能 trace |
-| `mcp__chrome_devtools__performance_analyze_insight` | `insightName`,`insightSetId` | 分析某个性能 insight |
-| `mcp__chrome_devtools__take_memory_snapshot` | `filePath` | 导出 JS 堆快照 |
+| `mcp__chrome_devtools__lighthouse_audit` | `device?`,`mode?`,`outputDirPath?` | Ejecutar Lighthouse (sin análisis de rendimiento) |
+| `mcp__chrome_devtools__performance_start_trace` | `autoStop?`,`filePath?`,`reload?` | Iniciar trace de rendimiento |
+| `mcp__chrome_devtools__performance_stop_trace` | `filePath?` | Detener trace de rendimiento |
+| `mcp__chrome_devtools__performance_analyze_insight` | `insightName`,`insightSetId` | Analizar un insight de rendimiento específico |
+| `mcp__chrome_devtools__take_memory_snapshot` | `filePath` | Exportar snapshot de heap de JS |
 
-### 7.7 推荐工作流
+### 7.7 Flujo de trabajo recomendado
 
-#### 页面自动化
+#### Automatización de página
 
 1. `new_page`
 2. `take_snapshot`
@@ -499,68 +499,68 @@ mcp__<server_name>__<tool_name>
 4. `wait_for`
 5. `take_screenshot`
 
-#### 抓页面请求
+#### Capturar solicitudes de página
 
 1. `new_page`
-2. 页面交互
+2. Interacción con la página
 3. `list_network_requests`
 4. `get_network_request`
 
-#### 性能排查
+#### Diagnóstico de rendimiento
 
 1. `navigate_page`
 2. `performance_start_trace`
-3. 页面操作或 reload
+3. Operación de página o recarga
 4. `performance_stop_trace`
 5. `performance_analyze_insight`
 
-### 7.8 注意点
+### 7.8 Puntos a tener en cuenta
 
-- 做 DOM 交互前优先 `take_snapshot`
-- 页面刷新后旧 `uid` 不一定还能用
-- 获取请求体/响应体时，必要时用 `requestFilePath` / `responseFilePath` 落地到文件
-- 若你关注“JS 调用链和断点”，`js_reverse` 往往比这里更适合
+- Antes de interactuar con el DOM, prioriza `take_snapshot`
+- Después de recargar la página, el `uid` antiguo puede no seguir siendo válido
+- Al obtener el cuerpo de solicitud/respuesta, usa `requestFilePath` / `responseFilePath` cuando sea necesario para guardarlo en archivo
+- Si te interesa "la cadena de llamadas JS y los breakpoints", `js_reverse` suele ser más adecuado que esto
 
 ---
 
-## 8. `context7`：实时文档与示例检索
+## 8. `context7`: búsqueda de documentación en tiempo real y ejemplos
 
-### 8.1 定位
+### 8.1 Posicionamiento
 
-`context7` 适合查询第三方库、框架、官方文档和代码示例，尤其适合技能编写里“要引用最新官方用法”的场景。
+`context7` es adecuado para consultar librerías de terceros, frameworks, documentación oficial y ejemplos de código, especialmente útil en escenarios de escritura de skills donde "se necesita referenciar el uso oficial más reciente".
 
-### 8.2 方法
+### 8.2 Métodos
 
 #### `mcp__context7__resolve_library_id`
 
-- 作用：先把“库名”解析成 Context7 可识别的文档 ID
-- 参数：
+- Función: primero resuelve el "nombre de la librería" a un ID de documentación reconocible por Context7
+- Parámetros:
   - `libraryName`
   - `query`
-- 返回重点：
+- Puntos clave del resultado devuelto:
   - `libraryId`
-  - 库名
-  - 描述
-  - snippets 数量
-  - source reputation
-  - benchmark score
+  - Nombre de la librería
+  - Descripción
+  - Cantidad de snippets
+  - Reputación de la fuente
+  - Puntuación de benchmark
 
 #### `mcp__context7__query_docs`
 
-- 作用：基于已经解析出的 `libraryId` 检索文档和示例
-- 参数：
+- Función: buscar documentación y ejemplos basándose en el `libraryId` ya resuelto
+- Parámetros:
   - `libraryId`
   - `query`
 
-### 8.3 推荐工作流
+### 8.3 Flujo de trabajo recomendado
 
 1. `resolve_library_id`
-2. 选最合适的 `libraryId`
+2. Elegir el `libraryId` más adecuado
 3. `query_docs`
 
-### 8.4 示例
+### 8.4 Ejemplo
 
-先解析：
+Resolver primero:
 
 ```json
 {
@@ -569,7 +569,7 @@ mcp__<server_name>__<tool_name>
 }
 ```
 
-再查询：
+Luego consultar:
 
 ```json
 {
@@ -578,30 +578,30 @@ mcp__<server_name>__<tool_name>
 }
 ```
 
-### 8.5 写 skill 的注意点
+### 8.5 Puntos a tener en cuenta al escribir un skill
 
-- 如果用户给的是模糊库名，先 `resolve_library_id`
-- 这是“文档问答 MCP”，不是联网随便搜网页
-- 对技术问题，优先把它当作“官方文档检索器”
+- Si el usuario da un nombre de librería ambiguo, primero `resolve_library_id`
+- Este es un "MCP de preguntas y respuestas sobre documentación", no una búsqueda genérica de páginas web
+- Para preguntas técnicas, priorízalo como un "buscador de documentación oficial"
 
 ---
 
-## 9. `everything_search`：本地文件极速搜索
+## 9. `everything_search`: búsqueda local de archivos ultrarrápida
 
-### 9.1 定位
+### 9.1 Posicionamiento
 
-这是 Windows 本地文件搜索 MCP，适合大目录、全盘、模糊条件下快速找文件。
+Este es un MCP de búsqueda de archivos local para Windows, adecuado para encontrar archivos rápidamente en directorios grandes, en todo el disco y con condiciones difusas.
 
-### 9.2 方法
+### 9.2 Métodos
 
-| 工具 | 主要参数 | 作用 |
+| Herramienta | Parámetros principales | Función |
 | --- | --- | --- |
-| `mcp__everything_search__search` | `query`,`maxResults?`,`parentPath?`,`filesOnly?`,`foldersOnly?`,`matchPath?`,`regex?`,`caseSensitive?`,`wholeWord?`,`sortBy?`,`sortDescending?`,`showSize?`,`showDateModified?` | 搜索文件或目录 |
-| `mcp__everything_search__get_file_info` | `filename` | 获取某个文件详细信息 |
+| `mcp__everything_search__search` | `query`,`maxResults?`,`parentPath?`,`filesOnly?`,`foldersOnly?`,`matchPath?`,`regex?`,`caseSensitive?`,`wholeWord?`,`sortBy?`,`sortDescending?`,`showSize?`,`showDateModified?` | Buscar archivos o directorios |
+| `mcp__everything_search__get_file_info` | `filename` | Obtener información detallada de un archivo específico |
 
-### 9.3 示例
+### 9.3 Ejemplo
 
-搜索指定目录下的所有 `.apk`：
+Buscar todos los `.apk` en un directorio específico:
 
 ```json
 {
@@ -612,40 +612,40 @@ mcp__<server_name>__<tool_name>
 }
 ```
 
-### 9.4 适用场景
+### 9.4 Escenarios de uso
 
-- 找 APK / SO / 日志 / 导出文件
-- 给逆向类 skill 找目标文件
-- 在大目录里找配置、脚本、数据库、证书
+- Buscar APK / SO / logs / archivos exportados
+- Encontrar archivos objetivo para skills de ingeniería inversa
+- Buscar configuración, scripts, bases de datos, certificados en directorios grandes
 
 ---
 
-## 10. `fetch`：通用网页抓取
+## 10. `fetch`: descarga genérica de páginas web
 
-### 10.1 定位
+### 10.1 Posicionamiento
 
-`fetch` 是“抓取网页/URL 内容”的通用工具，适合：
+`fetch` es una herramienta genérica para "descargar contenido de páginas web/URL", adecuada para:
 
-- 拉网页内容
-- 抓文档页
-- 读取 HTML
-- 做简单网页内容提取
+- Descargar contenido de páginas web
+- Descargar páginas de documentación
+- Leer HTML
+- Extracción simple de contenido de páginas web
 
-### 10.2 方法
+### 10.2 Métodos
 
 #### `mcp__fetch__fetch`
 
-- 参数：
+- Parámetros:
   - `url`
   - `max_length?`
   - `raw?`
   - `start_index?`
-- 作用：
-  - 获取网页内容
-  - 可返回简化后的 markdown 式内容
-  - 可指定偏移继续读长页面
+- Función:
+  - Obtener el contenido de la página web
+  - Puede devolver contenido simplificado en formato tipo markdown
+  - Se puede especificar un offset para continuar leyendo páginas largas
 
-### 10.3 示例
+### 10.3 Ejemplo
 
 ```json
 {
@@ -654,67 +654,67 @@ mcp__<server_name>__<tool_name>
 }
 ```
 
-### 10.4 注意点
+### 10.4 Puntos a tener en cuenta
 
-- 更适合“已知 URL 的内容抓取”，不是搜索引擎
-- 如果页面太长，可以通过 `start_index` 分片读取
-- 技术文档场景里，如有 `context7`，通常优先 `context7`
+- Más adecuado para "descarga de contenido de una URL conocida", no es un motor de búsqueda
+- Si la página es demasiado larga, se puede leer por fragmentos usando `start_index`
+- En escenarios de documentación técnica, si está disponible `context7`, normalmente se prioriza `context7`
 
 ---
 
-## 11. `frida_mcp`：Android 动态注入与运行时 Hook
+## 11. `frida_mcp`: inyección dinámica y hook en tiempo de ejecución de Android
 
-### 11.1 定位
+### 11.1 Posicionamiento
 
-`frida_mcp` 是 Android 动态分析层，核心用途：
+`frida_mcp` es la capa de análisis dinámico de Android, con usos principales:
 
-- 检查/启动/停止 `frida-server`
-- 枚举应用
-- 获取当前前台应用
-- `spawn` 或 `attach` 到目标进程
-- 注入 Frida JS 脚本
-- 获取脚本输出日志
+- Verificar/iniciar/detener `frida-server`
+- Enumerar aplicaciones
+- Obtener la aplicación en primer plano actual
+- `spawn` o `attach` al proceso objetivo
+- Inyectar scripts JS de Frida
+- Obtener el log de salida del script
 
-适合的场景：
+Escenarios adecuados:
 
-- SSL Pinning 绕过
-- 方法参数/返回值打印
-- 动态抓签名、token、header
-- native/Java 层运行时观察
+- Bypass de SSL Pinning
+- Impresión de parámetros/valores de retorno de métodos
+- Captura dinámica de firmas, tokens, headers
+- Observación en tiempo de ejecución de capa native/Java
 
-### 11.2 方法清单
+### 11.2 Lista de métodos
 
-| 工具 | 主要参数 | 作用 | 典型用途 |
+| Herramienta | Parámetros principales | Función | Uso típico |
 | --- | --- | --- | --- |
-| `mcp__frida_mcp__check_frida_status` | 无 | 查看 frida-server 是否运行 | 前置检查 |
-| `mcp__frida_mcp__start_frida_server` | 无 | 启动 frida-server | 动态分析准备 |
-| `mcp__frida_mcp__stop_frida_server` | 无 | 停止 frida-server | 清理环境 |
-| `mcp__frida_mcp__list_applications` | 无 | 列出设备应用 | 找包名、看是否运行中 |
-| `mcp__frida_mcp__get_frontmost_application` | 无 | 获取当前前台应用 | 确认当前界面所属包名 |
-| `mcp__frida_mcp__spawn` | `package_name`,`initial_script?`,`script_file_path?`,`output_file?` | 挂起启动并附加目标应用 | 早期时机 hook |
-| `mcp__frida_mcp__attach` | `target`,`initial_script?`,`script_file_path?`,`output_file?` | 附加到 PID 或包名 | 对已运行应用注入 |
-| `mcp__frida_mcp__get_messages` | `max_messages?` | 获取 hook/log 输出缓冲 | 看脚本打印结果 |
+| `mcp__frida_mcp__check_frida_status` | Ninguno | Verifica si frida-server está en ejecución | Verificación previa |
+| `mcp__frida_mcp__start_frida_server` | Ninguno | Inicia frida-server | Preparación para análisis dinámico |
+| `mcp__frida_mcp__stop_frida_server` | Ninguno | Detiene frida-server | Limpieza del entorno |
+| `mcp__frida_mcp__list_applications` | Ninguno | Lista las aplicaciones del dispositivo | Encontrar el nombre de paquete, ver si está en ejecución |
+| `mcp__frida_mcp__get_frontmost_application` | Ninguno | Obtiene la aplicación en primer plano actual | Confirmar a qué paquete pertenece la interfaz actual |
+| `mcp__frida_mcp__spawn` | `package_name`,`initial_script?`,`script_file_path?`,`output_file?` | Inicia en suspensión y adjunta la aplicación objetivo | Hook en un momento temprano |
+| `mcp__frida_mcp__attach` | `target`,`initial_script?`,`script_file_path?`,`output_file?` | Se adjunta a un PID o nombre de paquete | Inyección en una aplicación ya en ejecución |
+| `mcp__frida_mcp__get_messages` | `max_messages?` | Obtiene el buffer de salida de hook/log | Ver el resultado impreso por el script |
 
-### 11.3 `attach` 与 `spawn` 的区别
+### 11.3 Diferencia entre `attach` y `spawn`
 
 - `attach`
-  - 用于目标已经在运行
-  - 可以按 PID 或包名附加
-  - 适合临时观察、晚期 hook
+  - Se usa cuando el objetivo ya está en ejecución
+  - Se puede adjuntar por PID o nombre de paquete
+  - Adecuado para observación temporal, hook tardío
 
 - `spawn`
-  - 用于在应用恢复前注入脚本
-  - 适合早期类加载、启动流程、签名初始化、SSL pinning 早期绕过
+  - Se usa para inyectar el script antes de que la aplicación se reanude
+  - Adecuado para carga temprana de clases, flujo de arranque, inicialización de firma, bypass temprano de SSL pinning
 
-### 11.4 示例
+### 11.4 Ejemplo
 
-检查状态：
+Verificar estado:
 
 ```json
 {}
 ```
 
-按包名启动并注入脚本文件：
+Iniciar por nombre de paquete e inyectar un archivo de script:
 
 ```json
 {
@@ -724,7 +724,7 @@ mcp__<server_name>__<tool_name>
 }
 ```
 
-附加已运行应用并直接写内联脚本：
+Adjuntar a una aplicación en ejecución y escribir directamente un script en línea:
 
 ```json
 {
@@ -733,176 +733,176 @@ mcp__<server_name>__<tool_name>
 }
 ```
 
-### 11.5 推荐工作流
+### 11.5 Flujo de trabajo recomendado
 
 1. `check_frida_status`
-2. 若未运行则 `start_frida_server`
-3. `list_applications` 或 `get_frontmost_application`
-4. `spawn` 或 `attach`
+2. Si no está en ejecución, `start_frida_server`
+3. `list_applications` o `get_frontmost_application`
+4. `spawn` o `attach`
 5. `get_messages`
 
-### 11.6 注意点
+### 11.6 Puntos a tener en cuenta
 
-- 需要设备环境正确部署 `frida-server`
-- `script_file_path` 优先级高于 `initial_script`
-- 大多数签名/加密定位任务通常是：`jadx` 静态定位 -> `frida_mcp` 动态验证
+- Requiere que el entorno del dispositivo tenga `frida-server` desplegado correctamente
+- `script_file_path` tiene mayor prioridad que `initial_script`
+- La mayoría de las tareas de localización de firma/cifrado suelen seguir: localización estática con `jadx` -> verificación dinámica con `frida_mcp`
 
 ---
 
-## 12. `ida_pro_mcp`：IDA Pro 静态分析与批处理重构
+## 12. `ida_pro_mcp`: análisis estático con IDA Pro y refactorización por lotes
 
-### 12.1 定位
+### 12.1 Posicionamiento
 
-`ida_pro_mcp` 是当前能力里最重的静态分析 MCP。它不是“只看反编译”，而是覆盖：
+`ida_pro_mcp` es el MCP de análisis estático más completo entre las capacidades actuales. No es "solo ver la descompilación", sino que cubre:
 
-- 打开/切换 IDA 实例
-- 快速 survey 二进制
-- 列函数、全局、导入、类型
-- 查 xref / callgraph / basic block
-- 反编译、反汇编、导出函数信息
-- 修改注释、重命名、声明类型、创建栈变量
-- 读内存、补丁字节、补丁汇编
-- 用 Python 在 IDA 上下文执行脚本
+- Abrir/cambiar instancias de IDA
+- Survey rápido del binario
+- Listar funciones, globales, imports, tipos
+- Consultar xref / callgraph / basic block
+- Descompilar, desensamblar, exportar información de funciones
+- Modificar comentarios, renombrar, declarar tipos, crear variables de pila
+- Leer memoria, parchear bytes, parchear ensamblador
+- Ejecutar scripts en Python dentro del contexto de IDA
 
-如果 skill 是面向 native 逆向、恶意代码分析、补丁、批量重命名，它几乎是核心。
+Si el skill está orientado a ingeniería inversa native, análisis de malware, parches, renombrado por lotes, es prácticamente el núcleo.
 
-### 12.2 强烈建议的入口工具
+### 12.2 Herramienta de entrada fuertemente recomendada
 
 #### `mcp__ida_pro_mcp__survey_binary`
 
-这是最适合做第一步 triage 的工具。它可以一次性给出：
+Esta es la herramienta más adecuada para hacer el primer triage. Puede dar de una sola vez:
 
-- 文件元信息
-- 段布局
-- 入口点
-- 统计信息
-- 高频字符串
-- 高价值函数
-- imports 分类
-- 调用图概况
+- Metainformación del archivo
+- Distribución de segmentos
+- Punto de entrada
+- Información estadística
+- Cadenas de alta frecuencia
+- Funciones de alto valor
+- Clasificación de imports
+- Panorama del grafo de llamadas
 
-写 skill 时可以明确规定：  
-“开始分析 IDB 后，先调用 `survey_binary`，不要直接盲目 `list_funcs`。”
+Al escribir un skill se puede establecer explícitamente:
+"Después de comenzar el análisis del IDB, primero invoca `survey_binary`, no uses `list_funcs` de forma ciega."
 
-### 12.3 实例与会话管理
+### 12.3 Gestión de instancias y sesiones
 
-| 工具 | 主要参数 | 作用 |
+| Herramienta | Parámetros principales | Función |
 | --- | --- | --- |
-| `mcp__ida_pro_mcp__list_instances` | 无 | 列出当前可连接的 IDA 实例 |
-| `mcp__ida_pro_mcp__select_instance` | `port`,`host?` | 切换当前 MCP 指向的 IDA 实例 |
-| `mcp__ida_pro_mcp__open_file` | `file_path`,`autonomous?`,`new_database?`,`switch?`,`timeout?` | 打开文件到新的 IDA 实例 |
-| `mcp__ida_pro_mcp__server_health` | 无 | 看当前 IDB/服务健康状态 |
-| `mcp__ida_pro_mcp__server_warmup` | `build_caches?`,`init_hexrays?`,`wait_auto_analysis?` | 预热分析环境 |
-| `mcp__ida_pro_mcp__idb_save` | `path?` | 保存当前 IDB |
+| `mcp__ida_pro_mcp__list_instances` | Ninguno | Lista las instancias de IDA conectables actualmente |
+| `mcp__ida_pro_mcp__select_instance` | `port`,`host?` | Cambia la instancia de IDA a la que apunta el MCP actual |
+| `mcp__ida_pro_mcp__open_file` | `file_path`,`autonomous?`,`new_database?`,`switch?`,`timeout?` | Abre un archivo en una nueva instancia de IDA |
+| `mcp__ida_pro_mcp__server_health` | Ninguno | Ver el estado de salud del IDB/servicio actual |
+| `mcp__ida_pro_mcp__server_warmup` | `build_caches?`,`init_hexrays?`,`wait_auto_analysis?` | Precalienta el entorno de análisis |
+| `mcp__ida_pro_mcp__idb_save` | `path?` | Guarda el IDB actual |
 
-### 12.4 二进制总览与发现
+### 12.4 Panorama y descubrimiento del binario
 
-| 工具 | 主要参数 | 作用 |
+| Herramienta | Parámetros principales | Función |
 | --- | --- | --- |
-| `mcp__ida_pro_mcp__survey_binary` | `detail_level?` | 二进制总览 |
-| `mcp__ida_pro_mcp__entity_query` | 复杂查询对象 | 查 functions/globals/imports/strings/names |
-| `mcp__ida_pro_mcp__find_regex` | `pattern`,`limit?`,`offset?` | 在字符串中用正则查 |
-| `mcp__ida_pro_mcp__find` | `targets`,`type`,`limit?`,`offset?` | 查字符串、立即数、数据/代码引用 |
-| `mcp__ida_pro_mcp__find_bytes` | `patterns`,`limit?`,`offset?` | 字节模式搜索 |
+| `mcp__ida_pro_mcp__survey_binary` | `detail_level?` | Panorama del binario |
+| `mcp__ida_pro_mcp__entity_query` | Objeto de consulta complejo | Consulta functions/globals/imports/strings/names |
+| `mcp__ida_pro_mcp__find_regex` | `pattern`,`limit?`,`offset?` | Buscar con regex en cadenas |
+| `mcp__ida_pro_mcp__find` | `targets`,`type`,`limit?`,`offset?` | Buscar cadenas, inmediatos, referencias a datos/código |
+| `mcp__ida_pro_mcp__find_bytes` | `patterns`,`limit?`,`offset?` | Búsqueda por patrón de bytes |
 
-### 12.5 函数与图分析
+### 12.5 Análisis de funciones y grafos
 
-| 工具 | 主要参数 | 作用 |
+| Herramienta | Parámetros principales | Función |
 | --- | --- | --- |
-| `mcp__ida_pro_mcp__list_funcs` | `queries` | 列函数 |
-| `mcp__ida_pro_mcp__func_query` | 过滤条件集合 | 按大小/名字/是否有类型过滤函数 |
-| `mcp__ida_pro_mcp__func_profile` | 查询集合 | 给函数做概览画像 |
-| `mcp__ida_pro_mcp__lookup_funcs` | `queries` | 按地址或名称查询函数 |
-| `mcp__ida_pro_mcp__callees` | `addrs`,`limit?` | 查被调用函数 |
-| `mcp__ida_pro_mcp__callgraph` | `roots`,`max_depth?`,`max_nodes?`,`max_edges?`,`max_edges_per_func?` | 构建调用图 |
-| `mcp__ida_pro_mcp__basic_blocks` | `addrs`,`offset?`,`max_blocks?` | 获取 CFG 基本块 |
-| `mcp__ida_pro_mcp__analyze_function` | `addr`,`include_asm?` | 紧凑单函数分析 |
-| `mcp__ida_pro_mcp__analyze_batch` | `queries` | 批量多函数综合分析 |
-| `mcp__ida_pro_mcp__analyze_component` | `addrs` | 对一组相关函数做组件分析 |
+| `mcp__ida_pro_mcp__list_funcs` | `queries` | Lista funciones |
+| `mcp__ida_pro_mcp__func_query` | Conjunto de condiciones de filtro | Filtra funciones por tamaño/nombre/si tiene tipo |
+| `mcp__ida_pro_mcp__func_profile` | Conjunto de consultas | Genera un perfil general de la función |
+| `mcp__ida_pro_mcp__lookup_funcs` | `queries` | Consulta funciones por dirección o nombre |
+| `mcp__ida_pro_mcp__callees` | `addrs`,`limit?` | Consulta las funciones llamadas |
+| `mcp__ida_pro_mcp__callgraph` | `roots`,`max_depth?`,`max_nodes?`,`max_edges?`,`max_edges_per_func?` | Construye el grafo de llamadas |
+| `mcp__ida_pro_mcp__basic_blocks` | `addrs`,`offset?`,`max_blocks?` | Obtiene los bloques básicos del CFG |
+| `mcp__ida_pro_mcp__analyze_function` | `addr`,`include_asm?` | Análisis compacto de una función individual |
+| `mcp__ida_pro_mcp__analyze_batch` | `queries` | Análisis integral por lotes de múltiples funciones |
+| `mcp__ida_pro_mcp__analyze_component` | `addrs` | Análisis de componente sobre un grupo de funciones relacionadas |
 
-### 12.6 反编译、反汇编与导出
+### 12.6 Descompilación, desensamblado y exportación
 
-| 工具 | 主要参数 | 作用 |
+| Herramienta | Parámetros principales | Función |
 | --- | --- | --- |
-| `mcp__ida_pro_mcp__decompile` | `addr` | 反编译函数 |
-| `mcp__ida_pro_mcp__disasm` | `addr`,`offset?`,`max_instructions?`,`include_total?` | 反汇编函数 |
-| `mcp__ida_pro_mcp__export_funcs` | `addrs`,`format?` | 导出函数为 JSON / C 头 / 原型 |
+| `mcp__ida_pro_mcp__decompile` | `addr` | Descompila la función |
+| `mcp__ida_pro_mcp__disasm` | `addr`,`offset?`,`max_instructions?`,`include_total?` | Desensambla la función |
+| `mcp__ida_pro_mcp__export_funcs` | `addrs`,`format?` | Exporta funciones en JSON / cabecera C / prototipos |
 
-### 12.7 交叉引用与数据流
+### 12.7 Referencias cruzadas y flujo de datos
 
-| 工具 | 主要参数 | 作用 |
+| Herramienta | Parámetros principales | Función |
 | --- | --- | --- |
-| `mcp__ida_pro_mcp__xrefs_to` | `addrs`,`limit?` | 获取 xrefs to |
-| `mcp__ida_pro_mcp__xref_query` | 查询集合 | 按方向/类型批量查询 xref |
-| `mcp__ida_pro_mcp__trace_data_flow` | `addr`,`direction?`,`max_depth?` | 追踪多跳数据流 |
-| `mcp__ida_pro_mcp__xrefs_to_field` | `queries` | 查结构体字段引用 |
+| `mcp__ida_pro_mcp__xrefs_to` | `addrs`,`limit?` | Obtiene los xrefs to |
+| `mcp__ida_pro_mcp__xref_query` | Conjunto de consultas | Consulta por lotes xref según dirección/tipo |
+| `mcp__ida_pro_mcp__trace_data_flow` | `addr`,`direction?`,`max_depth?` | Rastrea el flujo de datos en múltiples saltos |
+| `mcp__ida_pro_mcp__xrefs_to_field` | `queries` | Consulta referencias a campos de struct |
 
-### 12.8 类型系统与结构恢复
+### 12.8 Sistema de tipos y recuperación de estructuras
 
-| 工具 | 主要参数 | 作用 |
+| Herramienta | Parámetros principales | Función |
 | --- | --- | --- |
-| `mcp__ida_pro_mcp__type_query` | 查询集合 | 查本地类型 |
-| `mcp__ida_pro_mcp__type_inspect` | `queries` | 查看类型声明与成员 |
-| `mcp__ida_pro_mcp__declare_type` | `decls` | 注入 C 类型声明 |
-| `mcp__ida_pro_mcp__set_type` | `edits` | 设置函数/变量/局部变量类型 |
-| `mcp__ida_pro_mcp__type_apply_batch` | `batch` | 批量应用类型 |
-| `mcp__ida_pro_mcp__infer_types` | `addrs` | 推断类型 |
-| `mcp__ida_pro_mcp__enum_upsert` | `queries` | 创建/补充枚举 |
-| `mcp__ida_pro_mcp__search_structs` | `filter` | 搜结构体/联合体 |
-| `mcp__ida_pro_mcp__read_struct` | `queries` | 读取某地址处结构体字段值 |
+| `mcp__ida_pro_mcp__type_query` | Conjunto de consultas | Consulta tipos locales |
+| `mcp__ida_pro_mcp__type_inspect` | `queries` | Ver la declaración y los miembros de un tipo |
+| `mcp__ida_pro_mcp__declare_type` | `decls` | Inyecta declaraciones de tipo en C |
+| `mcp__ida_pro_mcp__set_type` | `edits` | Establece el tipo de función/variable/variable local |
+| `mcp__ida_pro_mcp__type_apply_batch` | `batch` | Aplica tipos por lotes |
+| `mcp__ida_pro_mcp__infer_types` | `addrs` | Infiere tipos |
+| `mcp__ida_pro_mcp__enum_upsert` | `queries` | Crea/complementa enumeraciones |
+| `mcp__ida_pro_mcp__search_structs` | `filter` | Busca structs/uniones |
+| `mcp__ida_pro_mcp__read_struct` | `queries` | Lee los valores de los campos de un struct en una dirección |
 
-### 12.9 栈帧与局部变量
+### 12.9 Marco de pila y variables locales
 
-| 工具 | 主要参数 | 作用 |
+| Herramienta | Parámetros principales | Función |
 | --- | --- | --- |
-| `mcp__ida_pro_mcp__stack_frame` | `addrs` | 获取函数栈帧 |
-| `mcp__ida_pro_mcp__declare_stack` | `items` | 声明栈变量 |
-| `mcp__ida_pro_mcp__delete_stack` | `items` | 删除栈变量 |
+| `mcp__ida_pro_mcp__stack_frame` | `addrs` | Obtiene el marco de pila de la función |
+| `mcp__ida_pro_mcp__declare_stack` | `items` | Declara variables de pila |
+| `mcp__ida_pro_mcp__delete_stack` | `items` | Elimina variables de pila |
 
-### 12.10 重命名、注释与差异验证
+### 12.10 Renombrado, comentarios y verificación de diferencias
 
-| 工具 | 主要参数 | 作用 |
+| Herramienta | Parámetros principales | Función |
 | --- | --- | --- |
-| `mcp__ida_pro_mcp__rename` | `batch` | 批量重命名函数/数据/局部/栈变量 |
-| `mcp__ida_pro_mcp__set_comments` | `items` | 设置注释 |
-| `mcp__ida_pro_mcp__append_comments` | `items` | 追加注释 |
-| `mcp__ida_pro_mcp__diff_before_after` | `addr`,`action`,`action_args` | 应用 rename/type/comment 后比较前后反编译 |
+| `mcp__ida_pro_mcp__rename` | `batch` | Renombra por lotes funciones/datos/variables locales/de pila |
+| `mcp__ida_pro_mcp__set_comments` | `items` | Establece comentarios |
+| `mcp__ida_pro_mcp__append_comments` | `items` | Agrega comentarios |
+| `mcp__ida_pro_mcp__diff_before_after` | `addr`,`action`,`action_args` | Aplica rename/type/comment y compara la descompilación antes/después |
 
-### 12.11 原始内存读取与补丁
+### 12.11 Lectura de memoria en bruto y parcheo
 
-| 工具 | 主要参数 | 作用 |
+| Herramienta | Parámetros principales | Función |
 | --- | --- | --- |
-| `mcp__ida_pro_mcp__get_bytes` | `regions` | 读字节 |
-| `mcp__ida_pro_mcp__get_int` | `queries` | 读整数 |
-| `mcp__ida_pro_mcp__get_string` | `addrs` | 读字符串 |
-| `mcp__ida_pro_mcp__get_global_value` | `queries` | 读全局变量值 |
-| `mcp__ida_pro_mcp__put_int` | `items` | 写整数 |
-| `mcp__ida_pro_mcp__patch` | `patches` | 补丁字节 |
-| `mcp__ida_pro_mcp__patch_asm` | `items` | 补丁汇编 |
-| `mcp__ida_pro_mcp__undefine` | `items` | 取消定义为原始字节 |
-| `mcp__ida_pro_mcp__define_code` | `items` | 将字节定义为代码 |
-| `mcp__ida_pro_mcp__define_func` | `items` | 定义函数 |
+| `mcp__ida_pro_mcp__get_bytes` | `regions` | Lee bytes |
+| `mcp__ida_pro_mcp__get_int` | `queries` | Lee enteros |
+| `mcp__ida_pro_mcp__get_string` | `addrs` | Lee cadenas |
+| `mcp__ida_pro_mcp__get_global_value` | `queries` | Lee el valor de una variable global |
+| `mcp__ida_pro_mcp__put_int` | `items` | Escribe enteros |
+| `mcp__ida_pro_mcp__patch` | `patches` | Parchea bytes |
+| `mcp__ida_pro_mcp__patch_asm` | `items` | Parchea ensamblador |
+| `mcp__ida_pro_mcp__undefine` | `items` | Cancela la definición, deja como bytes en bruto |
+| `mcp__ida_pro_mcp__define_code` | `items` | Define bytes como código |
+| `mcp__ida_pro_mcp__define_func` | `items` | Define una función |
 
-### 12.12 导入、全局、指令与实体查询
+### 12.12 Imports, globales, instrucciones y consulta de entidades
 
-| 工具 | 主要参数 | 作用 |
+| Herramienta | Parámetros principales | Función |
 | --- | --- | --- |
-| `mcp__ida_pro_mcp__imports` | `count`,`offset` | 列导入 |
-| `mcp__ida_pro_mcp__imports_query` | `queries` | 按模块/名字过滤导入 |
-| `mcp__ida_pro_mcp__list_globals` | `queries` | 列全局变量 |
-| `mcp__ida_pro_mcp__insn_query` | `queries` | 查询指令模式 |
-| `mcp__ida_pro_mcp__int_convert` | `inputs` | 数字格式转换 |
+| `mcp__ida_pro_mcp__imports` | `count`,`offset` | Lista imports |
+| `mcp__ida_pro_mcp__imports_query` | `queries` | Filtra imports por módulo/nombre |
+| `mcp__ida_pro_mcp__list_globals` | `queries` | Lista variables globales |
+| `mcp__ida_pro_mcp__insn_query` | `queries` | Consulta patrones de instrucciones |
+| `mcp__ida_pro_mcp__int_convert` | `inputs` | Conversión de formato numérico |
 
-### 12.13 Python 扩展
+### 12.13 Extensión Python
 
-| 工具 | 主要参数 | 作用 |
+| Herramienta | Parámetros principales | Función |
 | --- | --- | --- |
-| `mcp__ida_pro_mcp__py_eval` | `code` | 在 IDA 环境里执行 Python 片段 |
-| `mcp__ida_pro_mcp__py_exec_file` | `file_path` | 执行整个 Python 脚本文件 |
+| `mcp__ida_pro_mcp__py_eval` | `code` | Ejecuta un fragmento de Python en el entorno de IDA |
+| `mcp__ida_pro_mcp__py_exec_file` | `file_path` | Ejecuta un archivo de script Python completo |
 
-### 12.14 推荐工作流
+### 12.14 Flujo de trabajo recomendado
 
-#### 初始 triage
+#### Triage inicial
 
 1. `server_health`
 2. `server_warmup`
@@ -910,7 +910,7 @@ mcp__<server_name>__<tool_name>
 4. `find_regex` / `imports_query`
 5. `analyze_function` / `decompile`
 
-#### 恢复语义
+#### Recuperación de semántica
 
 1. `decompile`
 2. `stack_frame`
@@ -919,103 +919,103 @@ mcp__<server_name>__<tool_name>
 5. `rename`
 6. `diff_before_after`
 
-#### 跟踪敏感字符串
+#### Rastreo de cadenas sensibles
 
 1. `find_regex`
 2. `xrefs_to`
 3. `trace_data_flow`
 4. `analyze_component`
 
-### 12.15 skill 编写建议
+### 12.15 Recomendaciones para escribir un skill
 
-- 一开始就写死“先 `survey_binary`”通常是好策略
-- 如果要做批量重命名，最好把 `diff_before_after` 当成验证步骤
-- 要分析 JNI / crypto / dispatch 表，`trace_data_flow` 很有价值
-- `type_apply_batch` 适合做“自动修类型”类 skill
-- `py_eval` / `py_exec_file` 适合做高级自动化，但应谨慎定义脚本边界
+- Fijar desde el inicio "primero `survey_binary`" suele ser buena estrategia
+- Si se va a hacer renombrado por lotes, es mejor usar `diff_before_after` como paso de verificación
+- Para analizar tablas de despacho de JNI/crypto, `trace_data_flow` es muy valioso
+- `type_apply_batch` es adecuado para skills de "corrección automática de tipos"
+- `py_eval` / `py_exec_file` son adecuados para automatización avanzada, pero se debe definir con cautela el alcance del script
 
 ---
 
-## 13. `jadx`：APK 静态反编译与 Android 代码导航
+## 13. `jadx`: descompilación estática de APK y navegación de código Android
 
-### 13.1 定位
+### 13.1 Posicionamiento
 
-`jadx` MCP 是 Android 静态分析入口，适合：
+El MCP `jadx` es el punto de entrada del análisis estático de Android, adecuado para:
 
-- 读 `AndroidManifest.xml`
-- 找主 Activity、组件、导出组件
-- 搜索类/方法/字段
-- 获取类源码、方法源码、smali
-- 查引用关系
-- 重命名类/方法/字段/变量/包
+- Leer `AndroidManifest.xml`
+- Encontrar la Activity principal, componentes, componentes exportados
+- Buscar clases/métodos/campos
+- Obtener el código fuente de clases, métodos, smali
+- Consultar relaciones de referencia
+- Renombrar clases/métodos/campos/variables/paquetes
 
-它和 `ida_pro_mcp` 的差异在于：
+Su diferencia con `ida_pro_mcp` está en que:
 
-- `jadx` 更偏 Java/Kotlin 层 APK
-- `ida_pro_mcp` 更偏 native 二进制 / so / ELF / PE
+- `jadx` se orienta más a APK en capa Java/Kotlin
+- `ida_pro_mcp` se orienta más a binarios native / so / ELF / PE
 
-### 13.2 入口信息与 Manifest
+### 13.2 Información de entrada y Manifest
 
-| 工具 | 主要参数 | 作用 |
+| Herramienta | Parámetros principales | Función |
 | --- | --- | --- |
-| `mcp__jadx__get_android_manifest` | 无 | 获取 Manifest 全文 |
-| `mcp__jadx__get_main_activity_class` | 无 | 获取主 Activity |
-| `mcp__jadx__get_main_application_classes_names` | 无 | 获取主应用包下主要类名 |
-| `mcp__jadx__get_main_application_classes_code` | `count?`,`offset?` | 获取主要类代码 |
-| `mcp__jadx__get_manifest_component` | `component_type`,`only_exported?` | 获取 activity/service/provider/receiver 组件信息 |
+| `mcp__jadx__get_android_manifest` | Ninguno | Obtiene el Manifest completo |
+| `mcp__jadx__get_main_activity_class` | Ninguno | Obtiene la Activity principal |
+| `mcp__jadx__get_main_application_classes_names` | Ninguno | Obtiene los nombres de las clases principales bajo el paquete principal |
+| `mcp__jadx__get_main_application_classes_code` | `count?`,`offset?` | Obtiene el código de las clases principales |
+| `mcp__jadx__get_manifest_component` | `component_type`,`only_exported?` | Obtiene información de componentes activity/service/provider/receiver |
 
-### 13.3 类与源码读取
+### 13.3 Lectura de clases y código fuente
 
-| 工具 | 主要参数 | 作用 |
+| Herramienta | Parámetros principales | Función |
 | --- | --- | --- |
-| `mcp__jadx__get_all_classes` | `count?`,`offset?` | 获取所有类名 |
-| `mcp__jadx__fetch_current_class` | 无 | 取 GUI 当前选中类源码 |
-| `mcp__jadx__get_class_source` | `class_name` | 获取某类 Java 源码 |
-| `mcp__jadx__get_smali_of_class` | `class_name` | 获取某类 smali |
-| `mcp__jadx__get_methods_of_class` | `class_name` | 列方法 |
-| `mcp__jadx__get_fields_of_class` | `class_name` | 列字段 |
-| `mcp__jadx__get_method_by_name` | `class_name`,`method_name` | 取某方法源码 |
-| `mcp__jadx__get_selected_text` | 无 | 获取当前选中文字 |
+| `mcp__jadx__get_all_classes` | `count?`,`offset?` | Obtiene todos los nombres de clase |
+| `mcp__jadx__fetch_current_class` | Ninguno | Obtiene el código fuente de la clase seleccionada actualmente en la GUI |
+| `mcp__jadx__get_class_source` | `class_name` | Obtiene el código fuente Java de una clase |
+| `mcp__jadx__get_smali_of_class` | `class_name` | Obtiene el smali de una clase |
+| `mcp__jadx__get_methods_of_class` | `class_name` | Lista los métodos |
+| `mcp__jadx__get_fields_of_class` | `class_name` | Lista los campos |
+| `mcp__jadx__get_method_by_name` | `class_name`,`method_name` | Obtiene el código fuente de un método específico |
+| `mcp__jadx__get_selected_text` | Ninguno | Obtiene el texto seleccionado actualmente |
 
-### 13.4 资源与字符串
+### 13.4 Recursos y cadenas
 
-| 工具 | 主要参数 | 作用 |
+| Herramienta | Parámetros principales | Función |
 | --- | --- | --- |
-| `mcp__jadx__get_all_resource_file_names` | `count?`,`offset?` | 列资源文件 |
-| `mcp__jadx__get_resource_file` | `resource_name` | 读资源文件内容 |
-| `mcp__jadx__get_strings` | `count?`,`offset?` | 获取 strings.xml 内容 |
+| `mcp__jadx__get_all_resource_file_names` | `count?`,`offset?` | Lista los archivos de recursos |
+| `mcp__jadx__get_resource_file` | `resource_name` | Lee el contenido de un archivo de recursos |
+| `mcp__jadx__get_strings` | `count?`,`offset?` | Obtiene el contenido de strings.xml |
 
-### 13.5 搜索与引用
+### 13.5 Búsqueda y referencias
 
-| 工具 | 主要参数 | 作用 |
+| Herramienta | Parámetros principales | Función |
 | --- | --- | --- |
-| `mcp__jadx__search_classes_by_keyword` | `search_term`,`package?`,`search_in?`,`offset?`,`count?` | 跨代码搜索类/方法/字段/代码内容 |
-| `mcp__jadx__search_method_by_name` | `method_name` | 搜方法名 |
-| `mcp__jadx__get_xrefs_to_class` | `class_name`,`count?`,`offset?` | 查类引用 |
-| `mcp__jadx__get_xrefs_to_field` | `class_name`,`field_name`,`count?`,`offset?` | 查字段引用 |
-| `mcp__jadx__get_xrefs_to_method` | `class_name`,`method_name`,`count?`,`offset?` | 查方法引用 |
+| `mcp__jadx__search_classes_by_keyword` | `search_term`,`package?`,`search_in?`,`offset?`,`count?` | Búsqueda transversal de clases/métodos/campos/contenido de código |
+| `mcp__jadx__search_method_by_name` | `method_name` | Buscar por nombre de método |
+| `mcp__jadx__get_xrefs_to_class` | `class_name`,`count?`,`offset?` | Consulta referencias a una clase |
+| `mcp__jadx__get_xrefs_to_field` | `class_name`,`field_name`,`count?`,`offset?` | Consulta referencias a un campo |
+| `mcp__jadx__get_xrefs_to_method` | `class_name`,`method_name`,`count?`,`offset?` | Consulta referencias a un método |
 
-### 13.6 重命名
+### 13.6 Renombrado
 
-| 工具 | 主要参数 | 作用 |
+| Herramienta | Parámetros principales | Función |
 | --- | --- | --- |
-| `mcp__jadx__rename_class` | `class_name`,`new_name` | 重命名类 |
-| `mcp__jadx__rename_field` | `class_name`,`field_name`,`new_name` | 重命名字段 |
-| `mcp__jadx__rename_method` | `method_name`,`new_name` | 重命名方法 |
-| `mcp__jadx__rename_variable` | `class_name`,`method_name`,`variable_name`,`new_name`,`reg?`,`ssa?` | 重命名变量 |
-| `mcp__jadx__rename_package` | `old_package_name`,`new_package_name` | 重命名包 |
+| `mcp__jadx__rename_class` | `class_name`,`new_name` | Renombra una clase |
+| `mcp__jadx__rename_field` | `class_name`,`field_name`,`new_name` | Renombra un campo |
+| `mcp__jadx__rename_method` | `method_name`,`new_name` | Renombra un método |
+| `mcp__jadx__rename_variable` | `class_name`,`method_name`,`variable_name`,`new_name`,`reg?`,`ssa?` | Renombra una variable |
+| `mcp__jadx__rename_package` | `old_package_name`,`new_package_name` | Renombra un paquete |
 
-### 13.7 调试相关
+### 13.7 Relacionado con depuración
 
-| 工具 | 主要参数 | 作用 |
+| Herramienta | Parámetros principales | Función |
 | --- | --- | --- |
-| `mcp__jadx__debug_get_threads` | 无 | 查看调试线程 |
-| `mcp__jadx__debug_get_stack_frames` | 无 | 查看当前调用栈 |
-| `mcp__jadx__debug_get_variables` | 无 | 查看当前变量 |
+| `mcp__jadx__debug_get_threads` | Ninguno | Ver los hilos de depuración |
+| `mcp__jadx__debug_get_stack_frames` | Ninguno | Ver la pila de llamadas actual |
+| `mcp__jadx__debug_get_variables` | Ninguno | Ver las variables actuales |
 
-### 13.8 推荐工作流
+### 13.8 Flujo de trabajo recomendado
 
-#### APK 初步分析
+#### Análisis preliminar de APK
 
 1. `get_android_manifest`
 2. `get_main_activity_class`
@@ -1023,180 +1023,180 @@ mcp__<server_name>__<tool_name>
 4. `search_classes_by_keyword`
 5. `get_class_source`
 
-#### 签名/接口定位
+#### Localización de firma/interfaz
 
-1. `search_classes_by_keyword` 搜 `okhttp`, `retrofit`, `sign`, `token`, `encrypt`
+1. `search_classes_by_keyword` buscando `okhttp`, `retrofit`, `sign`, `token`, `encrypt`
 2. `get_xrefs_to_method`
 3. `get_method_by_name`
-4. 必要时切到 `frida_mcp` 动态验证
+4. Cambiar a `frida_mcp` para verificación dinámica cuando sea necesario
 
-### 13.9 注意点
+### 13.9 Puntos a tener en cuenta
 
-- `search_classes_by_keyword` 是 `jadx` 里非常高价值的入口工具
-- `search_in` 可指定 `class,method,field,code,comment`
-- 对 JNI 场景，通常 `jadx` 找 native 注册点，`ida_pro_mcp` 深挖 so
+- `search_classes_by_keyword` es una herramienta de entrada de muy alto valor en `jadx`
+- `search_in` puede especificar `class,method,field,code,comment`
+- Para escenarios JNI, generalmente `jadx` encuentra el punto de registro native, y `ida_pro_mcp` profundiza en el so
 
 ---
 
-## 14. `js_reverse`：Web 前端 JavaScript 逆向与断点调试
+## 14. `js_reverse`: ingeniería inversa de JavaScript del frontend Web y depuración con breakpoints
 
-### 14.1 定位
+### 14.1 Posicionamiento
 
-`js_reverse` 是面向 Web 前端逆向的专业 MCP。它和 `chrome_devtools` 的区别：
+`js_reverse` es un MCP profesional orientado a la ingeniería inversa del frontend Web. Su diferencia con `chrome_devtools`:
 
-- `chrome_devtools` 更偏页面操作、网络、快照、性能
-- `js_reverse` 更偏 JS 源码、断点、调用链、XHR 发起者、函数跟踪、源码保存
+- `chrome_devtools` se orienta más a operación de página, red, snapshot, rendimiento
+- `js_reverse` se orienta más a código fuente JS, breakpoints, cadena de llamadas, iniciador de XHR, rastreo de funciones, guardado de código fuente
 
-适用场景：
+Escenarios de aplicación:
 
-- 分析签名函数
-- 追踪 XHR/Fetch 发起链
-- 定位混淆函数
-- 搜索 JS 源码中的关键词
-- 在执行上下文中取变量
-- 分析 WebSocket 消息模式
+- Analizar funciones de firma
+- Rastrear la cadena de origen de XHR/Fetch
+- Localizar funciones ofuscadas
+- Buscar palabras clave en el código fuente JS
+- Obtener variables en el contexto de ejecución
+- Analizar patrones de mensajes de WebSocket
 
-### 14.2 页面与上下文
+### 14.2 Página y contexto
 
-| 工具 | 主要参数 | 作用 |
+| Herramienta | Parámetros principales | Función |
 | --- | --- | --- |
-| `mcp__js_reverse__new_page` | `url`,`timeout?` | 新建页面 |
-| `mcp__js_reverse__select_page` | `pageIdx?` | 列出或切换页面 |
-| `mcp__js_reverse__navigate_page` | `type`,`url?`,`timeout?`,`ignoreCache?` | 导航/刷新 |
-| `mcp__js_reverse__select_frame` | `frameIdx?` | 列出或切换 frame/iframe |
+| `mcp__js_reverse__new_page` | `url`,`timeout?` | Crea una nueva página |
+| `mcp__js_reverse__select_page` | `pageIdx?` | Lista o cambia de página |
+| `mcp__js_reverse__navigate_page` | `type`,`url?`,`timeout?`,`ignoreCache?` | Navegar/actualizar |
+| `mcp__js_reverse__select_frame` | `frameIdx?` | Lista o cambia de frame/iframe |
 
-### 14.3 脚本枚举与源码读取
+### 14.3 Enumeración de scripts y lectura de código fuente
 
-| 工具 | 主要参数 | 作用 |
+| Herramienta | Parámetros principales | Función |
 | --- | --- | --- |
-| `mcp__js_reverse__list_scripts` | `filter?` | 列出当前页面脚本 |
-| `mcp__js_reverse__search_in_sources` | `query`,`isRegex?`,`caseSensitive?`,`excludeMinified?`,`urlFilter?`,`maxResults?`,`maxLineLength?` | 在全部脚本中搜索 |
-| `mcp__js_reverse__get_script_source` | `url?`,`scriptId?`,`startLine?`,`endLine?`,`offset?`,`length?` | 读取小片段源码 |
-| `mcp__js_reverse__save_script_source` | `filePath`,`url?`,`scriptId?` | 保存完整脚本到本地 |
+| `mcp__js_reverse__list_scripts` | `filter?` | Lista los scripts de la página actual |
+| `mcp__js_reverse__search_in_sources` | `query`,`isRegex?`,`caseSensitive?`,`excludeMinified?`,`urlFilter?`,`maxResults?`,`maxLineLength?` | Busca en todos los scripts |
+| `mcp__js_reverse__get_script_source` | `url?`,`scriptId?`,`startLine?`,`endLine?`,`offset?`,`length?` | Lee un fragmento pequeño de código fuente |
+| `mcp__js_reverse__save_script_source` | `filePath`,`url?`,`scriptId?` | Guarda el script completo en el local |
 
-说明：
+Notas:
 
-- `get_script_source` 设计成“看局部”，不是拉整个文件
-- 大脚本应使用 `save_script_source`
+- `get_script_source` está diseñado para "ver una parte local", no para descargar el archivo completo
+- Para scripts grandes se debe usar `save_script_source`
 
-### 14.4 断点、追踪与执行控制
+### 14.4 Breakpoints, rastreo y control de ejecución
 
-| 工具 | 主要参数 | 作用 |
+| Herramienta | Parámetros principales | Función |
 | --- | --- | --- |
-| `mcp__js_reverse__set_breakpoint_on_text` | `text`,`urlFilter?`,`occurrence?`,`condition?` | 按代码文本自动下断点 |
-| `mcp__js_reverse__list_breakpoints` | 无 | 列断点 |
-| `mcp__js_reverse__remove_breakpoint` | `breakpointId?`,`url?` | 删除断点或 XHR 断点 |
-| `mcp__js_reverse__pause_or_resume` | 无 | 暂停或继续执行 |
-| `mcp__js_reverse__step` | `direction` | 单步 over/into/out |
-| `mcp__js_reverse__trace_function` | `functionName`,`logArgs?`,`logThis?`,`pause?`,`traceId?`,`urlFilter?` | 跟踪函数调用 |
-| `mcp__js_reverse__inject_before_load` | `script?`,`identifier?` | 页面加载前注入脚本 |
+| `mcp__js_reverse__set_breakpoint_on_text` | `text`,`urlFilter?`,`occurrence?`,`condition?` | Coloca automáticamente un breakpoint según el texto del código |
+| `mcp__js_reverse__list_breakpoints` | Ninguno | Lista los breakpoints |
+| `mcp__js_reverse__remove_breakpoint` | `breakpointId?`,`url?` | Elimina un breakpoint o un breakpoint de XHR |
+| `mcp__js_reverse__pause_or_resume` | Ninguno | Pausa o reanuda la ejecución |
+| `mcp__js_reverse__step` | `direction` | Paso a paso over/into/out |
+| `mcp__js_reverse__trace_function` | `functionName`,`logArgs?`,`logThis?`,`pause?`,`traceId?`,`urlFilter?` | Rastrea la invocación de una función |
+| `mcp__js_reverse__inject_before_load` | `script?`,`identifier?` | Inyecta un script antes de que la página cargue |
 
-### 14.5 断点命中后的上下文分析
+### 14.5 Análisis de contexto tras alcanzar un breakpoint
 
-| 工具 | 主要参数 | 作用 |
+| Herramienta | Parámetros principales | Función |
 | --- | --- | --- |
-| `mcp__js_reverse__get_paused_info` | `frameIndex?`,`includeScopes?`,`maxScopeDepth?` | 获取断点命中时的栈与作用域变量 |
-| `mcp__js_reverse__evaluate_script` | `function`,`frameIndex?`,`mainWorld?` | 在当前页面或断点帧中执行 JS |
+| `mcp__js_reverse__get_paused_info` | `frameIndex?`,`includeScopes?`,`maxScopeDepth?` | Obtiene la pila y las variables de scope al alcanzar el breakpoint |
+| `mcp__js_reverse__evaluate_script` | `function`,`frameIndex?`,`mainWorld?` | Ejecuta JS en la página actual o en el frame del breakpoint |
 
-### 14.6 网络与调用链
+### 14.6 Red y cadena de llamadas
 
-| 工具 | 主要参数 | 作用 |
+| Herramienta | Parámetros principales | Función |
 | --- | --- | --- |
-| `mcp__js_reverse__break_on_xhr` | `url` | 对包含目标 URL 的 XHR/Fetch 设置断点 |
-| `mcp__js_reverse__list_network_requests` | `reqid?`,`pageIdx?`,`pageSize?`,`resourceTypes?`,`urlFilter?`,`includePreservedRequests?` | 查看请求列表或单请求详情 |
-| `mcp__js_reverse__get_request_initiator` | `requestId` | 查看某请求由哪段 JS 发起 |
-| `mcp__js_reverse__list_console_messages` | `msgid?`,`pageIdx?`,`pageSize?`,`types?`,`includePreservedMessages?` | 查看控制台 |
+| `mcp__js_reverse__break_on_xhr` | `url` | Coloca un breakpoint en XHR/Fetch que contenga la URL objetivo |
+| `mcp__js_reverse__list_network_requests` | `reqid?`,`pageIdx?`,`pageSize?`,`resourceTypes?`,`urlFilter?`,`includePreservedRequests?` | Ver la lista de solicitudes o el detalle de una solicitud específica |
+| `mcp__js_reverse__get_request_initiator` | `requestId` | Ver qué fragmento de JS originó una solicitud específica |
+| `mcp__js_reverse__list_console_messages` | `msgid?`,`pageIdx?`,`pageSize?`,`types?`,`includePreservedMessages?` | Ver la consola |
 
-### 14.7 WebSocket 分析
+### 14.7 Análisis de WebSocket
 
-| 工具 | 主要参数 | 作用 |
+| Herramienta | Parámetros principales | Función |
 | --- | --- | --- |
-| `mcp__js_reverse__get_websocket_messages` | `wsid?`,`analyze?`,`groupId?`,`frameIndex?`,`direction?`,`show_content?`,`pageIdx?`,`pageSize?`,`urlFilter?`,`includePreservedConnections?` | 列 WS 连接、分析消息分组、看具体帧 |
+| `mcp__js_reverse__get_websocket_messages` | `wsid?`,`analyze?`,`groupId?`,`frameIndex?`,`direction?`,`show_content?`,`pageIdx?`,`pageSize?`,`urlFilter?`,`includePreservedConnections?` | Lista conexiones WS, analiza agrupación de mensajes, ver frames específicos |
 
-### 14.8 截图
+### 14.8 Captura de pantalla
 
-| 工具 | 主要参数 | 作用 |
+| Herramienta | Parámetros principales | Función |
 | --- | --- | --- |
-| `mcp__js_reverse__take_screenshot` | `filePath?`,`format?`,`fullPage?`,`quality?` | 截图 |
+| `mcp__js_reverse__take_screenshot` | `filePath?`,`format?`,`fullPage?`,`quality?` | Captura de pantalla |
 
-### 14.9 推荐工作流
+### 14.9 Flujo de trabajo recomendado
 
-#### 定位签名函数
+#### Localizar la función de firma
 
 1. `new_page`
 2. `list_scripts`
-3. `search_in_sources` 搜 `sign` / `token` / 路径关键字
+3. `search_in_sources` buscando `sign` / `token` / palabras clave de ruta
 4. `set_breakpoint_on_text`
-5. 触发请求
+5. Disparar la solicitud
 6. `get_paused_info`
 7. `step`
 8. `evaluate_script`
 
-#### 跟踪请求是谁发起的
+#### Rastrear quién originó la solicitud
 
-1. 操作页面
+1. Operar la página
 2. `list_network_requests`
 3. `get_request_initiator`
-4. 必要时 `break_on_xhr`
+4. `break_on_xhr` cuando sea necesario
 
-#### 分析混淆脚本
+#### Analizar un script ofuscado
 
 1. `search_in_sources`
 2. `save_script_source`
 3. `set_breakpoint_on_text`
 4. `trace_function`
 
-### 14.10 skill 编写建议
+### 14.10 Recomendaciones para escribir un skill
 
-- 有源码关键词时，优先 `search_in_sources`
-- 有请求 URL 时，优先 `break_on_xhr` 或 `get_request_initiator`
-- 需要在页面脚本作用域里拿全局变量时，可考虑 `mainWorld: true`
-- 如果页面重载频繁，优先按 URL 查脚本，不要过度依赖临时 `scriptId`
+- Cuando haya una palabra clave del código fuente, prioriza `search_in_sources`
+- Cuando se conozca la URL de la solicitud, prioriza `break_on_xhr` o `get_request_initiator`
+- Cuando se necesite obtener variables globales dentro del scope del script de página, considera `mainWorld: true`
+- Si la página se recarga con frecuencia, prioriza buscar scripts por URL, no dependas en exceso de un `scriptId` temporal
 
 ---
 
-## 15. `memory`：结构化知识图谱记忆
+## 15. `memory`: grafo de conocimiento estructurado como memoria
 
-### 15.1 定位
+### 15.1 Posicionamiento
 
-`memory` 是长期结构化记忆层，不是普通笔记。它维护的是“实体-观察-关系”的知识图谱。
+`memory` es una capa de memoria estructurada a largo plazo, no son notas comunes. Mantiene un grafo de conocimiento de "entidad-observación-relación".
 
-适合用来：
+Adecuado para usarse en:
 
-- 记录用户偏好
-- 记录项目事实
-- 记录设备、目标、包名、接口名、漏洞点等结构化知识
-- 在多轮任务之间保存稳定事实
+- Registrar preferencias del usuario
+- Registrar hechos del proyecto
+- Registrar conocimiento estructurado como dispositivos, objetivos, nombres de paquete, nombres de interfaces, puntos de vulnerabilidad
+- Conservar hechos estables entre múltiples rondas de tareas
 
-### 15.2 核心对象
+### 15.2 Objetos centrales
 
-- 实体 `entity`
-  - 有名字 `name`
-  - 有类型 `entityType`
-  - 有多条观察 `observations`
+- Entidad `entity`
+  - Tiene nombre `name`
+  - Tiene tipo `entityType`
+  - Tiene varias observaciones `observations`
 
-- 关系 `relation`
+- Relación `relation`
   - `from`
   - `relationType`
   - `to`
 
-### 15.3 方法清单
+### 15.3 Lista de métodos
 
-| 工具 | 主要参数 | 作用 |
+| Herramienta | Parámetros principales | Función |
 | --- | --- | --- |
-| `mcp__memory__read_graph` | 无 | 读取整个图谱 |
-| `mcp__memory__search_nodes` | `query` | 搜实体/类型/观察 |
-| `mcp__memory__open_nodes` | `names` | 打开指定实体详情 |
-| `mcp__memory__create_entities` | `entities` | 批量创建实体 |
-| `mcp__memory__delete_entities` | `entityNames` | 删除实体 |
-| `mcp__memory__add_observations` | `observations` | 给实体追加观察 |
-| `mcp__memory__delete_observations` | `deletions` | 删除观察 |
-| `mcp__memory__create_relations` | `relations` | 创建关系 |
-| `mcp__memory__delete_relations` | `relations` | 删除关系 |
+| `mcp__memory__read_graph` | Ninguno | Lee todo el grafo |
+| `mcp__memory__search_nodes` | `query` | Busca entidades/tipos/observaciones |
+| `mcp__memory__open_nodes` | `names` | Abre el detalle de entidades específicas |
+| `mcp__memory__create_entities` | `entities` | Crea entidades por lotes |
+| `mcp__memory__delete_entities` | `entityNames` | Elimina entidades |
+| `mcp__memory__add_observations` | `observations` | Agrega observaciones a una entidad |
+| `mcp__memory__delete_observations` | `deletions` | Elimina observaciones |
+| `mcp__memory__create_relations` | `relations` | Crea relaciones |
+| `mcp__memory__delete_relations` | `relations` | Elimina relaciones |
 
-### 15.4 示例
+### 15.4 Ejemplo
 
-创建实体：
+Crear entidad:
 
 ```json
 {
@@ -1205,15 +1205,15 @@ mcp__<server_name>__<tool_name>
       "name": "com.example.app",
       "entityType": "android_app",
       "observations": [
-        "主包名",
-        "使用 OkHttp"
+        "Paquete principal",
+        "Usa OkHttp"
       ]
     }
   ]
 }
 ```
 
-创建关系：
+Crear relación:
 
 ```json
 {
@@ -1227,36 +1227,36 @@ mcp__<server_name>__<tool_name>
 }
 ```
 
-### 15.5 适合 skill 的用途
+### 15.5 Usos adecuados para un skill
 
-- 在逆向 skill 中记住目标包名、加密类、so 名、关键接口
-- 在渗透测试 skill 中记住域名、漏洞点、扫描结果
-- 在自动化 skill 中记住账号环境、部署方式、约定路径
+- Recordar en un skill de ingeniería inversa el nombre de paquete objetivo, la clase de cifrado, el nombre del so, las interfaces clave
+- Recordar en un skill de pruebas de penetración el dominio, los puntos de vulnerabilidad, los resultados de escaneo
+- Recordar en un skill de automatización el entorno de la cuenta, la forma de despliegue, las rutas convenidas
 
-### 15.6 注意点
+### 15.6 Puntos a tener en cuenta
 
-- 关系建议用主动语态，例如 `App uses OkHttp`
-- 不适合存超长原文，更适合存“可检索事实”
+- Se recomienda que las relaciones usen voz activa, por ejemplo `App uses OkHttp`
+- No es adecuado para guardar texto original muy extenso, es más adecuado para guardar "hechos consultables"
 
 ---
 
-## 16. `sequential_thinking`：分步思考辅助
+## 16. `sequential_thinking`: asistencia de pensamiento paso a paso
 
-### 16.1 定位
+### 16.1 Posicionamiento
 
-这是一个“显式多步思考”工具，用于复杂问题分析、修正、分支、验证假设。  
-它适合做：
+Esta es una herramienta de "pensamiento explícito multi-paso", usada para análisis de problemas complejos, corrección, ramificación, verificación de hipótesis.
+Es adecuada para:
 
-- 多步骤逆向分析规划
-- 不确定任务的方案探索
-- 需要修正前面判断的复杂决策
-- 大任务分解
+- Planificación de análisis de ingeniería inversa multi-paso
+- Exploración de opciones para tareas inciertas
+- Decisiones complejas que requieren corregir juicios previos
+- Descomposición de tareas grandes
 
-### 16.2 方法
+### 16.2 Método
 
 #### `mcp__sequential_thinking__sequentialthinking`
 
-主要参数：
+Parámetros principales:
 
 - `thought`
 - `thoughtNumber`
@@ -1268,155 +1268,155 @@ mcp__<server_name>__<tool_name>
 - `branchId?`
 - `needsMoreThoughts?`
 
-### 16.3 使用方式理解
+### 16.3 Entendiendo la forma de uso
 
-这个工具不是用来“查数据”的，而是用来把推理状态结构化地提交给系统。  
-你可以：
+Esta herramienta no se usa para "consultar datos", sino para enviar el estado del razonamiento al sistema de forma estructurada.
+Puedes:
 
-- 从第 1 步开始分析
-- 发现前面错了就 revision
-- 从某一步分叉 branch
-- 最后形成一个经过验证的解法
+- Empezar el análisis desde el paso 1
+- Si descubres que un paso anterior estaba mal, hacer una revision
+- Ramificar (branch) desde un paso específico
+- Finalmente formar una solución verificada
 
-### 16.4 适合 skill 的场景
+### 16.4 Escenarios adecuados para un skill
 
-- 自动 triage skill
-- 多阶段漏洞利用路线判断
-- 逆向中“先 Java 还是先 native”的决策
-- 多候选签名函数筛选
+- Skill de triage automático
+- Decisión de rutas de explotación de vulnerabilidad en múltiples fases
+- Decisión de "primero Java o primero native" en ingeniería inversa
+- Filtrado de múltiples funciones de firma candidatas
 
-### 16.5 示例
+### 16.5 Ejemplo
 
 ```json
 {
-  "thought": "先确认问题是前端签名还是服务端校验导致 403。",
+  "thought": "Primero confirmar si el problema es la firma del frontend o la validación del servidor la que causa el 403.",
   "thoughtNumber": 1,
   "totalThoughts": 4,
   "nextThoughtNeeded": true
 }
 ```
 
-### 16.6 注意点
+### 16.6 Puntos a tener en cuenta
 
-- 这是分析增强器，不是执行器
-- 对简单任务没必要使用
-- 对复杂、模糊、容易走错路的问题尤其有价值
+- Es un potenciador de análisis, no un ejecutor
+- No es necesario para tareas simples
+- Especialmente valioso para problemas complejos, ambiguos y propensos a desviarse
 
 ---
 
-## 17. `scrcpy_vision`：Android 可视化控制、UI 定位与无线调试
+## 17. `scrcpy_vision`: control visual de Android, localización de UI y depuración inalámbrica
 
-### 17.1 定位
+### 17.1 Posicionamiento
 
-`scrcpy_vision` 把 ADB、scrcpy 低延迟控制、屏幕截图/串流、`uiautomator` UI 树读取整合到一组工具里，适合做：
+`scrcpy_vision` integra en un solo conjunto de herramientas ADB, control de baja latencia de scrcpy, captura de pantalla/streaming, y lectura del árbol UI de `uiautomator`, adecuado para:
 
-- 以 `serial` 为核心的 Android 设备连接与识别
-- 基于当前页面元素文本、`resource-id`、`content-desc` 的 UI 定位
-- 坐标点击、拖拽、长按、滑动、键盘输入
-- 屏幕唤醒/解锁、前台 Activity、通知、剪贴板等状态确认
-- USB 转 WiFi ADB 调试
-- 单帧截图或持续画面流，用于观察界面变化和自动化联动
+- Conexión e identificación de dispositivos Android centrada en `serial`
+- Localización de UI basada en el texto de los elementos, `resource-id`, `content-desc` de la página actual
+- Clic en coordenadas, arrastre, pulsación larga, deslizamiento, entrada de teclado
+- Confirmación de estado como despertar/desbloqueo de pantalla, Activity en primer plano, notificaciones, portapapeles
+- Depuración ADB por WiFi desde USB
+- Captura de un solo frame o streaming continuo, para observar cambios de interfaz y coordinar con la automatización
 
-和 `adb_mcp` 相比，它更偏“可视化控制”和“UI 层定位”；`adb_mcp` 更偏基础设备管理、安装 APK、logcat、录屏、文件传输。写 skill 时两者通常是互补关系，而不是二选一。
+En comparación con `adb_mcp`, este se orienta más al "control visual" y la "localización a nivel de UI"; `adb_mcp` se orienta más a la gestión básica de dispositivos, instalación de APK, logcat, grabación de pantalla, transferencia de archivos. Al escribir un skill, ambos suelen ser complementarios, no una elección excluyente.
 
-### 17.2 适合的 skill 类型
+### 17.2 Tipos de skill adecuados
 
-- Android UI 自动化与页面回归
-- App 动态测试中的元素定位与界面驱动
-- 无线调试切换与真机远程控制
-- 抓包/Hook 前后的页面状态验证
-- 需要通过 UI 树确认按钮、输入框、弹窗位置的任务
-- 需要连续查看设备画面而不是只截单张图的任务
+- Automatización de UI y regresión de páginas en Android
+- Localización de elementos y guía de interfaz en pruebas dinámicas de App
+- Cambio de depuración inalámbrica y control remoto de dispositivos reales
+- Verificación del estado de la página antes/después de captura de tráfico/Hook
+- Tareas que requieren confirmar la posición de botones, campos de entrada, ventanas emergentes mediante el árbol UI
+- Tareas que requieren ver continuamente la pantalla del dispositivo en lugar de solo una captura única
 
-### 17.3 方法清单
+### 17.3 Lista de métodos
 
-#### 设备连接与识别
+#### Conexión e identificación de dispositivos
 
-| 工具 | 主要参数 | 作用 | 典型用途 |
+| Herramienta | Parámetros principales | Función | Uso típico |
 | --- | --- | --- | --- |
-| `mcp__scrcpy_vision__android_devices_list` | 无 | 列出已连接设备 | 获取 `serial`，确认 USB/WiFi 连接是否正常 |
-| `mcp__scrcpy_vision__android_devices_info` | `serial` | 读取设备基础 `getprop` 信息 | 看型号、系统版本、ABI、设备标识 |
-| `mcp__scrcpy_vision__android_adb_enableTcpip` | `serial`,`port?` | 在 USB 已连接时开启 WiFi 调试 | 为无线 ADB 做前置准备 |
-| `mcp__scrcpy_vision__android_adb_getDeviceIp` | `serial` | 获取设备 WiFi IP | 准备 `connectWifi` |
-| `mcp__scrcpy_vision__android_adb_connectWifi` | `ipAddress`,`port?` | 通过 WiFi 连接设备 | 无线调试 |
-| `mcp__scrcpy_vision__android_adb_disconnectWifi` | `ipAddress?` | 断开指定或全部 WiFi ADB 连接 | 清理无线调试会话 |
+| `mcp__scrcpy_vision__android_devices_list` | Ninguno | Lista los dispositivos conectados | Obtener el `serial`, confirmar si la conexión USB/WiFi está bien |
+| `mcp__scrcpy_vision__android_devices_info` | `serial` | Lee la información básica `getprop` del dispositivo | Ver modelo, versión del sistema, ABI, identificador del dispositivo |
+| `mcp__scrcpy_vision__android_adb_enableTcpip` | `serial`,`port?` | Activa la depuración WiFi cuando ya está conectado por USB | Preparación previa para ADB inalámbrico |
+| `mcp__scrcpy_vision__android_adb_getDeviceIp` | `serial` | Obtiene la IP WiFi del dispositivo | Preparación para `connectWifi` |
+| `mcp__scrcpy_vision__android_adb_connectWifi` | `ipAddress`,`port?` | Conecta el dispositivo por WiFi | Depuración inalámbrica |
+| `mcp__scrcpy_vision__android_adb_disconnectWifi` | `ipAddress?` | Desconecta una o todas las conexiones ADB WiFi | Limpieza de la sesión de depuración inalámbrica |
 
-#### 应用与运行态
+#### Aplicación y estado de ejecución
 
-| 工具 | 主要参数 | 作用 | 典型用途 |
+| Herramienta | Parámetros principales | Función | Uso típico |
 | --- | --- | --- | --- |
-| `mcp__scrcpy_vision__android_app_start` | `serial`,`packageName`,`activity?` | 启动应用或指定 Activity | 打开目标 App、直达指定页面 |
-| `mcp__scrcpy_vision__android_app_stop` | `serial`,`packageName` | 强制停止应用 | 重置应用状态 |
-| `mcp__scrcpy_vision__android_apps_list` | `serial`,`system?` | 列出已安装包 | 找包名、确认应用是否安装 |
-| `mcp__scrcpy_vision__android_activity_current` | `serial` | 获取当前前台包名与 Activity | 判断当前页面是否切换成功 |
-| `mcp__scrcpy_vision__android_notifications_get` | `serial` | 导出当前通知详情 | 查验证码通知、推送文案、包名来源 |
+| `mcp__scrcpy_vision__android_app_start` | `serial`,`packageName`,`activity?` | Inicia la aplicación o una Activity específica | Abrir la App objetivo, ir directo a una página específica |
+| `mcp__scrcpy_vision__android_app_stop` | `serial`,`packageName` | Fuerza la detención de la aplicación | Restablecer el estado de la aplicación |
+| `mcp__scrcpy_vision__android_apps_list` | `serial`,`system?` | Lista los paquetes instalados | Encontrar el nombre de paquete, confirmar si la aplicación está instalada |
+| `mcp__scrcpy_vision__android_activity_current` | `serial` | Obtiene el nombre de paquete y Activity en primer plano actuales | Determinar si el cambio de página se realizó correctamente |
+| `mcp__scrcpy_vision__android_notifications_get` | `serial` | Exporta el detalle de las notificaciones actuales | Ver notificaciones de código de verificación, texto de push, origen del paquete |
 
-#### 屏幕、剪贴板与设备状态
+#### Pantalla, portapapeles y estado del dispositivo
 
-| 工具 | 主要参数 | 作用 | 典型用途 |
+| Herramienta | Parámetros principales | Función | Uso típico |
 | --- | --- | --- | --- |
-| `mcp__scrcpy_vision__android_screen_isOn` | `serial` | 判断屏幕是否点亮 | 自动化前检查设备状态 |
-| `mcp__scrcpy_vision__android_screen_wake` | `serial` | 点亮屏幕 | 准备操作设备 |
-| `mcp__scrcpy_vision__android_screen_sleep` | `serial` | 熄灭屏幕 | 收尾或验证锁屏行为 |
-| `mcp__scrcpy_vision__android_screen_unlock` | `serial` | 尝试唤醒并解锁设备 | 无安全锁时快速进入桌面 |
-| `mcp__scrcpy_vision__android_clipboard_get` | `serial` | 读取剪贴板内容 | 取验证码、分享链接、复制结果 |
-| `mcp__scrcpy_vision__android_clipboard_set` | `serial`,`text` | 尝试设置剪贴板 | 向输入框粘贴准备好的文本 |
+| `mcp__scrcpy_vision__android_screen_isOn` | `serial` | Determina si la pantalla está encendida | Verificar el estado del dispositivo antes de automatizar |
+| `mcp__scrcpy_vision__android_screen_wake` | `serial` | Enciende la pantalla | Preparar la operación del dispositivo |
+| `mcp__scrcpy_vision__android_screen_sleep` | `serial` | Apaga la pantalla | Cierre o verificación del comportamiento de bloqueo de pantalla |
+| `mcp__scrcpy_vision__android_screen_unlock` | `serial` | Intenta despertar y desbloquear el dispositivo | Acceso rápido al escritorio sin bloqueo de seguridad |
+| `mcp__scrcpy_vision__android_clipboard_get` | `serial` | Lee el contenido del portapapeles | Obtener código de verificación, enlace compartido, resultado copiado |
+| `mcp__scrcpy_vision__android_clipboard_set` | `serial`,`text` | Intenta establecer el portapapeles | Pegar texto preparado en un campo de entrada |
 
-#### 文件与 Shell
+#### Archivos y Shell
 
-| 工具 | 主要参数 | 作用 | 典型用途 |
+| Herramienta | Parámetros principales | Función | Uso típico |
 | --- | --- | --- | --- |
-| `mcp__scrcpy_vision__android_file_list` | `serial`,`path` | 列出设备目录内容 | 查看导出目录、缓存目录、下载目录 |
-| `mcp__scrcpy_vision__android_file_pull` | `serial`,`remotePath`,`localPath` | 从设备拉文件到本地 | 导出日志、图片、下载文件 |
-| `mcp__scrcpy_vision__android_file_push` | `serial`,`localPath`,`remotePath` | 推送本地文件到设备 | 推配置、测试文件、证书 |
-| `mcp__scrcpy_vision__android_shell_exec` | `serial`,`command` | 执行任意 `adb shell` 命令 | 在必须时做高级诊断、分辨率查询或设备操作 |
+| `mcp__scrcpy_vision__android_file_list` | `serial`,`path` | Lista el contenido de un directorio del dispositivo | Ver directorio de exportación, caché, descargas |
+| `mcp__scrcpy_vision__android_file_pull` | `serial`,`remotePath`,`localPath` | Descarga un archivo del dispositivo al local | Exportar logs, imágenes, archivos descargados |
+| `mcp__scrcpy_vision__android_file_push` | `serial`,`localPath`,`remotePath` | Sube un archivo local al dispositivo | Subir configuración, archivos de prueba, certificados |
+| `mcp__scrcpy_vision__android_shell_exec` | `serial`,`command` | Ejecuta cualquier comando `adb shell` | Diagnóstico avanzado, consulta de resolución u operación de dispositivo cuando sea necesario |
 
-#### UI 树读取与输入控制
+#### Lectura del árbol UI y control de entrada
 
-| 工具 | 主要参数 | 作用 | 典型用途 |
+| Herramienta | Parámetros principales | Función | Uso típico |
 | --- | --- | --- | --- |
-| `mcp__scrcpy_vision__android_ui_dump` | `serial` | 导出当前页面的 `uiautomator` XML | 获取元素文本、类名、边界、`resource-id` |
-| `mcp__scrcpy_vision__android_ui_findElement` | `serial`,`text?`,`resourceId?`,`className?`,`contentDesc?` | 按 UI 属性查元素并返回中心坐标 | 定位按钮、输入框、弹窗控件 |
-| `mcp__scrcpy_vision__android_input_tap` | `serial`,`x`,`y` | 点击坐标 | 点按钮、列表项、菜单 |
-| `mcp__scrcpy_vision__android_input_longPress` | `serial`,`x`,`y`,`durationMs?` | 长按坐标 | 呼出上下文菜单、拖动态准备 |
-| `mcp__scrcpy_vision__android_input_swipe` | `serial`,`x1`,`y1`,`x2`,`y2`,`durationMs?` | 滑动屏幕 | 滚动列表、切页、下拉刷新 |
-| `mcp__scrcpy_vision__android_input_dragDrop` | `serial`,`startX`,`startY`,`endX`,`endY`,`durationMs?` | 拖拽到目标位置 | 拖动卡片、图标、排序项 |
-| `mcp__scrcpy_vision__android_input_pinch` | `serial`,`centerX`,`centerY`,`startDistance`,`endDistance`,`durationMs?` | 近似模拟缩放手势 | 地图、图片缩放验证 |
-| `mcp__scrcpy_vision__android_input_keyevent` | `serial`,`keycode` | 发送 Android 按键 | Home、Back、Enter、Delete、音量键 |
-| `mcp__scrcpy_vision__android_input_text` | `serial`,`text` | 输入文本 | 登录、搜索、表单填写 |
+| `mcp__scrcpy_vision__android_ui_dump` | `serial` | Exporta el XML de `uiautomator` de la página actual | Obtener el texto de elementos, nombre de clase, límites, `resource-id` |
+| `mcp__scrcpy_vision__android_ui_findElement` | `serial`,`text?`,`resourceId?`,`className?`,`contentDesc?` | Busca elementos por atributos de UI y devuelve las coordenadas centrales | Localizar botones, campos de entrada, controles de ventana emergente |
+| `mcp__scrcpy_vision__android_input_tap` | `serial`,`x`,`y` | Clic en coordenadas | Presionar botón, elemento de lista, menú |
+| `mcp__scrcpy_vision__android_input_longPress` | `serial`,`x`,`y`,`durationMs?` | Pulsación larga en coordenadas | Invocar menú contextual, preparación de arrastre |
+| `mcp__scrcpy_vision__android_input_swipe` | `serial`,`x1`,`y1`,`x2`,`y2`,`durationMs?` | Desliza la pantalla | Desplazar listas, cambiar de página, refrescar deslizando |
+| `mcp__scrcpy_vision__android_input_dragDrop` | `serial`,`startX`,`startY`,`endX`,`endY`,`durationMs?` | Arrastra a una posición objetivo | Arrastrar tarjetas, iconos, elementos ordenados |
+| `mcp__scrcpy_vision__android_input_pinch` | `serial`,`centerX`,`centerY`,`startDistance`,`endDistance`,`durationMs?` | Simula de forma aproximada el gesto de zoom | Verificación de zoom en mapas, imágenes |
+| `mcp__scrcpy_vision__android_input_keyevent` | `serial`,`keycode` | Envía una tecla de Android | Home, Back, Enter, Delete, teclas de volumen |
+| `mcp__scrcpy_vision__android_input_text` | `serial`,`text` | Ingresa texto | Inicio de sesión, búsqueda, llenado de formularios |
 
-#### 视觉能力
+#### Capacidades visuales
 
-| 工具 | 主要参数 | 作用 | 典型用途 |
+| Herramienta | Parámetros principales | Función | Uso típico |
 | --- | --- | --- | --- |
-| `mcp__scrcpy_vision__android_vision_snapshot` | `serial` | 通过 `adb exec-out screencap -p` 获取当前屏幕 PNG | 单次截图确认界面 |
-| `mcp__scrcpy_vision__android_vision_startStream` | `serial`,`frameFps?`,`maxFps?`,`maxSize?` | 启动 scrcpy+ffmpeg 持续画面流 | 持续观察页面变化，配合快速输入控制 |
-| `mcp__scrcpy_vision__android_vision_stopStream` | `serial` | 停止画面流并移除资源 | 收尾，释放流资源 |
+| `mcp__scrcpy_vision__android_vision_snapshot` | `serial` | Obtiene la pantalla actual en PNG mediante `adb exec-out screencap -p` | Confirmación de interfaz con una sola captura |
+| `mcp__scrcpy_vision__android_vision_startStream` | `serial`,`frameFps?`,`maxFps?`,`maxSize?` | Inicia el streaming continuo con scrcpy+ffmpeg | Observación continua de cambios de página, en conjunto con control de entrada rápido |
+| `mcp__scrcpy_vision__android_vision_stopStream` | `serial` | Detiene el streaming y libera los recursos | Cierre, liberación de recursos de streaming |
 
-### 17.4 推荐工作流
+### 17.4 Flujo de trabajo recomendado
 
-#### 页面自动化与定位
+#### Automatización y localización de páginas
 
 1. `android_devices_list`
 2. `android_screen_isOn` / `android_screen_wake` / `android_screen_unlock`
-3. 如果后续要用坐标点击或滑动，先用 `android_shell_exec` 执行 `wm size` 获取当前分辨率
-4. `android_vision_snapshot` 或 `android_vision_startStream`
-5. `android_ui_dump` 或 `android_ui_findElement`
+3. Si se van a usar clics o deslizamientos por coordenadas, primero ejecutar `android_shell_exec` con `wm size` para obtener la resolución actual
+4. `android_vision_snapshot` o `android_vision_startStream`
+5. `android_ui_dump` o `android_ui_findElement`
 6. `android_input_tap` / `android_input_text` / `android_input_swipe`
-7. `android_activity_current` 确认是否进入目标页面
-8. 需要持续观察时保留 stream，结束后 `android_vision_stopStream`
+7. `android_activity_current` para confirmar si se entró a la página objetivo
+8. Mantener el stream si se necesita observación continua, y `android_vision_stopStream` al finalizar
 
-#### WiFi ADB 切换
+#### Cambio a ADB por WiFi
 
-1. USB 连接设备后执行 `android_adb_enableTcpip`
+1. Ejecutar `android_adb_enableTcpip` tras conectar el dispositivo por USB
 2. `android_adb_getDeviceIp`
 3. `android_adb_connectWifi`
-4. `android_devices_list` 确认无线连接已出现
-5. 测试完成后用 `android_adb_disconnectWifi` 清理
+4. `android_devices_list` para confirmar que la conexión inalámbrica ya aparece
+5. Limpiar con `android_adb_disconnectWifi` al terminar las pruebas
 
-### 17.5 调用示例
+### 17.5 Ejemplos de invocación
 
-开启 WiFi 调试：
+Activar depuración WiFi:
 
 ```json
 {
@@ -1425,7 +1425,7 @@ mcp__<server_name>__<tool_name>
 }
 ```
 
-按文本找元素：
+Buscar elemento por texto:
 
 ```json
 {
@@ -1434,7 +1434,7 @@ mcp__<server_name>__<tool_name>
 }
 ```
 
-启动持续画面流：
+Iniciar streaming continuo:
 
 ```json
 {
@@ -1444,7 +1444,7 @@ mcp__<server_name>__<tool_name>
 }
 ```
 
-查询当前分辨率：
+Consultar la resolución actual:
 
 ```json
 {
@@ -1453,179 +1453,179 @@ mcp__<server_name>__<tool_name>
 }
 ```
 
-### 17.6 注意点
+### 17.6 Puntos a tener en cuenta
 
-- 除 `android_devices_list`、`android_adb_connectWifi`、`android_adb_disconnectWifi` 之外，大多数方法都要求先拿到设备 `serial`
-- 如果 scrcpy 画面流已启动，点击、滑动、输入等操作会优先走更快的 scrcpy 控制通道；否则回退到 ADB 输入
-- 如果要发坐标点击、长按、滑动、拖拽或 pinch，先查询当前分辨率；不同设备、横竖屏、缩放或截图尺寸假设都可能导致坐标偏移
-- `android_ui_findElement` 适合当前页面的静态定位，页面变化后建议重新 `ui_dump` 或重新查元素
-- 能用 `android_ui_findElement` / `android_ui_dump` 就尽量别直接写死坐标；只有在元素定位不可靠时才退回坐标点击
-- `android_screen_unlock` 只适用于没有 PIN/密码/图案等安全锁的设备
-- `android_clipboard_set` 在 Android 10+ 上可能受到系统限制，不保证所有设备都能直接生效
-- `android_input_pinch` 是近似手势，不是真正的多点触控
-- `android_shell_exec`、`android_file_push` 会直接改动设备环境，写 skill 时应明确这是高风险操作
-- `android_vision_startStream` 产出的是实时资源而不是落地文件；如果只是单次截图，优先用 `android_vision_snapshot`
+- A excepción de `android_devices_list`, `android_adb_connectWifi`, `android_adb_disconnectWifi`, la mayoría de los métodos requieren primero obtener el `serial` del dispositivo
+- Si el streaming de scrcpy ya está iniciado, las operaciones de clic, deslizamiento, entrada de texto priorizarán el canal de control más rápido de scrcpy; de lo contrario se recurre a la entrada ADB
+- Para enviar clics, pulsaciones largas, deslizamientos, arrastres o pinch por coordenadas, consulta primero la resolución actual; diferentes dispositivos, orientación horizontal/vertical, escalado o supuestos de tamaño de captura pueden causar desviación de coordenadas
+- `android_ui_findElement` es adecuado para localización estática en la página actual; tras un cambio de página se recomienda volver a hacer `ui_dump` o volver a buscar el elemento
+- Siempre que se pueda usar `android_ui_findElement` / `android_ui_dump`, evita fijar coordenadas; solo recurre al clic por coordenadas cuando la localización de elementos no sea confiable
+- `android_screen_unlock` solo aplica a dispositivos sin PIN/contraseña/patrón u otro bloqueo de seguridad
+- `android_clipboard_set` puede estar sujeto a restricciones del sistema en Android 10+, no se garantiza que funcione directamente en todos los dispositivos
+- `android_input_pinch` es un gesto aproximado, no es multitáctil real
+- `android_shell_exec`, `android_file_push` modifican directamente el entorno del dispositivo; al escribir un skill se debe dejar claro que es una operación de alto riesgo
+- Lo que produce `android_vision_startStream` es un recurso en tiempo real y no un archivo guardado; si solo se necesita una captura única, prioriza `android_vision_snapshot`
 
 ---
 
-## 18. 结合 skill 编写的推荐分组
+## 18. Agrupación recomendada combinada con la escritura de skills
 
-为了后续写 skill，更推荐你按“任务域”来组织，而不是按“工具服务器名”机械拆分。
+Para facilitar la escritura posterior de skills, se recomienda organizar por "dominio de tarea" en lugar de dividir mecánicamente por "nombre del servidor de herramientas".
 
-### 18.1 Android 静态分析 skill
+### 18.1 Skill de análisis estático de Android
 
-优先 MCP：
+MCP prioritario:
 
 - `jadx`
 - `everything_search`
 
-常见流程：
+Flujo común:
 
-1. 找 APK / 资源
-2. 读 Manifest
-3. 搜关键类
-4. 拉方法源码
-5. 追 xref
+1. Encontrar APK / recursos
+2. Leer el Manifest
+3. Buscar clases clave
+4. Descargar código fuente de métodos
+5. Rastrear xref
 
-### 18.2 Android 动态分析 skill
+### 18.2 Skill de análisis dinámico de Android
 
-优先 MCP：
+MCP prioritario:
 
 - `adb_mcp`
 - `scrcpy_vision`
 - `frida_mcp`
 - `charles`
 
-常见流程：
+Flujo común:
 
-1. 确认设备
-2. 安装应用
-3. 视情况启动 scrcpy 画面流或读取 UI 树
-4. 启动 Charles live capture
-5. 注入 hook
-6. 查看请求、界面和日志
+1. Confirmar el dispositivo
+2. Instalar la aplicación
+3. Según el caso, iniciar el streaming de scrcpy o leer el árbol UI
+4. Iniciar la live capture de Charles
+5. Inyectar hook
+6. Ver solicitudes, interfaz y logs
 
-### 18.3 Native 逆向 skill
+### 18.3 Skill de ingeniería inversa Native
 
-优先 MCP：
+MCP prioritario:
 
 - `ida_pro_mcp`
 - `everything_search`
 
-常见流程：
+Flujo común:
 
-1. 找 so / exe
+1. Encontrar so / exe
 2. `survey_binary`
-3. 查字符串/导入
-4. 反编译关键函数
-5. 重命名、修类型、追数据流
+3. Buscar cadenas/imports
+4. Descompilar funciones clave
+5. Renombrar, corregir tipos, rastrear flujo de datos
 
-### 18.4 Web 页面自动化 skill
+### 18.4 Skill de automatización de páginas Web
 
-优先 MCP：
+MCP prioritario:
 
 - `chrome_devtools`
 
-常见流程：
+Flujo común:
 
-1. 打开页面
-2. 获取快照
-3. 交互表单
-4. 抓请求
-5. 截图留证
+1. Abrir la página
+2. Obtener el snapshot
+3. Interactuar con el formulario
+4. Capturar solicitudes
+5. Captura de pantalla como evidencia
 
-### 18.5 Web JS 逆向 skill
+### 18.5 Skill de ingeniería inversa de JS Web
 
-优先 MCP：
+MCP prioritario:
 
 - `js_reverse`
 - `chrome_devtools`
 - `burp`
 
-常见流程：
+Flujo común:
 
-1. 搜源码
-2. 对请求 URL 断点
-3. 追调用链
-4. 导出脚本
-5. Burp 重放
+1. Buscar código fuente
+2. Colocar breakpoint en la URL de solicitud
+3. Rastrear la cadena de llamadas
+4. Exportar el script
+5. Reenvío con Burp
 
-### 18.6 文档检索 skill
+### 18.6 Skill de búsqueda de documentación
 
-优先 MCP：
+MCP prioritario:
 
 - `context7`
 - `fetch`
 
-常见流程：
+Flujo común:
 
 1. `resolve_library_id`
 2. `query_docs`
-3. 如需补充页面内容，再用 `fetch`
+3. Si se necesita complementar el contenido de la página, usar `fetch`
 
 ---
 
-## 19. 写 skill 时可直接复用的提示词模板
+## 19. Plantillas de prompt reutilizables al escribir un skill
 
-下面给你几个适合直接改写进 skill 的模板。
+A continuación se ofrecen algunas plantillas adecuadas para adaptar directamente a un skill.
 
-### 19.1 Android 逆向 skill 模板片段
+### 19.1 Fragmento de plantilla de skill de ingeniería inversa Android
 
 ```text
-当用户要求分析 Android APK 时：
-1. 若任务是对已授权 Android App 做渗透测试，不要先静态分析 APK；先确认连接设备上是否已安装目标 App。
-2. 先准备 burp 或 charles 的抓包可见性，再使用 scrcpy_vision 打开 App、驱动真实业务点击、输入和导航。
-3. 每个关键动作后，先检查 burp 或 charles 是否已经出现 HTTP/HTTPS 或 WebSocket 数据包，并结合 adb_mcp 查看日志、界面异常和运行时状态。
-4. 如果数据包已经可见且可重放，直接转入 Web/API/WebSocket 安全测试，按“界面动作 -> 数据包 -> Web 安全分析”的循环继续推进不同业务功能。
-5. 只有在抓不到包、包被加密、明文不可得、协议仍不透明、无法稳定重放，或异常明显指向客户端逻辑阻塞时，才使用 jadx 读取 AndroidManifest.xml、主 Activity、导出组件，并搜索 okhttp/retrofit/sign/token/encrypt 等关键字。
-6. 若 Java 层仍不够，使用 frida_mcp hook Java 或 native 边界恢复明文；若发现 native 线索（System.loadLibrary、JNI、so 文件）且 Java 与 hook 仍无法解决，再切换到 ida_pro_mcp 分析 dump 出来的 so。
-7. 若需要控制设备、按 UI 元素定位、观察实时画面或切到 WiFi 调试，使用 scrcpy_vision；若需要安装应用、录屏、logcat、基础文件传输，使用 adb_mcp。
+Cuando el usuario solicite analizar un APK Android:
+1. Si la tarea es una prueba de penetración de una App Android ya autorizada, no analices el APK estáticamente primero; confirma primero si la App objetivo ya está instalada en el dispositivo conectado.
+2. Prepara primero la visibilidad de captura de tráfico con burp o charles, luego usa scrcpy_vision para abrir la App, y ejecuta clics, entradas y navegación reales del flujo de negocio.
+3. Después de cada acción clave, verifica primero si ya aparecen paquetes HTTP/HTTPS o WebSocket en burp o charles, y combina con adb_mcp para revisar logs, anomalías de interfaz y estado en tiempo de ejecución.
+4. Si el paquete ya es visible y reenviable, pasa directamente a pruebas de seguridad Web/API/WebSocket, y continúa avanzando en distintas funciones de negocio siguiendo el ciclo "acción en interfaz -> paquete de datos -> análisis de seguridad Web".
+5. Solo cuando no se pueda capturar el paquete, el paquete esté cifrado, no se pueda obtener texto plano, el protocolo siga siendo opaco, no se pueda reenviar de forma estable, o la anomalía apunte claramente a un bloqueo en la lógica del cliente, usa jadx para leer AndroidManifest.xml, la Activity principal, los componentes exportados, y busca palabras clave como okhttp/retrofit/sign/token/encrypt.
+6. Si la capa Java aún no es suficiente, usa frida_mcp para hacer hook en el límite Java o native y recuperar el texto plano; si se descubren indicios native (System.loadLibrary, JNI, archivo so) y Java más hook aún no resuelven, cambia a ida_pro_mcp para analizar el so extraído.
+7. Si se necesita controlar el dispositivo, localizar por elemento de UI, observar la pantalla en tiempo real o cambiar a depuración WiFi, usa scrcpy_vision; si se necesita instalar la aplicación, grabar pantalla, logcat, transferencia básica de archivos, usa adb_mcp.
 ```
 
-### 19.2 Web JS 逆向 skill 模板片段
+### 19.2 Fragmento de plantilla de skill de ingeniería inversa de JS Web
 
 ```text
-当用户要求定位前端签名、混淆函数或接口调用链时：
-1. 优先使用 js_reverse 列举脚本并用 search_in_sources 搜索 sign/token/hash/encode/api path 等关键词。
-2. 如果已知请求 URL，优先使用 break_on_xhr 或 get_request_initiator 确定发起位置。
-3. 对关键函数使用 set_breakpoint_on_text、trace_function、get_paused_info、step 和 evaluate_script 获取运行时上下文。
-4. 若需要保存完整脚本用于离线分析，使用 save_script_source。
-5. 若需要复现或重放请求，配合 burp 的 create_repeater_tab、send_http1_request、send_http2_request。
-6. 若需要页面级交互或截图，配合 chrome_devtools。
+Cuando el usuario solicite localizar la firma del frontend, funciones ofuscadas o la cadena de llamadas de la interfaz:
+1. Prioriza usar js_reverse para enumerar scripts y usar search_in_sources para buscar palabras clave como sign/token/hash/encode/api path.
+2. Si ya se conoce la URL de la solicitud, prioriza usar break_on_xhr o get_request_initiator para determinar el punto de origen.
+3. Para funciones clave usa set_breakpoint_on_text, trace_function, get_paused_info, step y evaluate_script para obtener el contexto en tiempo de ejecución.
+4. Si se necesita guardar el script completo para análisis sin conexión, usa save_script_source.
+5. Si se necesita reproducir o reenviar la solicitud, combina con create_repeater_tab, send_http1_request, send_http2_request de burp.
+6. Si se necesita interacción a nivel de página o capturas de pantalla, combina con chrome_devtools.
 ```
 
-### 19.3 Native 二进制分析 skill 模板片段
+### 19.3 Fragmento de plantilla de skill de análisis de binarios Native
 
 ```text
-当用户要求分析二进制、so、恶意样本或 patch 点时：
-1. 打开 IDA 后先调用 ida_pro_mcp.survey_binary 做总览，不要直接盲目 list_funcs。
-2. 优先从 strings、imports、callgraph、关键常量、敏感 API 入手缩小范围。
-3. 对可疑函数使用 analyze_function / decompile / xref_query / trace_data_flow。
-4. 如果函数可读性差，使用 rename、set_type、declare_type、stack_frame、diff_before_after 逐步恢复语义。
-5. 如需修改样本，使用 patch / patch_asm / put_int，并在必要时保存 IDB。
+Cuando el usuario solicite analizar un binario, so, muestra maliciosa o punto de parche:
+1. Después de abrir IDA, invoca primero ida_pro_mcp.survey_binary para hacer un panorama general, no uses list_funcs de forma ciega directamente.
+2. Prioriza reducir el alcance a partir de strings, imports, callgraph, constantes clave, APIs sensibles.
+3. Para funciones sospechosas usa analyze_function / decompile / xref_query / trace_data_flow.
+4. Si la legibilidad de la función es pobre, usa rename, set_type, declare_type, stack_frame, diff_before_after para recuperar la semántica paso a paso.
+5. Si se necesita modificar la muestra, usa patch / patch_asm / put_int, y guarda el IDB cuando sea necesario.
 ```
 
 ---
 
-## 20. 常见注意事项汇总
+## 20. Resumen de puntos comunes a tener en cuenta
 
-### 20.1 绝对路径要求
+### 20.1 Requisito de rutas absolutas
 
-以下类型工具经常要求绝对路径：
+Los siguientes tipos de herramientas frecuentemente requieren rutas absolutas:
 
 - `adb_mcp.take_screenshot`
 - `adb_mcp.record_screen`
 - `adb_mcp.pull_file` / `push_file`
 - `scrcpy_vision.android_file_pull` / `android_file_push`
-- `frida_mcp` 的 `script_file_path`、`output_file`
+- `script_file_path`, `output_file` de `frida_mcp`
 - `js_reverse.save_script_source`
 - `chrome_devtools.take_screenshot`
 - `chrome_devtools.take_memory_snapshot`
 - `ida_pro_mcp.open_file`
 
-### 20.2 分页类参数
+### 20.2 Parámetros de tipo paginación
 
-常见分页/分片参数：
+Parámetros comunes de paginación/fragmentación:
 
 - `offset`
 - `count`
@@ -1635,14 +1635,14 @@ mcp__<server_name>__<tool_name>
 - `start_index`
 - `length`
 
-写 skill 时建议显式说明：
+Al escribir un skill se recomienda especificar explícitamente:
 
-- 默认先取小批量样本
-- 若结果过多，再增大 limit / count
+- Tomar por defecto primero una muestra pequeña
+- Si los resultados son demasiados, aumentar limit / count
 
-### 20.3 先发现，再深入
+### 20.3 Descubrir primero, profundizar después
 
-很多 MCP 都有明显的“发现阶段工具”，不要一上来就深挖：
+Muchos MCP tienen "herramientas de fase de descubrimiento" evidentes; no profundices directamente desde el inicio:
 
 - `ida_pro_mcp`: `survey_binary`
 - `jadx`: `get_android_manifest` / `search_classes_by_keyword`
@@ -1650,9 +1650,9 @@ mcp__<server_name>__<tool_name>
 - `chrome_devtools`: `take_snapshot`
 - `charles`: `query_live_capture_entries`
 
-### 20.4 证据留存
+### 20.4 Conservación de evidencia
 
-适合做证据保留的 MCP：
+MCP adecuados para la conservación de evidencia:
 
 - `adb_mcp.take_screenshot`
 - `adb_mcp.record_screen`
@@ -1660,33 +1660,33 @@ mcp__<server_name>__<tool_name>
 - `chrome_devtools.take_screenshot`
 - `js_reverse.take_screenshot`
 - `charles.get_traffic_entry_detail`
-- `burp` 历史与 Repeater
+- Historial de `burp` y Repeater
 
-### 20.5 最常见的组合
+### 20.5 Combinaciones más comunes
 
-- Android 静态 + 动态：`jadx` + `frida_mcp`
-- Android 动态 + 流量：`adb_mcp` + `charles`
-- Android 动态 + UI 自动化：`scrcpy_vision` + `frida_mcp`
-- Android 抓包 + 页面驱动：`scrcpy_vision` + `charles`
-- Web 自动化 + JS 逆向：`chrome_devtools` + `js_reverse`
-- Web 安全重放：`js_reverse` + `burp`
-- Native 静态 + 动态：`ida_pro_mcp` + `frida_mcp`
+- Android estático + dinámico: `jadx` + `frida_mcp`
+- Android dinámico + tráfico: `adb_mcp` + `charles`
+- Android dinámico + automatización de UI: `scrcpy_vision` + `frida_mcp`
+- Android captura de tráfico + guía de página: `scrcpy_vision` + `charles`
+- Automatización Web + ingeniería inversa JS: `chrome_devtools` + `js_reverse`
+- Reenvío de seguridad Web: `js_reverse` + `burp`
+- Native estático + dinámico: `ida_pro_mcp` + `frida_mcp`
 
 ---
 
-## 21. 总结
+## 21. Resumen
 
-如果你的目标是“方便后续写成 skills”，最实用的做法不是为每个 MCP 单独写一个 skill，而是按任务域拆：
+Si tu objetivo es "facilitar la escritura posterior de skills", lo más práctico no es escribir un skill independiente para cada MCP, sino dividir por dominio de tarea:
 
-- Android 静态分析
-- Android 动态分析与抓包
-- Web 自动化
-- Web JS 逆向
-- Native 二进制分析
-- 文档检索
-- 记忆与任务状态管理
+- Análisis estático de Android
+- Análisis dinámico de Android y captura de tráfico
+- Automatización Web
+- Ingeniería inversa de JS Web
+- Análisis de binarios Native
+- Búsqueda de documentación
+- Gestión de memoria y estado de tareas
 
-其中最值得优先围绕其设计 skill 的 MCP 是：
+De estos, los MCP alrededor de los cuales vale más la pena diseñar un skill de forma prioritaria son:
 
 1. `jadx`
 2. `ida_pro_mcp`
@@ -1696,7 +1696,7 @@ mcp__<server_name>__<tool_name>
 6. `charles`
 7. `adb_mcp`
 
-如果后面你要，我还可以在这份文档基础上继续帮你做两件事：
+Si más adelante lo necesitas, también puedo ayudarte con dos cosas más a partir de este documento:
 
-1. 再生成一份“适合 skills 的精简版 MCP 速查表”
-2. 直接把这份文档拆成多个 `SKILL.md` 模板骨架
+1. Generar una versión adicional de "tabla de referencia rápida de MCP simplificada para skills"
+2. Dividir directamente este documento en varios esqueletos de plantilla `SKILL.md`

@@ -1,132 +1,132 @@
-# AI模型安全 - 部署阶段
+# Seguridad de modelos de IA - Fase de despliegue
 
-> 来源: AISS绿盟大模型安全智链社区 | 拆自 ai-model-security.md
-> 阶段: 部署阶段（GAARM.0025-0026 模型文件窃取/参数篡改）
+> Fuente: Comunidad AISS NSFOCUS de seguridad de grandes modelos de IA | Extraído de ai-model-security.md
+> Fase: Fase de despliegue (GAARM.0025-0026 Robo de archivos del modelo/Manipulación de parámetros)
 
-## 部署阶段
+## Fase de despliegue
 
-### 模型参数篡改
+### Manipulación de los parámetros del modelo
 
-> 风险编号: GAARM.0026
-> 生命周期: 部署阶段
+> Código de riesgo: GAARM.0026
+> Ciclo de vida: Fase de despliegue
 
-**攻击概述**
+**Resumen del ataque**
 
-该风险是指模型在部署过程中可能会面临参数篡改的风险，这通常是指攻击者通过非法手段故意修改模型的内部参数或权重。这种篡改可能导致模型的行为偏离其设计目的，产生不可预测的输出，甚至可能使模型完全失效。参数篡改不仅威胁到模型的安全性和可靠性，还可能引发隐私泄露和决策失误，对依赖该模型的系统和服务造成严重影响。
+Este riesgo se refiere a la posibilidad de que el modelo sufra manipulación de sus parámetros durante el despliegue, lo que generalmente implica que un atacante modifique deliberadamente y por medios ilegítimos los parámetros o pesos internos del modelo. Esta manipulación puede provocar que el comportamiento del modelo se desvíe de su propósito de diseño, generando salidas impredecibles e incluso pudiendo inutilizar por completo el modelo. La manipulación de parámetros no solo amenaza la seguridad y fiabilidad del modelo, sino que también puede provocar filtraciones de privacidad y errores de decisión, afectando gravemente a los sistemas y servicios que dependen de dicho modelo.
 
-**攻击案例**
+**Casos de ataque**
 
-案例
-描述
-
-
-
-
-案例一
-该案例介绍了在LLM微调过程中，会有部分参数基本没有变化，如果将这部分参数进行修改，可能会导致LLM语言能力基本丧失
-
-**攻击风险**
-
-模型能力丧失：通过恶意篡改深度学习模型中的关键参数，攻击者可以导致模型失去其语言处理能力。
-输出错误内容：当模型的关键参数被篡改后，导致模型生成的文本不再正确，影响模型的可靠性和实用性。
-
-**缓解措施**
-
-缓解方式
-描述
+Caso
+Descripción
 
 
 
 
-加密模型文件
-对模型文件进行加密，确保只有授权用户才能访问和使用模型，防止未授权的篡改
+Caso 1
+Este caso describe cómo, durante el proceso de ajuste fino (fine-tuning) de un LLM, ciertos parámetros apenas cambian; si estos parámetros se modifican, puede provocar que el LLM pierda casi por completo su capacidad lingüística
+
+**Riesgos del ataque**
+
+Pérdida de capacidad del modelo: al manipular maliciosamente parámetros clave del modelo de aprendizaje profundo, el atacante puede hacer que el modelo pierda su capacidad de procesamiento del lenguaje.
+Generación de contenido erróneo: cuando se manipulan los parámetros clave del modelo, el texto generado deja de ser correcto, afectando la fiabilidad y utilidad del modelo.
+
+**Medidas de mitigación**
+
+Medida de mitigación
+Descripción
 
 
-模型数字签名
-模型文件添加校验和或数字签名，以便于检测文件是否被篡改
 
 
-备份和恢复机制
-建立模型的备份和恢复机制，以便在检测到篡改时能够快速恢复到安全的状态
+Cifrado de los archivos del modelo
+Cifrar los archivos del modelo para garantizar que solo los usuarios autorizados puedan acceder y utilizar el modelo, evitando manipulaciones no autorizadas
 
-**参考**
+
+Firma digital del modelo
+Añadir sumas de verificación o firmas digitales a los archivos del modelo, para facilitar la detección de manipulaciones
+
+
+Mecanismo de copia de seguridad y recuperación
+Establecer un mecanismo de copia de seguridad y recuperación del modelo, para poder restaurarlo rápidamente a un estado seguro en caso de detectar manipulación
+
+**Referencias**
 
 https://36kr.com/p/2653630408081670
 https://www.sciencedirect.com/science/article/abs/pii/S0167865522003063
 
 ---
-### 模型文件窃取
+### Robo de archivos del modelo
 
-> 风险编号: GAARM.0025
-> 生命周期: 部署阶段
+> Código de riesgo: GAARM.0025
+> Ciclo de vida: Fase de despliegue
 
-**攻击概述**
+**Resumen del ataque**
 
-这种风险主要涉及到模型参数、训练数据和推理过程的安全性，攻击者可能通过各种手段获取模型的参数信息，例如逆向工程、模型抽取或模型剪枝等技术，从而使得原本保密的模型结构和知识暴露给未经授权的人员。此外，攻击者还可能通过监视模型的推理过程或利用推理时的信息泄露漏洞，获取模型对输入数据的处理方式和输出结果，进而危及模型的机密性和完整性。
+Este riesgo se relaciona principalmente con la seguridad de los parámetros del modelo, los datos de entrenamiento y el proceso de inferencia. Un atacante puede obtener información sobre los parámetros del modelo mediante diversas técnicas, como ingeniería inversa, extracción del modelo o poda del modelo, exponiendo así la estructura y el conocimiento del modelo —originalmente confidenciales— a personas no autorizadas. Además, el atacante también puede monitorizar el proceso de inferencia del modelo o aprovechar vulnerabilidades de filtración de información durante la inferencia para obtener la forma en que el modelo procesa los datos de entrada y sus resultados de salida, comprometiendo así la confidencialidad e integridad del modelo.
 
-**攻击案例**
+**Casos de ataque**
 
-案例
-描述
-
-
-
-
-案例一
-该案例介绍了攻击者在典型的API访问下，恢复了gpt-3.5-turbo模型的确切隐藏维度大小，并估计完整恢复整个投影矩阵的查询成本不到2000美元
-
-
-案例二
-竞争对手渗透到公司的服务器并窃取他们为自然语言处理任务训练的专有语言模型。然后，被盗模型被重新利用或进行逆向工程以供未经授权的使用，从而使竞争对手在开发竞争产品或服务时获得不公平的优势，而无需投资从头开始训练此类模型所需的研发工作
-
-
-案例三
-有个创业公司开发了一个高度精准的电影推荐系统，这个系统背后使用了一个复杂的机器学习模型，能够根据用户的观影历史和喜好，准确预测并推荐他们可能喜欢的新电影。
-
-
-
-攻击场景：一家竞争对手公司对这个推荐系统垂涎已久，但他们并不知道具体的算法和模型细节。于是，攻击者开始采用模型窃取攻击的策略。他们创建了一系列虚假的用户账户，并通过API接口频繁向推荐系统提交查询请求，比如给每个假账户虚构不同的观影历史记录，然后观察系统返回的推荐结果。
-执行过程：攻击者逐渐积累了大量不同输入和对应推荐结果的数据对，例如：“输入：看过《钢铁侠》系列和《奇异博士》系列的用户，推荐结果：《蜘蛛侠》”。通过这种方法，攻击者实际上是在用各种各样的输入数据试探模型，并收集其输出。
-结果：随着收集到足够多的“输入-输出”数据对，攻击者就可以利用这些数据训练他们自己的推荐模型。即使新模型在结构上可能与原始模型不同，但它可以根据已有的数据集学习到相似的决策边界和规律，从而达到近似复制原始模型预测功能的目的。|
-
-**攻击风险**
-
-知识产权损失：攻击者通过提取AI模型的关键信息，如权重和算法参数，可能会复制或逆向工程该模型，导致知识产权的丧失。
-财务损失：模型窃取攻击可能会给目标组织带来重大财务损失。
-滥用风险：窃取的模型可能被用于不道德或非法的目的，如制造假新闻、进行网络钓鱼攻击或生成有害内容。
-
-**缓解措施**
-
-缓解方式
-描述
+Caso
+Descripción
 
 
 
 
-严格访问控制
-对大型语言模型（LLM）的网络资源、内部服务和API的访问进行限制，减少潜在的攻击面
+Caso 1
+Este caso describe cómo un atacante, mediante un acceso típico a la API, recuperó el tamaño exacto de la dimensión oculta del modelo gpt-3.5-turbo, estimando que el costo de recuperar por completo toda la matriz de proyección mediante consultas sería inferior a 2000 dólares
 
 
-身份验证和授权
-加强身份验证流程，确保所有请求都经过验证和授权
+Caso 2
+Un competidor se infiltró en los servidores de una empresa y robó el modelo de lenguaje propietario que esta había entrenado para tareas de procesamiento de lenguaje natural. El modelo robado fue posteriormente reutilizado o sometido a ingeniería inversa para un uso no autorizado, otorgando al competidor una ventaja injusta en el desarrollo de productos o servicios competidores, sin necesidad de invertir el esfuerzo de I+D requerido para entrenar dicho modelo desde cero
 
 
-数据加密
-对存储和传输的模型数据进行加密，即使数据被窃取，攻击者也无法轻易使用
+Caso 3
+Una startup desarrolló un sistema de recomendación de películas altamente preciso, respaldado por un complejo modelo de aprendizaje automático capaz de predecir y recomendar con precisión nuevas películas que probablemente gustarían a los usuarios, basándose en su historial de visualización y preferencias.
 
 
-监控和审计
-部署监控系统，对模型的访问和使用情况进行实时监控和定期审计，避免攻击者通过API等入口多次交互窃取信息
+
+Escenario del ataque: una empresa competidora codiciaba desde hacía tiempo este sistema de recomendación, pero desconocía los detalles específicos del algoritmo y del modelo. El atacante entonces adoptó una estrategia de ataque de robo de modelo. Creó una serie de cuentas de usuario falsas y, a través de la interfaz API, envió con frecuencia solicitudes de consulta al sistema de recomendación, por ejemplo, inventando un historial de visualización diferente para cada cuenta falsa y observando los resultados de recomendación devueltos por el sistema.
+Proceso de ejecución: el atacante fue acumulando gradualmente una gran cantidad de pares de datos de entrada y sus correspondientes resultados de recomendación, por ejemplo: "Entrada: usuarios que vieron las series de Iron Man y Doctor Strange, resultado de recomendación: Spider-Man". Mediante este método, el atacante en realidad estaba sondeando el modelo con una amplia variedad de datos de entrada y recopilando sus salidas.
+Resultado: al reunir suficientes pares de datos "entrada-salida", el atacante pudo utilizar estos datos para entrenar su propio modelo de recomendación. Aunque el nuevo modelo pudiera diferir estructuralmente del original, podía aprender límites de decisión y patrones similares a partir del conjunto de datos recopilado, logrando así replicar de forma aproximada la función de predicción del modelo original.|
+
+**Riesgos del ataque**
+
+Pérdida de propiedad intelectual: al extraer información clave del modelo de IA, como pesos y parámetros del algoritmo, el atacante puede copiar o realizar ingeniería inversa sobre el modelo, provocando la pérdida de la propiedad intelectual.
+Pérdidas financieras: los ataques de robo de modelo pueden provocar pérdidas financieras significativas a la organización objetivo.
+Riesgo de uso indebido: el modelo robado puede utilizarse con fines poco éticos o ilegales, como la fabricación de noticias falsas, la realización de ataques de phishing o la generación de contenido dañino.
+
+**Medidas de mitigación**
+
+Medida de mitigación
+Descripción
 
 
-模型混淆
-通过添加噪声、随机化或压缩等手段来混淆模型的输出结果，降低逆向工程的可行性。这种方法可以增加攻击者逆向工程的难度和成本，提高模型的安全性。
 
 
-技术防护
-使用防篡改技术，如水印和指纹，使得非法复制的模型容易被识别
+Control de acceso estricto
+Restringir el acceso a los recursos de red, servicios internos y API de los modelos de lenguaje de gran tamaño (LLM), reduciendo la superficie de ataque potencial
 
-**参考**
+
+Autenticación y autorización
+Reforzar el proceso de autenticación, garantizando que todas las solicitudes sean verificadas y autorizadas
+
+
+Cifrado de datos
+Cifrar los datos del modelo tanto en almacenamiento como en tránsito, de modo que, incluso si son robados, el atacante no pueda utilizarlos fácilmente
+
+
+Monitorización y auditoría
+Desplegar sistemas de monitorización para supervisar en tiempo real y auditar periódicamente el acceso y uso del modelo, evitando que el atacante robe información mediante interacciones repetidas a través de la API u otros puntos de entrada
+
+
+Ofuscación del modelo
+Ofuscar los resultados de salida del modelo mediante la adición de ruido, aleatorización o compresión, entre otras técnicas, reduciendo la viabilidad de la ingeniería inversa. Este método puede aumentar la dificultad y el costo de la ingeniería inversa para el atacante, mejorando la seguridad del modelo
+
+
+Protección técnica
+Utilizar técnicas anti-manipulación, como marcas de agua y huellas digitales, para que las copias ilegales del modelo puedan identificarse fácilmente
+
+**Referencias**
 
 https://rodtrent.substack.com/p/must-learn-ai-security-part-8-model
 https://arxiv.org/pdf/2403.06634.pdf

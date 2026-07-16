@@ -1,45 +1,45 @@
-# Web 安全 - XSS 跨站脚本
+# Seguridad Web - XSS (Cross-Site Scripting)
 
-> 来源: WooYun 漏洞库（7,532 XSS 案例）| 拆自 web-injection.md
+> Fuente: Base de datos de vulnerabilidades WooYun (7,532 casos de XSS) | Extraído de web-injection.md
 
-## 二、XSS跨站脚本
+## II. XSS (Cross-Site Scripting)
 
-### 2.1 漏洞本质
+### 2.1 Naturaleza de la vulnerabilidad
 
 ```
-用户输入(数据) -> 未编码输出 -> 浏览器解析为代码 -> 脚本执行
+Entrada del usuario (datos) -> Salida sin codificar -> El navegador la interpreta como código -> Ejecución del script
 ```
 
-**核心公式**：XSS = 信任边界突破 + 输出上下文混淆（数据在HTML/JS/CSS/URL中语义变化）
+**Fórmula central**: XSS = Ruptura del límite de confianza + Confusión del contexto de salida (el significado de los datos cambia dentro de HTML/JS/CSS/URL)
 
-### 2.2 检测方法
+### 2.2 Métodos de detección
 
-#### 高危输出点
+#### Puntos de salida de alto riesgo
 
-| 输出点 | 触发条件 | 典型场景 |
+| Punto de salida | Condición de activación | Escenario típico |
 |-------|---------|---------|
-| 用户昵称/签名 | 页面加载 | 个人主页、评论、好友列表 |
-| 搜索框回显 | 搜索操作 | 搜索结果页 |
-| 评论/留言 | 内容展示 | 论坛、博客、商品评价 |
-| 文件名/描述 | 文件列表 | 网盘、相册 |
-| 邮件正文/标题 | 打开邮件 | 邮箱系统 |
-| 订单备注 | 后台查看 | 电商后台、工单系统 |
+| Apodo/firma de usuario | Carga de página | Página personal, comentarios, lista de amigos |
+| Reflejo en cuadro de búsqueda | Operación de búsqueda | Página de resultados de búsqueda |
+| Comentarios/mensajes | Visualización de contenido | Foro, blog, reseñas de productos |
+| Nombre/descripción de archivo | Lista de archivos | Almacenamiento en la nube, álbum de fotos |
+| Cuerpo/asunto del correo | Apertura del correo | Sistema de correo electrónico |
+| Notas de pedido | Visualización en backend | Backend de e-commerce, sistema de tickets |
 
-**隐蔽输出点**（易遗漏）：HTTP头(XFF/UA写入日志)、WAP提交PC展示、客户端昵称Web渲染、草稿箱/审核列表
+**Puntos de salida ocultos** (fáciles de pasar por alto): cabeceras HTTP (XFF/UA escritos en logs), envío por WAP mostrado en PC, apodo de cliente renderizado en Web, bandeja de borradores/lista de revisión
 
-#### 上下文快速判断
+#### Determinación rápida del contexto
 
 ```
-输出在 <script> 内？ -> JS上下文（检查引号类型）
-输出在属性值中？    -> 属性上下文（检查属性类型）
-输出在标签内容中？  -> HTML上下文（检查特殊标签textarea/title）
-输出在URL中？       -> URL上下文（检查协议限制）
-输出在CSS中？       -> CSS上下文（检查expression支持）
+¿La salida está dentro de <script>? -> Contexto JS (verificar tipo de comillas)
+¿La salida está en un valor de atributo? -> Contexto de atributo (verificar tipo de atributo)
+¿La salida está en el contenido de una etiqueta? -> Contexto HTML (verificar etiquetas especiales textarea/title)
+¿La salida está en una URL? -> Contexto URL (verificar restricciones de protocolo)
+¿La salida está en CSS? -> Contexto CSS (verificar soporte de expression)
 ```
 
-### 2.3 上下文Payload
+### 2.3 Payloads por contexto
 
-#### HTML标签内容
+#### Contenido de etiquetas HTML
 
 ```html
 <script>alert(1)</script>
