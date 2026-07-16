@@ -1,195 +1,195 @@
-# RCE远程代码执行
+# RCE Ejecución Remota de Código
 English: RCE Remote Code Execution
 - Entry Count: 12
 - Use this file to shortlist relevant payloads, then open the linked source markdown for the full workflow and commands.
-## 命令注入
+## Inyección de comandos
 - ID: rce-command-injection
 - Difficulty: intermediate
-- Subcategory: 命令注入
+- Subcategory: Inyección de comandos
 - Tags: rce, command, injection, os
 - Original Extracted Source: original extracted web-security-wiki source/rce-command-injection.md
 Description:
-操作系统命令注入攻击技术
+Técnicas de ataque de inyección de comandos del sistema operativo
 Prerequisites:
-- 存在系统命令执行功能
-- 用户输入未过滤
+- Existe funcionalidad de ejecución de comandos del sistema
+- La entrada del usuario no está filtrada
 Execution Outline:
-1. 1. 探测命令注入
-2. 2. Linux命令注入
-3. 3. Windows命令注入
-4. 4. 盲命令注入
-## PHP代码执行
+1. 1. Detectar la inyección de comandos
+2. 2. Inyección de comandos en Linux
+3. 3. Inyección de comandos en Windows
+4. 4. Inyección de comandos ciega
+## Ejecución de código PHP
 - ID: rce-php
 - Difficulty: intermediate
-- Subcategory: PHP代码执行
+- Subcategory: Ejecución de código PHP
 - Tags: rce, php, code, execution
 - Original Extracted Source: original extracted web-security-wiki source/rce-php.md
 Description:
-PHP代码执行漏洞利用技术
+Técnicas de explotación de vulnerabilidades de ejecución de código PHP
 Prerequisites:
-- 存在PHP代码执行点
-- 用户输入可控制代码
+- Existe un punto de ejecución de código PHP
+- La entrada del usuario puede controlar el código
 Execution Outline:
-1. 1. 常见危险函数
-2. 2. 命令执行
-3. 3. 一句话木马
-4. 4. 免杀一句话
-## PHP Filter链RCE
+1. 1. Funciones peligrosas comunes
+2. 2. Ejecución de comandos
+3. 3. Webshell de una línea
+4. 4. Webshell de una línea indetectable (evasión de antivirus)
+## RCE mediante cadena de filtros PHP (Filter Chain)
 - ID: rce-php-filter
 - Difficulty: advanced
-- Subcategory: PHP Filter链
+- Subcategory: Cadena de filtros PHP
 - Tags: rce, php, filter, chain
 - Original Extracted Source: original extracted web-security-wiki source/rce-php-filter.md
 Description:
-利用PHP Filter链构造RCE
+Construcción de RCE aprovechando la cadena de filtros PHP (Filter Chain)
 Prerequisites:
-- 存在文件包含漏洞
-- PHP版本支持Filter链
+- Existe una vulnerabilidad de inclusión de archivos
+- La versión de PHP soporta cadenas de filtros
 Execution Outline:
-1. 1. Filter链原理
-2. 2. 构造Filter链
-3. 3. 使用工具生成
-4. 4. 完整利用示例
-## 盲命令注入
+1. 1. Principio de la cadena de filtros
+2. 2. Construcción de la cadena de filtros
+3. 3. Uso de herramientas para generarla
+4. 4. Ejemplo completo de explotación
+## Inyección de comandos ciega
 - ID: rce-cmd-blind
 - Difficulty: intermediate
-- Subcategory: 盲命令注入
+- Subcategory: Inyección de comandos ciega
 - Tags: rce, blind, command, injection
 - Original Extracted Source: original extracted web-security-wiki source/rce-cmd-blind.md
 Description:
-无回显的命令注入利用技术
+Técnicas de explotación de inyección de comandos sin reflejo en pantalla
 Prerequisites:
-- 存在命令注入点
-- 无直接回显
+- Existe un punto de inyección de comandos
+- No hay reflejo directo de la salida
 Execution Outline:
-1. 1. 时间盲注
-2. 2. DNS外带
-3. 3. HTTP外带
-4. 4. ICMP外带
-## 反序列化漏洞
+1. 1. Inyección ciega temporal
+2. 2. Exfiltración vía DNS
+3. 3. Exfiltración vía HTTP
+4. 4. Exfiltración vía ICMP
+## Vulnerabilidades de deserialización
 - ID: rce-deserialize
 - Difficulty: advanced
-- Subcategory: 反序列化
+- Subcategory: Deserialización
 - Tags: rce, deserialize, java, php
 - Original Extracted Source: original extracted web-security-wiki source/rce-deserialize.md
 Description:
-利用反序列化漏洞实现RCE
+Explotación de vulnerabilidades de deserialización para lograr RCE
 Prerequisites:
-- 存在反序列化点
-- 存在可利用的Gadget链
+- Existe un punto de deserialización
+- Existe una cadena de Gadgets explotable
 Execution Outline:
-1. 1. Java反序列化
-2. 2. PHP反序列化
-3. 3. Python反序列化
-4. 4. .NET反序列化
-## PHP反序列化
+1. 1. Deserialización en Java
+2. 2. Deserialización en PHP
+3. 3. Deserialización en Python
+4. 4. Deserialización en .NET
+## Deserialización en PHP
 - ID: rce-deserialize-php
 - Difficulty: advanced
-- Subcategory: PHP反序列化
+- Subcategory: Deserialización en PHP
 - Tags: rce, php, deserialize, unserialize
 - Original Extracted Source: original extracted web-security-wiki source/rce-deserialize-php.md
 Description:
-PHP反序列化漏洞利用技术
+Técnicas de explotación de vulnerabilidades de deserialización en PHP
 Prerequisites:
-- 存在unserialize调用
-- 存在可利用的类
+- Existe una llamada a unserialize
+- Existe una clase explotable
 Execution Outline:
-1. 1. 魔术方法
-2. 2. 构造POP链
-3. 3. Phar反序列化
-4. 4. Session反序列化
-## Java反序列化
+1. 1. Métodos mágicos
+2. 2. Construcción de cadena POP
+3. 3. Deserialización vía Phar
+4. 4. Deserialización de Session
+## Deserialización en Java
 - ID: rce-deserialize-java
 - Difficulty: advanced
-- Subcategory: Java反序列化
+- Subcategory: Deserialización en Java
 - Tags: rce, java, deserialize, ysoserial
 - Original Extracted Source: original extracted web-security-wiki source/rce-deserialize-java.md
 Description:
-Java反序列化漏洞利用技术
+Técnicas de explotación de vulnerabilidades de deserialización en Java
 Prerequisites:
-- 存在Java反序列化点
-- 存在Gadget链
+- Existe un punto de deserialización en Java
+- Existe una cadena de Gadgets
 Execution Outline:
-1. 1. 常见Gadget链
-2. 2. 使用ysoserial
-3. 3. JRMP攻击
-4. 4. 内存马注入
-## 文件上传漏洞
+1. 1. Cadenas de Gadgets comunes
+2. 2. Uso de ysoserial
+3. 3. Ataque JRMP
+4. 4. Inyección de memshell (webshell en memoria)
+## Vulnerabilidad de subida de archivos
 - ID: rce-file-upload
 - Difficulty: intermediate
-- Subcategory: 文件上传
+- Subcategory: Subida de archivos
 - Tags: rce, upload, webshell, file
 - Original Extracted Source: original extracted web-security-wiki source/rce-file-upload.md
 Description:
-利用文件上传漏洞获取RCE
+Obtención de RCE aprovechando la vulnerabilidad de subida de archivos
 Prerequisites:
-- 存在文件上传功能
-- 可上传可执行文件
+- Existe funcionalidad de subida de archivos
+- Se pueden subir archivos ejecutables
 Execution Outline:
-1. 1. 基础上传
-2. 2. 前端绕过
-3. 3. 后端绕过
-4. 4. 图片马
-## 文件包含RCE
+1. 1. Subida básica
+2. 2. Bypass en el frontend
+3. 3. Bypass en el backend
+4. 4. Webshell con imagen (imagen troyanizada)
+## RCE por inclusión de archivos
 - ID: rce-include
 - Difficulty: intermediate
-- Subcategory: 文件包含
+- Subcategory: Inclusión de archivos
 - Tags: rce, include, lfi, rfi
 - Original Extracted Source: original extracted web-security-wiki source/rce-include.md
 Description:
-利用文件包含漏洞实现RCE
+Obtención de RCE aprovechando la vulnerabilidad de inclusión de archivos
 Prerequisites:
-- 存在文件包含漏洞
-- 可包含恶意文件
+- Existe una vulnerabilidad de inclusión de archivos
+- Se puede incluir un archivo malicioso
 Execution Outline:
-1. 1. 日志投毒
-2. 2. Session文件包含
+1. 1. Envenenamiento de logs
+2. 2. Inclusión de archivo de Session
 3. 3. /proc/self/environ
-4. 4. PHP伪协议
-## 日志投毒RCE
+4. 4. Pseudo-protocolos de PHP
+## RCE por envenenamiento de logs
 - ID: rce-log-poison
 - Difficulty: intermediate
-- Subcategory: 日志投毒
+- Subcategory: Envenenamiento de logs
 - Tags: rce, log, poison, lfi
 - Original Extracted Source: original extracted web-security-wiki source/rce-log-poison.md
 Description:
-利用日志投毒实现RCE
+Obtención de RCE mediante envenenamiento de logs
 Prerequisites:
-- 存在文件包含漏洞
-- 可读取日志文件
+- Existe una vulnerabilidad de inclusión de archivos
+- Se puede leer el archivo de log
 Execution Outline:
-1. 1. Apache日志投毒
-2. 2. Nginx日志投毒
-## 图片马RCE
+1. 1. Envenenamiento de logs de Apache
+2. 2. Envenenamiento de logs de Nginx
+## RCE mediante imagen troyanizada
 - ID: rce-image
 - Difficulty: intermediate
-- Subcategory: 图片马
+- Subcategory: Imagen troyanizada
 - Tags: rce, image, webshell, upload
 - Original Extracted Source: original extracted web-security-wiki source/rce-image.md
 Description:
-利用图片马实现RCE
+Obtención de RCE mediante una imagen troyanizada
 Prerequisites:
-- 存在文件上传
-- 存在文件包含
+- Existe subida de archivos
+- Existe inclusión de archivos
 Execution Outline:
-1. 1. 制作图片马
-2. 2. 图片马内容
-3. 3. 利用文件包含执行
-4. 4. 配合.htaccess
-## .htaccess利用
+1. 1. Elaboración de la imagen troyanizada
+2. 2. Contenido de la imagen troyanizada
+3. 3. Ejecución aprovechando la inclusión de archivos
+4. 4. Combinación con .htaccess
+## Explotación de .htaccess
 - ID: rce-htaccess
 - Difficulty: intermediate
 - Subcategory: .htaccess
 - Tags: rce, htaccess, apache, upload
 - Original Extracted Source: original extracted web-security-wiki source/rce-htaccess.md
 Description:
-利用.htaccess文件实现RCE
+Obtención de RCE aprovechando el archivo .htaccess
 Prerequisites:
-- Apache服务器
-- 可上传.htaccess
+- Servidor Apache
+- Se puede subir un archivo .htaccess
 Execution Outline:
-1. 1. 解析其他扩展名
-2. 2. 自动包含
-3. 3. 伪静态RCE
-4. 4. 错误页面包含
+1. 1. Interpretar otras extensiones
+2. 2. Inclusión automática
+3. 3. RCE mediante URLs amigables (pseudo-estáticas)
+4. 4. Inclusión mediante página de error
 

@@ -388,7 +388,7 @@ Este riesgo se refiere a la aplicación de un tratamiento especial sobre las pal
 **Casos de ataque**
 
 En los LLM en inglés, los métodos comunes de confusión de palabras clave incluyen: confusión de letras (bomb -> b0mb), sustitución por sinónimos (bomb -> explosive), división de palabras (bomb -> b-o-m-b).
-Para los LLM en chino, debido a las diferencias en los métodos de segmentación de palabras, los métodos de confusión de palabras clave también presentan diferencias notables; los métodos comunes de confusión de palabras clave en chino incluyen la sustitución por pinyin (炸弹 -> zha弹), la sustitución por sinónimos (炸弹 -> 爆炸物), la sustitución por caracteres de forma similar (炸弹 -> 炸掸), etc.
+Para los LLM en chino, debido a las diferencias en los métodos de segmentación de palabras, los métodos de confusión de palabras clave también presentan diferencias notables; los métodos comunes de confusión de palabras clave en chino incluyen la sustitución por pinyin (por ejemplo, escribir parcialmente en pinyin la palabra que significa "bomba"), la sustitución por sinónimos (por ejemplo, reemplazar la palabra "bomba" por "explosivo"), la sustitución por caracteres de forma visualmente similar (por ejemplo, sustituir un carácter por otro gráficamente parecido), etc.
 
 **Riesgos del ataque**
 

