@@ -1,198 +1,197 @@
-# SSRF服务端请求伪造
+# SSRF falsificación de solicitud del lado del servidor
 English: SSRF Server-Side Request Forgery
 - Entry Count: 12
 - Use this file to shortlist relevant payloads, then open the linked source markdown for the full workflow and commands.
-## 基础SSRF攻击
+## Ataque SSRF básico
 - ID: ssrf-basic
 - Difficulty: intermediate
-- Subcategory: 基础攻击
+- Subcategory: Ataque básico
 - Tags: ssrf, server-side, request
 - Original Extracted Source: original extracted web-security-wiki source/ssrf-basic.md
 Description:
-服务端请求伪造基础攻击技术
+Técnicas básicas de ataque de falsificación de solicitud del lado del servidor
 Prerequisites:
-- 存在URL输入点
-- 服务器会请求用户提供的URL
+- Existe un punto de entrada de URL
+- El servidor realiza solicitudes a la URL proporcionada por el usuario
 Execution Outline:
-1. 1. 探测SSRF
-2. 2. 扫描内网端口
-3. 3. 访问内网服务
-4. 4. 读取本地文件
-## AWS元数据攻击
+1. 1. Sondear el SSRF
+2. 2. Escanear puertos de la red interna
+3. 3. Acceder a servicios de la red interna
+4. 4. Leer archivos locales
+## Ataque a metadatos de AWS
 - ID: ssrf-cloud-aws
 - Difficulty: intermediate
-- Subcategory: 云元数据
+- Subcategory: Metadatos en la nube
 - Tags: ssrf, aws, metadata, cloud
 - Original Extracted Source: original extracted web-security-wiki source/ssrf-cloud-aws.md
 Description:
-利用SSRF访问AWS EC2元数据服务
+Uso de SSRF para acceder al servicio de metadatos de AWS EC2
 Prerequisites:
-- 存在SSRF漏洞
-- 目标运行在AWS EC2上
+- Existe una vulnerabilidad SSRF
+- El objetivo se ejecuta en AWS EC2
 Execution Outline:
-1. 1. 访问元数据服务
-2. 2. 获取IAM凭证
-3. 3. 获取用户数据
-4. 4. 使用IMDSv2绕过
-## GCP元数据攻击
+1. 1. Acceder al servicio de metadatos
+2. 2. Obtener credenciales IAM
+3. 3. Obtener datos de usuario
+4. 4. Bypass usando IMDSv2
+## Ataque a metadatos de GCP
 - ID: ssrf-cloud-gcp
 - Difficulty: intermediate
-- Subcategory: GCP元数据
+- Subcategory: Metadatos de GCP
 - Tags: ssrf, gcp, cloud, metadata
 - Original Extracted Source: original extracted web-security-wiki source/ssrf-cloud-gcp.md
 Description:
-利用SSRF攻击Google Cloud元数据服务
+Uso de SSRF para atacar el servicio de metadatos de Google Cloud
 Prerequisites:
-- 存在SSRF漏洞
-- 目标运行在GCP环境
+- Existe una vulnerabilidad SSRF
+- El objetivo se ejecuta en un entorno GCP
 Execution Outline:
-1. 1. 访问元数据服务
-2. 2. 获取访问令牌
-3. 3. 获取服务账户信息
-4. 4. 获取项目信息
-## Azure元数据攻击
+1. 1. Acceder al servicio de metadatos
+2. 2. Obtener el token de acceso
+3. 3. Obtener información de la cuenta de servicio
+4. 4. Obtener información del proyecto
+## Ataque a metadatos de Azure
 - ID: ssrf-cloud-azure
 - Difficulty: intermediate
-- Subcategory: Azure元数据
+- Subcategory: Metadatos de Azure
 - Tags: ssrf, azure, cloud, metadata
 - Original Extracted Source: original extracted web-security-wiki source/ssrf-cloud-azure.md
 Description:
-利用SSRF攻击Azure元数据服务
+Uso de SSRF para atacar el servicio de metadatos de Azure
 Prerequisites:
-- 存在SSRF漏洞
-- 目标运行在Azure环境
+- Existe una vulnerabilidad SSRF
+- El objetivo se ejecuta en un entorno Azure
 Execution Outline:
-1. 1. 访问元数据服务
-2. 2. 获取访问令牌
-3. 3. 获取计算信息
-4. 4. 获取网络信息
-## SSRF协议利用
+1. 1. Acceder al servicio de metadatos
+2. 2. Obtener el token de acceso
+3. 3. Obtener información de cómputo
+4. 4. Obtener información de red
+## Explotación de protocolos vía SSRF
 - ID: ssrf-protocol
 - Difficulty: intermediate
-- Subcategory: 协议利用
+- Subcategory: Explotación de protocolos
 - Tags: ssrf, protocol, file, gopher
 - Original Extracted Source: original extracted web-security-wiki source/ssrf-protocol.md
 Description:
-利用各种协议进行SSRF攻击
+Uso de diversos protocolos para realizar ataques SSRF
 Prerequisites:
-- 存在SSRF漏洞
-- 服务器支持多种协议
+- Existe una vulnerabilidad SSRF
+- El servidor admite múltiples protocolos
 Execution Outline:
-1. 1. File协议
-2. 2. Dict协议
-3. 3. Gopher协议
-4. 4. LDAP协议
-## Gopher协议攻击
+1. 1. Protocolo File
+2. 2. Protocolo Dict
+3. 3. Protocolo Gopher
+4. 4. Protocolo LDAP
+## Ataque con protocolo Gopher
 - ID: ssrf-gopher
 - Difficulty: advanced
-- Subcategory: Gopher攻击
+- Subcategory: Ataque Gopher
 - Tags: ssrf, gopher, redis, mysql
 - Original Extracted Source: original extracted web-security-wiki source/ssrf-gopher.md
 Description:
-利用Gopher协议攻击内网服务
+Uso del protocolo Gopher para atacar servicios de la red interna
 Prerequisites:
-- 存在SSRF漏洞
-- 服务器支持Gopher协议
+- Existe una vulnerabilidad SSRF
+- El servidor admite el protocolo Gopher
 Execution Outline:
-1. 1. Gopher基础格式
-2. 2. 攻击Redis
-3. 3. 攻击MySQL
-4. 4. 攻击FastCGI
-## Dict协议攻击
+1. 1. Formato básico de Gopher
+2. 2. Ataque a Redis
+3. 3. Ataque a MySQL
+4. 4. Ataque a FastCGI
+## Ataque con protocolo Dict
 - ID: ssrf-dict
 - Difficulty: intermediate
-- Subcategory: Dict协议
+- Subcategory: Protocolo Dict
 - Tags: ssrf, dict, redis, memcached
 - Original Extracted Source: original extracted web-security-wiki source/ssrf-dict.md
 Description:
-利用Dict协议探测和攻击内网服务
+Uso del protocolo Dict para sondear y atacar servicios de la red interna
 Prerequisites:
-- 存在SSRF漏洞
-- 服务器支持Dict协议
+- Existe una vulnerabilidad SSRF
+- El servidor admite el protocolo Dict
 Execution Outline:
-1. 1. Dict协议格式
-2. 2. 探测Redis
-3. 3. 探测Memcached
-4. 4. Redis写入文件
-## File协议攻击
+1. 1. Formato del protocolo Dict
+2. 2. Sondear Redis
+3. 3. Sondear Memcached
+4. 4. Escritura de archivos en Redis
+## Ataque con protocolo File
 - ID: ssrf-file
 - Difficulty: beginner
-- Subcategory: File协议
+- Subcategory: Protocolo File
 - Tags: ssrf, file, lfi, read
 - Original Extracted Source: original extracted web-security-wiki source/ssrf-file.md
 Description:
-利用File协议读取本地文件
+Uso del protocolo File para leer archivos locales
 Prerequisites:
-- 存在SSRF漏洞
-- 服务器支持File协议
+- Existe una vulnerabilidad SSRF
+- El servidor admite el protocolo File
 Execution Outline:
-1. 1. Linux敏感文件
-2. 2. Windows敏感文件
-3. 3. Web配置文件
-4. 4. 云环境文件
-## SSRF绕过技术
+1. 1. Archivos sensibles de Linux
+2. 2. Archivos sensibles de Windows
+3. 3. Archivos de configuración web
+4. 4. Archivos de entornos en la nube
+## Técnicas de bypass de SSRF
 - ID: ssrf-bypass
 - Difficulty: intermediate
-- Subcategory: 绕过技术
+- Subcategory: Técnicas de bypass
 - Tags: ssrf, bypass, waf, filter
 - Original Extracted Source: original extracted web-security-wiki source/ssrf-bypass.md
 Description:
-各种绕过SSRF过滤的技术
+Diversas técnicas para eludir los filtros de SSRF
 Prerequisites:
-- 存在SSRF漏洞
-- 存在过滤机制
+- Existe una vulnerabilidad SSRF
+- Existe un mecanismo de filtrado
 Execution Outline:
-1. 1. IP格式绕过
-2. 2. URL解析差异
-3. 3. 重定向绕过
-4. 4. DNS重绑定
-## DNS重绑定攻击
+1. 1. Bypass por formato de IP
+2. 2. Diferencias en el parseo de URL
+3. 3. Bypass mediante redirección
+4. 4. DNS rebinding
+## Ataque de DNS rebinding
 - ID: ssrf-dns-rebinding
 - Difficulty: advanced
-- Subcategory: DNS重绑定
+- Subcategory: DNS rebinding
 - Tags: ssrf, dns, rebinding, bypass
 - Original Extracted Source: original extracted web-security-wiki source/ssrf-dns-rebinding.md
 Description:
-利用DNS重绑定绕过SSRF防护
+Uso de DNS rebinding para eludir las protecciones de SSRF
 Prerequisites:
-- 存在SSRF漏洞
-- 存在DNS解析验证
+- Existe una vulnerabilidad SSRF
+- Existe verificación de resolución DNS
 Execution Outline:
-1. 1. DNS重绑定原理
-2. 2. 使用公开服务
-3. 3. 自建DNS服务器
-4. 4. 攻击流程
-## SSRF攻击Redis
+1. 1. Principio del DNS rebinding
+2. 2. Uso de servicios públicos
+3. 3. Montar un servidor DNS propio
+4. 4. Flujo del ataque
+## SSRF con ataque a Redis
 - ID: ssrf-redis
 - Difficulty: intermediate
-- Subcategory: Redis攻击
+- Subcategory: Ataque a Redis
 - Tags: ssrf, redis, rce, webshell
 - Original Extracted Source: original extracted web-security-wiki source/ssrf-redis.md
 Description:
-利用SSRF攻击内网Redis服务
+Uso de SSRF para atacar el servicio Redis de la red interna
 Prerequisites:
-- 存在SSRF漏洞
-- 内网存在未授权Redis
+- Existe una vulnerabilidad SSRF
+- Existe un Redis sin autorización en la red interna
 Execution Outline:
-1. 1. 探测Redis
-2. 2. 写入WebShell
-3. 3. 写入SSH公钥
-4. 4. 写入Cron任务
-## SSRF攻击MySQL
+1. 1. Sondear Redis
+2. 2. Escribir una WebShell
+3. 3. Escribir una clave pública SSH
+4. 4. Escribir una tarea Cron
+## SSRF con ataque a MySQL
 - ID: ssrf-mysql
 - Difficulty: advanced
-- Subcategory: MySQL攻击
+- Subcategory: Ataque a MySQL
 - Tags: ssrf, mysql, gopher, database
 - Original Extracted Source: original extracted web-security-wiki source/ssrf-mysql.md
 Description:
-利用SSRF攻击内网MySQL服务
+Uso de SSRF para atacar el servicio MySQL de la red interna
 Prerequisites:
-- 存在SSRF漏洞
-- 内网存在MySQL服务
-- 知道MySQL用户名
+- Existe una vulnerabilidad SSRF
+- Existe un servicio MySQL en la red interna
+- Se conoce el nombre de usuario de MySQL
 Execution Outline:
-1. 1. MySQL协议基础
-2. 2. 使用Gopher攻击MySQL
-3. 3. 使用工具生成Payload
-4. 4. 执行SQL命令
-
+1. 1. Fundamentos del protocolo MySQL
+2. 2. Uso de Gopher para atacar MySQL
+3. 3. Uso de herramientas para generar el payload
+4. 4. Ejecutar comandos SQL
