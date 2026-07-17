@@ -19,7 +19,7 @@ def render_manual(output_format: str = "text", topic: str | None = None) -> str:
 
     fmt = output_format.strip().lower()
     if fmt not in {"text", "markdown", "man"}:
-        raise ValueError("manual format must be one of: text, markdown, man")
+        raise ValueError("el formato del manual debe ser uno de: text, markdown, man")
 
     topics = _select_topics(topic)
     normalized_topic = _normalize_topic(topic)
@@ -48,7 +48,7 @@ def _select_topics(topic: str | None) -> tuple[ManualTopic, ...]:
     selected = by_name.get(normalized)
     if not selected:
         raise ValueError(
-            f"unknown manual topic '{topic}'. Available topics: {', '.join(available_topics())}"
+            f"tema de manual desconocido '{topic}'. Temas disponibles: {', '.join(available_topics())}"
         )
     return (selected,)
 
@@ -63,32 +63,33 @@ def _provider_names() -> str:
 
 def _render_text(topics: tuple[ManualTopic, ...], topic: str) -> str:
     lines: list[str] = [
-        "VULNCLAW(1) - VulnClaw CLI Manual",
-        f"Version: {__version__}",
+        "VULNCLAW(1) - Manual de la CLI de VulnClaw",
+        f"Versión: {__version__}",
         "",
-        "SYNOPSIS",
-        "  vulnclaw [--help] [--version] [--man] [COMMAND] [ARGS]...",
-        "  vulnclaw manual [TOPIC] [--format text|markdown|man]",
+        "SINOPSIS",
+        "  vulnclaw [--help] [--version] [--man] [COMANDO] [ARGUMENTOS]...",
+        "  vulnclaw manual [TEMA] [--format text|markdown|man]",
         "",
-        "DESCRIPTION",
-        "  VulnClaw is an AI-assisted CLI for authorized security testing. It combines",
-        "  natural-language tasking, scoped autonomous loops, target history, reports,",
-        "  MCP/built-in tools, a terminal workbench, and an optional local Web UI.",
+        "DESCRIPCIÓN",
+        "  VulnClaw es una CLI asistida por IA para pruebas de seguridad autorizadas.",
+        "  Combina asignación de tareas en lenguaje natural, bucles autónomos con",
+        "  alcance definido, historial de objetivos, informes, herramientas MCP e",
+        "  integradas, un banco de trabajo de terminal y una Web UI local opcional.",
         "",
-        "ROOT OPTIONS",
+        "OPCIONES RAÍZ",
     ]
     lines.extend(_render_text_pairs(ROOT_OPTIONS, indent_spaces=2))
     lines.extend(
         [
             "",
-            "FAST START",
+            "INICIO RÁPIDO",
             "  vulnclaw init",
             "  vulnclaw config provider deepseek",
-            "  vulnclaw config set llm.api_key <key>",
+            "  vulnclaw config set llm.api_key <clave>",
             "  vulnclaw doctor",
-            "  vulnclaw run https://authorized-target.example --allow-actions recon,scan",
+            "  vulnclaw run https://objetivo-autorizado.example --allow-actions recon,scan",
             "",
-            "COMMAND MAP",
+            "MAPA DE COMANDOS",
         ]
     )
     for item in COMMANDS:
@@ -97,25 +98,26 @@ def _render_text(topics: tuple[ManualTopic, ...], topic: str) -> str:
     if not topic or any(item.name in TASK_COMMAND_NAMES for item in topics):
         lines.extend(_common_sections_text())
 
-    lines.extend(["", "COMMAND DETAILS"])
+    lines.extend(["", "DETALLES DE COMANDOS"])
     for item in topics:
         lines.extend(_topic_text(item))
 
     lines.extend(
         [
             "",
-            "CONFIG AND ENVIRONMENT",
-            f"  Provider presets: {_provider_names()}",
-            "  Config directory: ~/.vulnclaw by default, or VULNCLAW_CONFIG_DIR when set.",
-            "  High-value env vars: VULNCLAW_LLM_API_KEY, VULNCLAW_LLM_API_KEYS,",
+            "CONFIGURACIÓN Y ENTORNO",
+            f"  Presets de proveedor: {_provider_names()}",
+            "  Directorio de configuración: ~/.vulnclaw por defecto, o VULNCLAW_CONFIG_DIR si está definido.",
+            "  Variables de entorno de alto valor: VULNCLAW_LLM_API_KEY, VULNCLAW_LLM_API_KEYS,",
             "  VULNCLAW_LLM_PROVIDER, VULNCLAW_LLM_BASE_URL, VULNCLAW_LLM_MODEL,",
             "  VULNCLAW_SESSION_OUTPUT_DIR, VULNCLAW_SESSION_MAX_ROUNDS,",
             "  VULNCLAW_SESSION_SHOW_THINKING, VULNCLAW_SAFETY_PYTHON_EXECUTE_ENABLED.",
             "",
-            "SAFETY",
-            "  VulnClaw is for authorized testing only. Scope flags and action constraints",
-            "  are there to make allowed boundaries explicit and enforceable, but they do",
-            "  not replace written authorization or a clear rules-of-engagement document.",
+            "SEGURIDAD",
+            "  VulnClaw es solo para pruebas autorizadas. Los indicadores de alcance y las",
+            "  restricciones de acciones existen para hacer explícitos y exigibles los límites",
+            "  permitidos, pero no reemplazan una autorización por escrito ni un documento",
+            "  claro de reglas de enfrentamiento (rules of engagement).",
         ]
     )
     return "\n".join(lines).rstrip() + "\n"
@@ -124,16 +126,17 @@ def _render_text(topics: tuple[ManualTopic, ...], topic: str) -> str:
 def _common_sections_text() -> list[str]:
     lines = [
         "",
-        "COMMON TASK FLAGS",
+        "FLAGS COMUNES DE TAREA",
     ]
     lines.extend(_render_text_pairs(COMMON_TASK_FLAGS, indent_spaces=2))
     lines.extend(
         [
             "",
-            "ACTION CONSTRAINTS",
-            f"  Recognized action names: {', '.join(ACTION_NAMES)}.",
-            "  Example: --allow-actions recon,scan blocks direct exploit/report commands",
-            "  and also constrains tool and phase transitions during agent execution.",
+            "RESTRICCIONES DE ACCIÓN",
+            f"  Nombres de acción reconocidos: {', '.join(ACTION_NAMES)}.",
+            "  Ejemplo: --allow-actions recon,scan bloquea los comandos directos de",
+            "  explotación/informe y también restringe las transiciones de herramientas",
+            "  y fases durante la ejecución del agente.",
         ]
     )
     return lines
@@ -145,19 +148,19 @@ def _topic_text(topic: ManualTopic) -> list[str]:
         topic.name.upper(),
         f"  {topic.summary}",
         "",
-        "  Usage:",
+        "  Uso:",
     ]
     for usage_line in topic.usage.splitlines():
         lines.append(f"    {usage_line}")
 
     if topic.flags:
-        lines.extend(["", "  Arguments and flags:"])
+        lines.extend(["", "  Argumentos y flags:"])
         lines.extend(_render_text_pairs(topic.flags, indent_spaces=4))
     if topic.notes:
-        lines.extend(["", "  Notes:"])
+        lines.extend(["", "  Notas:"])
         lines.extend(f"    - {note}" for note in topic.notes)
     if topic.examples:
-        lines.extend(["", "  Examples:"])
+        lines.extend(["", "  Ejemplos:"])
         lines.extend(f"    {example}" for example in topic.examples)
     return lines
 
@@ -173,82 +176,82 @@ def _render_text_pairs(pairs: tuple[tuple[str, str], ...], indent_spaces: int) -
 
 def _render_markdown(topics: tuple[ManualTopic, ...], topic: str) -> str:
     lines: list[str] = [
-        "# VulnClaw CLI Manual",
+        "# Manual de la CLI de VulnClaw",
         "",
-        f"Version: `{__version__}`",
+        f"Versión: `{__version__}`",
         "",
-        "## Synopsis",
+        "## Sinopsis",
         "",
         "```bash",
-        "vulnclaw [--help] [--version] [--man] [COMMAND] [ARGS]...",
-        "vulnclaw manual [TOPIC] [--format text|markdown|man]",
+        "vulnclaw [--help] [--version] [--man] [COMANDO] [ARGUMENTOS]...",
+        "vulnclaw manual [TEMA] [--format text|markdown|man]",
         "```",
         "",
-        "## Description",
+        "## Descripción",
         "",
-        "VulnClaw is an AI-assisted CLI for authorized security testing. It combines natural-language tasking, scoped autonomous loops, target history, reports, MCP/built-in tools, a terminal workbench, and an optional local Web UI.",
+        "VulnClaw es una CLI asistida por IA para pruebas de seguridad autorizadas. Combina asignación de tareas en lenguaje natural, bucles autónomos con alcance definido, historial de objetivos, informes, herramientas MCP e integradas, un banco de trabajo de terminal y una Web UI local opcional.",
         "",
-        "## Root Options",
+        "## Opciones raíz",
         "",
     ]
-    lines.extend(_markdown_table(["Option", "Meaning"], ROOT_OPTIONS))
+    lines.extend(_markdown_table(["Opción", "Significado"], ROOT_OPTIONS))
     lines.extend(
         [
             "",
-            "## Fast Start",
+            "## Inicio rápido",
             "",
             "```bash",
             "vulnclaw init",
             "vulnclaw config provider deepseek",
-            "vulnclaw config set llm.api_key <key>",
+            "vulnclaw config set llm.api_key <clave>",
             "vulnclaw doctor",
-            "vulnclaw run https://authorized-target.example --allow-actions recon,scan",
+            "vulnclaw run https://objetivo-autorizado.example --allow-actions recon,scan",
             "```",
             "",
-            "## Command Map",
+            "## Mapa de comandos",
             "",
         ]
     )
-    lines.extend(_markdown_table(["Command", "Summary"], tuple((c.name, c.summary) for c in COMMANDS)))
+    lines.extend(_markdown_table(["Comando", "Resumen"], tuple((c.name, c.summary) for c in COMMANDS)))
 
     if not topic or any(item.name in TASK_COMMAND_NAMES for item in topics):
         lines.extend(
             [
                 "",
-                "## Common Task Flags",
+                "## Flags comunes de tarea",
                 "",
             ]
         )
-        lines.extend(_markdown_table(["Flag", "Meaning"], COMMON_TASK_FLAGS))
+        lines.extend(_markdown_table(["Flag", "Significado"], COMMON_TASK_FLAGS))
         lines.extend(
             [
                 "",
-                "## Action Constraints",
+                "## Restricciones de acción",
                 "",
-                f"Recognized action names: `{', '.join(ACTION_NAMES)}`.",
+                f"Nombres de acción reconocidos: `{', '.join(ACTION_NAMES)}`.",
                 "",
-                "Example: `--allow-actions recon,scan` blocks direct exploit/report commands and also constrains tool and phase transitions during agent execution.",
+                "Ejemplo: `--allow-actions recon,scan` bloquea los comandos directos de explotación/informe y también restringe las transiciones de herramientas y fases durante la ejecución del agente.",
             ]
         )
 
-    lines.extend(["", "## Command Details", ""])
+    lines.extend(["", "## Detalles de comandos", ""])
     for item in topics:
         lines.extend(_topic_markdown(item))
 
     lines.extend(
         [
             "",
-            "## Config And Environment",
+            "## Configuración y entorno",
             "",
-            f"Provider presets: `{_provider_names()}`.",
+            f"Presets de proveedor: `{_provider_names()}`.",
             "",
-            "Config directory: `~/.vulnclaw` by default, or `VULNCLAW_CONFIG_DIR` when set.",
+            "Directorio de configuración: `~/.vulnclaw` por defecto, o `VULNCLAW_CONFIG_DIR` si está definido.",
             "",
-            "High-value env vars: `VULNCLAW_LLM_API_KEY`, `VULNCLAW_LLM_API_KEYS`, `VULNCLAW_LLM_PROVIDER`, `VULNCLAW_LLM_BASE_URL`, `VULNCLAW_LLM_MODEL`, `VULNCLAW_SESSION_OUTPUT_DIR`, `VULNCLAW_SESSION_MAX_ROUNDS`, `VULNCLAW_SESSION_SHOW_THINKING`, `VULNCLAW_SAFETY_PYTHON_EXECUTE_ENABLED`.",
+            "Variables de entorno de alto valor: `VULNCLAW_LLM_API_KEY`, `VULNCLAW_LLM_API_KEYS`, `VULNCLAW_LLM_PROVIDER`, `VULNCLAW_LLM_BASE_URL`, `VULNCLAW_LLM_MODEL`, `VULNCLAW_SESSION_OUTPUT_DIR`, `VULNCLAW_SESSION_MAX_ROUNDS`, `VULNCLAW_SESSION_SHOW_THINKING`, `VULNCLAW_SAFETY_PYTHON_EXECUTE_ENABLED`.",
             "",
-            "## Safety",
+            "## Seguridad",
             "",
-            "VulnClaw is for authorized testing only. Scope flags and action constraints make allowed boundaries explicit and enforceable, but they do not replace written authorization or a clear rules-of-engagement document.",
+            "VulnClaw es solo para pruebas autorizadas. Los indicadores de alcance y las restricciones de acciones hacen explícitos y exigibles los límites permitidos, pero no reemplazan una autorización por escrito ni un documento claro de reglas de enfrentamiento (rules of engagement).",
         ]
     )
     return "\n".join(lines).rstrip() + "\n"
@@ -265,13 +268,13 @@ def _topic_markdown(topic: ManualTopic) -> list[str]:
         "```",
     ]
     if topic.flags:
-        lines.extend(["", "Arguments and flags:", ""])
-        lines.extend(_markdown_table(["Name", "Meaning"], topic.flags))
+        lines.extend(["", "Argumentos y flags:", ""])
+        lines.extend(_markdown_table(["Nombre", "Significado"], topic.flags))
     if topic.notes:
-        lines.extend(["", "Notes:", ""])
+        lines.extend(["", "Notas:", ""])
         lines.extend(f"- {note}" for note in topic.notes)
     if topic.examples:
-        lines.extend(["", "Examples:", "", "```bash", *topic.examples, "```"])
+        lines.extend(["", "Ejemplos:", "", "```bash", *topic.examples, "```"])
     lines.append("")
     return lines
 
@@ -288,51 +291,51 @@ def _markdown_table(headers: list[str], rows: tuple[tuple[str, str], ...]) -> li
 
 def _render_man(topics: tuple[ManualTopic, ...], topic: str) -> str:
     lines = [
-        f'.TH VULNCLAW 1 "" "VulnClaw {__version__}" "VulnClaw Manual"',
-        ".SH NAME",
-        "vulnclaw \\- AI-assisted authorized security-testing CLI",
-        ".SH SYNOPSIS",
+        f'.TH VULNCLAW 1 "" "VulnClaw {__version__}" "Manual de VulnClaw"',
+        ".SH NOMBRE",
+        "vulnclaw \\- CLI asistida por IA para pruebas de seguridad autorizadas",
+        ".SH SINOPSIS",
         ".B vulnclaw",
-        "[--help] [--version] [--man] [COMMAND] [ARGS]...",
+        "[--help] [--version] [--man] [COMANDO] [ARGUMENTOS]...",
         ".br",
         ".B vulnclaw manual",
-        "[TOPIC] [--format text|markdown|man]",
-        ".SH DESCRIPTION",
-        "VulnClaw combines natural-language tasking, scoped autonomous loops, target history, reports, MCP and built-in tools, a terminal workbench, and an optional local Web UI.",
-        ".SH ROOT OPTIONS",
+        "[TEMA] [--format text|markdown|man]",
+        ".SH DESCRIPCIÓN",
+        "VulnClaw combina asignación de tareas en lenguaje natural, bucles autónomos con alcance definido, historial de objetivos, informes, herramientas MCP e integradas, un banco de trabajo de terminal y una Web UI local opcional.",
+        ".SH OPCIONES RAÍZ",
     ]
     lines.extend(_roff_pairs(ROOT_OPTIONS))
     lines.extend(
         [
-            ".SH COMMAND MAP",
+            ".SH MAPA DE COMANDOS",
         ]
     )
     lines.extend(_roff_pairs(tuple((item.name, item.summary) for item in COMMANDS)))
 
     if not topic or any(item.name in TASK_COMMAND_NAMES for item in topics):
-        lines.extend([".SH COMMON TASK FLAGS"])
+        lines.extend([".SH FLAGS COMUNES DE TAREA"])
         lines.extend(_roff_pairs(COMMON_TASK_FLAGS))
         lines.extend(
             [
-                ".SH ACTION CONSTRAINTS",
-                f"Recognized action names: {', '.join(ACTION_NAMES)}.",
+                ".SH RESTRICCIONES DE ACCIÓN",
+                f"Nombres de acción reconocidos: {', '.join(ACTION_NAMES)}.",
             ]
         )
 
-    lines.append(".SH COMMAND DETAILS")
+    lines.append(".SH DETALLES DE COMANDOS")
     for item in topics:
         lines.extend(_topic_roff(item))
 
     lines.extend(
         [
-            ".SH CONFIG AND ENVIRONMENT",
-            f"Provider presets: {_provider_names()}.",
+            ".SH CONFIGURACIÓN Y ENTORNO",
+            f"Presets de proveedor: {_provider_names()}.",
             ".PP",
-            "Config directory: ~/.vulnclaw by default, or VULNCLAW_CONFIG_DIR when set.",
+            "Directorio de configuración: ~/.vulnclaw por defecto, o VULNCLAW_CONFIG_DIR si está definido.",
             ".PP",
-            "High-value env vars: VULNCLAW_LLM_API_KEY, VULNCLAW_LLM_API_KEYS, VULNCLAW_LLM_PROVIDER, VULNCLAW_LLM_BASE_URL, VULNCLAW_LLM_MODEL, VULNCLAW_SESSION_OUTPUT_DIR, VULNCLAW_SESSION_MAX_ROUNDS, VULNCLAW_SESSION_SHOW_THINKING, VULNCLAW_SAFETY_PYTHON_EXECUTE_ENABLED.",
-            ".SH SAFETY",
-            "VulnClaw is for authorized testing only. Scope flags and action constraints make allowed boundaries explicit and enforceable, but they do not replace written authorization or a clear rules-of-engagement document.",
+            "Variables de entorno de alto valor: VULNCLAW_LLM_API_KEY, VULNCLAW_LLM_API_KEYS, VULNCLAW_LLM_PROVIDER, VULNCLAW_LLM_BASE_URL, VULNCLAW_LLM_MODEL, VULNCLAW_SESSION_OUTPUT_DIR, VULNCLAW_SESSION_MAX_ROUNDS, VULNCLAW_SESSION_SHOW_THINKING, VULNCLAW_SAFETY_PYTHON_EXECUTE_ENABLED.",
+            ".SH SEGURIDAD",
+            "VulnClaw es solo para pruebas autorizadas. Los indicadores de alcance y las restricciones de acciones hacen explícitos y exigibles los límites permitidos, pero no reemplazan una autorización por escrito ni un documento claro de reglas de enfrentamiento (rules of engagement).",
         ]
     )
     return "\n".join(lines).rstrip() + "\n"
@@ -343,19 +346,19 @@ def _topic_roff(topic: ManualTopic) -> list[str]:
         ".SS " + _roff_escape(topic.name),
         _roff_escape(topic.summary),
         ".PP",
-        ".B Usage:",
+        ".B Uso:",
     ]
     for usage_line in topic.usage.splitlines():
         lines.extend([".br", _roff_escape(usage_line)])
     if topic.flags:
-        lines.extend([".PP", ".B Arguments and flags:"])
+        lines.extend([".PP", ".B Argumentos y flags:"])
         lines.extend(_roff_pairs(topic.flags))
     if topic.notes:
-        lines.extend([".PP", ".B Notes:"])
+        lines.extend([".PP", ".B Notas:"])
         for note in topic.notes:
             lines.extend([".IP \\[bu] 2", _roff_escape(note)])
     if topic.examples:
-        lines.extend([".PP", ".B Examples:"])
+        lines.extend([".PP", ".B Ejemplos:"])
         for example in topic.examples:
             lines.extend([".br", _roff_escape(example)])
     return lines
