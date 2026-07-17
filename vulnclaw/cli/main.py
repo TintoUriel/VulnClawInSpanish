@@ -1714,42 +1714,42 @@ def network_scan(
         help="Tras el escaneo nmap, por defecto solo se ejecutan sondeos de verificación no destructivos",
     ),
     prompt: Optional[str] = typer.Option(
-        None, "--prompt", help="Custom natural language prompt (overrides auto-generated prompt)"
+        None, "--prompt", help="Prompt personalizado en lenguaje natural (sobrescribe el prompt generado automáticamente)"
     ),
     only_port: Optional[int] = typer.Option(
-        None, "--only-port", help="Restrict testing to a single port"
+        None, "--only-port", help="Restringe las pruebas a un solo puerto"
     ),
     only_host: Optional[str] = typer.Option(
-        None, "--only-host", help="Restrict testing to a single host"
+        None, "--only-host", help="Restringe las pruebas a un solo host"
     ),
     blocked_host: Optional[str] = typer.Option(
-        None, "--blocked-host", help="Explicitly blocked host"
+        None, "--blocked-host", help="Host explícitamente bloqueado"
     ),
     allow_actions: Optional[str] = typer.Option(
-        None, "--allow-actions", help="Comma-separated allowed actions"
+        None, "--allow-actions", help="Acciones permitidas separadas por comas"
     ),
     block_actions: Optional[str] = typer.Option(
-        None, "--block-actions", help="Comma-separated blocked actions"
+        None, "--block-actions", help="Acciones bloqueadas separadas por comas"
     ),
-    resume: bool = typer.Option(True, "--resume/--no-resume", help="Resume previous target state"),
+    resume: bool = typer.Option(True, "--resume/--no-resume", help="Reanuda el estado previo del objetivo"),
     snapshot: Optional[str] = typer.Option(
-        None, "--snapshot", help="Resume from a specific target snapshot id"
+        None, "--snapshot", help="Reanuda desde un id de snapshot de objetivo específico"
     ),
     run_name: Optional[str] = typer.Option(
-        None, "--run-name", help="Explicit name for a new run directory"
+        None, "--run-name", help="Nombre explícito para un nuevo directorio de ejecución"
     ),
     resume_run: Optional[str] = typer.Option(
-        None, "--resume-run", help="Resume an exact run by run name"
+        None, "--resume-run", help="Reanuda una ejecución exacta por nombre de ejecución"
     ),
-    runs_dir: Optional[str] = typer.Option(None, "--runs-dir", help="Run-directory root"),
+    runs_dir: Optional[str] = typer.Option(None, "--runs-dir", help="Raíz del directorio de ejecuciones"),
     additional_targets: Optional[list[str]] = typer.Option(
-        None, "--target", help="Additional target to include in this run"
+        None, "--target", help="Objetivo adicional para incluir en esta ejecución"
     ),
-    target_type: Optional[str] = typer.Option(None, "--target-type", help="Override target type"),
-    mount: bool = typer.Option(False, "--mount", help="Use mount ingress mode"),
-    repair: bool = typer.Option(False, "--repair", help="Repair a corrupt run"),
-    force_fresh: bool = typer.Option(False, "--force-fresh", help="Start a fresh run"),
-    no_import: bool = typer.Option(False, "--no-import", help="Do not import legacy state"),
+    target_type: Optional[str] = typer.Option(None, "--target-type", help="Sobrescribe el tipo de objetivo"),
+    mount: bool = typer.Option(False, "--mount", help="Usa el modo de ingreso mount"),
+    repair: bool = typer.Option(False, "--repair", help="Repara una ejecución corrupta"),
+    force_fresh: bool = typer.Option(False, "--force-fresh", help="Inicia una ejecución nueva"),
+    no_import: bool = typer.Option(False, "--no-import", help="No importa el estado heredado"),
 ) -> None:
     """Ejecuta un escaneo de red basado en nmap y hace seguimiento de los puntos débiles."""
     normalized_profile = profile.strip().lower()
@@ -1880,56 +1880,56 @@ def network_scan(
 
 @app.command()
 def exploit(
-    target: str = typer.Argument(..., help="Target host/IP/URL"),
-    cve: Optional[str] = typer.Option(None, help="Specific CVE to exploit"),
-    cmd: str = typer.Option("id", help="Command to execute for verification"),
+    target: str = typer.Argument(..., help="Host/IP/URL objetivo"),
+    cve: Optional[str] = typer.Option(None, help="CVE específico a explotar"),
+    cmd: str = typer.Option("id", help="Comando a ejecutar para verificación"),
     # [Añadido] 2026-06-10 Nyaecho - TUI impulsado por lenguaje natural: permite
     #   pasar un prompt personalizado vía --prompt que sobrescribe el prompt generado automáticamente
     prompt: Optional[str] = typer.Option(
-        None, "--prompt", help="Custom natural language prompt (overrides auto-generated prompt)"
+        None, "--prompt", help="Prompt personalizado en lenguaje natural (sobrescribe el prompt generado automáticamente)"
     ),
     only_port: Optional[int] = typer.Option(
-        None, "--only-port", help="Restrict testing to a single port"
+        None, "--only-port", help="Restringe las pruebas a un solo puerto"
     ),
     only_host: Optional[str] = typer.Option(
-        None, "--only-host", help="Restrict testing to a single host"
+        None, "--only-host", help="Restringe las pruebas a un solo host"
     ),
     only_path: Optional[str] = typer.Option(
-        None, "--only-path", help="Restrict testing to a single path"
+        None, "--only-path", help="Restringe las pruebas a una sola ruta"
     ),
     blocked_host: Optional[str] = typer.Option(
-        None, "--blocked-host", help="Explicitly blocked host"
+        None, "--blocked-host", help="Host explícitamente bloqueado"
     ),
     blocked_path: Optional[str] = typer.Option(
-        None, "--blocked-path", help="Explicitly blocked path"
+        None, "--blocked-path", help="Ruta explícitamente bloqueada"
     ),
     allow_actions: Optional[str] = typer.Option(
-        None, "--allow-actions", help="Comma-separated allowed actions"
+        None, "--allow-actions", help="Acciones permitidas separadas por comas"
     ),
     block_actions: Optional[str] = typer.Option(
-        None, "--block-actions", help="Comma-separated blocked actions"
+        None, "--block-actions", help="Acciones bloqueadas separadas por comas"
     ),
-    resume: bool = typer.Option(True, "--resume/--no-resume", help="Resume previous target state"),
+    resume: bool = typer.Option(True, "--resume/--no-resume", help="Reanuda el estado previo del objetivo"),
     snapshot: Optional[str] = typer.Option(
-        None, "--snapshot", help="Resume from a specific target snapshot id"
+        None, "--snapshot", help="Reanuda desde un id de snapshot de objetivo específico"
     ),
     run_name: Optional[str] = typer.Option(
-        None, "--run-name", help="Explicit name for a new run directory"
+        None, "--run-name", help="Nombre explícito para un nuevo directorio de ejecución"
     ),
     resume_run: Optional[str] = typer.Option(
-        None, "--resume-run", help="Resume an exact run by run name"
+        None, "--resume-run", help="Reanuda una ejecución exacta por nombre de ejecución"
     ),
-    runs_dir: Optional[str] = typer.Option(None, "--runs-dir", help="Run-directory root"),
+    runs_dir: Optional[str] = typer.Option(None, "--runs-dir", help="Raíz del directorio de ejecuciones"),
     additional_targets: Optional[list[str]] = typer.Option(
-        None, "--target", help="Additional target to include in this run"
+        None, "--target", help="Objetivo adicional para incluir en esta ejecución"
     ),
-    target_type: Optional[str] = typer.Option(None, "--target-type", help="Override target type"),
-    mount: bool = typer.Option(False, "--mount", help="Use mount ingress mode"),
-    repair: bool = typer.Option(False, "--repair", help="Repair a corrupt run"),
-    force_fresh: bool = typer.Option(False, "--force-fresh", help="Start a fresh run"),
-    no_import: bool = typer.Option(False, "--no-import", help="Do not import legacy state"),
+    target_type: Optional[str] = typer.Option(None, "--target-type", help="Sobrescribe el tipo de objetivo"),
+    mount: bool = typer.Option(False, "--mount", help="Usa el modo de ingreso mount"),
+    repair: bool = typer.Option(False, "--repair", help="Repara una ejecución corrupta"),
+    force_fresh: bool = typer.Option(False, "--force-fresh", help="Inicia una ejecución nueva"),
+    no_import: bool = typer.Option(False, "--no-import", help="No importa el estado heredado"),
 ) -> None:
-    """Run exploitation only."""
+    """Ejecuta solo la explotación."""
     cve_hint = f" using {cve}" if cve else ""
     task_prompt = prompt if prompt else (
         f"Attempt authorized exploitation against {target}{cve_hint} and verify with command: {cmd}"
@@ -1974,32 +1974,32 @@ def exploit(
 @app.command()
 def report(
     session: str = typer.Argument(
-        ..., help="Path to session JSON file or target when used with --target"
+        ..., help="Ruta al archivo JSON de la sesión, o el objetivo si se usa con --target"
     ),
     target_mode: bool = typer.Option(
-        False, "--target", help="Interpret argument as target and generate report from target state"
+        False, "--target", help="Interpreta el argumento como objetivo y genera el informe desde el estado del objetivo"
     ),
     pdf: bool = typer.Option(
-        False, "--pdf", help="Also export the report to PDF (requires the vulnclaw[pdf] extra)"
+        False, "--pdf", help="También exporta el informe a PDF (requiere el extra vulnclaw[pdf])"
     ),
     pdf_out: str = typer.Option(
-        "", "--pdf-out", help="PDF output path (default: the report path with a .pdf suffix)"
+        "", "--pdf-out", help="Ruta de salida del PDF (por defecto: la ruta del informe con sufijo .pdf)"
     ),
 ) -> None:
-    """Generate a report from a session file or target state."""
+    """Genera un informe a partir de un archivo de sesión o del estado del objetivo."""
     if target_mode:
         from vulnclaw.report.generator import generate_report_from_target_state
 
         state = load_target_state(session)
         if not state:
-            err_console.print(f"[!] Target state not found: {session}")
+            err_console.print(f"[!] Estado del objetivo no encontrado: {session}")
             raise typer.Exit(1)
         report_path = generate_report_from_target_state(state)
     else:
         from vulnclaw.report.generator import generate_report_from_file
 
         report_path = generate_report_from_file(session)
-    console.print(f"[+] Report generated: {report_path}")
+    console.print(f"[+] Informe generado: {report_path}")
 
     if pdf:
         from pathlib import Path
@@ -2009,64 +2009,64 @@ def report(
         out = Path(pdf_out) if pdf_out else Path(report_path).with_suffix(".pdf")
         try:
             markdown = Path(report_path).read_text(encoding="utf-8")
-            export_pdf(markdown, out, title="VulnClaw Report")
+            export_pdf(markdown, out, title="Informe VulnClaw")
         except RuntimeError as exc:
             err_console.print(f"[!] {exc}")
             raise typer.Exit(1) from exc
-        console.print(f"[+] PDF exported: {out}")
+        console.print(f"[+] PDF exportado: {out}")
 
 
 def _print_cli_manual(topic: Optional[str], output_format: str) -> None:
-    """Print the packaged CLI manual, normalizing user-facing errors."""
+    """Imprime el manual de la CLI incluido, normalizando los errores de cara al usuario."""
     try:
         console.out(render_manual(output_format, topic), end="")
     except ValueError as exc:
         err_console.print(f"[!] {exc}")
-        err_console.print(f"    Available topics: {', '.join(available_topics())}")
+        err_console.print(f"    Temas disponibles: {', '.join(available_topics())}")
         raise typer.Exit(1) from exc
 
 
 @app.command("manual")
 def manual_command(
     topic: Optional[str] = typer.Argument(
-        None, help="Optional manual topic, e.g. run, solve, network-scan, config"
+        None, help="Tema opcional del manual, p. ej. run, solve, network-scan, config"
     ),
     output_format: str = typer.Option(
         "text",
         "--format",
         "-f",
-        help="Output format: text, markdown, man",
+        help="Formato de salida: text, markdown, man",
     ),
 ) -> None:
-    """Print the full VulnClaw CLI manual."""
+    """Imprime el manual completo de la CLI de VulnClaw."""
     _print_cli_manual(topic, output_format)
 
 
 @app.command("man")
 def man_command(
     topic: Optional[str] = typer.Argument(
-        None, help="Optional manual topic, e.g. run, solve, network-scan, config"
+        None, help="Tema opcional del manual, p. ej. run, solve, network-scan, config"
     ),
     output_format: str = typer.Option(
         "text",
         "--format",
         "-f",
-        help="Output format: text, markdown, man",
+        help="Formato de salida: text, markdown, man",
     ),
 ) -> None:
-    """Alias for 'vulnclaw manual'."""
+    """Alias de 'vulnclaw manual'."""
     _print_cli_manual(topic, output_format)
 
 
 # ── Config sub-command group ───────────────────────────────────────
 
-config_app = typer.Typer(help="Manage configuration")
+config_app = typer.Typer(help="Gestionar la configuración")
 app.add_typer(config_app, name="config")
 
 
 @config_app.callback(invoke_without_command=True)
 def config_root(ctx: typer.Context) -> None:
-    """Open the interactive config editor when no subcommand is provided."""
+    """Abre el editor de configuración interactivo cuando no se indica un subcomando."""
     if ctx.resilient_parsing or ctx.invoked_subcommand is not None:
         return
     from vulnclaw.cli.tui import run_config_tui
@@ -2076,10 +2076,10 @@ def config_root(ctx: typer.Context) -> None:
 
 @config_app.command("set")
 def config_set(
-    key: str = typer.Argument(..., help="Config key in dot notation, e.g. llm.api_key"),
-    value: str = typer.Argument(..., help="Config value"),
+    key: str = typer.Argument(..., help="Clave de configuración en notación de puntos, p. ej. llm.api_key"),
+    value: str = typer.Argument(..., help="Valor de configuración"),
 ) -> None:
-    """Set a config value."""
+    """Establece un valor de configuración."""
     set_config_value(key, value)
     console.print(
         f"[+] Set {key} = {'***' if 'key' in key.lower() or 'pass' in key.lower() else value}"
@@ -2088,9 +2088,9 @@ def config_set(
 
 @config_app.command("get")
 def config_get(
-    key: str = typer.Argument(..., help="Config key in dot notation"),
+    key: str = typer.Argument(..., help="Clave de configuración en notación de puntos"),
 ) -> None:
-    """Get a config value."""
+    """Obtiene un valor de configuración."""
     config = load_config()
     parts = key.split(".")
     obj = config
@@ -2104,7 +2104,7 @@ def config_get(
 
 @config_app.command("list")
 def config_list() -> None:
-    """List all configuration values."""
+    """Lista todos los valores de configuración."""
     import yaml as _yaml
 
     config = load_config()
@@ -2115,27 +2115,27 @@ def config_list() -> None:
 @config_app.command("provider")
 def config_provider(
     name: Optional[str] = typer.Argument(
-        None, help="Provider name to switch to (e.g. minimax, deepseek)"
+        None, help="Nombre del proveedor al que cambiar (p. ej. minimax, deepseek)"
     ),
-    list_all: bool = typer.Option(False, "--list", "-l", help="List all available providers"),
+    list_all: bool = typer.Option(False, "--list", "-l", help="Lista todos los proveedores disponibles"),
 ) -> None:
-    """View or switch the configured LLM provider."""
+    """Muestra o cambia el proveedor LLM configurado."""
     if list_all or name is None:
         providers = list_providers()
         current_config = load_config()
         current_provider = current_config.llm.provider
 
-        console.print("[bold]Available LLM Providers[/]")
+        console.print("[bold]Proveedores LLM disponibles[/]")
         console.print()
         for p in providers:
             is_current = p["provider"] == current_provider
             marker = " [green](current)[/]" if is_current else ""
             console.print(f"  [bold cyan]{p['provider']}[/]{marker}")
-            console.print(f"    Label: {p['label']}")
+            console.print(f"    Etiqueta: {p['label']}")
             console.print(f"    URL:  [dim]{p['base_url']}[/]")
-            console.print(f"    Model: [dim]{p['default_model']}[/]")
+            console.print(f"    Modelo: [dim]{p['default_model']}[/]")
             console.print()
-        console.print("[dim]Use vulnclaw config provider <name> to switch providers.[/]")
+        console.print("[dim]Usa vulnclaw config provider <nombre> para cambiar de proveedor.[/]")
         return
 
     # Switch provider
@@ -2145,9 +2145,9 @@ def config_provider(
     try:
         provider_enum = LLMProvider(name.lower())
     except ValueError:
-        console.print(f"[!] Unknown provider: [bold]{name}[/]")
-        console.print(f"    Available: {', '.join(p.value for p in LLMProvider)}")
-        console.print("    Tip: use [bold]custom[/] for a manual base_url and model.")
+        console.print(f"[!] Proveedor desconocido: [bold]{name}[/]")
+        console.print(f"    Disponibles: {', '.join(p.value for p in LLMProvider)}")
+        console.print("    Consejo: usa [bold]custom[/] para un base_url y modelo manuales.")
         raise typer.Exit(1)
 
     config = load_config()
@@ -2156,15 +2156,15 @@ def config_provider(
 
     preset = PROVIDER_PRESETS.get(provider_enum, {})
     label = preset.get("label", name)
-    console.print(f"[+] Switched LLM provider to [bold cyan]{label}[/]")
-    console.print(f"    Base URL: [dim]{config.llm.base_url}[/]")
-    console.print(f"    Model:    [dim]{config.llm.model}[/]")
+    console.print(f"[+] Proveedor LLM cambiado a [bold cyan]{label}[/]")
+    console.print(f"    URL base: [dim]{config.llm.base_url}[/]")
+    console.print(f"    Modelo:   [dim]{config.llm.model}[/]")
 
     if not has_llm_credentials(config.llm):
         console.print()
         console.print(
-            "[yellow]Set credentials first: [bold]vulnclaw config set llm.api_key <your-key>[/] "
-            "or configure keyless auth (llm.auth_mode = env/file/command/wif)[/]"
+            "[yellow]Configura primero las credenciales: [bold]vulnclaw config set llm.api_key <tu-clave>[/] "
+            "o configura autenticación sin clave (llm.auth_mode = env/file/command/wif)[/]"
         )
 
 
@@ -2173,7 +2173,7 @@ def config_provider(
 
 @app.command()
 def init() -> None:
-    """Initialize VulnClaw config."""
+    """Inicializa la configuración de VulnClaw."""
     from vulnclaw.config.settings import ensure_dirs
 
     ensure_dirs()
@@ -2201,24 +2201,25 @@ def login(
     proxy_url: Optional[str] = typer.Option(
         None,
         "--proxy-url",
-        help="External OpenAI-compatible proxy base_url (disables the built-in one)",
+        help="base_url de un proxy externo compatible con OpenAI (desactiva el integrado)",
     ),
     no_browser: bool = typer.Option(
-        False, "--no-browser", help="Print the URL instead of opening a browser"
+        False, "--no-browser", help="Imprime la URL en lugar de abrir un navegador"
     ),
     set_default: bool = typer.Option(
-        True, "--set-default/--no-set-default", help="Set llm.auth_mode=oauth on success"
+        True, "--set-default/--no-set-default", help="Establece llm.auth_mode=oauth si tiene éxito"
     ),
 ) -> None:
-    """Sign in with your ChatGPT subscription (Codex "Sign in with ChatGPT").
+    """Inicia sesión con tu suscripción de ChatGPT (Codex "Sign in with ChatGPT").
 
-    Opens the ChatGPT consent page in your browser, stores the resulting
-    refreshable token, and enables the built-in proxy that bridges
-    chat.completions to the ChatGPT backend — so VulnClaw just works afterwards.
+    Abre la página de consentimiento de ChatGPT en tu navegador, almacena el
+    token renovable resultante y habilita el proxy integrado que conecta
+    chat.completions con el backend de ChatGPT — así VulnClaw simplemente funciona después.
 
-    ⚠️ This reuses OpenAI's first-party Codex OAuth client. Using a ChatGPT
-    subscription through a non-official client may violate OpenAI's Terms of
-    Service and can get your account restricted. You proceed at your own risk.
+    ⚠️ Esto reutiliza el cliente OAuth de Codex de OpenAI (first-party). Usar una
+    suscripción de ChatGPT a través de un cliente no oficial puede violar los
+    Términos de Servicio de OpenAI y tu cuenta podría ser restringida.
+    Procedes bajo tu propio riesgo.
     """
     from vulnclaw.config.token_provider import (
         CHATGPT_CLIENT_ID,
@@ -2230,15 +2231,15 @@ def login(
     llm = load_config().llm
 
     err_console.print(
-        "[yellow][!] Sign in with ChatGPT reuses OpenAI's first-party Codex OAuth "
-        "client. Using a ChatGPT subscription through a non-official client may "
-        "violate OpenAI's Terms of Service and can get your account restricted. "
-        "You are proceeding at your own risk.[/]"
+        "[yellow][!] Iniciar sesión con ChatGPT reutiliza el cliente OAuth de Codex "
+        "de OpenAI (first-party). Usar una suscripción de ChatGPT a través de un "
+        "cliente no oficial puede violar los Términos de Servicio de OpenAI y tu "
+        "cuenta podría ser restringida. Procedes bajo tu propio riesgo.[/]"
     )
     try:
         bundle = perform_chatgpt_login(open_browser=not no_browser)
     except OAuthError as exc:
-        err_console.print(f"[!] ChatGPT sign-in failed: {exc}")
+        err_console.print(f"[!] Error al iniciar sesión con ChatGPT: {exc}")
         raise typer.Exit(1)
 
     # Wire config so resolve/refresh works against the Codex token endpoint.
@@ -2259,33 +2260,33 @@ def login(
         set_config_value("llm.chatgpt_auto_proxy", "true")
 
     tok = bundle.get("access_token", "")
-    masked = (tok[:6] + "…" + tok[-4:]) if len(tok) > 12 else "(received)"
-    console.print("[green]Signed in with ChatGPT.[/]")
-    console.print(f"  Access token: [dim]{masked}[/]  (refreshes automatically)")
+    masked = (tok[:6] + "…" + tok[-4:]) if len(tok) > 12 else "(recibido)"
+    console.print("[green]Sesión iniciada con ChatGPT.[/]")
+    console.print(f"  Token de acceso: [dim]{masked}[/]  (se renueva automáticamente)")
     if bundle.get("account_id"):
-        console.print(f"  Account id: [dim]{bundle['account_id']}[/]")
+        console.print(f"  ID de cuenta: [dim]{bundle['account_id']}[/]")
     console.print()
     if proxy_url:
-        console.print(f"  base_url set to external proxy: [dim]{proxy_url.rstrip('/')}[/]")
+        console.print(f"  base_url configurado al proxy externo: [dim]{proxy_url.rstrip('/')}[/]")
     else:
         console.print(
-            "  [green]Built-in ChatGPT proxy enabled — it starts automatically.[/]\n"
-            "  [dim]No external proxy needed. The bridge to OpenAI's ChatGPT backend "
-            "is experimental; if a call fails, the error shows the backend response "
-            "so you can adjust llm.model or the VULNCLAW_CHATGPT_* env vars.[/]"
+            "  [green]Proxy integrado de ChatGPT habilitado — se inicia automáticamente.[/]\n"
+            "  [dim]No se necesita un proxy externo. El puente hacia el backend de ChatGPT "
+            "de OpenAI es experimental; si una llamada falla, el error muestra la respuesta "
+            "del backend para que puedas ajustar llm.model o las variables de entorno VULNCLAW_CHATGPT_*.[/]"
         )
-    console.print("  Run [bold]vulnclaw[/] to start.")
+    console.print("  Ejecuta [bold]vulnclaw[/] para comenzar.")
 
 
 @app.command()
 def logout() -> None:
-    """Remove stored OAuth tokens (browser sign-in)."""
+    """Elimina los tokens OAuth almacenados (inicio de sesión por navegador)."""
     from vulnclaw.config.token_provider import logout_oauth
 
     if logout_oauth():
-        console.print("[green]Signed out — stored OAuth tokens removed.[/]")
+        console.print("[green]Sesión cerrada — se eliminaron los tokens OAuth almacenados.[/]")
     else:
-        console.print("[yellow]No stored OAuth tokens to remove.[/]")
+        console.print("[yellow]No hay tokens OAuth almacenados para eliminar.[/]")
 
 
 # ── Doctor command ──────────────────────────────────────────────────
@@ -2293,7 +2294,7 @@ def logout() -> None:
 
 @app.command()
 def doctor() -> None:
-    """Inspect the VulnClaw runtime environment."""
+    """Inspecciona el entorno de ejecución de VulnClaw."""
     import shutil
 
     # Modificado por: Nyaecho
@@ -2302,7 +2303,7 @@ def doctor() -> None:
     #   eliminando la dependencia CLI→Web.
     from vulnclaw.mcp.diagnostics import get_mcp_diagnostics
 
-    console.print("[bold]VulnClaw Environment Check[/]")
+    console.print("[bold]Verificación del entorno de VulnClaw[/]")
     console.print()
 
     # Check Python
@@ -2319,55 +2320,55 @@ def doctor() -> None:
             )
             console.print(f"  Node.js: [green]{result.stdout.strip()}[/]")
         except Exception:
-            console.print("  Node.js: [yellow]check failed[/]")
+            console.print("  Node.js: [yellow]verificación fallida[/]")
     else:
-        console.print("  Node.js: [red]not installed[/] (required for some MCP services)")
+        console.print("  Node.js: [red]no instalado[/] (requerido para algunos servicios MCP)")
 
     # Check npx
     npx_path = shutil.which("npx")
     console.print(
-        f"  npx: [{'green' if npx_path else 'red'}]{'installed' if npx_path else 'missing'}[/]"
+        f"  npx: [{'green' if npx_path else 'red'}]{'instalado' if npx_path else 'faltante'}[/]"
     )
 
     # Check uvx
     uvx_path = shutil.which("uvx")
     console.print(
-        f"  uvx: [{'green' if uvx_path else 'yellow'}]{'installed' if uvx_path else 'missing'}[/]"
+        f"  uvx: [{'green' if uvx_path else 'yellow'}]{'instalado' if uvx_path else 'faltante'}[/]"
     )
 
     # Check nmap
     nmap_path = shutil.which("nmap")
     console.print(
-        f"  nmap: [{'green' if nmap_path else 'yellow'}]{'installed' if nmap_path else 'optional/missing'}[/]"
+        f"  nmap: [{'green' if nmap_path else 'yellow'}]{'instalado' if nmap_path else 'opcional/faltante'}[/]"
     )
 
     # Check config
     config = load_config()
     console.print()
-    console.print("[bold]LLM Config[/]:")
+    console.print("[bold]Configuración LLM[/]:")
     has_key = has_llm_credentials(config.llm)
     auth_mode = (config.llm.auth_mode or "static").lower()
-    console.print(f"  Provider: [bold cyan]{config.llm.provider}[/]")
-    console.print(f"  Auth Mode: [bold]{auth_mode}[/]")
-    cred_label = "configured" if has_key else "not set"
+    console.print(f"  Proveedor: [bold cyan]{config.llm.provider}[/]")
+    console.print(f"  Modo de autenticación: [bold]{auth_mode}[/]")
+    cred_label = "configurado" if has_key else "no configurado"
     console.print(
-        f"  Credentials: [{'green' if has_key else 'red'}]{cred_label}[/]"
+        f"  Credenciales: [{'green' if has_key else 'red'}]{cred_label}[/]"
     )
-    console.print(f"  Base URL: [dim]{config.llm.base_url}[/]")
-    console.print(f"  Model: [dim]{config.llm.model}[/]")
+    console.print(f"  URL base: [dim]{config.llm.base_url}[/]")
+    console.print(f"  Modelo: [dim]{config.llm.model}[/]")
 
     # Check MCP servers
     console.print()
-    console.print("[bold]MCP Services[/]:")
+    console.print("[bold]Servicios MCP[/]:")
     mcp_diag = get_mcp_diagnostics()
-    console.print(f"  Registered: [bold]{mcp_diag.total_services}[/] services")
-    console.print(f"  Tools: [bold]{mcp_diag.tool_count}[/] exposed")
+    console.print(f"  Registrados: [bold]{mcp_diag.total_services}[/] servicios")
+    console.print(f"  Herramientas: [bold]{mcp_diag.tool_count}[/] expuestas")
 
     for item in mcp_diag.services:
-        status = "[green]enabled[/]" if item.enabled else "[dim]disabled[/]"
+        status = "[green]habilitado[/]" if item.enabled else "[dim]deshabilitado[/]"
         priority_label = {0: "P0", 1: "P1", 2: "P2"}.get(item.priority, "??")
-        running = "[green]running[/]" if item.running else "[yellow]registered[/]"
-        capability = "[green]exec[/]" if item.can_execute else "[yellow]schema-only[/]"
+        running = "[green]en ejecución[/]" if item.running else "[yellow]registrado[/]"
+        capability = "[green]exec[/]" if item.can_execute else "[yellow]solo esquema[/]"
         console.print(
             f"  {item.name}: {status} [{priority_label}] {running} mode={item.execution_mode} {capability} tools={item.tool_count}"
         )
@@ -2376,34 +2377,34 @@ def doctor() -> None:
             console.print(f"    [red]{label}[/]: {item.error}")
 
     console.print(
-        "[dim]doctor shows MCP registration state and exposed tools. fetch/memory run in local mode; most other services are still placeholders.[/]"
+        "[dim]doctor muestra el estado de registro de MCP y las herramientas expuestas. fetch/memory se ejecutan en modo local; la mayoría de los demás servicios siguen siendo marcadores de posición.[/]"
     )
     console.print(
-        "[yellow]python_execute is a high-risk experimental capability. It is not a strong sandbox; use it only in authorized or controlled environments.[/]"
+        "[yellow]python_execute es una capacidad experimental de alto riesgo. No es un sandbox robusto; úsala solo en entornos autorizados o controlados.[/]"
     )
     console.print(
-        "[dim]The knowledge-base update flow is live; retrieval enhancements can continue independently.[/]"
+        "[dim]El flujo de actualización de la base de conocimiento está activo; las mejoras de recuperación pueden continuar de forma independiente.[/]"
     )
 
     console.print()
     if has_key:
-        console.print("[green]Environment ready. Run [bold]vulnclaw[/] to start.[/]")
+        console.print("[green]Entorno listo. Ejecuta [bold]vulnclaw[/] para comenzar.[/]")
     else:
         console.print(
-            "[yellow]Set credentials first: [bold]vulnclaw config set llm.api_key <key>[/] "
-            "or keyless auth (llm.auth_mode = env/file/command/wif)[/]"
+            "[yellow]Configura primero las credenciales: [bold]vulnclaw config set llm.api_key <clave>[/] "
+            "o autenticación sin clave (llm.auth_mode = env/file/command/wif)[/]"
         )
 
 
 # ── KB command ──────────────────────────────────────────────────────
 
-kb_app = typer.Typer(help="Security knowledge base commands")
+kb_app = typer.Typer(help="Comandos de la base de conocimiento de seguridad")
 app.add_typer(kb_app, name="kb")
 
-target_state_app = typer.Typer(help="Manage target history state")
+target_state_app = typer.Typer(help="Gestiona el historial de estado del objetivo")
 app.add_typer(target_state_app, name="target-state")
 
-plugins_app = typer.Typer(help="Inspect and run vulnerability detection plugins")
+plugins_app = typer.Typer(help="Inspecciona y ejecuta plugins de detección de vulnerabilidades")
 app.add_typer(plugins_app, name="plugins")
 
 
@@ -2414,7 +2415,7 @@ def _parse_kv_options(pairs: Optional[list[str]]) -> dict[str, object]:
     options: dict[str, object] = {}
     for pair in pairs or []:
         if "=" not in pair:
-            raise typer.BadParameter(f"Expected key=value, got: {pair}")
+            raise typer.BadParameter(f"Se esperaba key=value, se obtuvo: {pair}")
         key, _, raw = pair.partition("=")
         key = key.strip()
         raw = raw.strip()
@@ -2427,10 +2428,10 @@ def _parse_kv_options(pairs: Optional[list[str]]) -> dict[str, object]:
 
 @plugins_app.command("list")
 def plugins_list(
-    stage: Optional[str] = typer.Option(None, "--stage", help="Filter by stage"),
-    tag: Optional[str] = typer.Option(None, "--tag", help="Filter by tag"),
+    stage: Optional[str] = typer.Option(None, "--stage", help="Filtra por etapa"),
+    tag: Optional[str] = typer.Option(None, "--tag", help="Filtra por etiqueta"),
 ) -> None:
-    """List registered detection plugins."""
+    """Lista los plugins de detección registrados."""
     from rich.table import Table
 
     from vulnclaw.plugins import registry
@@ -2440,22 +2441,22 @@ def plugins_list(
         try:
             plugin_classes = registry.by_stage(stage)
         except ValueError:
-            err_console.print(f"[!] Unknown stage: {stage}")
+            err_console.print(f"[!] Etapa desconocida: {stage}")
             raise typer.Exit(1) from None
     if tag:
         tag_set = {p.plugin_id for p in registry.by_tag(tag)}
         plugin_classes = [p for p in plugin_classes if p.plugin_id in tag_set]
 
     if not plugin_classes:
-        console.print("[yellow]No plugins match the filter.[/yellow]")
+        console.print("[yellow]Ningún plugin coincide con el filtro.[/yellow]")
         return
 
-    table = Table(title="VulnClaw Plugins", show_lines=False)
+    table = Table(title="Plugins de VulnClaw", show_lines=False)
     table.add_column("ID", style="cyan", no_wrap=True)
-    table.add_column("Name")
-    table.add_column("Stages")
-    table.add_column("Risk")
-    table.add_column("Destructive", justify="center")
+    table.add_column("Nombre")
+    table.add_column("Etapas")
+    table.add_column("Riesgo")
+    table.add_column("Destructivo", justify="center")
     for plugin_cls in sorted(plugin_classes, key=lambda p: p.plugin_id):
         meta = plugin_cls.metadata()
         table.add_row(
@@ -2469,39 +2470,39 @@ def plugins_list(
 
 
 @plugins_app.command("info")
-def plugins_info(plugin_id: str = typer.Argument(..., help="Plugin id")) -> None:
-    """Show full metadata for a single plugin."""
+def plugins_info(plugin_id: str = typer.Argument(..., help="Id del plugin")) -> None:
+    """Muestra los metadatos completos de un plugin."""
     import json as _json
 
     from vulnclaw.plugins import registry
 
     plugin_cls = registry.get(plugin_id)
     if plugin_cls is None:
-        err_console.print(f"[!] Plugin not found: {plugin_id}")
+        err_console.print(f"[!] Plugin no encontrado: {plugin_id}")
         raise typer.Exit(1)
     console.print_json(_json.dumps(plugin_cls.metadata(), ensure_ascii=False))
 
 
 @plugins_app.command("run")
 def plugins_run(
-    plugin_id: str = typer.Argument(..., help="Plugin id to run"),
-    target: str = typer.Option("", "--target", help="Target host/IP/URL"),
-    stage: str = typer.Option("discovery", "--stage", help="Plugin stage"),
+    plugin_id: str = typer.Argument(..., help="Id del plugin a ejecutar"),
+    target: str = typer.Option("", "--target", help="Host/IP/URL objetivo"),
+    stage: str = typer.Option("discovery", "--stage", help="Etapa del plugin"),
     option: Optional[list[str]] = typer.Option(
-        None, "--option", "-o", help="Plugin option key=value (repeatable, value parsed as JSON)"
+        None, "--option", "-o", help="Opción del plugin key=value (repetible; el valor se interpreta como JSON)"
     ),
     input_file: Optional[str] = typer.Option(
-        None, "--input", help="JSON file merged into plugin options"
+        None, "--input", help="Archivo JSON combinado con las opciones del plugin"
     ),
     allow_destructive: bool = typer.Option(
-        False, "--allow-destructive", help="Permit destructive plugins"
+        False, "--allow-destructive", help="Permite plugins destructivos"
     ),
     session_file: Optional[str] = typer.Option(
-        None, "--session", help="Merge findings into this SessionState JSON and save it"
+        None, "--session", help="Combina los hallazgos en este JSON de SessionState y lo guarda"
     ),
-    as_json: bool = typer.Option(False, "--json", help="Print the raw PluginResult as JSON"),
+    as_json: bool = typer.Option(False, "--json", help="Imprime el PluginResult sin procesar como JSON"),
 ) -> None:
-    """Run a plugin against supplied data (builtin plugins only analyze provided input)."""
+    """Ejecuta un plugin sobre los datos proporcionados (los plugins integrados solo analizan la entrada dada)."""
     import json as _json
     from pathlib import Path
 
@@ -2513,19 +2514,19 @@ def plugins_run(
     try:
         stage_value = PluginStage(stage)
     except ValueError:
-        err_console.print(f"[!] Unknown stage: {stage}")
+        err_console.print(f"[!] Etapa desconocida: {stage}")
         raise typer.Exit(1) from None
 
     options = _parse_kv_options(option)
     if input_file:
         path = Path(input_file)
         if not path.exists():
-            err_console.print(f"[!] Input file not found: {input_file}")
+            err_console.print(f"[!] Archivo de entrada no encontrado: {input_file}")
             raise typer.Exit(1)
         try:
             payload = _json.loads(path.read_text(encoding="utf-8"))
         except (ValueError, OSError) as exc:
-            err_console.print(f"[!] Failed to read input file: {exc}")
+            err_console.print(f"[!] Error al leer el archivo de entrada: {exc}")
             raise typer.Exit(1) from None
         if isinstance(payload, dict):
             options.update(payload)
@@ -2547,17 +2548,17 @@ def plugins_run(
         console.print_json(result.model_dump_json())
     else:
         if result.skipped:
-            console.print(f"[yellow]⊘ Skipped[/yellow] ({result.error_type}): {result.error}")
+            console.print(f"[yellow]⊘ Omitido[/yellow] ({result.error_type}): {result.error}")
         elif result.error:
             console.print(f"[red]✗ Error[/red] ({result.error_type}): {result.error}")
         for message in result.messages:
             console.print(f"  [dim]{message}[/dim]")
         if result.findings:
-            table = Table(title=f"{plugin_id} findings", show_lines=True)
-            table.add_column("Risk", style="magenta", no_wrap=True)
-            table.add_column("Title")
-            table.add_column("Type")
-            table.add_column("Confidence", justify="right")
+            table = Table(title=f"Hallazgos de {plugin_id}", show_lines=True)
+            table.add_column("Riesgo", style="magenta", no_wrap=True)
+            table.add_column("Título")
+            table.add_column("Tipo")
+            table.add_column("Confianza", justify="right")
             for finding in result.findings:
                 table.add_row(
                     finding.risk.value,
@@ -2567,7 +2568,7 @@ def plugins_run(
                 )
             console.print(table)
         elif not result.error:
-            console.print("[green]✓[/green] Plugin ran; no findings.")
+            console.print("[green]✓[/green] El plugin se ejecutó; sin hallazgos.")
 
     if session_file:
         session_path = Path(session_file)
@@ -2576,13 +2577,13 @@ def plugins_run(
         session = SessionState.load(session_path) if session_path.exists() else SessionState()
         added = merge_plugin_results_into_session(session, result)
         session.save(session_path)
-        console.print(f"[+] Merged {added} finding(s) into {session_file}")
+        console.print(f"[+] Se combinaron {added} hallazgo(s) en {session_file}")
 
 
 @kb_app.command("update")
 def kb_update() -> None:
-    """Update the knowledge base."""
-    console.print("[*] Updating knowledge base...")
+    """Actualiza la base de conocimiento."""
+    console.print("[*] Actualizando la base de conocimiento...")
     from vulnclaw.kb.store import KnowledgeStore
     from vulnclaw.kb.updater import seed_knowledge_base
 
@@ -2596,13 +2597,13 @@ def kb_update() -> None:
     delta = after_total - before_total
     category_summary = ", ".join(f"{cat}={count}" for cat, count in sorted(after_stats.items()))
 
-    console.print(f"[+] Knowledge base updated: +{delta} entries")
-    console.print(f"    Categories: {category_summary or 'empty'}")
+    console.print(f"[+] Base de conocimiento actualizada: +{delta} entradas")
+    console.print(f"    Categorías: {category_summary or 'vacío'}")
 
 
 @kb_app.command("status")
 def kb_status() -> None:
-    """Show the knowledge base retrieval backend status."""
+    """Muestra el estado del backend de recuperación de la base de conocimiento."""
     from vulnclaw.kb.retriever import KnowledgeRetriever, RetrieverStatus
     from vulnclaw.kb.store import KnowledgeStore
 
@@ -2625,10 +2626,10 @@ def kb_status() -> None:
         Panel(
             f"{line}\n"
             f"Backend: [bold]{status.value}[/]\n"
-            f"Detail: {detail or 'n/a'}\n"
-            f"Entries: [bold]{total}[/] ({category_summary or 'empty'})\n"
+            f"Detalle: {detail or 'n/d'}\n"
+            f"Entradas: [bold]{total}[/] ({category_summary or 'vacío'})\n"
             f"Búsqueda semántica: ejecuta [bold]pip install vulnclaw\\[kb][/] para habilitar ChromaDB",
-            title="KB Status",
+            title="Estado de la KB",
             border_style="cyan",
         )
     )
@@ -2636,15 +2637,15 @@ def kb_status() -> None:
 
 @target_state_app.command("list")
 def target_state_list(
-    target: str = typer.Argument(..., help="Target host/IP/URL"),
+    target: str = typer.Argument(..., help="Host/IP/URL objetivo"),
 ) -> None:
-    """List target snapshots."""
+    """Lista los snapshots del objetivo."""
     snapshots = list_target_snapshots(target)
     if not snapshots:
-        console.print(f"[-] No snapshots found for: {target}")
+        console.print(f"[-] No se encontraron snapshots para: {target}")
         raise typer.Exit(1)
 
-    console.print(f"[bold]Target snapshots[/]: {target}")
+    console.print(f"[bold]Snapshots del objetivo[/]: {target}")
     for item in snapshots[:20]:
         console.print(
             f"  {item['snapshot_id']} | v{item.get('schema_version', 1)} | {item['last_command']} | "
@@ -2654,79 +2655,79 @@ def target_state_list(
 
 @target_state_app.command("preview")
 def target_state_preview_cmd(
-    target: str = typer.Argument(..., help="Target host/IP/URL"),
+    target: str = typer.Argument(..., help="Host/IP/URL objetivo"),
     snapshot_id: Optional[str] = typer.Option(
-        None, "--snapshot", help="Preview a specific snapshot id"
+        None, "--snapshot", help="Vista previa de un snapshot específico"
     ),
 ) -> None:
-    """Show a resume preview for the target state."""
+    """Muestra una vista previa de reanudación del estado del objetivo."""
     preview = get_target_state_preview(target, snapshot_id=snapshot_id)
     if not preview:
-        console.print(f"[-] No target state found: {target}")
+        console.print(f"[-] No se encontró estado del objetivo: {target}")
         raise typer.Exit(1)
 
     console.print(
         Panel(
-            f"Target: [bold]{preview['target']}[/]\n"
-            f"Schema: [bold]v{preview['schema_version']}[/]\n"
-            f"Phase: [bold]{preview['phase'] or 'unknown'}[/]\n"
-            f"Resume strategy: [bold]{preview['resume_strategy'] or 'none'}[/]\n"
-            f"Reason: {preview['resume_reason'] or 'n/a'}\n"
-            f"Findings: {preview['verified_count']} verified / {preview['pending_count']} pending / {preview['findings_count']} total",
-            title="Target Preview",
+            f"Objetivo: [bold]{preview['target']}[/]\n"
+            f"Esquema: [bold]v{preview['schema_version']}[/]\n"
+            f"Fase: [bold]{preview['phase'] or 'desconocida'}[/]\n"
+            f"Estrategia de reanudación: [bold]{preview['resume_strategy'] or 'ninguna'}[/]\n"
+            f"Motivo: {preview['resume_reason'] or 'n/d'}\n"
+            f"Hallazgos: {preview['verified_count']} verificados / {preview['pending_count']} pendientes / {preview['findings_count']} total",
+            title="Vista previa del objetivo",
             border_style="cyan",
         )
     )
 
     if preview.get("priority_targets"):
-        console.print("[bold]Priority targets[/]:")
+        console.print("[bold]Objetivos prioritarios[/]:")
         for item in preview["priority_targets"][:5]:
             console.print(f"  - {item}")
     if preview.get("priority_recon_assets"):
-        console.print("[bold]Priority recon assets[/]:")
+        console.print("[bold]Activos de reconocimiento prioritarios[/]:")
         for item in preview["priority_recon_assets"][:5]:
             console.print(f"  - {item}")
     if preview.get("next_actions"):
-        console.print("[bold]Next actions[/]:")
+        console.print("[bold]Próximas acciones[/]:")
         for item in preview["next_actions"][:5]:
             console.print(f"  - {item}")
 
 
 @target_state_app.command("diff")
 def target_state_diff_cmd(
-    target: str = typer.Argument(..., help="Target host/IP/URL"),
-    from_snapshot_id: str = typer.Argument(..., help="Base snapshot id"),
+    target: str = typer.Argument(..., help="Host/IP/URL objetivo"),
+    from_snapshot_id: str = typer.Argument(..., help="Id del snapshot base"),
     to_snapshot_id: Optional[str] = typer.Option(
-        None, "--to", help="Compare against another snapshot or current state"
+        None, "--to", help="Compara con otro snapshot o con el estado actual"
     ),
 ) -> None:
-    """Show differences between two target-state snapshots."""
+    """Muestra las diferencias entre dos snapshots del estado del objetivo."""
     diff = diff_target_state_snapshots(target, from_snapshot_id, to_snapshot_id=to_snapshot_id)
     if not diff:
-        console.print(f"[-] Unable to diff target state: {target}")
+        console.print(f"[-] No se pudo comparar el estado del objetivo: {target}")
         raise typer.Exit(1)
 
     console.print(
         Panel(
-            f"Target: [bold]{diff['target']}[/]\n"
-            f"From: [bold]{diff['from_snapshot_id']}[/] -> To: [bold]{diff['to_snapshot_id']}[/]\n"
-            f"Schema: v{diff['schema_version_from']} -> v{diff['schema_version_to']}\n"
-            f"Resume strategy: {diff['resume_strategy_from'] or 'none'} -> {diff['resume_strategy_to'] or 'none'}",
-            title="Target Diff",
+            f"Objetivo: [bold]{diff['target']}[/]\n"
+            f"Desde: [bold]{diff['from_snapshot_id']}[/] -> Hasta: [bold]{diff['to_snapshot_id']}[/]\n"
+            f"Esquema: v{diff['schema_version_from']} -> v{diff['schema_version_to']}\n"
+            f"Estrategia de reanudación: {diff['resume_strategy_from'] or 'ninguna'} -> {diff['resume_strategy_to'] or 'ninguna'}",
+            title="Diferencias del objetivo",
             border_style="magenta",
         )
     )
 
     for title, items in (
-        ("Added findings", diff.get("added_findings", [])),
-        ("Removed findings", diff.get("removed_findings", [])),
-        ("Updated findings", diff.get("updated_findings", [])),
-        ("Added recon assets", diff.get("added_recon_assets", [])),
-        ("Removed recon assets", diff.get("removed_recon_assets", [])),
-        ("Added steps", diff.get("added_steps", [])),
-        ("Removed steps", diff.get("removed_steps", [])),
-        ("Added notes", diff.get("added_notes", [])),
-        ("Removed notes", diff.get("removed_notes", [])),
+        ("Hallazgos agregados", diff.get("added_findings", [])),
+        ("Hallazgos eliminados", diff.get("removed_findings", [])),
+        ("Hallazgos actualizados", diff.get("updated_findings", [])),
+        ("Activos de reconocimiento agregados", diff.get("added_recon_assets", [])),
+        ("Activos de reconocimiento eliminados", diff.get("removed_recon_assets", [])),
+        ("Pasos agregados", diff.get("added_steps", [])),
+        ("Pasos eliminados", diff.get("removed_steps", [])),
+        ("Notas agregadas", diff.get("added_notes", [])),
+        ("Notas eliminadas", diff.get("removed_notes", [])),
     ):
         if items:
             console.print(f"[bold]{title}[/]:")
@@ -2736,28 +2737,28 @@ def target_state_diff_cmd(
 
 @target_state_app.command("rollback")
 def target_state_rollback_cmd(
-    target: str = typer.Argument(..., help="Target host/IP/URL"),
-    snapshot_id: str = typer.Argument(..., help="Snapshot id to restore"),
+    target: str = typer.Argument(..., help="Host/IP/URL objetivo"),
+    snapshot_id: str = typer.Argument(..., help="Id del snapshot a restaurar"),
 ) -> None:
-    """Rollback target state to a snapshot."""
+    """Revierte el estado del objetivo a un snapshot."""
     path = rollback_target_state(target, snapshot_id)
     if not path:
-        console.print(f"[-] Snapshot not found: {snapshot_id}")
+        console.print(f"[-] Snapshot no encontrado: {snapshot_id}")
         raise typer.Exit(1)
-    console.print(f"[+] Rolled back target state: {target}")
+    console.print(f"[+] Estado del objetivo revertido: {target}")
     console.print(f"    Snapshot: {snapshot_id}")
 
 
 @target_state_app.command("clear")
 def target_state_clear_cmd(
-    target: str = typer.Argument(..., help="Target host/IP/URL"),
+    target: str = typer.Argument(..., help="Host/IP/URL objetivo"),
 ) -> None:
-    """Clear target state."""
+    """Borra el estado del objetivo."""
     ok = clear_target_state(target)
     if not ok:
-        console.print(f"[-] No target state found: {target}")
+        console.print(f"[-] No se encontró estado del objetivo: {target}")
         raise typer.Exit(1)
-    console.print(f"[+] Cleared target state: {target}")
+    console.print(f"[+] Estado del objetivo borrado: {target}")
 
 
 # Default command (no sub-command -> REPL)
@@ -2898,33 +2899,33 @@ def main(
     version: bool = typer.Option(
         False,
         "--version",
-        help="Show version and exit.",
+        help="Muestra la versión y termina.",
         is_eager=True,
     ),
     show_manual: bool = typer.Option(
         False,
         "--man",
         "--manual",
-        help="Show the full CLI manual and exit.",
+        help="Muestra el manual completo de la CLI y termina.",
         is_eager=True,
     ),
     resume_run_name: Optional[str] = typer.Option(
         None,
         "--resume",
-        help="Resume an exact saved run by run name.",
+        help="Reanuda una ejecución guardada exacta por nombre de ejecución.",
     ),
     runs_dir: Optional[str] = typer.Option(
         None,
         "--runs-dir",
-        help="Run-directory root for --resume.",
+        help="Raíz del directorio de ejecuciones para --resume.",
     ),
     repair: bool = typer.Option(
         False,
         "--repair",
-        help="Repair a corrupt run by rolling back to the last valid snapshot.",
+        help="Repara una ejecución corrupta revirtiendo al último snapshot válido.",
     ),
 ) -> None:
-    """Open the classic CLI/REPL by default."""
+    """Abre la CLI/REPL clásica por defecto."""
     if version:
         console.print(__version__)
         raise typer.Exit()
@@ -2961,13 +2962,13 @@ def _resume_saved_run(
     targets = run_context.manifest.get("targets", [])
     first_target = targets[0] if isinstance(targets, list) and targets else {}
     if not isinstance(first_target, dict) or not first_target.get("input"):
-        err_console.print(f"[!] Run {run_name} has no resumable target in run.json")
+        err_console.print(f"[!] La ejecución {run_name} no tiene un objetivo reanudable en run.json")
         raise typer.Exit(1)
 
     target = str(first_target["input"])
     command = str(run_context.manifest.get("command") or "run")
     if not has_llm_credentials(config.llm):
-        err_console.print("[!] Configure LLM credentials first (api_key or auth_mode).")
+        err_console.print("[!] Configura primero las credenciales del LLM (api_key o auth_mode).")
         raise typer.Exit(1)
 
     async def _run():
@@ -3000,7 +3001,7 @@ def _auto_save_recon_report(agent, user_input: str, config) -> None:
 
     try:
         state = agent.session_state
-        target = state.target or "unknown"
+        target = state.target or "desconocido"
 
         # Determine output path
         # Check if user specified a path
@@ -3024,15 +3025,15 @@ def _auto_save_recon_report(agent, user_input: str, config) -> None:
             report_format=config.session.report_format,
         )
 
-        console.print(f"\n[+] Recon report saved: {output_path}")
+        console.print(f"\n[+] Informe de reconocimiento guardado: {output_path}")
 
     except Exception as e:
-        console.print(f"\n[!] Failed to auto-save report: {e}")
+        console.print(f"\n[!] Error al guardar automáticamente el informe: {e}")
 
 
 @app.command()
 def repl() -> None:
-    """Start the classic natural-language REPL."""
+    """Inicia la REPL clásica de lenguaje natural."""
     _run_repl()
 
 
@@ -3042,62 +3043,62 @@ def tui(
         None,
         "--target",
         "-t",
-        help="Pre-fill the authorized target for the TUI.",
+        help="Precarga el objetivo autorizado para la TUI.",
     ),
     mode: str = typer.Option(
         "standard",
         "--mode",
         "-m",
-        help="Pre-fill check mode: quick, standard, deep, continuous.",
+        help="Precarga el modo de verificación: quick, standard, deep, continuous.",
     ),
     only_port: Optional[int] = typer.Option(
         None,
         "--only-port",
-        help="Pre-fill a single allowed test port.",
+        help="Precarga un único puerto de prueba permitido.",
     ),
     only_host: Optional[str] = typer.Option(
         None,
         "--only-host",
-        help="Pre-fill a single allowed host.",
+        help="Precarga un único host permitido.",
     ),
     only_path: Optional[str] = typer.Option(
         None,
         "--only-path",
-        help="Pre-fill a single allowed path.",
+        help="Precarga una única ruta permitida.",
     ),
     blocked_host: Optional[str] = typer.Option(
         None,
         "--blocked-host",
-        help="Pre-fill an explicitly blocked host.",
+        help="Precarga un host explícitamente bloqueado.",
     ),
     blocked_path: Optional[str] = typer.Option(
         None,
         "--blocked-path",
-        help="Pre-fill an explicitly blocked path.",
+        help="Precarga una ruta explícitamente bloqueada.",
     ),
     allow_actions: Optional[str] = typer.Option(
         None,
         "--allow-actions",
-        help="Pre-fill comma-separated allowed actions.",
+        help="Precarga acciones permitidas separadas por comas.",
     ),
     block_actions: Optional[str] = typer.Option(
         None,
         "--block-actions",
-        help="Pre-fill comma-separated blocked actions.",
+        help="Precarga acciones bloqueadas separadas por comas.",
     ),
-    resume: bool = typer.Option(True, "--resume/--no-resume", help="Resume target history."),
+    resume: bool = typer.Option(True, "--resume/--no-resume", help="Reanuda el historial del objetivo."),
     dry_run: bool = typer.Option(
         False,
         "--dry-run",
-        help="Render the launch summary and exit without starting a task.",
+        help="Muestra el resumen de lanzamiento y termina sin iniciar una tarea.",
     ),
     once: bool = typer.Option(
         False,
         "--once",
-        help="Render the TUI dashboard once and exit (useful for smoke tests).",
+        help="Muestra el panel de la TUI una vez y termina (útil para pruebas rápidas).",
     ),
 ) -> None:
-    """Open the terminal UI workbench."""
+    """Abre el banco de trabajo de la interfaz de terminal (TUI)."""
     from vulnclaw.cli.tui import (
         MODES,
         build_state_from_options,
@@ -3107,7 +3108,7 @@ def tui(
     )
 
     if mode not in MODES:
-        err_console.print("[!] Unknown TUI mode. Use one of: quick, standard, deep, continuous")
+        err_console.print("[!] Modo de TUI desconocido. Usa uno de: quick, standard, deep, continuous")
         raise typer.Exit(1)
 
     state = build_state_from_options(
@@ -3139,25 +3140,25 @@ def tui(
 @app.command()
 def web(
     host: str = typer.Option(
-        "127.0.0.1", "--host", help="Web server host (default: localhost only)"
+        "127.0.0.1", "--host", help="Host del servidor web (por defecto: solo localhost)"
     ),
-    port: int = typer.Option(7788, "--port", help="Web server port"),
+    port: int = typer.Option(7788, "--port", help="Puerto del servidor web"),
     dry_run: bool = typer.Option(
-        False, "--dry-run", help="Validate and print launch info without starting the server"
+        False, "--dry-run", help="Valida e imprime la información de lanzamiento sin iniciar el servidor"
     ),
     allow_remote: bool = typer.Option(
-        False, "--allow-remote", help="Explicitly allow binding the Web UI to a non-local address"
+        False, "--allow-remote", help="Permite explícitamente enlazar la Web UI a una dirección no local"
     ),
 ) -> None:
-    """Run the local Web UI."""
+    """Ejecuta la Web UI local."""
     if not _is_loopback_bind_host(host):
         if not allow_remote:
             err_console.print(
-                "[!] Refusing to bind the Web UI to a non-local address without --allow-remote."
+                "[!] Se rechaza enlazar la Web UI a una dirección no local sin --allow-remote."
             )
             raise typer.Exit(1)
         console.print(
-            "[yellow]Warning: keep the Web UI bound to 127.0.0.1 unless you know what you're doing.[/]"
+            "[yellow]Advertencia: mantén la Web UI enlazada a 127.0.0.1 a menos que sepas lo que haces.[/]"
         )
 
     from vulnclaw.web.app import FASTAPI_AVAILABLE
@@ -3165,21 +3166,21 @@ def web(
     console.print(
         Panel(
             f"Host: [bold]{host}[/]\n"
-            f"Port: [bold]{port}[/]\n"
-            f"FastAPI: [{'green' if FASTAPI_AVAILABLE else 'yellow'}]{'installed' if FASTAPI_AVAILABLE else 'missing'}[/]\n"
+            f"Puerto: [bold]{port}[/]\n"
+            f"FastAPI: [{'green' if FASTAPI_AVAILABLE else 'yellow'}]{'instalado' if FASTAPI_AVAILABLE else 'faltante'}[/]\n"
             f"URL: [bold]http://{host}:{port}[/]",
-            title="VulnClaw Web UI",
+            title="Interfaz Web de VulnClaw",
             border_style="cyan",
         )
     )
 
     if dry_run:
-        console.print("[green]Web UI dry-run completed.[/]")
+        console.print("[green]Ejecución de prueba (dry-run) de la Web UI completada.[/]")
         return
 
     if not FASTAPI_AVAILABLE:
         err_console.print(
-            "[!] FastAPI is missing. Install with [bold]pip install vulnclaw[web][/]."
+            "[!] Falta FastAPI. Instálalo con [bold]pip install vulnclaw[web][/]."
         )
         raise typer.Exit(1)
 
@@ -3187,7 +3188,7 @@ def web(
         import uvicorn
     except ImportError:
         err_console.print(
-            "[!] uvicorn is missing. Install with [bold]pip install vulnclaw[web][/]."
+            "[!] Falta uvicorn. Instálalo con [bold]pip install vulnclaw[web][/]."
         )
         raise typer.Exit(1)
 
