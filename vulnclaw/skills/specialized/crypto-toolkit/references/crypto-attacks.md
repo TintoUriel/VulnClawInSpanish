@@ -1,133 +1,133 @@
-# 密码学攻击手法
+# Técnicas de ataque criptográfico
 
-## 1. 哈希攻击
+## 1. Ataques a hashes
 
-### 彩虹表查询
-- crackstation.net — 免费，支持 MD5/SHA1/SHA256
-- cmd5.com — 中文，覆盖广泛
-- hashes.org — 社区维护
+### Consulta en rainbow tables
+- crackstation.net — gratuito, soporta MD5/SHA1/SHA256
+- cmd5.com — en chino, cobertura amplia
+- hashes.org — mantenido por la comunidad
 
-### 哈希长度扩展攻击
-- 适用：MD5, SHA1, SHA256 等基于 Merkle-Damgård 的哈希
-- 条件：知道 `H(message)` 和 `len(message)`，不知道 message 本身
-- 工具：hashpump, hash_extender
-- 场景：API 签名验证绕过
+### Ataque de extensión de longitud de hash
+- Aplicable a: MD5, SHA1, SHA256 y otros hashes basados en Merkle-Damgård
+- Condición: se conoce `H(message)` y `len(message)`, pero no el mensaje en sí
+- Herramientas: hashpump, hash_extender
+- Escenario: bypass de verificación de firmas en API
 
-### 哈希碰撞
-- MD5：fastcoll, HashClash
-- SHA1：SHAttered (理论可行)
-- 场景：文件完整性绕过、证书伪造
+### Colisión de hashes
+- MD5: fastcoll, HashClash
+- SHA1: SHAttered (viable en teoría)
+- Escenario: bypass de integridad de archivos, falsificación de certificados
 
-## 2. 对称加密攻击
+## 2. Ataques a cifrado simétrico
 
-### ECB 模式攻击
-- 相同明文块 → 相同密文块
-- 可通过重排密文块重排明文
-- 可识别重复模式（如用户角色字段）
+### Ataque al modo ECB
+- Mismo bloque de texto plano → mismo bloque de texto cifrado
+- Se puede reordenar el texto plano reordenando los bloques de texto cifrado
+- Permite identificar patrones repetidos (por ejemplo, el campo de rol de usuario)
 
-### CBC 字节翻转攻击
-- 修改 IV 或前一块密文即可翻转下一块明文的对应字节
-- 公式：`P[i] = D(C[i]) XOR C[i-1]`
-- 修改 `C[i-1][j]` → `P[i][j]` 翻转
-- 场景：修改加密的用户ID、角色字段
+### Ataque de volteo de bits en CBC (byte flipping)
+- Modificar el IV o el bloque de texto cifrado anterior permite voltear el byte correspondiente del siguiente bloque de texto plano
+- Fórmula: `P[i] = D(C[i]) XOR C[i-1]`
+- Modificar `C[i-1][j]` → voltea `P[i][j]`
+- Escenario: modificar el ID de usuario o el campo de rol cifrados
 
-### Padding Oracle 攻击
-- 条件：服务端返回 padding 是否正确
-- 逐字节恢复明文，无需密钥
-- 工具：padbuster, padding-oracle-attacker
-- 场景：ASP.NET、Java 序列化 token
+### Ataque Padding Oracle
+- Condición: el servidor indica si el padding es correcto o no
+- Recupera el texto plano byte a byte, sin necesidad de la clave
+- Herramientas: padbuster, padding-oracle-attacker
+- Escenario: tokens serializados de ASP.NET, Java
 
-### IV 重用攻击
-- CBC 模式下相同 IV + 相同 Key → 信息泄露
-- 可推断明文是否相同
+### Reutilización de IV
+- En modo CBC, mismo IV + misma clave → filtración de información
+- Permite inferir si los textos planos son iguales
 
-## 3. RSA 攻击
+## 3. Ataques a RSA
 
-### 小公钥指数攻击
-- e=3 时，如果明文 m^3 < n，直接开立方根恢复
-- 低加密指数广播攻击：同一明文用相同 e 不同 n 加密
+### Ataque de exponente público pequeño
+- Con e=3, si el texto plano m^3 < n, se puede recuperar directamente mediante raíz cúbica
+- Ataque de difusión con exponente de cifrado bajo: mismo texto plano cifrado con el mismo e pero distinto n
 
-### 共模攻击
-- 同一明文用相同 n 不同 e 加密
-- 通过扩展欧几里得算法恢复明文
+### Ataque de módulo común
+- Mismo texto plano cifrado con el mismo n pero distinto e
+- Se recupera el texto plano mediante el algoritmo extendido de Euclides
 
-### Wiener 攻击
-- d < n^0.25 时可分解 n
-- 适用于小私钥指数场景
+### Ataque de Wiener
+- Con d < n^0.25 se puede factorizar n
+- Aplicable a escenarios con exponente privado pequeño
 
-### Fermat 分解
-- p 和 q 相近时可快速分解 n
-- 适用于弱密钥生成
+### Factorización de Fermat
+- Cuando p y q son cercanos, n se puede factorizar rápidamente
+- Aplicable a generación de claves débil
 
-### 已知密钥文件
-- 从 .pem/.der 文件中提取参数
+### Archivo de clave conocido
+- Extraer los parámetros de archivos .pem/.der
 - openssl rsa -text -noout -in key.pem
 
-## 4. 古典密码攻击
+## 4. Ataques a cifrados clásicos
 
-### Caesar 暴力
-- 仅 25 种可能，直接遍历
-- 配合词频分析选择最可能的结果
+### Fuerza bruta sobre Caesar
+- Solo 25 posibilidades, recorrerlas directamente
+- Combinar con análisis de frecuencias para elegir el resultado más probable
 
-### Vigenere 分析
-- Kasiski 测试确定密钥长度
-- 重合指数法验证密钥长度
-- 确定长度后每列做 Caesar 破解
+### Análisis de Vigenère
+- Prueba de Kasiski para determinar la longitud de la clave
+- Método del índice de coincidencia para verificar la longitud de la clave
+- Una vez determinada la longitud, romper cada columna como un Caesar
 
-### 栅栏密码
-- 常见栏数：2-8
-- 遍历所有可能的栏数
-- 检查结果是否有意义
+### Cifrado de transposición en columnas (rail fence)
+- Número de columnas común: 2-8
+- Recorrer todos los números de columnas posibles
+- Comprobar si el resultado tiene sentido
 
-### 培根密码
-- 两种字体/样式 → A/B 编码
-- 每5个字符解码一个字母
+### Cifrado de Bacon
+- Dos tipos de fuente/estilo → codificación A/B
+- Decodificar una letra cada 5 caracteres
 
-## 5. JWT 攻击
+## 5. Ataques a JWT
 
-### none 算法绕过
+### Bypass del algoritmo none
 ```json
 {"alg": "none", "typ": "JWT"}
 ```
-- 将算法改为 none
-- 移除签名部分
-- 某些实现会接受无签名的 token
+- Cambiar el algoritmo a none
+- Eliminar la parte de la firma
+- Algunas implementaciones aceptan tokens sin firma
 
-### RS256 → HS256 算法混淆
-- 将算法从 RS256 改为 HS256
-- 用公钥作为 HMAC 密钥签名
-- 如果服务端用公钥验证 HS256 签名 → 绕过
+### Confusión de algoritmo RS256 → HS256
+- Cambiar el algoritmo de RS256 a HS256
+- Usar la clave pública como clave HMAC para firmar
+- Si el servidor verifica la firma HS256 con la clave pública → bypass
 
-### 弱密钥爆破
+### Fuerza bruta de clave débil
 - jwt-tool, jwt-cracker
-- 常见弱密钥：secret, password, 123456 等
+- Claves débiles comunes: secret, password, 123456, etc.
 
-### JWK / jku 注入
-- 在 Header 中嵌入公钥（jwk 字段）
-- 或指向攻击者控制的 jku URL
-- 如果服务端信任 Header 中的密钥 → 伪造
+### Inyección de JWK / jku
+- Incrustar la clave pública en el Header (campo jwk)
+- O apuntar a una URL jku controlada por el atacante
+- Si el servidor confía en la clave del Header → falsificación
 
-## 6. 编码链攻击模式
+## 6. Patrones de ataque de cadenas de codificación
 
-### WAF 绕过编码
-- 双重 URL 编码：`%2527` → `%27` → `'`
-- Unicode 标准化：`％27` → `'`（全角变半角）
-- HTML 实体：`&#39;` → `'`
-- Base64 编码注入参数
+### Codificación para bypass de WAF
+- Doble codificación URL: `%2527` → `%27` → `'`
+- Normalización Unicode: `％27` → `'` (ancho completo a ancho medio)
+- Entidad HTML: `&#39;` → `'`
+- Inyección de parámetros codificados en Base64
 
-### 反序列化中的编码
-- PHP: base64 编码的序列化对象
-- Java: Base64 编码的序列化字节流
-- Python: base64 pickle payloads
+### Codificación en deserialización
+- PHP: objeto serializado codificado en base64
+- Java: flujo de bytes serializado codificado en Base64
+- Python: payloads pickle en base64
 
-## 7. 工具速查
+## 7. Chuleta de herramientas
 
-| 场景 | 工具 |
+| Escenario | Herramienta |
 |------|------|
-| 通用编解码 | CyberChef |
-| 哈希破解 | hashcat, john |
-| RSA 分析 | RsaCtfTool |
-| JWT 分析 | jwt-tool |
+| Codificación/decodificación general | CyberChef |
+| Ruptura de hashes | hashcat, john |
+| Análisis de RSA | RsaCtfTool |
+| Análisis de JWT | jwt-tool |
 | Padding Oracle | padbuster |
-| 哈希扩展 | hashpump |
-| 在线解码 | base64decode.org, cyberchef.org |
+| Extensión de hash | hashpump |
+| Decodificación online | base64decode.org, cyberchef.org |
