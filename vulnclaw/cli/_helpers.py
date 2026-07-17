@@ -78,7 +78,7 @@ ASCII_LOGO = (
     "|___/\\__,_/_/_/ /_/\\____/_/\\__,_/ |__/|__/\n"
 )
 
-BANNER_SUBTITLE = f"VulnClaw v{__version__} - AI-powered penetration testing CLI"
+BANNER_SUBTITLE = f"VulnClaw v{__version__} - CLI de pruebas de penetración impulsada por IA"
 
 
 def _print_banner() -> None:
@@ -101,7 +101,7 @@ def _print_agent_output(output: str, config: Any) -> None:
         stripped = strip_think_tags(output)
         had_thinking = (stripped != output) and not stripped
         if had_thinking:
-            console.print("[dim](LLM returned only hidden reasoning and no visible answer.)[/dim]")
+            console.print("[dim](El LLM solo devolvió razonamiento oculto y ninguna respuesta visible.)[/dim]")
 
 
 def _make_solve_event_printer(target_console: Console) -> Any:
@@ -122,13 +122,13 @@ def _make_solve_event_printer(target_console: Console) -> Any:
         elif kind == "frontier_recovery":
             if payload.get("reason") == "fallback_intents":
                 target_console.print(
-                    f"[yellow]Frontier recovery:[/yellow] "
-                    f"added {payload.get('added', 0)} fallback intents"
+                    f"[yellow]Recuperación de frontera:[/yellow] "
+                    f"se agregaron {payload.get('added', 0)} intents de respaldo"
                 )
             else:
                 target_console.print(
-                    f"[yellow]Frontier recovery:[/yellow] "
-                    f"no open intents, retry {payload.get('streak', '?')}"
+                    f"[yellow]Recuperación de frontera:[/yellow] "
+                    f"sin intents abiertos, reintento {payload.get('streak', '?')}"
                 )
         elif kind == "completed":
             target_console.print("[green]✓ Reason: objetivo alcanzado[/green]")
@@ -261,7 +261,7 @@ async def _run_cli_orchestrated_task(
     try:
         def on_restored(restore_result: Any) -> None:
             console.print(
-                f"[*] Restored saved target state: [bold]{restore_result.target or target}[/]"
+                f"[*] Estado del objetivo guardado restaurado: [bold]{restore_result.target or target}[/]"
             )
 
         return await run_agent_task(
