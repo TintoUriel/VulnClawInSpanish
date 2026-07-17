@@ -5,27 +5,27 @@ description: Authorized web security reference for selecting attack categories, 
 
 # Web Security Playbook
 
-Use this skill for authorized security testing, defense validation, training, or documentation work.
+Usa este skill para pruebas de seguridad autorizadas, validación de defensas, capacitación o trabajo de documentación.
 
-## When To Use
+## Cuándo usar
 
-- The user needs a category-level web testing playbook rather than a single exploit recipe.
-- The task involves choosing among multiple web attack families, payload styles, or bypass approaches.
-- The user wants to turn the extracted wiki into narrower skills, checklists, notes, or reports.
+- El usuario necesita una chuleta de pruebas web a nivel de categoría en lugar de una receta de exploit puntual.
+- La tarea implica elegir entre múltiples familias de ataque web, estilos de payload o enfoques de bypass.
+- El usuario quiere convertir la wiki extraída en skills, checklists, notas o reportes más específicos.
 
-## When Not To Use
+## Cuándo no usar
 
-- A narrower existing skill already covers the request better.
-- The task is primarily internal network, AD, Windows, Exchange, or SharePoint work.
-- The user only needs a tool cheat sheet rather than attack-family guidance.
+- Un skill existente más específico ya cubre mejor la solicitud.
+- La tarea es principalmente trabajo de red interna, AD, Windows, Exchange o SharePoint.
+- El usuario solo necesita una chuleta de herramientas en lugar de guía por familia de ataque.
 
-## Workflow
+## Flujo de trabajo
 
-1. Start with `references/web-playbook-index.md`, then narrow to 1-3 relevant category files.
-2. If the request still spans multiple attack families, keep the answer grouped by category instead of by individual payload.
-3. If a specific payload entry is needed, use the packaged reference entries in `references/`; any extracted source path still shown in entries should be treated as provenance only.
-4. Return only the payload families, variants, prerequisites, bypass notes, OPSEC notes, and mitigations that match the authorized scope.
-5. When writing a new skill, checklist, or report, rewrite the selected material into the target format instead of copying whole reference files.
+1. Comienza con `references/web-playbook-index.md`, luego reduce a 1-3 archivos de categoría relevantes.
+2. Si la solicitud sigue abarcando múltiples familias de ataque, mantén la respuesta agrupada por categoría en lugar de por payload individual.
+3. Si se necesita una entrada de payload específica, usa las entradas de referencia empaquetadas en `references/`; cualquier ruta de origen extraída que aún aparezca en las entradas debe tratarse solo como procedencia.
+4. Devuelve únicamente las familias de payload, variantes, prerrequisitos, notas de bypass, notas OPSEC y mitigaciones que correspondan al alcance autorizado.
+5. Al redactar un nuevo skill, checklist o reporte, reescribe el material seleccionado en el formato objetivo en lugar de copiar archivos de referencia completos.
 
 ## Category Map
 
@@ -53,11 +53,11 @@ Use this skill for authorized security testing, defense validation, training, or
 - XSS cross-site scripting: `references/web-playbook-22-xss-cross-site-scripting.md`
 - Inyección de entidades XXE: `references/web-playbook-23-xxe-entity-injection.md`
 
-## Notes
+## Notas
 
-- Prefer 1-3 categories per request, not the whole corpus.
-- Use `references/web-playbook-index.md` as the first stop for category selection.
-- Use source markdown files for detailed commands and tutorial text.
-- Keep outputs scoped to the user's target stack and authorization.
+- Prefiere 1-3 categorías por solicitud, no todo el corpus.
+- Usa `references/web-playbook-index.md` como primera parada para seleccionar categoría.
+- Usa los archivos markdown de origen para comandos detallados y texto tutorial.
+- Mantén las salidas limitadas al stack objetivo y a la autorización del usuario.
 
 </content>

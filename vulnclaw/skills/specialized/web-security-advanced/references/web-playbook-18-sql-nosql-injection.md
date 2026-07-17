@@ -1,278 +1,277 @@
-# SQL/NoSQL注入
+# Inyección SQL/NoSQL
 English: SQL/NoSQL Injection
 - Entry Count: 17
 - Use this file to shortlist relevant payloads, then open the linked source markdown for the full workflow and commands.
-## MySQL注入 - 基础探测
+## Inyección MySQL - Sondeo básico
 - ID: sqli-mysql-basic
 - Difficulty: beginner
 - Subcategory: MySQL
 - Tags: sqli, mysql, injection, database
 - Original Extracted Source: original extracted web-security-wiki source/sqli-mysql-basic.md
 Description:
-MySQL数据库注入基础探测与数据提取技术
+Sondeo básico de inyección en base de datos MySQL y técnicas de extracción de datos
 Prerequisites:
-- 目标存在SQL注入点
-- 后端数据库为MySQL
-- 了解基本SQL语法
+- El objetivo tiene un punto de inyección SQL
+- La base de datos backend es MySQL
+- Conocimiento básico de sintaxis SQL
 Execution Outline:
-1. 1. 探测注入点
-2. 2. 确定列数
-3. 3. 确定显示位置
-4. 4. 获取数据库信息
-## MySQL注入 - 高级技术
+1. 1. Sondear el punto de inyección
+2. 2. Determinar el número de columnas
+3. 3. Determinar la posición de visualización
+4. 4. Obtener información de la base de datos
+## Inyección MySQL - Técnicas avanzadas
 - ID: sqli-mysql-advanced
 - Difficulty: advanced
 - Subcategory: MySQL
 - Tags: sqli, mysql, advanced, file-read, rce
 - Original Extracted Source: original extracted web-security-wiki source/sqli-mysql-advanced.md
 Description:
-MySQL高级注入技术：文件读写、UDF提权、命令执行
+Técnicas avanzadas de inyección MySQL: lectura/escritura de archivos, escalada de privilegios mediante UDF, ejecución de comandos
 Prerequisites:
-- MySQL用户具有FILE权限
-- 知道网站绝对路径
-- secure_file_priv配置允许
+- El usuario MySQL tiene el privilegio FILE
+- Se conoce la ruta absoluta del sitio
+- La configuración secure_file_priv lo permite
 Execution Outline:
-1. 1. 检测FILE权限
-2. 2. 获取网站路径
-3. 3. 读取敏感文件
-4. 4. 写入WebShell
-## MSSQL注入 - 基础探测
+1. 1. Detectar el privilegio FILE
+2. 2. Obtener la ruta del sitio
+3. 3. Leer archivos sensibles
+4. 4. Escribir una WebShell
+## Inyección MSSQL - Sondeo básico
 - ID: sqli-mssql-basic
 - Difficulty: intermediate
 - Subcategory: MSSQL
 - Tags: sqli, mssql, sqlserver, injection
 - Original Extracted Source: original extracted web-security-wiki source/sqli-mssql-basic.md
 Description:
-Microsoft SQL Server数据库注入技术
+Técnicas de inyección en base de datos Microsoft SQL Server
 Prerequisites:
-- 目标存在SQL注入点
-- 后端使用MSSQL数据库
+- El objetivo tiene un punto de inyección SQL
+- El backend usa base de datos MSSQL
 Execution Outline:
-1. 1. 探测注入点
-2. 2. 获取版本信息
-3. 3. 获取用户信息
-4. 4. 获取数据库信息
-## MSSQL注入 - 高级技术
+1. 1. Sondear el punto de inyección
+2. 2. Obtener información de versión
+3. 3. Obtener información de usuario
+4. 4. Obtener información de la base de datos
+## Inyección MSSQL - Técnicas avanzadas
 - ID: sqli-mssql-advanced
 - Difficulty: advanced
 - Subcategory: MSSQL
 - Tags: sqli, mssql, xp_cmdshell, rce
 - Original Extracted Source: original extracted web-security-wiki source/sqli-mssql-advanced.md
 Description:
-MSSQL高级注入：xp_cmdshell、SP_OACREATE命令执行
+Inyección avanzada en MSSQL: ejecución de comandos mediante xp_cmdshell y SP_OACREATE
 Prerequisites:
-- MSSQL具有高权限
-- xp_cmdshell可用或可开启
+- MSSQL tiene privilegios elevados
+- xp_cmdshell está disponible o se puede habilitar
 Execution Outline:
-1. 1. 检测xp_cmdshell状态
-2. 2. 开启xp_cmdshell
-3. 3. 执行系统命令
-4. 4. 写入WebShell
-## Oracle注入 - 基础探测
+1. 1. Detectar el estado de xp_cmdshell
+2. 2. Habilitar xp_cmdshell
+3. 3. Ejecutar comandos del sistema
+4. 4. Escribir una WebShell
+## Inyección Oracle - Sondeo básico
 - ID: sqli-oracle-basic
 - Difficulty: intermediate
 - Subcategory: Oracle
 - Tags: sqli, oracle, injection
 - Original Extracted Source: original extracted web-security-wiki source/sqli-oracle-basic.md
 Description:
-Oracle数据库注入基础技术
+Técnicas básicas de inyección en base de datos Oracle
 Prerequisites:
-- 目标存在SQL注入点
-- 后端使用Oracle数据库
+- El objetivo tiene un punto de inyección SQL
+- El backend usa base de datos Oracle
 Execution Outline:
-1. 1. 探测注入点
-2. 2. 获取版本信息
-3. 3. 获取用户信息
-4. 4. 获取表名
-## Oracle注入 - 高级技术
+1. 1. Sondear el punto de inyección
+2. 2. Obtener información de versión
+3. 3. Obtener información de usuario
+4. 4. Obtener nombres de tablas
+## Inyección Oracle - Técnicas avanzadas
 - ID: sqli-oracle-advanced
 - Difficulty: advanced
 - Subcategory: Oracle
 - Tags: sqli, oracle, advanced, rce
 - Original Extracted Source: original extracted web-security-wiki source/sqli-oracle-advanced.md
 Description:
-Oracle高级注入技术：Java存储过程、UTL_FILE文件操作
+Técnicas avanzadas de inyección Oracle: procedimientos almacenados Java, operaciones de archivos con UTL_FILE
 Prerequisites:
-- Oracle高权限
-- Java虚拟机可用
+- Privilegios elevados en Oracle
+- La máquina virtual Java está disponible
 Execution Outline:
-1. 1. 检测Java权限
-2. 2. 创建Java执行函数
-3. 3. UTL_FILE读取文件
-## PostgreSQL注入 - 基础探测
+1. 1. Detectar privilegios Java
+2. 2. Crear una función de ejecución Java
+3. 3. Leer archivos con UTL_FILE
+## Inyección PostgreSQL - Sondeo básico
 - ID: sqli-postgres-basic
 - Difficulty: intermediate
 - Subcategory: PostgreSQL
 - Tags: sqli, postgresql, postgres, injection
 - Original Extracted Source: original extracted web-security-wiki source/sqli-postgres-basic.md
 Description:
-PostgreSQL数据库注入技术
+Técnicas de inyección en base de datos PostgreSQL
 Prerequisites:
-- 目标存在SQL注入点
-- 后端使用PostgreSQL
+- El objetivo tiene un punto de inyección SQL
+- El backend usa PostgreSQL
 Execution Outline:
-1. 1. 探测注入点
-2. 2. 获取版本信息
-3. 3. 获取表名
-4. 4. 获取列名
-## SQLite注入
+1. 1. Sondear el punto de inyección
+2. 2. Obtener información de versión
+3. 3. Obtener nombres de tablas
+4. 4. Obtener nombres de columnas
+## Inyección SQLite
 - ID: sqli-sqlite-basic
 - Difficulty: intermediate
 - Subcategory: SQLite
 - Tags: sqli, sqlite
 - Original Extracted Source: original extracted web-security-wiki source/sqli-sqlite-basic.md
 Description:
-SQLite数据库注入攻击
+Ataque de inyección en base de datos SQLite
 Prerequisites:
-- SQLite数据库
-- 存在注入点
+- Base de datos SQLite
+- Existe un punto de inyección
 Execution Outline:
-1. 1. 探测注入点
-2. 2. 获取版本
-3. 3. 获取表名
-4. 4. 获取表结构
-## MongoDB注入
+1. 1. Sondear el punto de inyección
+2. 2. Obtener la versión
+3. 3. Obtener nombres de tablas
+4. 4. Obtener la estructura de la tabla
+## Inyección MongoDB
 - ID: sqli-mongodb-basic
 - Difficulty: intermediate
 - Subcategory: MongoDB
 - Tags: nosql, mongodb, injection
 - Original Extracted Source: original extracted web-security-wiki source/sqli-mongodb-basic.md
 Description:
-NoSQL数据库注入攻击技术
+Técnicas de ataque de inyección en bases de datos NoSQL
 Prerequisites:
-- 目标使用MongoDB
-- 存在用户输入拼接查询
+- El objetivo usa MongoDB
+- Existe concatenación de entrada de usuario en la consulta
 Execution Outline:
-1. 1. 探测注入点
-2. 2. 绕过认证
-3. 3. 逻辑运算注入
-4. 4. 正则注入
-## Redis未授权访问
+1. 1. Sondear el punto de inyección
+2. 2. Bypass de autenticación
+3. 3. Inyección de operadores lógicos
+4. 4. Inyección de expresiones regulares
+## Acceso no autorizado a Redis
 - ID: sqli-redis
 - Difficulty: intermediate
 - Subcategory: Redis
 - Tags: redis, nosql, injection
 - Original Extracted Source: original extracted web-security-wiki source/sqli-redis.md
 Description:
-Redis未授权访问和命令注入
+Acceso no autorizado a Redis e inyección de comandos
 Prerequisites:
-- Redis服务可访问
-- 未授权或弱密码
+- El servicio Redis es accesible
+- Sin autorización o con contraseña débil
 Execution Outline:
-1. 1. 探测Redis
-2. 2. 未授权访问
-3. 3. 写入Webshell
-4. 4. 写入SSH公钥
-## 布尔盲注
+1. 1. Sondear Redis
+2. 2. Acceso no autorizado
+3. 3. Escribir una Webshell
+4. 4. Escribir una clave pública SSH
+## Inyección ciega booleana
 - ID: sqli-blind
 - Difficulty: intermediate
-- Subcategory: 盲注
+- Subcategory: Inyección ciega
 - Tags: sqli, blind, boolean
 - Original Extracted Source: original extracted web-security-wiki source/sqli-blind.md
 Description:
-基于布尔条件的SQL盲注技术
+Técnica de inyección SQL ciega basada en condiciones booleanas
 Prerequisites:
-- 存在SQL注入
-- 页面有真/假两种不同响应
+- Existe inyección SQL
+- La página tiene respuestas distintas para verdadero/falso
 Execution Outline:
-1. 1. 确认盲注
-2. 2. 获取数据库名长度
-3. 3. 逐字符枚举数据库名
-4. 4. 使用工具自动化
-## 时间盲注
+1. 1. Confirmar la inyección ciega
+2. 2. Obtener la longitud del nombre de la base de datos
+3. 3. Enumerar el nombre de la base de datos carácter por carácter
+4. 4. Usar herramientas para automatizar
+## Inyección ciega basada en tiempo
 - ID: sqli-time-based
 - Difficulty: intermediate
-- Subcategory: 盲注
+- Subcategory: Inyección ciega
 - Tags: sqli, blind, time
 - Original Extracted Source: original extracted web-security-wiki source/sqli-time-based.md
 Description:
-基于时间延迟的SQL盲注技术
+Técnica de inyección SQL ciega basada en retardo temporal
 Prerequisites:
-- 存在SQL注入
-- 页面响应时间可控
+- Existe inyección SQL
+- El tiempo de respuesta de la página es controlable
 Execution Outline:
-1. 1. 确认时间盲注
-2. 2. 获取数据库名长度
-3. 3. 逐字符提取
-4. 4. 不同数据库延时函数
-## 报错注入
+1. 1. Confirmar la inyección ciega basada en tiempo
+2. 2. Obtener la longitud del nombre de la base de datos
+3. 3. Extraer carácter por carácter
+4. 4. Funciones de retardo según la base de datos
+## Inyección basada en errores
 - ID: sqli-error-based
 - Difficulty: intermediate
-- Subcategory: 报错注入
+- Subcategory: Inyección basada en errores
 - Tags: sqli, error, extractvalue
 - Original Extracted Source: original extracted web-security-wiki source/sqli-error-based.md
 Description:
-利用错误信息提取数据的SQL注入
+Inyección SQL que extrae datos aprovechando los mensajes de error
 Prerequisites:
-- 存在SQL注入
-- 错误信息会显示在页面上
+- Existe inyección SQL
+- Los mensajes de error se muestran en la página
 Execution Outline:
-1. 1. 确认报错注入
-2. 2. 获取数据库信息
-3. 3. 获取表名
-4. 4. 获取数据
-## 二阶SQL注入
+1. 1. Confirmar la inyección basada en errores
+2. 2. Obtener información de la base de datos
+3. 3. Obtener nombres de tablas
+4. 4. Obtener los datos
+## Inyección SQL de segundo orden
 - ID: sqli-second-order
 - Difficulty: advanced
-- Subcategory: 二阶注入
+- Subcategory: Inyección de segundo orden
 - Tags: sqli, second-order, stored
 - Original Extracted Source: original extracted web-security-wiki source/sqli-second-order.md
 Description:
-存储后触发的SQL注入攻击
+Ataque de inyección SQL que se dispara después del almacenamiento
 Prerequisites:
-- 存在数据存储功能
-- 存储数据被二次使用
+- Existe una función de almacenamiento de datos
+- Los datos almacenados se reutilizan posteriormente
 Execution Outline:
-1. 1. 探测二阶注入
-2. 2. 用户名注入
-3. 3. 密码重置注入
-4. 4. 订单/评论注入
-## 联合查询注入
+1. 1. Sondear la inyección de segundo orden
+2. 2. Inyección en el nombre de usuario
+3. 3. Inyección en el restablecimiento de contraseña
+4. 4. Inyección en pedidos/comentarios
+## Inyección por consulta UNION
 - ID: sqli-union
 - Difficulty: beginner
-- Subcategory: 联合查询
+- Subcategory: Consulta UNION
 - Tags: sqli, union, select
 - Original Extracted Source: original extracted web-security-wiki source/sqli-union.md
 Description:
-使用UNION SELECT提取数据
+Extracción de datos mediante UNION SELECT
 Prerequisites:
-- 存在注入点
-- 可显示查询结果
+- Existe un punto de inyección
+- Los resultados de la consulta se pueden mostrar
 Execution Outline:
-1. 1. 确定列数
-2. 2. 确定显示列
-3. 3. 提取数据
-4. 4. 绕过过滤
-## 堆叠查询注入
+1. 1. Determinar el número de columnas
+2. 2. Determinar las columnas visibles
+3. 3. Extraer los datos
+4. 4. Bypass de filtros
+## Inyección por consultas apiladas (stacked queries)
 - ID: sqli-stacked
 - Difficulty: intermediate
-- Subcategory: 堆叠查询
+- Subcategory: Consultas apiladas
 - Tags: sqli, stacked, queries
 - Original Extracted Source: original extracted web-security-wiki source/sqli-stacked.md
 Description:
-执行多条SQL语句的注入
+Inyección que ejecuta múltiples sentencias SQL
 Prerequisites:
-- 支持多语句执行
+- Se admite la ejecución de múltiples sentencias
 - MySQL/PostgreSQL/MSSQL
 Execution Outline:
-1. 1. 探测堆叠查询
-2. 2. MySQL堆叠查询
-3. 3. MSSQL堆叠查询
-4. 4. PostgreSQL堆叠查询
-## SQL注入WAF绕过
+1. 1. Sondear las consultas apiladas
+2. 2. Consultas apiladas en MySQL
+3. 3. Consultas apiladas en MSSQL
+4. 4. Consultas apiladas en PostgreSQL
+## Bypass de WAF en inyección SQL
 - ID: sqli-waf-bypass
 - Difficulty: advanced
-- Subcategory: WAF绕过
+- Subcategory: Bypass de WAF
 - Tags: sqli, waf, bypass
 - Original Extracted Source: original extracted web-security-wiki source/sqli-waf-bypass.md
 Description:
-绕过Web应用防火墙的技术
+Técnicas para eludir el firewall de aplicaciones web (WAF)
 Prerequisites:
-- 目标存在SQL注入点
-- 存在WAF防护
+- El objetivo tiene un punto de inyección SQL
+- Existe protección WAF
 Execution Outline:
-1. 分块传输编码
-2. HTTP参数污染(HPP)
-3. 等价函数替换
-4. 无逗号注入
-
+1. Codificación de transferencia fragmentada (chunked)
+2. Contaminación de parámetros HTTP (HPP)
+3. Sustitución por funciones equivalentes
+4. Inyección sin comas

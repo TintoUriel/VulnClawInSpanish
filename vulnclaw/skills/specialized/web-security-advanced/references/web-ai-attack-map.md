@@ -1,35 +1,35 @@
-# Web And AI Attack Map
+# Mapa de ataques Web y de IA
 
-Use the fused upstream material for complete content:
+Usa el material fusionado de origen para el contenido completo:
 
 - `references/`
 - `references/web-playbook-*.md`
 - `references/tools-reference-*.md`
 
-## Web Families
+## Familias Web
 
-- SQL and NoSQL injection
+- Inyección SQL y NoSQL
 - XSS
 - SSRF
 - RCE
 - XXE
 - SSTI
-- LFI and RFI
+- LFI y RFI
 - CSRF
-- JWT and auth flaws
-- API and business logic flaws
-- request smuggling
-- cache and CDN issues
-- WebSocket issues
+- Fallos de JWT y autenticación
+- Fallos de API y lógica de negocio
+- Contrabando de solicitudes (request smuggling)
+- Problemas de caché y CDN
+- Problemas de WebSocket
 
-## AI And MCP Families
+## Familias de IA y MCP
 
-- prompt injection
-- indirect prompt injection
-- CoT interference
-- MCP tool poisoning
-- hidden instruction injection
-- agent privilege abuse
-- prompt leakage
+- Inyección de prompts
+- Inyección de prompts indirecta
+- Interferencia en la cadena de pensamiento (CoT)
+- Envenenamiento de herramientas MCP
+- Inyección de instrucciones ocultas
+- Abuso de privilegios del agente
+- Filtración de prompts
 
 
