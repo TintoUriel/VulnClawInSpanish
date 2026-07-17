@@ -1,98 +1,98 @@
-# Android UI-Driven Observation And Packet Loop
+# Observación Guiada por UI y Bucle de Paquetes en Android
 
-Use this file when Android runtime progress depends on what is visible in the app, which button or field the operator should touch next, or which UI action is needed to trigger the HTTP/HTTPS request or WebSocket message that will later enter Burp and the pentest workflow.
+Usa este archivo cuando el progreso en runtime de Android dependa de lo que sea visible en la app, qué botón o campo debe tocar el operador a continuación, o qué acción de UI se necesita para disparar la solicitud HTTP/HTTPS o el mensaje WebSocket que luego entrará en Burp y en el flujo de trabajo de pentest.
 
-## Core Rule
+## Regla Central
 
-This file is a runtime steering layer.
+Este archivo es una capa de dirección en runtime.
 
-For Android external URL testing, start here before reverse engineering: drive the app, inspect the screenshot, review logs, and check whether HTTP/HTTPS requests or WebSocket messages are already visible.
-Only after those checks fail should you fall back to Java recovery, native dump, or runtime hooks.
+Para las pruebas de URL externas en Android, comienza aquí antes de la ingeniería inversa: maneja la app, inspecciona la captura de pantalla, revisa los logs, y verifica si las solicitudes HTTP/HTTPS o los mensajes WebSocket ya son visibles.
+Solo después de que esas verificaciones fallen debes recurrir a la recuperación de Java, el volcado nativo, o los hooks en runtime.
 
-The runtime sequence stays the same:
+La secuencia de runtime se mantiene igual:
 
-`app presence -> packet path ready -> UI action -> screenshot/log check -> packet capture -> replay -> pentest`
+`presencia de la app -> ruta de paquetes lista -> acción de UI -> revisión de captura de pantalla/log -> captura de paquetes -> repetición (replay) -> pentest`
 
-## When To Use This File
+## Cuándo Usar Este Archivo
 
-- the next request trigger is hidden behind login, navigation, wizard steps, dialogs, or feature toggles
-- the target request only appears after a visible UI transition
-- you need to reason from the current screenshot before deciding the next tap, text input, swipe, or back action
-- you need to correlate a specific screen action with one or more packets before replay work starts
-- the app is testable, but the operator still needs a disciplined observe-decide-act loop instead of blind random clicking
+- el siguiente disparador de solicitud está oculto detrás de un inicio de sesión, navegación, pasos de asistente, diálogos, o interruptores de funcionalidad
+- la solicitud objetivo solo aparece después de una transición de UI visible
+- necesitas razonar a partir de la captura de pantalla actual antes de decidir el siguiente toque, entrada de texto, deslizamiento, o acción de retroceso
+- necesitas correlacionar una acción de pantalla específica con uno o más paquetes antes de que comience el trabajo de repetición (replay)
+- la app es comprobable, pero el operador aún necesita un bucle disciplinado de observar-decidir-actuar en lugar de clics aleatorios a ciegas
 
-## Primary MCP Chain
+## Cadena MCP Principal
 
 1. `scrcpy_vision`
-2. `charles` or `burp`
+2. `charles` o `burp`
 3. `adb_mcp`
-4. `jadx` only when packets are absent, encrypted, or blocked
+4. `jadx` solo cuando los paquetes estén ausentes, cifrados, o bloqueados
 5. `frida_mcp`
-6. `ida_pro_mcp` when dumped `.so` analysis is required
+6. `ida_pro_mcp` cuando se requiera análisis de `.so` volcado (dump)
 
-## Observe-Decide-Act Loop
+## Bucle de Observar-Decidir-Actuar
 
-### Step 1: Prepare the runtime view
+### Paso 1: Preparar la vista de runtime
 
-- list devices and confirm the right `serial`
-- confirm the target app package is installed on the device
-- make sure packet capture is already ready if the next action may trigger the target request
-- wake or unlock the screen if needed
-- get the physical screen resolution before any coordinate-based tap or swipe
-- start the app or bring it to the target feature
+- lista los dispositivos y confirma el `serial` correcto
+- confirma que el paquete de la app objetivo esté instalado en el dispositivo
+- asegúrate de que la captura de paquetes ya esté lista si la siguiente acción puede disparar la solicitud objetivo
+- despierta o desbloquea la pantalla si es necesario
+- obtén la resolución física de la pantalla antes de cualquier toque o deslizamiento basado en coordenadas
+- inicia la app o llévala a la funcionalidad objetivo
 
-Typical `scrcpy_vision` helpers:
+Ayudantes típicos de `scrcpy_vision`:
 
 - `android_devices_list`
 - `android_apps_list`
 - `android_screen_wake`
 - `android_screen_unlock`
-- `android_shell_exec` with `wm size`
+- `android_shell_exec` con `wm size`
 - `android_app_start`
 - `android_activity_current`
 
-If the next step will use raw coordinates, first run `android_shell_exec` with `wm size` and record the current resolution.
-Do not reuse old coordinates from a different device, orientation, display mode, or screenshot scale.
-Do not jump into `jadx`, `frida_mcp`, or `ida_pro_mcp` until you have confirmed the app is present and tried to trigger the target packet from the live UI.
+Si el siguiente paso usará coordenadas sin procesar, primero ejecuta `android_shell_exec` con `wm size` y registra la resolución actual.
+No reutilices coordenadas antiguas de un dispositivo, orientación, modo de pantalla, o escala de captura de pantalla diferente.
+No saltes a `jadx`, `frida_mcp`, o `ida_pro_mcp` hasta que hayas confirmado que la app está presente y hayas intentado disparar el paquete objetivo desde la UI en vivo.
 
-### Step 2: Create a visual checkpoint
+### Paso 2: Crear un punto de control visual
 
-Capture the current state before taking the next action:
+Captura el estado actual antes de tomar la siguiente acción:
 
-- use `android_vision_snapshot` for a single screen image
-- use `android_ui_dump` when you need `resource-id`, text, class, or bounds
-- use `android_ui_findElement` when you already know a likely button, text label, or content description
+- usa `android_vision_snapshot` para una sola imagen de pantalla
+- usa `android_ui_dump` cuando necesites `resource-id`, texto, clase, o límites (bounds)
+- usa `android_ui_findElement` cuando ya conozcas un botón, etiqueta de texto, o descripción de contenido probable
 
-Do not rely on coordinates alone when the UI can still be described structurally.
+No confíes únicamente en coordenadas cuando la UI todavía pueda describirse estructuralmente.
 
-### Step 3: Analyze the current screen
+### Paso 3: Analizar la pantalla actual
 
-From the screenshot and UI tree, answer:
+A partir de la captura de pantalla y el árbol de UI, responde:
 
-- what page or dialog is currently visible
-- which controls are actionable now
-- which field probably maps to the target request path
-- what blocker is present: login, consent, captcha-like gate, empty form, step gate, cooldown, or missing prerequisite
-- what next action is most likely to produce the packet you want
+- qué página o diálogo es visible actualmente
+- qué controles son accionables ahora
+- qué campo probablemente se corresponde con la ruta de la solicitud objetivo
+- qué bloqueo está presente: inicio de sesión, consentimiento, puerta tipo captcha, formulario vacío, puerta de paso, período de espera, o prerrequisito faltante
+- qué siguiente acción es más probable que produzca el paquete que deseas
 
-The output of this step should be explicit, for example:
+La salida de este paso debe ser explícita, por ejemplo:
 
-- current screen state
-- candidate next actions
-- chosen next action
-- why this action is the best next probe
+- estado actual de la pantalla
+- acciones candidatas siguientes
+- acción siguiente elegida
+- por qué esta acción es la mejor sonda siguiente
 
-Also decide whether the screenshot already suggests an abnormal condition:
+También decide si la captura de pantalla ya sugiere una condición anormal:
 
-- visible error message or warning
-- auth failure or forced login
-- network timeout, TLS warning, or certificate issue
-- blank page, crash dialog, or repeated retry state
-- redirect to an unexpected domain or WebView target
+- mensaje de error o advertencia visible
+- falla de autenticación o inicio de sesión forzado
+- timeout de red, advertencia de TLS, o problema de certificado
+- página en blanco, diálogo de crash, o estado de reintento repetido
+- redirección a un dominio inesperado o destino de WebView
 
-### Step 4: Execute the next UI action
+### Paso 4: Ejecutar la siguiente acción de UI
 
-Use `scrcpy_vision` to perform the chosen move:
+Usa `scrcpy_vision` para realizar el movimiento elegido:
 
 - `android_input_tap`
 - `android_input_text`
@@ -101,107 +101,107 @@ Use `scrcpy_vision` to perform the chosen move:
 - `android_input_keyevent`
 - `android_input_dragDrop`
 
-Before sending any coordinate-based action such as `android_input_tap`, `android_input_swipe`, `android_input_longPress`, `android_input_dragDrop`, or `android_input_pinch`, confirm the current screen resolution first.
-Prefer `android_ui_findElement` or `android_ui_dump` when possible; only fall back to raw coordinates after resolution has been confirmed.
+Antes de enviar cualquier acción basada en coordenadas como `android_input_tap`, `android_input_swipe`, `android_input_longPress`, `android_input_dragDrop`, o `android_input_pinch`, confirma primero la resolución de pantalla actual.
+Prefiere `android_ui_findElement` o `android_ui_dump` cuando sea posible; recurre a coordenadas sin procesar solo después de haber confirmado la resolución.
 
-If the action changes the screen significantly, return to Step 2 and take a new checkpoint before chaining more actions.
+Si la acción cambia la pantalla significativamente, regresa al Paso 2 y toma un nuevo punto de control antes de encadenar más acciones.
 
-### Step 4.5: Review logs before reversing
+### Paso 4.5: Revisar los logs antes de hacer ingeniería inversa
 
-After important UI transitions, check logs with `adb_mcp`:
+Después de transiciones de UI importantes, verifica los logs con `adb_mcp`:
 
-- look for crashes, TLS errors, serialization failures, auth errors, WebView warnings, or network stack exceptions
-- treat logs as a cheap discriminator before escalating into reverse work
-- if logs already explain the failure or blocker, fix the test path first instead of reversing immediately
+- busca crashes, errores de TLS, fallas de serialización, errores de autenticación, advertencias de WebView, o excepciones de la pila de red
+- trata los logs como un discriminador económico antes de escalar al trabajo de ingeniería inversa
+- si los logs ya explican la falla o el bloqueo, arregla primero la ruta de prueba en lugar de hacer ingeniería inversa de inmediato
 
-### Step 4.8: Check network evidence immediately
+### Paso 4.8: Verificar la evidencia de red de inmediato
 
-Before taking more UI actions or escalating into reverse:
+Antes de tomar más acciones de UI o escalar a la ingeniería inversa:
 
-- query `charles` or inspect `burp` for the latest HTTP/HTTPS requests or WebSocket messages
-- decide whether the expected request already exists in plaintext or replayable form
-- if a usable packet already exists, stop UI exploration and move to replay and pentest
-- if no packet exists, return to screenshot reasoning instead of defaulting to reverse
+- consulta `charles` o inspecciona `burp` en busca de las últimas solicitudes HTTP/HTTPS o mensajes WebSocket
+- decide si la solicitud esperada ya existe en forma de texto plano o reproducible (replayable)
+- si ya existe un paquete utilizable, detén la exploración de UI y pasa a la repetición (replay) y al pentest
+- si no existe ningún paquete, regresa al razonamiento sobre la captura de pantalla en lugar de recurrir por defecto a la ingeniería inversa
 
-### Step 5: Tie UI action to packet capture
+### Paso 5: Vincular la acción de UI con la captura de paquete
 
-After the action:
+Después de la acción:
 
-- query `charles` or inspect `burp` for the latest HTTP/HTTPS requests or WebSocket messages
-- decide whether the expected packet appeared
-- if it appeared, mark the triggering screen state and exact UI action that produced it
-- if it did not appear, go back to screenshot analysis instead of blindly continuing
+- consulta `charles` o inspecciona `burp` en busca de las últimas solicitudes HTTP/HTTPS o mensajes WebSocket
+- decide si el paquete esperado apareció
+- si apareció, marca el estado de pantalla disparador y la acción de UI exacta que lo produjo
+- si no apareció, regresa al análisis de captura de pantalla en lugar de continuar a ciegas
 
-The goal is to produce a clear mapping:
+El objetivo es producir un mapeo claro:
 
-`screen state -> user action -> observed packet`
+`estado de pantalla -> acción del usuario -> paquete observado`
 
-### Step 6: Promote the packet into replay analysis
+### Paso 6: Promover el paquete al análisis de repetición (replay)
 
-Once the target packet is real:
+Una vez que el paquete objetivo sea real:
 
-- inspect it in `charles` or `burp`
-- determine host, path, method, headers, cookies, tokens, body shape, and sequencing
-- if it is already usable, move directly into replay and security testing
-- hand it off to `web-playbook-index.md` for API, HTTP/HTTPS, or WebSocket security analysis
-- only correlate it with builder or signer logic if encryption, signatures, or replay blockers remain
-- use `frida_mcp` only if runtime-only values are still missing
+- inspecciónalo en `charles` o `burp`
+- determina host, ruta, método, headers, cookies, tokens, forma del cuerpo, y secuenciación
+- si ya es utilizable, pasa directamente a la repetición (replay) y a las pruebas de seguridad
+- entrégalo a `web-playbook-index.md` para el análisis de seguridad de API, HTTP/HTTPS, o WebSocket
+- correlaciónalo con la lógica de builder o firmador solo si quedan bloqueos de cifrado, firmas, o repetición
+- usa `frida_mcp` solo si todavía faltan valores exclusivos de runtime
 
-At this point the work leaves UI steering and enters replay and pentest mode. When one business flow has been tested, return to the app and repeat the loop for the next feature instead of defaulting to reverse engineering.
-If the packet is already replayable, reverse work is optional and should not delay network-layer testing.
+En este punto el trabajo sale de la dirección de UI y entra en modo de repetición (replay) y pentest. Cuando se haya probado un flujo de negocio, regresa a la app y repite el bucle para la siguiente funcionalidad en lugar de recurrir por defecto a la ingeniería inversa.
+Si el paquete ya es reproducible, el trabajo de ingeniería inversa es opcional y no debería retrasar las pruebas de capa de red.
 
-## Escalation Order When Packets Are Blocked
+## Orden de Escalamiento Cuando los Paquetes Están Bloqueados
 
-Only escalate beyond UI steering when one of these is true:
+Escala más allá de la dirección de UI solo cuando una de estas condiciones sea verdadera:
 
-- no packet appears in `burp` or `charles`
-- a packet appears but the payload is encrypted or unusable
-- replay fails because mandatory plaintext values are still hidden
+- no aparece ningún paquete en `burp` o `charles`
+- aparece un paquete pero el payload está cifrado o no es utilizable
+- la repetición (replay) falla porque los valores obligatorios en texto plano siguen ocultos
 
-Escalation order:
+Orden de escalamiento:
 
-1. reverse Java first with `jadx`
-2. use `frida_mcp` to hook Java or native boundaries when hook-based plaintext recovery is faster than deeper reverse
-3. if Java and hooks still do not expose enough, dump the relevant `.so`
-4. analyze the dumped `.so` with `ida_pro_mcp`
+1. haz ingeniería inversa de Java primero con `jadx`
+2. usa `frida_mcp` para enganchar (hook) límites de Java o nativos cuando la recuperación de texto plano basada en hooks sea más rápida que una ingeniería inversa más profunda
+3. si Java y los hooks todavía no exponen lo suficiente, vuelca el `.so` relevante
+4. analiza el `.so` volcado con `ida_pro_mcp`
 
-The goal is not reverse for its own sake. The goal is to make HTTP/HTTPS requests or WebSocket messages visible, plaintext recoverable, or replay stable.
+El objetivo no es la ingeniería inversa por sí misma. El objetivo es hacer visibles las solicitudes HTTP/HTTPS o los mensajes WebSocket, recuperar el texto plano, o estabilizar la repetición (replay).
 
-## Handoff To Pentest Workflow
+## Traspaso al Flujo de Trabajo de Pentest
 
-Do not start payload mutation only because you captured a packet once.
+No comiences la mutación de payload solo porque capturaste un paquete una vez.
 
-First confirm:
+Primero confirma:
 
-- which visible UI action produced the packet
-- whether the packet depends on login state, toggles, or prior screens
-- whether the packet contains sign, token, nonce, timestamp, device ID, or session values that must be preserved
-- whether replay is stable outside the app
-- which fields are safe to change without breaking the request
+- qué acción de UI visible produjo el paquete
+- si el paquete depende del estado de sesión, interruptores, o pantallas previas
+- si el paquete contiene valores de firma, token, nonce, timestamp, ID de dispositivo, o sesión que deben conservarse
+- si la repetición (replay) es estable fuera de la app
+- qué campos son seguros de cambiar sin romper la solicitud
 
-Then branch:
+Luego ramifica:
 
-- `web-playbook-index.md` for normal API and Web testing
-- `04-ai-and-mcp-security-integrated.md` if the packet reaches AI, agent, or MCP-exposed surfaces
-- `tools-reference-index.md` when you need the next operator tool family
+- `web-playbook-index.md` para pruebas normales de API y Web
+- `04-ai-and-mcp-security-integrated.md` si el paquete alcanza superficies de IA, agente, o expuestas por MCP
+- `tools-reference-index.md` cuando necesites la siguiente familia de herramientas del operador
 
-## Evidence Contract
+## Contrato de Evidencia
 
-Keep these artifacts:
+Conserva estos artefactos:
 
-- the screen state that mattered
-- the chosen next action and why it was selected
-- the packet triggered by that action
-- the mapping from screen action to request
-- any abnormal screenshot or log evidence that justified escalation
-- any runtime-only values or hook points needed for replay
-- the point where the task switched from UI steering to Burp and pentest analysis
+- el estado de pantalla que importó
+- la siguiente acción elegida y por qué fue seleccionada
+- el paquete disparado por esa acción
+- el mapeo de la acción de pantalla a la solicitud
+- cualquier evidencia anormal de captura de pantalla o log que justificó la escalada
+- cualquier valor exclusivo de runtime o punto de hook necesario para la repetición (replay)
+- el punto donde la tarea cambió de dirección de UI a análisis de Burp y pentest
 
-## Anti-Pattern Warnings
+## Advertencias de Antipatrones
 
-- do not start by randomly clicking through the app without checkpoints
-- do not trust screenshot reasoning alone when logs or packet evidence can resolve uncertainty
-- do not open `jadx` or `ida_pro_mcp` before confirming the target app is installed and trying to trigger the packet from the live app
-- do not reverse first when screenshots, logs, and HTTP/HTTPS or WebSocket visibility can already answer the problem
-- do not jump into Burp payload testing before the request is reproducible
-- do not send coordinate taps or swipes before checking the current resolution, or stale coordinates may drift and hit the wrong place
+- no comiences haciendo clic aleatoriamente por la app sin puntos de control
+- no confíes únicamente en el razonamiento sobre capturas de pantalla cuando los logs o la evidencia de paquetes puedan resolver la incertidumbre
+- no abras `jadx` o `ida_pro_mcp` antes de confirmar que la app objetivo está instalada e intentar disparar el paquete desde la app en vivo
+- no hagas ingeniería inversa primero cuando las capturas de pantalla, logs, y la visibilidad HTTP/HTTPS o WebSocket ya puedan responder el problema
+- no saltes a las pruebas de payload en Burp antes de que la solicitud sea reproducible
+- no envíes toques o deslizamientos por coordenadas antes de verificar la resolución actual, o las coordenadas obsoletas pueden desviarse y golpear el lugar equivocado

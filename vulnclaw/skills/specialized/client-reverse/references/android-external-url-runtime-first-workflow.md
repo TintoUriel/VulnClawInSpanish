@@ -1,229 +1,229 @@
-# Android External URL Runtime-First Workflow
+# Flujo de Trabajo Centrado en Runtime para URLs Externas en Android
 
-Use this file when you are testing an Android app feature that reaches an external URL or remote API and you do not yet know whether reverse engineering is necessary.
+Usa este archivo cuando estés probando una funcionalidad de una app Android que alcanza una URL externa o una API remota y aún no sabes si la ingeniería inversa es necesaria.
 
-This branch is packet-first and runtime-first, not reverse-first.
+Esta rama está centrada en paquetes y en runtime primero, no en ingeniería inversa primero.
 
-## Front Rule For Authorized Android App Pentest
+## Regla Principal Para Pentest de App Android Autorizada
 
-For an authorized Android app pentest, the opening move is not APK analysis.
-Before `jadx`, `frida_mcp`, or `ida_pro_mcp`, always do this first:
+Para un pentest de app Android autorizada, el movimiento de apertura no es el análisis del APK.
+Antes de `jadx`, `frida_mcp`, o `ida_pro_mcp`, siempre haz esto primero:
 
-1. confirm the target app is installed on the connected device
-2. get `burp` or `charles` ready so the next request or message is observable
-3. open the app with `scrcpy_vision`
-4. simulate real business clicks and navigation
-5. after each important action, inspect screenshots, logs, and `burp` or `charles`
-6. if packets are visible and usable, move directly into `web-playbook-index.md`
-7. only if traffic is missing, encrypted, opaque, still not replayable, or runtime evidence clearly points to a client-side blocker should reverse work begin
+1. confirma que la aplicación objetivo esté instalada en el dispositivo conectado
+2. prepara `burp` o `charles` para que la siguiente solicitud o mensaje sea observable
+3. abre la app con `scrcpy_vision`
+4. simula clics reales de negocio y navegación
+5. después de cada acción importante, inspecciona capturas de pantalla, logs, y `burp` o `charles`
+6. si los paquetes son visibles y utilizables, pasa directamente a `web-playbook-index.md`
+7. solo si el tráfico está ausente, cifrado, opaco, aún no es reproducible (replayable), o la evidencia de runtime apunta claramente a un bloqueo del lado del cliente, debe comenzar el trabajo de ingeniería inversa
 
-This rule is the default for Android pentest work. Reverse is not the first step unless the task itself is already a known decryption or reverse-only problem.
+Esta regla es la predeterminada para el trabajo de pentest en Android. La ingeniería inversa no es el primer paso a menos que la tarea en sí ya sea un problema conocido de descifrado o exclusivamente de ingeniería inversa.
 
-## Core Rule
+## Regla Central
 
-Do not start by reversing the interface.
+No comiences invirtiendo la interfaz.
 
-First:
+Primero:
 
-1. confirm the target app is installed on a connected device
-2. prepare `burp` or `charles` so the next request or message can be observed
-3. drive the app with `scrcpy_vision`
-4. inspect the screenshot for visible anomalies
-5. review logs with `adb_mcp`
-6. check whether `burp` or `charles` already receives HTTP/HTTPS requests or WebSocket messages
+1. confirma que la aplicación objetivo esté instalada en un dispositivo conectado
+2. prepara `burp` o `charles` para que la siguiente solicitud o mensaje pueda observarse
+3. maneja la app con `scrcpy_vision`
+4. inspecciona la captura de pantalla en busca de anomalías visibles
+5. revisa los logs con `adb_mcp`
+6. verifica si `burp` o `charles` ya reciben solicitudes HTTP/HTTPS o mensajes WebSocket
 
-Only if packets are encrypted, absent, still opaque, or still unusable for replay should you escalate into reverse engineering.
+Solo si los paquetes están cifrados, ausentes, siguen siendo opacos, o siguen sin ser utilizables para la repetición (replay), debes escalar a la ingeniería inversa.
 
-## When To Use This File
+## Cuándo Usar Este Archivo
 
-- the goal is to test an Android app's external URL or API behavior
-- you are still in black-box or gray-box mode and want to know whether reverse work is necessary
-- the request may already be visible once the right screen action is found
-- you need a disciplined way to decide when to escalate from runtime observation into Java, native, or hook-based recovery
+- el objetivo es probar el comportamiento de URL externa o API de una app Android
+- todavía estás en modo caja negra o caja gris y quieres saber si el trabajo de ingeniería inversa es necesario
+- la solicitud puede volverse visible una vez que se encuentre la acción de pantalla correcta
+- necesitas una forma disciplinada de decidir cuándo escalar de la observación en runtime a la recuperación basada en Java, nativo, o hooks
 
-## Primary MCP Chain
+## Cadena MCP Principal
 
 1. `scrcpy_vision`
-2. `burp` or `charles`
+2. `burp` o `charles`
 3. `adb_mcp`
-4. `jadx` only when runtime visibility is insufficient
+4. `jadx` solo cuando la visibilidad de runtime sea insuficiente
 5. `frida_mcp`
-6. `ida_pro_mcp` for dumped `.so` analysis
+6. `ida_pro_mcp` para análisis de `.so` volcado (dump)
 
-## Runtime-First Loop
+## Bucle Centrado en Runtime
 
-### Step 1: Confirm device and app presence
+### Paso 1: Confirmar dispositivo y presencia de la app
 
-Use `scrcpy_vision` to:
+Usa `scrcpy_vision` para:
 
-- list connected devices and confirm the right `serial`
-- verify the target app package is installed on the device
-- confirm whether the app is already foregrounded or needs to be launched
+- listar los dispositivos conectados y confirmar el `serial` correcto
+- verificar que el paquete de la app objetivo esté instalado en el dispositivo
+- confirmar si la app ya está en primer plano o necesita ser lanzada
 
-Typical helpers:
+Ayudantes típicos:
 
 - `android_devices_list`
 - `android_apps_list`
 - `android_activity_current`
 - `android_app_start`
 
-Do not jump to `jadx`, `frida_mcp`, or `ida_pro_mcp` before you have confirmed that the target app is actually present and launchable on the test device.
+No saltes a `jadx`, `frida_mcp`, o `ida_pro_mcp` antes de haber confirmado que la app objetivo realmente está presente y se puede lanzar en el dispositivo de prueba.
 
-### Step 2: Prepare packet visibility first
+### Paso 2: Preparar primero la visibilidad de paquetes
 
-Before driving the target feature:
+Antes de manejar la funcionalidad objetivo:
 
-- ensure Burp or Charles is already the active capture path
-- confirm proxy and certificate assumptions are in place
-- decide whether the next trigger should produce HTTP/HTTPS, WebSocket, or both
+- asegúrate de que Burp o Charles ya sean la ruta de captura activa
+- confirma que los supuestos de proxy y certificado estén en su lugar
+- decide si el siguiente disparador debería producir HTTP/HTTPS, WebSocket, o ambos
 
-Do not start business-flow driving until the next request can actually be observed.
+No comiences a manejar el flujo de negocio hasta que la siguiente solicitud realmente pueda observarse.
 
-### Step 3: Drive the app to the target feature
+### Paso 3: Manejar la app hasta la funcionalidad objetivo
 
-Use `scrcpy_vision` to:
+Usa `scrcpy_vision` para:
 
-- wake or unlock the device
-- get the current screen resolution before any coordinate-based action
-- start the app
-- tap into the target feature
-- input text, swipe, or navigate until the external URL should be triggered
+- despertar o desbloquear el dispositivo
+- obtener la resolución de pantalla actual antes de cualquier acción basada en coordenadas
+- iniciar la app
+- tocar hacia la funcionalidad objetivo
+- ingresar texto, deslizar, o navegar hasta que la URL externa deba dispararse
 
-Typical helpers:
+Ayudantes típicos:
 
 - `android_devices_list`
 - `android_screen_wake`
 - `android_screen_unlock`
-- `android_shell_exec` with `wm size`
+- `android_shell_exec` con `wm size`
 - `android_app_start`
 - `android_input_tap`
 - `android_input_text`
 - `android_input_swipe`
 
-If you are about to use coordinates instead of UI element lookup, first query the current resolution with `android_shell_exec` and `wm size`.
-This prevents desktop or app clicks from drifting when device resolution, orientation, scaling, or screenshot size differs from your assumption.
+Si estás a punto de usar coordenadas en lugar de la búsqueda de elementos de la UI, primero consulta la resolución actual con `android_shell_exec` y `wm size`.
+Esto evita que los clics de escritorio o de la app se desvíen cuando la resolución del dispositivo, orientación, escala, o tamaño de la captura de pantalla difiere de tu supuesto.
 
-Before triggering the business flow, ensure Burp or Charles is already in a state where the next request can be observed.
+Antes de disparar el flujo de negocio, asegúrate de que Burp o Charles ya estén en un estado donde la siguiente solicitud pueda observarse.
 
-### Step 4: Inspect the screenshot before reversing
+### Paso 4: Inspeccionar la captura de pantalla antes de hacer ingeniería inversa
 
-After each important action, take a visual checkpoint:
+Después de cada acción importante, toma un punto de control visual:
 
-- use `android_vision_snapshot`
-- use `android_ui_dump` when UI structure matters
+- usa `android_vision_snapshot`
+- usa `android_ui_dump` cuando la estructura de la UI importe
 
-Check whether the screenshot already shows something abnormal:
+Verifica si la captura de pantalla ya muestra algo anormal:
 
-- visible error dialog or warning
-- login or permission blocker
-- white screen, crash, spinner loop, or timeout
-- certificate warning or network error
-- redirect to an unexpected page, host, or WebView destination
+- diálogo de error o advertencia visible
+- bloqueo de inicio de sesión o permisos
+- pantalla en blanco, crash, bucle de spinner, o timeout
+- advertencia de certificado o error de red
+- redirección a una página, host, o destino de WebView inesperado
 
-Do not reverse just because the feature failed once. First determine whether the failure is already explained by the visible state.
+No hagas ingeniería inversa solo porque la funcionalidad falló una vez. Primero determina si la falla ya está explicada por el estado visible.
 
-### Step 5: Review logs for cheap evidence
+### Paso 5: Revisar los logs en busca de evidencia económica
 
-Use `adb_mcp` log review after important actions:
+Usa la revisión de logs con `adb_mcp` después de acciones importantes:
 
-- check for TLS failures
-- serialization or parsing errors
-- auth failures or token expiry
-- WebView, okhttp, retrofit, or custom network stack exceptions
-- crash traces or JNI load failures
+- verifica fallas de TLS
+- errores de serialización o parsing
+- fallas de autenticación o expiración de token
+- excepciones de WebView, okhttp, retrofit, o pila de red personalizada
+- trazas de crash o fallas de carga JNI
 
-If logs already explain the issue, fix the test path first instead of escalating into reverse work.
+Si los logs ya explican el problema, arregla primero la ruta de prueba en lugar de escalar al trabajo de ingeniería inversa.
 
-### Step 6: Check Burp and Charles
+### Paso 6: Verificar Burp y Charles
 
-Now decide whether traffic is already visible:
+Ahora decide si el tráfico ya es visible:
 
-- inspect `burp` history if Burp is the active proxy
-- inspect `charles` if Charles is the active capture path
-- confirm whether the HTTP/HTTPS request or WebSocket message exists, whether the body or frames are plaintext, and whether replay looks realistic
+- inspecciona el historial de `burp` si Burp es el proxy activo
+- inspecciona `charles` si Charles es la ruta de captura activa
+- confirma si la solicitud HTTP/HTTPS o el mensaje WebSocket existe, si el cuerpo o los frames están en texto plano, y si la repetición (replay) se ve realista
 
-Three cases:
+Tres casos:
 
-1. packet is visible and usable
-2. packet is visible but encrypted or still opaque
-3. packet is missing entirely
+1. el paquete es visible y utilizable
+2. el paquete es visible pero está cifrado o sigue opaco
+3. el paquete está completamente ausente
 
-### Step 7: Branch by packet visibility
+### Paso 7: Ramificar según la visibilidad del paquete
 
-#### Case 1: Packet is visible and usable
+#### Caso 1: El paquete es visible y utilizable
 
-- do not reverse first
-- move directly into replay and security testing
-- use `burp` as the testing baseline
-- preserve the screen action that produced the packet
-- continue into `web-playbook-index.md` to test the HTTP/HTTPS or WebSocket surface
-- after finishing one server-side probe set, return to the app and repeat the loop for the next business action if needed
+- no hagas ingeniería inversa primero
+- pasa directamente a la repetición (replay) y las pruebas de seguridad
+- usa `burp` como línea base de prueba
+- conserva la acción de pantalla que produjo el paquete
+- continúa en `web-playbook-index.md` para probar la superficie HTTP/HTTPS o WebSocket
+- después de terminar un conjunto de pruebas del lado del servidor, regresa a la app y repite el bucle para la siguiente acción de negocio si es necesario
 
-#### Case 2: Packet is visible but encrypted or opaque
+#### Caso 2: El paquete es visible pero está cifrado u opaco
 
-- reverse Java first with `jadx`
-- locate URL builders, interceptors, signers, encryptors, and serialization logic
-- if Java is insufficient, use `frida_mcp` to hook the relevant Java or native boundary and recover plaintext or arguments
+- haz ingeniería inversa de Java primero con `jadx`
+- localiza los builders de URL, interceptores, firmadores (signers), cifradores, y la lógica de serialización
+- si Java es insuficiente, usa `frida_mcp` para enganchar (hook) el límite de Java o nativo relevante y recuperar el texto plano o los argumentos
 
-#### Case 3: Packet is missing entirely
+#### Caso 3: El paquete está completamente ausente
 
-- re-check screenshot state and logs
-- verify proxy and certificate assumptions
-- if the app path is correct but traffic is still hidden, reverse Java first
-- if Java points into native code or still does not explain the missing traffic, dump the relevant `.so`
+- vuelve a revisar el estado de la captura de pantalla y los logs
+- verifica los supuestos de proxy y certificado
+- si la ruta de la app es correcta pero el tráfico sigue oculto, haz ingeniería inversa de Java primero
+- si Java apunta a código nativo o aún no explica el tráfico faltante, vuelca el `.so` relevante
 
-## Escalation Order
+## Orden de Escalamiento
 
-When runtime-first visibility is not enough, escalate in this order:
+Cuando la visibilidad centrada en runtime no sea suficiente, escala en este orden:
 
-1. Java reverse with `jadx`
-2. Java or native hook recovery with `frida_mcp`
-3. dump the relevant `.so`
-4. analyze the dumped `.so` with `ida_pro_mcp`
+1. ingeniería inversa de Java con `jadx`
+2. recuperación mediante hooks de Java o nativos con `frida_mcp`
+3. volcar (dump) el `.so` relevante
+4. analizar el `.so` volcado con `ida_pro_mcp`
 
-Native work is a blocker-resolution step, not the default starting point.
+El trabajo nativo es un paso de resolución de bloqueos, no el punto de partida por defecto.
 
-## Reverse Objectives
+## Objetivos de la Ingeniería Inversa
 
-Reverse only until one of these goals is met:
+Haz ingeniería inversa solo hasta que se cumpla uno de estos objetivos:
 
-- plaintext request data is recovered
-- the HTTP/HTTPS request or WebSocket message becomes visible in `burp` or `charles`
-- the encryption or signer boundary is understood well enough for replay
-- hook-based decryption or argument capture makes the interface testable
+- se recuperan los datos de la solicitud en texto plano
+- la solicitud HTTP/HTTPS o el mensaje WebSocket se vuelve visible en `burp` o `charles`
+- el límite de cifrado o firma se entiende lo suficiente para la repetición (replay)
+- el descifrado basado en hooks o la captura de argumentos hace que la interfaz sea comprobable
 
-## Handoff To Pentest
+## Traspaso al Pentest
 
-Move into pentest only after at least one of these is true:
+Pasa al pentest solo después de que al menos una de estas condiciones sea verdadera:
 
-- Burp or Charles already has a usable baseline request
-- Frida hooks recover plaintext inputs or outputs reliably
-- Java or native reverse has exposed the exact blocker and replay path
+- Burp o Charles ya tienen una solicitud de línea base utilizable
+- los hooks de Frida recuperan de forma confiable entradas o salidas en texto plano
+- la ingeniería inversa de Java o nativo ha expuesto el bloqueo exacto y la ruta de repetición (replay)
 
-If Burp or Charles already has a usable baseline request, that is the preferred handoff condition.
-Do not keep reversing only because static recovery also seems possible.
+Si Burp o Charles ya tienen una solicitud de línea base utilizable, esa es la condición de traspaso preferida.
+No sigas haciendo ingeniería inversa solo porque la recuperación estática también parezca posible.
 
-Then continue into:
+Luego continúa en:
 
-- `web-playbook-index.md` for API and Web testing
-- `04-ai-and-mcp-security-integrated.md` if the target request reaches AI, agent, or MCP surfaces
-- `tools-reference-index.md` when you need the next operator tool family
+- `web-playbook-index.md` para pruebas de API y Web
+- `04-ai-and-mcp-security-integrated.md` si la solicitud objetivo alcanza superficies de IA, agente, o MCP
+- `tools-reference-index.md` cuando necesites la siguiente familia de herramientas del operador
 
-## Evidence Contract
+## Contrato de Evidencia
 
-Keep:
+Conserva:
 
-- the screen state that triggered the external URL
-- screenshot anomalies that influenced the next step
-- relevant log anomalies
-- whether `burp` or `charles` saw traffic
-- the reason reverse escalation was or was not necessary
-- Java findings, hook points, or dumped `.so` evidence when escalation happened
+- el estado de pantalla que disparó la URL externa
+- las anomalías de captura de pantalla que influyeron en el siguiente paso
+- las anomalías de log relevantes
+- si `burp` o `charles` vieron tráfico
+- la razón por la que la escalada a ingeniería inversa fue o no necesaria
+- los hallazgos de Java, puntos de hook, o evidencia del `.so` volcado cuando ocurrió la escalada
 
-## Anti-Patterns
+## Antipatrones
 
-- do not open `jadx` or `ida_pro_mcp` before confirming the target app is installed on the connected device and attempting runtime packet capture
-- do not reverse the app before checking screenshot, logs, and HTTP/HTTPS or WebSocket visibility
-- do not dump `.so` first when Java or hooks might solve the blocker faster
-- do not move into payload testing before the request is reproducible or plaintext is recoverable
-- do not send coordinate clicks or swipes before confirming the current screen resolution
+- no abras `jadx` o `ida_pro_mcp` antes de confirmar que la app objetivo está instalada en el dispositivo conectado e intentar la captura de paquetes en runtime
+- no hagas ingeniería inversa de la app antes de verificar la captura de pantalla, los logs, y la visibilidad HTTP/HTTPS o WebSocket
+- no vuelques el `.so` primero cuando Java o los hooks podrían resolver el bloqueo más rápido
+- no pases a las pruebas de payload antes de que la solicitud sea reproducible o el texto plano sea recuperable
+- no envíes clics o deslizamientos por coordenadas antes de confirmar la resolución de pantalla actual

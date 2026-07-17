@@ -1,43 +1,43 @@
-# Reporting And Evidence
+# Reportes y Evidencia
 
-Use this file to normalize final evidence and replay handoff after browser, Android, desktop-client, Web, or AI/MCP work.
+Usa este archivo para normalizar la evidencia final y el traspaso de repetición (replay) después del trabajo en navegador, Android, cliente de escritorio, Web, o IA/MCP.
 
-## Minimum Output
+## Salida Mínima
 
-- scope and client type
-- chosen MCP chain
-- static findings
-- runtime proof
-- recovered request recipe
-- Burp-ready baseline request
-- security finding and mitigation
+- alcance y tipo de cliente
+- cadena MCP elegida
+- hallazgos estáticos
+- prueba en runtime
+- receta de solicitud recuperada
+- solicitud de línea base lista para Burp
+- hallazgo de seguridad y mitigación
 
-## Client-Controlled Targets
+## Objetivos Controlados por el Cliente
 
-For browser or Android request-generation tasks, always include:
+Para tareas de generación de solicitudes en navegador o Android, siempre incluye:
 
-- target request and target field
-- request-chain summary
-- proven writer or sink
-- upstream dependency or explicit statement that none exists
-- runtime values that must be preserved
-- replay-safe fields versus mutation-safe fields
+- solicitud objetivo y campo objetivo
+- resumen de la cadena de solicitud
+- writer o sink probado
+- dependencia upstream o declaración explícita de que no existe ninguna
+- valores de runtime que deben conservarse
+- campos seguros para repetir (replay) versus campos seguros para mutar
 
-## Recommended Templates
+## Plantillas Recomendadas
 
-### Browser JS
+### JS de Navegador
 
-- workflow: `references/browser-js-signing-workflow.md`
-- persistent record: `references/browser-request-chain-template.md`
+- flujo de trabajo: `references/browser-js-signing-workflow.md`
+- registro persistente: `references/browser-request-chain-template.md`
 
 ### Android
 
-- workflow: `references/android-signing-and-crypto-workflow.md`
-- persistent record: `references/android-signature-reverse-template.md`
+- flujo de trabajo: `references/android-signing-and-crypto-workflow.md`
+- registro persistente: `references/android-signature-reverse-template.md`
 
-## Final Handoff Checklist
+## Lista de Verificación Final de Traspaso
 
-- one real request sample is preserved
-- replay prerequisites are explicit
-- blockers are separated from proven facts
-- the next operator can reproduce the baseline request
+- se conserva una muestra real de la solicitud
+- los prerrequisitos de repetición (replay) son explícitos
+- los bloqueos están separados de los hechos probados
+- el siguiente operador puede reproducir la solicitud de línea base

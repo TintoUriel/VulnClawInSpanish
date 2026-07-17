@@ -1,52 +1,52 @@
-# Browser Runtime Fit And Risk
+# Ajuste de Runtime y Riesgo en Navegador
 
-Use this file when the browser boundary and shell are already clear but browser execution and local or controlled execution diverge.
+Usa este archivo cuando el límite y el shell del navegador ya sean claros pero la ejecución en el navegador y la ejecución local o controlada diverjan.
 
-## Diagnose Before Patching
+## Diagnosticar Antes de Parchear
 
-Classify the first meaningful divergence as one or more of:
+Clasifica la primera divergencia significativa como una o más de:
 
-- missing object
-- missing state
+- objeto faltante
+- estado faltante
 - anti-debugging
-- unstable source
-- risk branch
+- fuente inestable
+- rama de riesgo
 
-## First-Divergence Table
+## Tabla de Primera Divergencia
 
-Always compare browser normal state and local execution using a concrete checkpoint table before adding patches.
+Siempre compara el estado normal del navegador y la ejecución local usando una tabla de checkpoint concreta antes de agregar parches.
 
-Minimum comparison rows:
+Filas mínimas de comparación:
 
-- input parameters
-- cookie and storage state
-- fixed time and randomness
-- first stable intermediate value
-- first abnormal intermediate value
-- final branch or response
+- parámetros de entrada
+- estado de cookie y storage
+- tiempo fijo y aleatoriedad
+- primer valor intermedio estable
+- primer valor intermedio anormal
+- rama final o respuesta
 
-## Risk And Anti-Debug Refinement
+## Refinamiento de Riesgo y Anti-Debug
 
-When debugging changes behavior or a risk branch is suspected, answer:
+Cuando el debugging cambie el comportamiento o se sospeche una rama de riesgo, responde:
 
-- where the fork begins
-- whether the issue is debug friction or a real consumer-driven risk branch
-- which exact missing state or fingerprint surface triggers the split
+- dónde comienza la bifurcación
+- si el problema es fricción de debug o una rama de riesgo real impulsada por el consumidor
+- qué estado faltante exacto o superficie de fingerprint dispara la división
 
-Keep the anti-debug handling minimal. Remove only the smallest obstacle needed to keep observation going.
+Mantén el manejo anti-debug al mínimo. Elimina solo el obstáculo más pequeño necesario para mantener la observación en marcha.
 
-## Environment Fit Rules
+## Reglas de Ajuste de Entorno
 
-- keep `required objects` and `required state` separate
-- record why each dependency is necessary
-- fix time, randomness, and seed sources before further comparison
-- do not claim pure computation while upstream response, `HttpOnly` state, challenge flow, or browser lifecycle state remain open
+- mantén separados los `objetos requeridos` y el `estado requerido`
+- registra por qué cada dependencia es necesaria
+- fija el tiempo, la aleatoriedad, y las fuentes de semilla antes de continuar la comparación
+- no afirmes que es cómputo puro mientras la respuesta upstream, el estado `HttpOnly`, el flujo de challenge, o el estado del ciclo de vida del navegador sigan abiertos
 
-## Completion Standard
+## Estándar de Finalización
 
-Stop runtime when:
+Detén el runtime cuando:
 
-- the divergence class is explicit
-- the first divergent checkpoint is known
-- missing object and missing state are not mixed
-- the next action is clearly patch, state restore, or validation
+- la clase de divergencia sea explícita
+- se conozca el primer checkpoint divergente
+- el objeto faltante y el estado faltante no estén mezclados
+- la siguiente acción sea claramente parchear, restaurar estado, o validar

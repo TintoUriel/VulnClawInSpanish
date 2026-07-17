@@ -1,68 +1,68 @@
-# Android Signing And Crypto Workflow
+# Flujo de Trabajo de Firma y Criptografía en Android
 
-Use this file when the target request is produced in an Android app and the main task is to recover sign, token, encrypt, decrypt, JNI, or request-sequencing logic so the request can be explained or replayed outside the APK.
-This is not the default entrypoint for a general authorized Android app pentest.
+Usa este archivo cuando la solicitud objetivo se produzca en una app Android y la tarea principal sea recuperar la lógica de firma (sign), token, cifrado, descifrado, JNI, o secuenciación de solicitudes para que la solicitud pueda explicarse o reproducirse (replay) fuera del APK.
+Este no es el punto de entrada por defecto para un pentest general de app Android autorizada.
 
-## Core Rule
+## Regla Central
 
-Do not jump straight into Frida or `.so` reversing.
+No saltes directamente a Frida o a la ingeniería inversa de `.so`.
 
-If the task is a general authorized Android app pentest and you do not yet know whether reverse is required, do not start here.
-First confirm the app is installed on the connected device, prepare Burp or Charles, use `scrcpy_vision` to drive real business features, and check after each important action whether HTTP/HTTPS requests or WebSocket messages are already visible and usable.
-Start from `references/android-authorized-app-pentest-sop.md` or `references/android-external-url-runtime-first-workflow.md`, and only return here after screenshot review, logs, and packet visibility checks show that reverse is necessary.
+Si la tarea es un pentest general de app Android autorizada y aún no sabes si la ingeniería inversa es necesaria, no comiences aquí.
+Primero confirma que la app esté instalada en el dispositivo conectado, prepara Burp o Charles, usa `scrcpy_vision` para manejar funcionalidades reales de negocio, y verifica después de cada acción importante si las solicitudes HTTP/HTTPS o los mensajes WebSocket ya son visibles y utilizables.
+Comienza desde `references/android-authorized-app-pentest-sop.md` o `references/android-external-url-runtime-first-workflow.md`, y regresa aquí solo después de que la revisión de capturas de pantalla, logs, y verificaciones de visibilidad de paquetes demuestren que la ingeniería inversa es necesaria.
 
-Start with static triage in `jadx` and answer:
+Comienza con triage estático en `jadx` y responde:
 
-- which network stack is in use
-- where the request is built
-- where headers, body, and sign fields are written
-- whether the sign or crypto path is visible in Java or handed to JNI
+- qué pila de red está en uso
+- dónde se construye la solicitud
+- dónde se escriben los headers, el cuerpo, y los campos de firma
+- si la ruta de firma o criptografía es visible en Java o se entrega a JNI
 
-Use runtime work only after static evidence narrows the target.
-If live traffic is already visible and replayable, prioritize network-layer testing first and use this file only to resolve the remaining signer, crypto, or sequencing blocker.
+Usa el trabajo en runtime solo después de que la evidencia estática acote el objetivo.
+Si el tráfico en vivo ya es visible y reproducible (replayable), prioriza primero las pruebas de capa de red y usa este archivo únicamente para resolver el bloqueo restante de firmador (signer), criptografía, o secuenciación.
 
-## Intake Contract
+## Contrato de Recepción (Intake)
 
-Start from this block:
+Comienza desde este bloque:
 
 ```text
-APK / package / target feature:
-Target request / field / API path:
-Trigger action:
-Current symptom:
-Known evidence:
-Goal:
-Constraints:
+APK / paquete / funcionalidad objetivo:
+Solicitud / campo / ruta de API objetivo:
+Acción disparadora:
+Síntoma actual:
+Evidencia conocida:
+Objetivo:
+Restricciones:
 ```
 
-Then decide:
+Luego decide:
 
-- is the task static triage, runtime confirmation, JNI analysis, or replay proof
-- is the target request already captured or still inferred
-- is the app using Java-only logic, mixed Java/JNI logic, or mostly native logic
+- si la tarea es triage estático, confirmación en runtime, análisis JNI, o prueba de repetición (replay)
+- si la solicitud objetivo ya está capturada o todavía se infiere
+- si la app usa lógica exclusivamente Java, lógica mixta Java/JNI, o lógica mayormente nativa
 
-## Static-First Workflow
+## Flujo de Trabajo Centrado en lo Estático
 
-### Phase 1: Entry and architecture
+### Fase 1: Entrada y arquitectura
 
-Read:
+Lee:
 
 - `AndroidManifest.xml`
-- application class
-- launcher activity or target component
-- package structure around `api`, `network`, `data`, `repository`, `service`, `retrofit`, `http`
+- la clase de aplicación
+- la activity de lanzamiento o componente objetivo
+- la estructura de paquetes alrededor de `api`, `network`, `data`, `repository`, `service`, `retrofit`, `http`
 
-Goal:
+Objetivo:
 
-- locate entry components
-- identify the app package
-- identify the likely network stack and dependency injection setup
+- localizar los componentes de entrada
+- identificar el paquete de la app
+- identificar la pila de red probable y la configuración de inyección de dependencias
 
-Detailed reference: `references/android-static-triage-and-callflow.md`
+Referencia detallada: `references/android-static-triage-and-callflow.md`
 
-### Phase 2: Request-chain and call-flow proof
+### Fase 2: Prueba de la cadena de solicitud y de flujo de llamadas
 
-Trace:
+Traza:
 
 ```text
 Activity / Fragment / Service
@@ -72,149 +72,149 @@ Activity / Fragment / Service
 -> Signer / Encryptor / Serializer
 ```
 
-Use strings, Retrofit annotations, interceptor classes, request builders, and constants as anchors.
+Usa strings, anotaciones de Retrofit, clases interceptoras, builders de solicitud, y constantes como anclas.
 
-Prove:
+Demuestra:
 
-- request method and path
-- header and body writers
-- request ordering or preflight dependencies
-- the exact class or method where sign inputs come together
+- el método y ruta de la solicitud
+- los escritores de header y cuerpo
+- el ordenamiento de la solicitud o las dependencias de preflight
+- la clase o método exacto donde se juntan las entradas de firma
 
-### Phase 3: Sign and crypto locator
+### Fase 3: Localizador de firma y criptografía
 
-Search for:
+Busca:
 
 - `sign`, `token`, `encrypt`, `decrypt`, `cipher`, `aes`, `rsa`, `hmac`, `md5`, `sha`
 - `Interceptor`, `intercept`, `addInterceptor`
 - `native`, `System.loadLibrary`, `System.load`
-- hardcoded URLs, header names, key names, and device identifiers
+- URLs, nombres de header, nombres de claves, e identificadores de dispositivo codificados
 
-Classify the current sign path:
+Clasifica la ruta de firma actual:
 
-- Java-only
-- Java wrapper around native
-- native-first
-- still unknown
+- exclusivamente Java
+- wrapper de Java alrededor de nativo
+- nativo primero
+- todavía desconocido
 
-### Phase 4: JNI handoff triage
+### Fase 4: Triage del traspaso JNI
 
-If Java calls native code, prove:
+Si Java llama a código nativo, demuestra:
 
-- which Java method declares `native`
-- which library is loaded
-- whether the native function is statically exported or dynamically registered
-- which parameters are passed into the native boundary
-- which return value comes back into the request chain
+- qué método Java declara `native`
+- qué biblioteca se carga
+- si la función nativa se exporta estáticamente o se registra dinámicamente
+- qué parámetros se pasan al límite nativo
+- qué valor de retorno regresa a la cadena de solicitud
 
-Do not start deep native reversing until the Java-side boundary is already concrete.
+No comiences una ingeniería inversa nativa profunda hasta que el límite del lado de Java ya sea concreto.
 
-Detailed reference: `references/android-native-signature-analysis.md`
+Referencia detallada: `references/android-native-signature-analysis.md`
 
-### Phase 5: UI-driven trigger proof
+### Fase 5: Prueba del disparador guiado por UI
 
-If the request depends on what screen the app is showing or which gesture submits the data, use `scrcpy_vision` after static triage has already narrowed the target.
+Si la solicitud depende de qué pantalla muestra la app o qué gesto envía los datos, usa `scrcpy_vision` después de que el triage estático ya haya acotado el objetivo.
 
-Run this loop:
+Ejecuta este bucle:
 
-1. navigate or tap toward the suspected trigger
-2. capture a screenshot or UI tree
-3. analyze what screen is visible now, which controls matter, and which next action is most likely to expose the target request
-4. perform the next input, tap, swipe, or back action
-5. watch for the packet or state transition that proves the request path
+1. navega o toca hacia el disparador sospechoso
+2. captura una captura de pantalla o el árbol de UI
+3. analiza qué pantalla es visible ahora, qué controles importan, y qué siguiente acción es más probable que exponga la solicitud objetivo
+4. realiza la siguiente entrada, toque, deslizamiento, o acción de retroceso
+5. observa el paquete o la transición de estado que demuestre la ruta de la solicitud
 
-Do not treat screenshot reasoning as a replacement for static proof. It is a runtime steering layer that helps you reach the right trigger and connect visible UI state to the request chain.
+No trates el razonamiento sobre capturas de pantalla como un reemplazo de la prueba estática. Es una capa de dirección en runtime que te ayuda a alcanzar el disparador correcto y conectar el estado visible de la UI con la cadena de solicitud.
 
-Detailed reference: `references/android-ui-driven-observation-and-packet-loop.md`
+Referencia detallada: `references/android-ui-driven-observation-and-packet-loop.md`
 
-## Dynamic Escalation Rules
+## Reglas de Escalamiento Dinámico
 
-Escalate only when static proof is no longer enough.
+Escala solo cuando la prueba estática ya no sea suficiente.
 
-### Prefer these hook points in order
+### Prefiere estos puntos de hook en orden
 
-1. final request object construction
-2. interceptor methods
-3. request execution entrypoint
-4. sign or token generator
-5. native boundary
+1. construcción final del objeto de solicitud
+2. métodos de interceptor
+3. punto de entrada de ejecución de la solicitud
+4. generador de firma (sign) o token
+5. límite nativo
 
-For each hook, capture:
+Para cada hook, captura:
 
-- class and method
+- clase y método
 - URL
 - headers
-- body or serialized payload
-- sign input tuple
-- sign output or encrypted result
+- cuerpo o payload serializado
+- tupla de entrada de firma
+- salida de firma o resultado cifrado
 
-### SSL pinning and packet capture
+### SSL pinning y captura de paquetes
 
-Treat SSL pinning bypass as a support step, not the first move.
-Treat Burp or Charles as the runtime baseline that stays active so recovered signer behavior can be compared to real traffic.
+Trata el bypass de SSL pinning como un paso de apoyo, no como el primer movimiento.
+Trata a Burp o Charles como la línea base de runtime que permanece activa para que el comportamiento del firmador recuperado pueda compararse con tráfico real.
 
-Use them when:
+Úsalos cuando:
 
-- Java hooks still do not expose final request values
-- the custom transport hides fields until after TLS setup
-- you need to verify that replay matches runtime traffic
+- los hooks de Java todavía no exponen los valores finales de la solicitud
+- el transporte personalizado oculta campos hasta después de la configuración TLS
+- necesites verificar que la repetición (replay) coincide con el tráfico en runtime
 
-Detailed reference: `references/android-dynamic-hooking-and-replay.md`
+Referencia detallada: `references/android-dynamic-hooking-and-replay.md`
 
-## Native and Signature Decisions
+## Decisiones Nativas y de Firma
 
-Only escalate past Java and JNI boundary proof when the user needs:
+Escala más allá de la prueba del límite Java y JNI solo cuando el usuario necesite:
 
-- offline reproduction
-- deeper algorithm recovery
-- unidbg-based execution
-- `.so` patching or native control-flow analysis
+- reproducción fuera de línea (offline)
+- recuperación de algoritmo más profunda
+- ejecución basada en unidbg
+- parcheo de `.so` o análisis de flujo de control nativo
 
-Before that, answer these questions:
+Antes de eso, responde estas preguntas:
 
-- is the signature generated in Java or native code
-- what exact inputs feed the signature
-- which inputs are constants versus runtime values
-- can replay call the app or hook the boundary instead of reimplementing the algorithm
+- si la firma se genera en Java o en código nativo
+- qué entradas exactas alimentan la firma
+- qué entradas son constantes versus valores de runtime
+- si la repetición (replay) puede llamar a la app o enganchar (hook) el límite en lugar de reimplementar el algoritmo
 
-## Android Tool Order
+## Orden de Herramientas de Android
 
-1. `burp` or `charles`
+1. `burp` o `charles`
 2. `jadx`
 3. `adb_mcp`
 4. `frida_mcp`
-5. `ida_pro_mcp` when dumped `.so` analysis is required
+5. `ida_pro_mcp` cuando se requiera análisis de `.so` volcado (dump)
 
-The order may compress, but the logic stays the same: network visibility first, static proof second, runtime recovery third, deeper native analysis last.
+El orden puede comprimirse, pero la lógica se mantiene igual: visibilidad de red primero, prueba estática segundo, recuperación en runtime tercero, análisis nativo más profundo al final.
 
-## Replay Exit Criteria
+## Criterios de Salida de Repetición (Replay)
 
-Do not move into Burp mutation work until you can explain:
+No pases al trabajo de mutación en Burp hasta que puedas explicar:
 
-- where the request is built
-- where sign or encryption is applied
-- which runtime inputs are mandatory
-- whether device identity, timestamp, nonce, token, or sequence must be preserved
-- whether replay can call the app, reuse a hook point, or must reimplement the logic
+- dónde se construye la solicitud
+- dónde se aplica la firma o el cifrado
+- qué entradas de runtime son obligatorias
+- si la identidad del dispositivo, timestamp, nonce, token, o secuencia deben conservarse
+- si la repetición (replay) puede llamar a la app, reutilizar un punto de hook, o debe reimplementar la lógica
 
-If Burp or Charles already has a stable replay baseline and the remaining blocker is narrow, resolve only that blocker instead of expanding reverse scope.
+Si Burp o Charles ya tienen una línea base de repetición estable y el bloqueo restante es acotado, resuelve solo ese bloqueo en lugar de expandir el alcance de la ingeniería inversa.
 
-## Output Contract
+## Contrato de Salida
 
-Deliver:
+Entrega:
 
-- app architecture summary
-- call-flow map from entry component to request execution
-- request-builder and signer location
-- Java versus JNI conclusion
-- runtime hook point and observed values when runtime work was needed
-- Burp-ready replay recipe or the exact remaining blocker
+- resumen de la arquitectura de la app
+- mapa de flujo de llamadas desde el componente de entrada hasta la ejecución de la solicitud
+- ubicación del builder de solicitud y del firmador
+- conclusión de Java versus JNI
+- punto de hook en runtime y valores observados cuando se necesitó trabajo en runtime
+- receta de repetición lista para Burp o el bloqueo exacto restante
 
-Record template: `references/android-signature-reverse-template.md`
+Plantilla de registro: `references/android-signature-reverse-template.md`
 
-## Recommended Read Order Inside This Branch
+## Orden de Lectura Recomendado Dentro de Esta Rama
 
 1. `android-static-triage-and-callflow.md`
-2. `android-dynamic-hooking-and-replay.md` only when static proof is not enough
-3. `android-native-signature-analysis.md` when JNI or `.so` becomes part of the real sign path
-4. `android-signature-reverse-template.md` when you need a persistent record or replay handoff
+2. `android-dynamic-hooking-and-replay.md` solo cuando la prueba estática no sea suficiente
+3. `android-native-signature-analysis.md` cuando JNI o `.so` se conviertan en parte de la ruta de firma real
+4. `android-signature-reverse-template.md` cuando necesites un registro persistente o un traspaso de repetición
