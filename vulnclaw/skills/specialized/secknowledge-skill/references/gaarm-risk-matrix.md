@@ -1,158 +1,158 @@
-# GAARM 风险索引矩阵
+# Matriz de índice de riesgos GAARM
 
-> 来源: AISS绿盟大模型安全智链社区
+> Fuente: Comunidad de Inteligencia en Seguridad de Grandes Modelos AISS NSFOCUS
 
-| 风险编号 | 安全域 | 阶段 | 风险名称 | Reference文件 |
+| Número de riesgo | Dominio de seguridad | Fase | Nombre del riesgo | Archivo de referencia |
 |----------|--------|------|----------|---------------|
-| GAARM.0042 | AI应用安全 | 应用阶段 | CoT注入攻击 | ai-app-agent-cot.md |
-| GAARM.0046.001 | AI应用安全 | 应用阶段 | MCP地毯式骗局 | ai-app-mcp.md |
-| GAARM.0046 | AI应用安全 | 应用阶段 | MCP工具投毒攻击 | ai-app-mcp.md |
-| GAARM.0046.002 | AI应用安全 | 应用阶段 | MCP指令覆盖攻击 | ai-app-mcp.md |
-| GAARM.0046.003 | AI应用安全 | 应用阶段 | MCP隐藏指令攻击 | ai-app-mcp.md |
-| GAARM.0039 | AI应用安全 | 应用阶段 | Prompt注入 | ai-app-prompt.md |
-| GAARM.0041.001 | AI应用安全 | 应用阶段 | SSRF环境模拟探测 | ai-app-agent-cot.md |
-| GAARM.0040.001 | AI应用安全 | 应用阶段 | XSS会话内容劫持 | ai-app-prompt.md |
-| GAARM.0041.002 | AI应用安全 | 应用阶段 | 代码执行注入 | ai-app-agent-cot.md |
-| GAARM.0043 | AI应用安全 | 应用阶段 | 关键字混淆 | ai-app-prompt.md |
-| GAARM.0045 | AI应用安全 | 应用阶段 | 反向诱导&抑制攻击 | ai-app-prompt.md |
-| GAARM.0043.001 | AI应用安全 | 应用阶段 | 同义词替换攻击 | ai-app-prompt.md |
-| GAARM.0061 | AI应用安全 | 应用阶段 | 多模态协同注入攻击 | ai-app-prompt.md |
-| GAARM.0044 | AI应用安全 | 应用阶段 | 对抗编码攻击 | ai-app-prompt.md |
-| GAARM.0040.003 | AI应用安全 | 应用阶段 | 应用对话Memory攻击 | ai-app-prompt.md |
-| GAARM.0041 | AI应用安全 | 应用阶段 | 应用智能体Agent利用 | ai-app-agent-cot.md |
-| GAARM.0042.001 | AI应用安全 | 应用阶段 | 思维链干扰注入 | ai-app-agent-cot.md |
-| GAARM.0042.002 | AI应用安全 | 应用阶段 | 思维链操纵注入 | ai-app-agent-cot.md |
-| GAARM.0056.001 | AI应用安全 | 应用阶段 | 查询注入攻击 | ai-app-agent-cot.md |
-| GAARM.0047 | AI应用安全 | 应用阶段 | 环境注入攻击 | ai-app-agent-cot.md |
-| GAARM.0040.002 | AI应用安全 | 应用阶段 | 环路Agent蠕虫 | ai-app-prompt.md |
-| GAARM.0040 | AI应用安全 | 应用阶段 | 间接Prompt注入 | ai-app-prompt.md |
-| GAARM.0060 | AI应用安全 | 应用阶段 | 预期外代码执行 | ai-app-agent-cot.md |
-| GAARM.0049 | AI应用安全 | 部署阶段 | LLMs应用API管理不当 | ai-app-deploy.md |
-| GAARM.0038 | AI应用安全 | 部署阶段 | LLMs应用源代码投毒 | ai-app-deploy.md |
-| GAARM.0037 | AI应用安全 | 部署阶段 | LLMs应用源代码窃取 | ai-app-deploy.md |
-| GAARM.0035.003 | AI应用安全 | 训练阶段 | LLMs应用不安全输出处理 | ai-app-train.md |
-| GAARM.0035.002 | AI应用安全 | 训练阶段 | LLMs应用传统漏洞风险 | ai-app-train.md |
-| GAARM.0035.001 | AI应用安全 | 训练阶段 | LLMs插件：不安全输入处理 | ai-app-train.md |
-| GAARM.0036 | AI应用安全 | 训练阶段 | LLMs插件：业务过度代理 | ai-app-train.md |
-| GAARM.0034.002 | AI应用安全 | 训练阶段 | RAG开发框架漏洞 | ai-app-train.md |
-| GAARM.0035 | AI应用安全 | 训练阶段 | 不安全的代码实践 | ai-app-train.md |
-| GAARM.0034.001 | AI应用安全 | 训练阶段 | 数据处理组件漏洞 | ai-app-train.md |
-| GAARM.0034 | AI应用安全 | 训练阶段 | 第三方组件漏洞 | ai-app-train.md |
-| GAARM.0027.001 | AI模型安全 | 应用阶段 | DAN(Do Anything Now) | ai-model-jailbreak.md |
-| GAARM.0027.002 | AI模型安全 | 应用阶段 | Many-shot越狱 | ai-model-jailbreak.md |
-| GAARM.0028.001 | AI模型安全 | 应用阶段 | 事实性幻觉 | ai-model-hallucination.md |
-| GAARM.0032.003 | AI模型安全 | 应用阶段 | 代理预训练模型创建 | ai-model-extraction.md |
-| GAARM.0027.003 | AI模型安全 | 应用阶段 | 假定场景越狱 | ai-model-jailbreak.md |
-| GAARM.0027.004 | AI模型安全 | 应用阶段 | 假定角色越狱 | ai-model-jailbreak.md |
-| GAARM.0030 | AI模型安全 | 应用阶段 | 商业违法输出 | ai-model-copyright.md |
-| GAARM.0031.003 | AI模型安全 | 应用阶段 | 图片信息伪造 | ai-model-misuse.md |
-| GAARM.0062 | AI模型安全 | 应用阶段 | 多模态内容合规安全风险 | ai-model-misuse.md |
-| GAARM.0027.005 | AI模型安全 | 应用阶段 | 对抗性后缀攻击 | ai-model-jailbreak.md |
-| GAARM.0032.004 | AI模型安全 | 应用阶段 | 对抗样本攻击 | ai-model-extraction.md |
-| GAARM.0029.003 | AI模型安全 | 应用阶段 | 带有偏见、仇恨、歧视或侮辱问题 | ai-model-content.md |
-| GAARM.0028.002 | AI模型安全 | 应用阶段 | 攻击案例 | ai-model-hallucination.md |
-| GAARM.0029.004 | AI模型安全 | 应用阶段 | 恐怖主义&&带有暴力倾向 | ai-model-content.md |
-| GAARM.0031.001 | AI模型安全 | 应用阶段 | 恶意代码生成 | ai-model-misuse.md |
-| GAARM.0063 | AI模型安全 | 应用阶段 | 意图破坏&目标操纵 | ai-model-misuse.md |
-| GAARM.0029.005 | AI模型安全 | 应用阶段 | 政治&&军事敏感问题 | ai-model-content.md |
-| GAARM.0029.006 | AI模型安全 | 应用阶段 | 攻击概述 | ai-model-content.md |
-| GAARM.0033 | AI模型安全 | 应用阶段 | 数据漂移 | ai-model-misuse.md |
-| GAARM.0027.006 | AI模型安全 | 应用阶段 | 概念激活攻击 | ai-model-jailbreak.md |
-| GAARM.0031 | AI模型安全 | 应用阶段 | 模型功能滥用 | ai-model-misuse.md |
-| GAARM.0028 | AI模型安全 | 应用阶段 | 模型幻觉风险 | ai-model-hallucination.md |
-| - | AI模型安全 | 应用阶段 | 模型提取与盗窃 | ai-model-extraction.md |
-| GAARM.0027 | AI模型安全 | 应用阶段 | 模型越狱攻击 | ai-model-jailbreak.md |
-| GAARM.0030.001 | AI模型安全 | 应用阶段 | 知识产权版权侵犯 | ai-model-copyright.md |
-| GAARM.0029.001 | AI模型安全 | 应用阶段 | 虚假信息生成 | ai-model-content.md |
-| GAARM.0031.005 | AI模型安全 | 应用阶段 | 视频信息伪造 | ai-model-misuse.md |
-| GAARM.0029.002 | AI模型安全 | 应用阶段 | 诱导&&不当言论 | ai-model-content.md |
-| GAARM.0064 | AI模型安全 | 应用阶段 | 跨模态幻觉 | ai-model-hallucination.md |
-| GAARM.0031.002 | AI模型安全 | 应用阶段 | 钓鱼邮件生成 | ai-model-misuse.md |
-| GAARM.0029 | AI模型安全 | 应用阶段 | 非合规内容输出 | ai-model-content.md |
-| GAARM.0031.004 | AI模型安全 | 应用阶段 | 音频信息伪造 | ai-model-misuse.md |
-| GAARM.0032 | AI模型安全 | 应用阶段 | 预训练模型信息窃取与攻击 | ai-model-extraction.md |
-| GAARM.0032.001 | AI模型安全 | 应用阶段 | 预训练模型家族探测 | ai-model-extraction.md |
-| GAARM.0032.002 | AI模型安全 | 应用阶段 | 预训练模型本体探测 | ai-model-extraction.md |
-| GAARM.0026 | AI模型安全 | 部署阶段 | 模型参数篡改 | ai-model-deploy.md |
-| GAARM.0025 | AI模型安全 | 部署阶段 | 模型文件窃取 | ai-model-deploy.md |
-| GAARM.0023 | AI模型安全 | 训练阶段 | 模型后门 | ai-model-train.md |
-| GAARM.0033 | AI模型安全 | 训练阶段 | 模型安全对齐不足 | ai-model-train.md |
-| GAARM.0023.001 | AI模型安全 | 训练阶段 | 模型序列化后门 | ai-model-train.md |
-| GAARM.0024 | AI模型安全 | 训练阶段 | 预训练模型不安全依赖 | ai-model-train.md |
-| GAARM.0023.002 | AI模型安全 | 训练阶段 | 预训练模型投毒 | ai-model-train.md |
-| GAARM.0022 | AI数据安全 | 应用阶段 | API信息泄露 | ai-data-app.md |
-| GAARM.0019.001 | AI数据安全 | 应用阶段 | 个人隐私数据窃取 | ai-data-app.md |
-| GAARM.0019.002 | AI数据安全 | 应用阶段 | 企业机密数据窃取 | ai-data-app.md |
-| GAARM.0017.001 | AI数据安全 | 应用阶段 | 假定场景泄露 | ai-data-app.md |
-| GAARM.0017.002 | AI数据安全 | 应用阶段 | 假定角色泄露 | ai-data-app.md |
-| GAARM.0017 | AI数据安全 | 应用阶段 | 元Prompt泄露 | ai-data-app.md |
-| GAARM.0017.003 | AI数据安全 | 应用阶段 | 关键字前后定位泄露 | ai-data-app.md |
-| GAARM.0030 | AI数据安全 | 应用阶段 | 外部数据源信息泄露 | ai-data-app.md |
-| GAARM.0029 | AI数据安全 | 应用阶段 | 成员推断攻击 | ai-data-app.md |
-| GAARM.0028 | AI数据安全 | 应用阶段 | 数据操纵 | ai-data-app.md |
-| GAARM.0018 | AI数据安全 | 应用阶段 | 模型反演攻击 | ai-data-app.md |
-| GAARM.0020 | AI数据安全 | 应用阶段 | 模型推理API数据窃取 | ai-data-app.md |
-| GAARM.0065 | AI数据安全 | 应用阶段 | 级联幻觉攻击 | ai-data-app.md |
-| GAARM.0018.001 | AI数据安全 | 应用阶段 | 触发模型异常 | ai-data-app.md |
-| GAARM.0018.002 | AI数据安全 | 应用阶段 | 训练数据推导 | ai-data-app.md |
-| GAARM.0019 | AI数据安全 | 应用阶段 | 隐私数据窃取 | ai-data-app.md |
-| GAARM.0012 | AI数据安全 | 部署阶段 | 备份数据窃取 | ai-data-deploy.md |
-| GAARM.0013 | AI数据安全 | 部署阶段 | 数据传输劫持 | ai-data-deploy.md |
-| GAARM.0014 | AI数据安全 | 部署阶段 | 数据存储服务攻击 | ai-data-deploy.md |
-| GAARM.0015 | AI数据安全 | 部署阶段 | 日志和审计记录窃取 | ai-data-deploy.md |
-| GAARM.0016 | AI数据安全 | 部署阶段 | 缓存数据&索引信息窃取 | ai-data-deploy.md |
-| GAARM.0010 | AI数据安全 | 训练阶段 | 不正确&恶意外部数据源 | ai-data-train.md |
-| GAARM.0009.001 | AI数据安全 | 训练阶段 | 个人隐私数据保护缺陷 | ai-data-train.md |
-| GAARM.0009.002 | AI数据安全 | 训练阶段 | 企业敏感数据保护缺陷 | ai-data-train.md |
-| GAARM.0009 | AI数据安全 | 训练阶段 | 内部数据保护缺陷 | ai-data-train.md |
-| GAARM.0011.001 | AI数据安全 | 训练阶段 | 对话语料投毒 | ai-data-train.md |
-| GAARM.0018.003 | AI数据安全 | 训练阶段 | 数据匿名化处理不当 | ai-data-train.md |
-| GAARM.0009.003 | AI数据安全 | 训练阶段 | 机密敏感数据保护缺陷 | ai-data-train.md |
-| GAARM.0011 | AI数据安全 | 训练阶段 | 训练数据投毒 | ai-data-train.md |
-| GAARM.0020 | AI数据安全 | 训练阶段 | 训练数据泄露 | ai-data-train.md |
-| GAARM.0011.002 | AI数据安全 | 训练阶段 | 训练数据篡改 | ai-data-train.md |
-| GAARM.0010.001 | AI数据安全 | 训练阶段 | 预训练模型数据偏见 | ai-data-train.md |
-| GAARM.0058 | AI身份安全 | 应用阶段 | Action模块权限失控 | ai-identity-app.md |
-| GAARM.0057 | AI身份安全 | 应用阶段 | MCP未授权获取系统资源 | ai-identity-app.md |
-| GAARM.0052.004 | AI身份安全 | 应用阶段 | Prompt目标劫持 | ai-identity-app.md |
-| GAARM.0052.001 | AI身份安全 | 应用阶段 | 假定场景逃逸 | ai-identity-app.md |
-| GAARM.0052.002 | AI身份安全 | 应用阶段 | 假定角色逃逸 | ai-identity-app.md |
-| GAARM.0053.002 | AI身份安全 | 应用阶段 | 利用云凭证非法访问云端模型 | ai-identity-app.md |
-| GAARM.0073 | AI身份安全 | 应用阶段 | 外部数据源欺骗 | ai-identity-app.md |
-| GAARM.0059 | AI身份安全 | 应用阶段 | 多Agent访问身份伪造 | ai-identity-app.md |
-| GAARM.0055 | AI身份安全 | 应用阶段 | 应用会话劫持 | ai-identity-app.md |
-| GAARM.0053.001 | AI身份安全 | 应用阶段 | 未授权访问模型 | ai-identity-app.md |
-| GAARM.0053 | AI身份安全 | 应用阶段 | 权限管控不当 | ai-identity-app.md |
-| GAARM.0054 | AI身份安全 | 应用阶段 | 模拟对话攻击 | ai-identity-app.md |
-| GAARM.0052 | AI身份安全 | 应用阶段 | 角色逃逸 | ai-identity-app.md |
-| GAARM.0056 | AI身份安全 | 应用阶段 | 账户劫持风险 | ai-identity-app.md |
-| GAARM.0053.003 | AI身份安全 | 应用阶段 | 账户越权访问 | ai-identity-app.md |
-| GAARM.0052.003 | AI身份安全 | 应用阶段 | 遗忘法角色逃逸 | ai-identity-app.md |
-| GAARM.0049.001 | AI身份安全 | 部署阶段 | 公开服务API密钥利用 | ai-identity-deploy.md |
-| GAARM.0050 | AI身份安全 | 部署阶段 | 向量数据库未授权访问 | ai-identity-deploy.md |
-| GAARM.0051 | AI身份安全 | 部署阶段 | 未授权访模型部署环境 | ai-identity-deploy.md |
-| GAARM.0049 | AI身份安全 | 部署阶段 | 滥用部署环境凭据 | ai-identity-deploy.md |
-| GAARM.0048 | AI身份安全 | 训练阶段 | LLMs插件：权限管控设计缺陷 | ai-identity-train.md |
-| GAARM.0046 | AI身份安全 | 训练阶段 | 训练环境缺少认证授权 | ai-identity-train.md |
-| GAARM.0047 | AI身份安全 | 训练阶段 | 训练环境过度权限分配 | ai-identity-train.md |
-| GAARM.0008 | AI基座安全 | 应用阶段 | LLMs拒绝服务&资源耗尽 | ai-baseline-app.md |
-| GAARM.0007.001 | AI基座安全 | 应用阶段 | 代码解析器执行逃逸 | ai-baseline-app.md |
-| - | AI基座安全 | 应用阶段 | 容器运行时风险 | ai-baseline-app.md |
-| GAARM.0006 | AI基座安全 | 应用阶段 | 容器集群环境探测 | ai-baseline-app.md |
-| GAARM.0007 | AI基座安全 | 应用阶段 | 容器集群环境攻击 | ai-baseline-app.md |
-| GAARM.0004 | AI基座安全 | 部署阶段 | CI&CD流程攻击 | ai-baseline-deploy.md |
-| GAARM.0003.001 | AI基座安全 | 部署阶段 | 云平台多租户隔离失效 | ai-baseline-deploy.md |
-| GAARM.005 | AI基座安全 | 部署阶段 | 云平台安全漏洞 | ai-baseline-deploy.md |
-| GAARM.0003 | AI基座安全 | 部署阶段 | 利用不安全系统配置 | ai-baseline-deploy.md |
-| GAARM.0005 | AI基座安全 | 部署阶段 | 向量数据库漏洞 | ai-baseline-deploy.md |
-| GAARM.0005 | AI基座安全 | 部署阶段 | 容器&&集群系统漏洞 | ai-baseline-deploy.md |
-| GAARM.0004.001 | AI基座安全 | 部署阶段 | 模型部署服务漏洞 | ai-baseline-deploy.md |
-| GAARM.0004.002 | AI基座安全 | 部署阶段 | 模型镜像污染 | ai-baseline-deploy.md |
-| GAARM.0003.001 | AI基座安全 | 部署阶段 | 环境隔离缺陷 | ai-baseline-deploy.md |
-| GAARM.0005 | AI基座安全 | 部署阶段 | 部署环境组件供应链漏洞 | ai-baseline-deploy.md |
-| GAARM.0001.001 | AI基座安全 | 训练阶段 | 模型开发工具漏洞 | ai-baseline-train.md |
-| GAARM.0001.002 | AI基座安全 | 训练阶段 | 训练数据管理系统漏洞 | ai-baseline-train.md |
-| GAARM.0001 | AI基座安全 | 训练阶段 | 训练环境安全风险 | ai-baseline-train.md |
-| GAARM.0002 | AI基座安全 | 训练阶段 | 训练环境隔离缺陷 | ai-baseline-train.md |
+| GAARM.0042 | Seguridad de aplicaciones de IA | Fase de aplicación | Ataque de inyección CoT | ai-app-agent-cot.md |
+| GAARM.0046.001 | Seguridad de aplicaciones de IA | Fase de aplicación | Rug pull generalizado en MCP | ai-app-mcp.md |
+| GAARM.0046 | Seguridad de aplicaciones de IA | Fase de aplicación | Ataque de envenenamiento de herramientas MCP | ai-app-mcp.md |
+| GAARM.0046.002 | Seguridad de aplicaciones de IA | Fase de aplicación | Ataque de sobrescritura de instrucciones MCP | ai-app-mcp.md |
+| GAARM.0046.003 | Seguridad de aplicaciones de IA | Fase de aplicación | Ataque de instrucciones ocultas MCP | ai-app-mcp.md |
+| GAARM.0039 | Seguridad de aplicaciones de IA | Fase de aplicación | Inyección de Prompt | ai-app-prompt.md |
+| GAARM.0041.001 | Seguridad de aplicaciones de IA | Fase de aplicación | Sondeo de simulación de entorno SSRF | ai-app-agent-cot.md |
+| GAARM.0040.001 | Seguridad de aplicaciones de IA | Fase de aplicación | Secuestro de contenido de sesión XSS | ai-app-prompt.md |
+| GAARM.0041.002 | Seguridad de aplicaciones de IA | Fase de aplicación | Inyección de ejecución de código | ai-app-agent-cot.md |
+| GAARM.0043 | Seguridad de aplicaciones de IA | Fase de aplicación | Ofuscación de palabras clave | ai-app-prompt.md |
+| GAARM.0045 | Seguridad de aplicaciones de IA | Fase de aplicación | Ataque de inducción inversa y supresión | ai-app-prompt.md |
+| GAARM.0043.001 | Seguridad de aplicaciones de IA | Fase de aplicación | Ataque de sustitución de sinónimos | ai-app-prompt.md |
+| GAARM.0061 | Seguridad de aplicaciones de IA | Fase de aplicación | Ataque de inyección coordinada multimodal | ai-app-prompt.md |
+| GAARM.0044 | Seguridad de aplicaciones de IA | Fase de aplicación | Ataque de codificación adversaria | ai-app-prompt.md |
+| GAARM.0040.003 | Seguridad de aplicaciones de IA | Fase de aplicación | Ataque a la memoria de conversación de la aplicación | ai-app-prompt.md |
+| GAARM.0041 | Seguridad de aplicaciones de IA | Fase de aplicación | Explotación del agente (Agent) de la aplicación | ai-app-agent-cot.md |
+| GAARM.0042.001 | Seguridad de aplicaciones de IA | Fase de aplicación | Inyección de interferencia en la cadena de pensamiento | ai-app-agent-cot.md |
+| GAARM.0042.002 | Seguridad de aplicaciones de IA | Fase de aplicación | Inyección de manipulación en la cadena de pensamiento | ai-app-agent-cot.md |
+| GAARM.0056.001 | Seguridad de aplicaciones de IA | Fase de aplicación | Ataque de inyección de consultas | ai-app-agent-cot.md |
+| GAARM.0047 | Seguridad de aplicaciones de IA | Fase de aplicación | Ataque de inyección de entorno | ai-app-agent-cot.md |
+| GAARM.0040.002 | Seguridad de aplicaciones de IA | Fase de aplicación | Gusano de Agent en bucle | ai-app-prompt.md |
+| GAARM.0040 | Seguridad de aplicaciones de IA | Fase de aplicación | Inyección indirecta de Prompt | ai-app-prompt.md |
+| GAARM.0060 | Seguridad de aplicaciones de IA | Fase de aplicación | Ejecución de código inesperada | ai-app-agent-cot.md |
+| GAARM.0049 | Seguridad de aplicaciones de IA | Fase de despliegue | Gestión inadecuada de la API de aplicaciones LLM | ai-app-deploy.md |
+| GAARM.0038 | Seguridad de aplicaciones de IA | Fase de despliegue | Envenenamiento del código fuente de aplicaciones LLM | ai-app-deploy.md |
+| GAARM.0037 | Seguridad de aplicaciones de IA | Fase de despliegue | Robo del código fuente de aplicaciones LLM | ai-app-deploy.md |
+| GAARM.0035.003 | Seguridad de aplicaciones de IA | Fase de entrenamiento | Procesamiento inseguro de salidas en aplicaciones LLM | ai-app-train.md |
+| GAARM.0035.002 | Seguridad de aplicaciones de IA | Fase de entrenamiento | Riesgo de vulnerabilidades tradicionales en aplicaciones LLM | ai-app-train.md |
+| GAARM.0035.001 | Seguridad de aplicaciones de IA | Fase de entrenamiento | Plugins LLM: procesamiento inseguro de entradas | ai-app-train.md |
+| GAARM.0036 | Seguridad de aplicaciones de IA | Fase de entrenamiento | Plugins LLM: agencia excesiva del negocio | ai-app-train.md |
+| GAARM.0034.002 | Seguridad de aplicaciones de IA | Fase de entrenamiento | Vulnerabilidad del framework de desarrollo RAG | ai-app-train.md |
+| GAARM.0035 | Seguridad de aplicaciones de IA | Fase de entrenamiento | Prácticas de codificación inseguras | ai-app-train.md |
+| GAARM.0034.001 | Seguridad de aplicaciones de IA | Fase de entrenamiento | Vulnerabilidad de componentes de procesamiento de datos | ai-app-train.md |
+| GAARM.0034 | Seguridad de aplicaciones de IA | Fase de entrenamiento | Vulnerabilidad de componentes de terceros | ai-app-train.md |
+| GAARM.0027.001 | Seguridad de modelos de IA | Fase de aplicación | DAN (Do Anything Now) | ai-model-jailbreak.md |
+| GAARM.0027.002 | Seguridad de modelos de IA | Fase de aplicación | Jailbreak Many-shot | ai-model-jailbreak.md |
+| GAARM.0028.001 | Seguridad de modelos de IA | Fase de aplicación | Alucinación factual | ai-model-hallucination.md |
+| GAARM.0032.003 | Seguridad de modelos de IA | Fase de aplicación | Creación de modelo proxy preentrenado | ai-model-extraction.md |
+| GAARM.0027.003 | Seguridad de modelos de IA | Fase de aplicación | Jailbreak mediante escenario hipotético | ai-model-jailbreak.md |
+| GAARM.0027.004 | Seguridad de modelos de IA | Fase de aplicación | Jailbreak mediante rol hipotético | ai-model-jailbreak.md |
+| GAARM.0030 | Seguridad de modelos de IA | Fase de aplicación | Generación de contenido comercial ilícito | ai-model-copyright.md |
+| GAARM.0031.003 | Seguridad de modelos de IA | Fase de aplicación | Falsificación de información en imágenes | ai-model-misuse.md |
+| GAARM.0062 | Seguridad de modelos de IA | Fase de aplicación | Riesgo de seguridad y cumplimiento de contenido multimodal | ai-model-misuse.md |
+| GAARM.0027.005 | Seguridad de modelos de IA | Fase de aplicación | Ataque de sufijo adversario | ai-model-jailbreak.md |
+| GAARM.0032.004 | Seguridad de modelos de IA | Fase de aplicación | Ataque de muestras adversarias | ai-model-extraction.md |
+| GAARM.0029.003 | Seguridad de modelos de IA | Fase de aplicación | Contenido con sesgo, odio, discriminación o insultos | ai-model-content.md |
+| GAARM.0028.002 | Seguridad de modelos de IA | Fase de aplicación | Casos de ataque | ai-model-hallucination.md |
+| GAARM.0029.004 | Seguridad de modelos de IA | Fase de aplicación | Terrorismo y contenido con tendencia violenta | ai-model-content.md |
+| GAARM.0031.001 | Seguridad de modelos de IA | Fase de aplicación | Generación de código malicioso | ai-model-misuse.md |
+| GAARM.0063 | Seguridad de modelos de IA | Fase de aplicación | Sabotaje de intención y manipulación de objetivos | ai-model-misuse.md |
+| GAARM.0029.005 | Seguridad de modelos de IA | Fase de aplicación | Temas sensibles políticos y militares | ai-model-content.md |
+| GAARM.0029.006 | Seguridad de modelos de IA | Fase de aplicación | Resumen del ataque | ai-model-content.md |
+| GAARM.0033 | Seguridad de modelos de IA | Fase de aplicación | Deriva de datos (data drift) | ai-model-misuse.md |
+| GAARM.0027.006 | Seguridad de modelos de IA | Fase de aplicación | Ataque de activación de conceptos | ai-model-jailbreak.md |
+| GAARM.0031 | Seguridad de modelos de IA | Fase de aplicación | Uso indebido de funciones del modelo | ai-model-misuse.md |
+| GAARM.0028 | Seguridad de modelos de IA | Fase de aplicación | Riesgo de alucinación del modelo | ai-model-hallucination.md |
+| - | Seguridad de modelos de IA | Fase de aplicación | Extracción y robo de modelos | ai-model-extraction.md |
+| GAARM.0027 | Seguridad de modelos de IA | Fase de aplicación | Ataque de jailbreak de modelo | ai-model-jailbreak.md |
+| GAARM.0030.001 | Seguridad de modelos de IA | Fase de aplicación | Infracción de propiedad intelectual y derechos de autor | ai-model-copyright.md |
+| GAARM.0029.001 | Seguridad de modelos de IA | Fase de aplicación | Generación de información falsa | ai-model-content.md |
+| GAARM.0031.005 | Seguridad de modelos de IA | Fase de aplicación | Falsificación de información en video | ai-model-misuse.md |
+| GAARM.0029.002 | Seguridad de modelos de IA | Fase de aplicación | Inducción y discurso inapropiado | ai-model-content.md |
+| GAARM.0064 | Seguridad de modelos de IA | Fase de aplicación | Alucinación cruzada entre modalidades | ai-model-hallucination.md |
+| GAARM.0031.002 | Seguridad de modelos de IA | Fase de aplicación | Generación de correos de phishing | ai-model-misuse.md |
+| GAARM.0029 | Seguridad de modelos de IA | Fase de aplicación | Salida de contenido no conforme | ai-model-content.md |
+| GAARM.0031.004 | Seguridad de modelos de IA | Fase de aplicación | Falsificación de información de audio | ai-model-misuse.md |
+| GAARM.0032 | Seguridad de modelos de IA | Fase de aplicación | Robo de información y ataques a modelos preentrenados | ai-model-extraction.md |
+| GAARM.0032.001 | Seguridad de modelos de IA | Fase de aplicación | Sondeo de la familia de modelos preentrenados | ai-model-extraction.md |
+| GAARM.0032.002 | Seguridad de modelos de IA | Fase de aplicación | Sondeo de la ontología de modelos preentrenados | ai-model-extraction.md |
+| GAARM.0026 | Seguridad de modelos de IA | Fase de despliegue | Manipulación de parámetros del modelo | ai-model-deploy.md |
+| GAARM.0025 | Seguridad de modelos de IA | Fase de despliegue | Robo de archivos del modelo | ai-model-deploy.md |
+| GAARM.0023 | Seguridad de modelos de IA | Fase de entrenamiento | Puerta trasera del modelo | ai-model-train.md |
+| GAARM.0033 | Seguridad de modelos de IA | Fase de entrenamiento | Alineación de seguridad insuficiente del modelo | ai-model-train.md |
+| GAARM.0023.001 | Seguridad de modelos de IA | Fase de entrenamiento | Puerta trasera en la serialización del modelo | ai-model-train.md |
+| GAARM.0024 | Seguridad de modelos de IA | Fase de entrenamiento | Dependencias inseguras en modelos preentrenados | ai-model-train.md |
+| GAARM.0023.002 | Seguridad de modelos de IA | Fase de entrenamiento | Envenenamiento de modelos preentrenados | ai-model-train.md |
+| GAARM.0022 | Seguridad de datos de IA | Fase de aplicación | Filtración de información por API | ai-data-app.md |
+| GAARM.0019.001 | Seguridad de datos de IA | Fase de aplicación | Robo de datos personales privados | ai-data-app.md |
+| GAARM.0019.002 | Seguridad de datos de IA | Fase de aplicación | Robo de datos confidenciales empresariales | ai-data-app.md |
+| GAARM.0017.001 | Seguridad de datos de IA | Fase de aplicación | Filtración mediante escenario hipotético | ai-data-app.md |
+| GAARM.0017.002 | Seguridad de datos de IA | Fase de aplicación | Filtración mediante rol hipotético | ai-data-app.md |
+| GAARM.0017 | Seguridad de datos de IA | Fase de aplicación | Filtración de meta-prompt | ai-data-app.md |
+| GAARM.0017.003 | Seguridad de datos de IA | Fase de aplicación | Filtración por posicionamiento de palabras clave | ai-data-app.md |
+| GAARM.0030 | Seguridad de datos de IA | Fase de aplicación | Filtración de información de fuentes de datos externas | ai-data-app.md |
+| GAARM.0029 | Seguridad de datos de IA | Fase de aplicación | Ataque de inferencia de membresía | ai-data-app.md |
+| GAARM.0028 | Seguridad de datos de IA | Fase de aplicación | Manipulación de datos | ai-data-app.md |
+| GAARM.0018 | Seguridad de datos de IA | Fase de aplicación | Ataque de inversión de modelo | ai-data-app.md |
+| GAARM.0020 | Seguridad de datos de IA | Fase de aplicación | Robo de datos mediante la API de inferencia del modelo | ai-data-app.md |
+| GAARM.0065 | Seguridad de datos de IA | Fase de aplicación | Ataque de alucinación en cascada | ai-data-app.md |
+| GAARM.0018.001 | Seguridad de datos de IA | Fase de aplicación | Activación de anomalías del modelo | ai-data-app.md |
+| GAARM.0018.002 | Seguridad de datos de IA | Fase de aplicación | Derivación de datos de entrenamiento | ai-data-app.md |
+| GAARM.0019 | Seguridad de datos de IA | Fase de aplicación | Robo de datos privados | ai-data-app.md |
+| GAARM.0012 | Seguridad de datos de IA | Fase de despliegue | Robo de datos de respaldo | ai-data-deploy.md |
+| GAARM.0013 | Seguridad de datos de IA | Fase de despliegue | Secuestro de transmisión de datos | ai-data-deploy.md |
+| GAARM.0014 | Seguridad de datos de IA | Fase de despliegue | Ataque al servicio de almacenamiento de datos | ai-data-deploy.md |
+| GAARM.0015 | Seguridad de datos de IA | Fase de despliegue | Robo de registros de logs y auditoría | ai-data-deploy.md |
+| GAARM.0016 | Seguridad de datos de IA | Fase de despliegue | Robo de datos en caché e información de índices | ai-data-deploy.md |
+| GAARM.0010 | Seguridad de datos de IA | Fase de entrenamiento | Fuentes de datos externas incorrectas y maliciosas | ai-data-train.md |
+| GAARM.0009.001 | Seguridad de datos de IA | Fase de entrenamiento | Deficiencia en la protección de datos personales privados | ai-data-train.md |
+| GAARM.0009.002 | Seguridad de datos de IA | Fase de entrenamiento | Deficiencia en la protección de datos sensibles empresariales | ai-data-train.md |
+| GAARM.0009 | Seguridad de datos de IA | Fase de entrenamiento | Deficiencia en la protección de datos internos | ai-data-train.md |
+| GAARM.0011.001 | Seguridad de datos de IA | Fase de entrenamiento | Envenenamiento del corpus de conversación | ai-data-train.md |
+| GAARM.0018.003 | Seguridad de datos de IA | Fase de entrenamiento | Anonimización de datos inadecuada | ai-data-train.md |
+| GAARM.0009.003 | Seguridad de datos de IA | Fase de entrenamiento | Deficiencia en la protección de datos confidenciales y sensibles | ai-data-train.md |
+| GAARM.0011 | Seguridad de datos de IA | Fase de entrenamiento | Envenenamiento de datos de entrenamiento | ai-data-train.md |
+| GAARM.0020 | Seguridad de datos de IA | Fase de entrenamiento | Filtración de datos de entrenamiento | ai-data-train.md |
+| GAARM.0011.002 | Seguridad de datos de IA | Fase de entrenamiento | Manipulación de datos de entrenamiento | ai-data-train.md |
+| GAARM.0010.001 | Seguridad de datos de IA | Fase de entrenamiento | Sesgo en los datos de modelos preentrenados | ai-data-train.md |
+| GAARM.0058 | Seguridad de identidad de IA | Fase de aplicación | Pérdida de control de permisos en el módulo Action | ai-identity-app.md |
+| GAARM.0057 | Seguridad de identidad de IA | Fase de aplicación | Obtención no autorizada de recursos del sistema vía MCP | ai-identity-app.md |
+| GAARM.0052.004 | Seguridad de identidad de IA | Fase de aplicación | Secuestro de objetivo mediante Prompt | ai-identity-app.md |
+| GAARM.0052.001 | Seguridad de identidad de IA | Fase de aplicación | Evasión mediante escenario hipotético | ai-identity-app.md |
+| GAARM.0052.002 | Seguridad de identidad de IA | Fase de aplicación | Evasión mediante rol hipotético | ai-identity-app.md |
+| GAARM.0053.002 | Seguridad de identidad de IA | Fase de aplicación | Acceso ilegítimo a modelos en la nube mediante credenciales de nube | ai-identity-app.md |
+| GAARM.0073 | Seguridad de identidad de IA | Fase de aplicación | Suplantación de fuentes de datos externas | ai-identity-app.md |
+| GAARM.0059 | Seguridad de identidad de IA | Fase de aplicación | Falsificación de identidad de acceso multi-Agent | ai-identity-app.md |
+| GAARM.0055 | Seguridad de identidad de IA | Fase de aplicación | Secuestro de sesión de la aplicación | ai-identity-app.md |
+| GAARM.0053.001 | Seguridad de identidad de IA | Fase de aplicación | Acceso no autorizado al modelo | ai-identity-app.md |
+| GAARM.0053 | Seguridad de identidad de IA | Fase de aplicación | Control de permisos inadecuado | ai-identity-app.md |
+| GAARM.0054 | Seguridad de identidad de IA | Fase de aplicación | Ataque de simulación de conversación | ai-identity-app.md |
+| GAARM.0052 | Seguridad de identidad de IA | Fase de aplicación | Evasión de rol | ai-identity-app.md |
+| GAARM.0056 | Seguridad de identidad de IA | Fase de aplicación | Riesgo de secuestro de cuenta | ai-identity-app.md |
+| GAARM.0053.003 | Seguridad de identidad de IA | Fase de aplicación | Acceso a cuenta con privilegios excedidos | ai-identity-app.md |
+| GAARM.0052.003 | Seguridad de identidad de IA | Fase de aplicación | Evasión de rol mediante técnica de "olvido" | ai-identity-app.md |
+| GAARM.0049.001 | Seguridad de identidad de IA | Fase de despliegue | Explotación de claves de API de servicios públicos | ai-identity-deploy.md |
+| GAARM.0050 | Seguridad de identidad de IA | Fase de despliegue | Acceso no autorizado a la base de datos vectorial | ai-identity-deploy.md |
+| GAARM.0051 | Seguridad de identidad de IA | Fase de despliegue | Acceso no autorizado al entorno de despliegue del modelo | ai-identity-deploy.md |
+| GAARM.0049 | Seguridad de identidad de IA | Fase de despliegue | Uso indebido de credenciales del entorno de despliegue | ai-identity-deploy.md |
+| GAARM.0048 | Seguridad de identidad de IA | Fase de entrenamiento | Plugins LLM: deficiencia de diseño en el control de permisos | ai-identity-train.md |
+| GAARM.0046 | Seguridad de identidad de IA | Fase de entrenamiento | Falta de autenticación y autorización en el entorno de entrenamiento | ai-identity-train.md |
+| GAARM.0047 | Seguridad de identidad de IA | Fase de entrenamiento | Asignación excesiva de permisos en el entorno de entrenamiento | ai-identity-train.md |
+| GAARM.0008 | Seguridad de la infraestructura base de IA | Fase de aplicación | Denegación de servicio y agotamiento de recursos en LLMs | ai-baseline-app.md |
+| GAARM.0007.001 | Seguridad de la infraestructura base de IA | Fase de aplicación | Evasión de ejecución del intérprete de código | ai-baseline-app.md |
+| - | Seguridad de la infraestructura base de IA | Fase de aplicación | Riesgo del runtime de contenedores | ai-baseline-app.md |
+| GAARM.0006 | Seguridad de la infraestructura base de IA | Fase de aplicación | Sondeo del entorno de clústeres de contenedores | ai-baseline-app.md |
+| GAARM.0007 | Seguridad de la infraestructura base de IA | Fase de aplicación | Ataque al entorno de clústeres de contenedores | ai-baseline-app.md |
+| GAARM.0004 | Seguridad de la infraestructura base de IA | Fase de despliegue | Ataque al flujo de CI/CD | ai-baseline-deploy.md |
+| GAARM.0003.001 | Seguridad de la infraestructura base de IA | Fase de despliegue | Fallo de aislamiento multiinquilino en la plataforma en la nube | ai-baseline-deploy.md |
+| GAARM.005 | Seguridad de la infraestructura base de IA | Fase de despliegue | Vulnerabilidad de seguridad de la plataforma en la nube | ai-baseline-deploy.md |
+| GAARM.0003 | Seguridad de la infraestructura base de IA | Fase de despliegue | Explotación de configuración insegura del sistema | ai-baseline-deploy.md |
+| GAARM.0005 | Seguridad de la infraestructura base de IA | Fase de despliegue | Vulnerabilidad de la base de datos vectorial | ai-baseline-deploy.md |
+| GAARM.0005 | Seguridad de la infraestructura base de IA | Fase de despliegue | Vulnerabilidad del sistema de contenedores y clústeres | ai-baseline-deploy.md |
+| GAARM.0004.001 | Seguridad de la infraestructura base de IA | Fase de despliegue | Vulnerabilidad del servicio de despliegue del modelo | ai-baseline-deploy.md |
+| GAARM.0004.002 | Seguridad de la infraestructura base de IA | Fase de despliegue | Contaminación de la imagen del modelo | ai-baseline-deploy.md |
+| GAARM.0003.001 | Seguridad de la infraestructura base de IA | Fase de despliegue | Deficiencia de aislamiento del entorno | ai-baseline-deploy.md |
+| GAARM.0005 | Seguridad de la infraestructura base de IA | Fase de despliegue | Vulnerabilidad de la cadena de suministro de componentes del entorno de despliegue | ai-baseline-deploy.md |
+| GAARM.0001.001 | Seguridad de la infraestructura base de IA | Fase de entrenamiento | Vulnerabilidad de herramientas de desarrollo de modelos | ai-baseline-train.md |
+| GAARM.0001.002 | Seguridad de la infraestructura base de IA | Fase de entrenamiento | Vulnerabilidad del sistema de gestión de datos de entrenamiento | ai-baseline-train.md |
+| GAARM.0001 | Seguridad de la infraestructura base de IA | Fase de entrenamiento | Riesgo de seguridad del entorno de entrenamiento | ai-baseline-train.md |
+| GAARM.0002 | Seguridad de la infraestructura base de IA | Fase de entrenamiento | Deficiencia de aislamiento del entorno de entrenamiento | ai-baseline-train.md |
 
-共计 150 个风险条目
+Total: 150 entradas de riesgo
