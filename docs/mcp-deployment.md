@@ -1,35 +1,35 @@
-# VulnClaw MCP 工具部署方案
+# Plan de despliegue de herramientas MCP de VulnClaw
 
-## 概览
+## Resumen
 
-VulnClaw 保留 4 个 MCP 服务，其中 2 个本地实现开箱即用，2 个需部署外部服务。
+VulnClaw mantiene 4 servicios MCP: 2 implementaciones locales listas para usar y 2 que requieren desplegar un servicio externo.
 
-| 服务 | 模式 | 状态 | 用途 |
+| Servicio | Modo | Estado | Uso |
 |---|---|---|---|
-| fetch | 本地 (httpx) | 开箱即用 | HTTP 请求/API 测试 |
-| memory | 本地 (JSON) | 开箱即用 | 跨会话记忆持久化 |
-| chrome-devtools | stdio MCP | 需部署 | 浏览器自动化/JS 执行/截图 |
-| burp | stdio MCP | 需部署 | 抓包/重放/HTTP 拦截（替代 Yakit） |
+| fetch | Local (httpx) | Listo para usar | Peticiones HTTP / pruebas de API |
+| memory | Local (JSON) | Listo para usar | Persistencia de memoria entre sesiones |
+| chrome-devtools | stdio MCP | Requiere despliegue | Automatización de navegador / ejecución de JS / capturas |
+| burp | stdio MCP | Requiere despliegue | Captura de tráfico / repetición / interceptación HTTP (alternativa a Yakit) |
 
 ---
 
 ## 1. Chrome DevTools MCP
 
-### 仓库
+### Repositorio
 
 https://github.com/ChromeDevTools/chrome-devtools-mcp
 
-### 前置条件
+### Prerrequisitos
 
 - Node.js LTS (v20+)
-- Chrome 浏览器（Stable 或 Chrome for Testing）
-- ffmpeg（screencast 功能需要，可选）
+- Navegador Chrome (Stable o Chrome for Testing)
+- ffmpeg (necesario para la función de screencast, opcional)
 
-### 安装
+### Instalación
 
-无需手动安装，VulnClaw 配置中已使用 `npx -y chrome-devtools-mcp@latest` 自动拉取。
+No requiere instalación manual: la configuración de VulnClaw ya usa `npx -y chrome-devtools-mcp@latest` para descargarlo automáticamente.
 
-### 启动 Chrome 远程调试
+### Iniciar la depuración remota de Chrome
 
 PowerShell:
 
@@ -49,9 +49,9 @@ Linux/Mac:
 google-chrome --remote-debugging-port=9222 --user-data-dir=/tmp/chrome-debug
 ```
 
-### VulnClaw 配置
+### Configuración de VulnClaw
 
-编辑 `~/.vulnclaw/config.yaml`，Windows 默认路径为 `C:\Users\<用户名>\.vulnclaw\config.yaml`：
+Edita `~/.vulnclaw/config.yaml` (en Windows, la ruta predeterminada es `C:\Users\<usuario>\.vulnclaw\config.yaml`):
 
 ```yaml
 mcp:
@@ -67,74 +67,74 @@ mcp:
           - "--browser-url=http://127.0.0.1:9222"
 ```
 
-可以通过 CLI 启用 Chrome DevTools MCP：
+Puedes habilitar Chrome DevTools MCP desde la CLI:
 
 ```bash
 vulnclaw config set mcp.servers.chrome-devtools.enabled true
 ```
 
-如需指定 `--browser-url`，仍需编辑上面的 `config.yaml`。
+Si necesitas especificar `--browser-url`, aún debes editar el `config.yaml` anterior.
 
-### 提供的能力（31+ 工具）
+### Capacidades que ofrece (31+ herramientas)
 
-- **输入自动化**: 点击、拖拽、表单填充、对话框处理
-- **导航**: 页面管理、URL 跳转、元素等待
-- **性能分析**: Trace 录制、Google CrUX 集成
-- **网络**: 请求监控、网络拦截
-- **调试**: 截图、Console 日志、Lighthouse 审计
-- **内存**: 堆快照分析
-- **模拟**: 设备/视口模拟
+- **Automatización de entrada**: clics, arrastrar y soltar, llenado de formularios, manejo de diálogos
+- **Navegación**: gestión de páginas, salto de URL, espera de elementos
+- **Análisis de rendimiento**: grabación de trazas, integración con Google CrUX
+- **Red**: monitoreo de peticiones, interceptación de red
+- **Depuración**: capturas de pantalla, registros de consola, auditorías Lighthouse
+- **Memoria**: análisis de instantáneas del heap
+- **Simulación**: simulación de dispositivo/viewport
 
-### 渗透测试场景
+### Escenarios de pentest
 
-- 访问目标页面截图取证
-- 执行 JS 检测 DOM XSS
-- 监控网络请求发现 API 端点
-- 自动化表单交互测试 CSRF/认证绕过
+- Acceder a páginas objetivo y capturar evidencia en pantalla
+- Ejecutar JS para detectar DOM XSS
+- Monitorear peticiones de red para descubrir endpoints de API
+- Automatizar interacción con formularios para probar CSRF/bypass de autenticación
 
 ---
 
-## 2. Burp Suite MCP（替代 Yakit）
+## 2. Burp Suite MCP (alternativa a Yakit)
 
-### 仓库
+### Repositorio
 
 https://github.com/PortSwigger/mcp-server
 
-### 前置条件
+### Prerrequisitos
 
-- Java（PATH 中可用，`java --version` 验证）
-- Burp Suite Professional（Community 版功能有限）
-- `jar` 命令可用
+- Java (disponible en el PATH, verifica con `java --version`)
+- Burp Suite Professional (la versión Community tiene funciones limitadas)
+- Comando `jar` disponible
 
-### 安装步骤
+### Pasos de instalación
 
-#### Step 1: 克隆并构建
+#### Paso 1: clonar y compilar
 
 ```bash
 git clone https://github.com/PortSwigger/mcp-server.git burp-mcp
 cd burp-mcp
 ./gradlew embedProxyJar
-# Windows 用: gradlew.bat embedProxyJar
-# 产物: build/libs/burp-mcp-all.jar
+# En Windows usa: gradlew.bat embedProxyJar
+# Resultado: build/libs/burp-mcp-all.jar
 ```
 
-#### Step 2: 加载到 Burp Suite
+#### Paso 2: cargarlo en Burp Suite
 
-1. 打开 Burp Suite -> Extensions 标签页
-2. 点击 Add -> Type 选择 Java
-3. 选择 `build/libs/burp-mcp-all.jar`
-4. 点击 Next 完成加载
+1. Abre Burp Suite -> pestaña Extensions
+2. Haz clic en Add -> selecciona Type Java
+3. Selecciona `build/libs/burp-mcp-all.jar`
+4. Haz clic en Next para completar la carga
 
-#### Step 3: 启用 MCP Server
+#### Paso 3: habilitar el MCP Server
 
-1. 在 Burp 中找到 MCP 标签页
-2. 勾选 "Enabled"
-3. 默认监听 `http://127.0.0.1:9876`
-4. 可选：修改 Host/Port
+1. Busca la pestaña MCP dentro de Burp
+2. Marca "Enabled"
+3. Por defecto escucha en `http://127.0.0.1:9876`
+4. Opcional: modifica Host/Port
 
-### VulnClaw 配置
+### Configuración de VulnClaw
 
-编辑 `~/.vulnclaw/config.yaml`，Windows 默认路径为 `C:\Users\<用户名>\.vulnclaw\config.yaml`：
+Edita `~/.vulnclaw/config.yaml` (en Windows, la ruta predeterminada es `C:\Users\<usuario>\.vulnclaw\config.yaml`):
 
 ```yaml
 mcp:
@@ -146,66 +146,66 @@ mcp:
         url: "http://127.0.0.1:9876"
 ```
 
-VulnClaw 直接连接 Burp 扩展暴露的 SSE 服务，不再通过 `java -jar` 代理启动 Burp MCP。
+VulnClaw se conecta directamente al servicio SSE que expone la extensión de Burp; ya no inicia Burp MCP a través de un proxy `java -jar`.
 
-### 提供的能力
+### Capacidades que ofrece
 
-- **抓包**: 查看 Proxy History 中的请求/响应
-- **重放**: 构造并发送自定义 HTTP 请求
-- **拦截**: 实时修改请求/响应
-- **扫描**: 调用 Burp Scanner（Pro 版）
-- **Intruder**: 参数化攻击
+- **Captura de tráfico**: ver peticiones/respuestas en Proxy History
+- **Repetición**: construir y enviar peticiones HTTP personalizadas
+- **Interceptación**: modificar peticiones/respuestas en tiempo real
+- **Escaneo**: invocar Burp Scanner (versión Pro)
+- **Intruder**: ataques parametrizados
 
-### 替代 Yakit 的对照
+### Comparación con Yakit
 
-| 功能 | Yakit | Burp MCP |
+| Función | Yakit | Burp MCP |
 |---|---|---|
-| MITM 抓包 | MITM 劫持 | Proxy History |
-| 请求重放 | Web Fuzzer | send_http1_request |
-| 流量分析 | 流量分析 | get_proxy_history |
-| 漏洞扫描 | 插件扫描 | Burp Scanner |
-| MCP 集成 | 未实现 (Issue #2703) | 官方支持 v1.3.0 |
+| Captura MITM | Secuestro MITM | Proxy History |
+| Repetición de peticiones | Web Fuzzer | send_http1_request |
+| Análisis de tráfico | Análisis de tráfico | get_proxy_history |
+| Escaneo de vulnerabilidades | Escaneo por plugins | Burp Scanner |
+| Integración MCP | No implementada (Issue #2703) | Soporte oficial v1.3.0 |
 
 ---
 
-## 快速验证
+## Verificación rápida
 
-### 验证 Chrome DevTools MCP
+### Verificar Chrome DevTools MCP
 
 ```bash
-# 1. 启动 Chrome 调试模式
-# 2. 启动 VulnClaw
+# 1. Inicia Chrome en modo de depuración
+# 2. Inicia VulnClaw
 vulnclaw chat
 
-# 3. 输入测试命令
-> 打开 http://example.com 并截图
+# 3. Escribe un comando de prueba
+> Abre http://example.com y toma una captura
 ```
 
-### 验证 Burp MCP
+### Verificar Burp MCP
 
 ```bash
-# 1. 启动 Burp Suite 并启用 MCP 扩展
-# 2. 启动 VulnClaw
+# 1. Inicia Burp Suite y habilita la extensión MCP
+# 2. Inicia VulnClaw
 vulnclaw chat
 
-# 3. 输入测试命令
-> 查看 Burp 抓包历史
+# 3. Escribe un comando de prueba
+> Muestra el historial de captura de Burp
 ```
 
 ---
 
-## 故障排查
+## Solución de problemas
 
-### Chrome DevTools 连不上
+### Chrome DevTools no conecta
 
-1. 确认 Chrome 已启动远程调试：`curl http://127.0.0.1:9222/json`
-2. 确认 Node.js 已安装：`node --version`
-3. 尝试手动运行：`npx -y chrome-devtools-mcp@latest --browser-url=http://127.0.0.1:9222`
-4. 如需连接固定调试端口，确认 `config.yaml` 中包含 `--browser-url=http://127.0.0.1:9222`
+1. Confirma que Chrome inició con depuración remota: `curl http://127.0.0.1:9222/json`
+2. Confirma que Node.js está instalado: `node --version`
+3. Intenta ejecutarlo manualmente: `npx -y chrome-devtools-mcp@latest --browser-url=http://127.0.0.1:9222`
+4. Si necesitas conectar a un puerto de depuración fijo, confirma que `config.yaml` incluya `--browser-url=http://127.0.0.1:9222`
 
-### Burp MCP 连不上
+### Burp MCP no conecta
 
-1. 确认 Burp 中 MCP 标签页显示 "Enabled"
-2. 确认端口可达：`curl http://127.0.0.1:9876`
-3. 确认 Java 版本：`java --version`（需要 Java 11+）
-4. 检查 JAR 路径是否正确
+1. Confirma que la pestaña MCP en Burp muestra "Enabled"
+2. Confirma que el puerto es alcanzable: `curl http://127.0.0.1:9876`
+3. Confirma la versión de Java: `java --version` (se requiere Java 11+)
+4. Verifica que la ruta del JAR sea correcta
