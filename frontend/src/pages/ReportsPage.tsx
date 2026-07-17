@@ -221,7 +221,7 @@ export function ReportsPage({ selectedTarget, focus }: ReportsPageProps) {
                 onClick={() => setSelectedPath(report.path)}
               >
                 <strong>{report.name}</strong>
-                <span>{report.kind} - {formatSize(report.size_bytes ?? 0, t)}</span>
+                <span>{report.kind === "html" ? t("reports.html") : t("reports.markdown")} - {formatSize(report.size_bytes ?? 0, t)}</span>
                 <span className="muted-inline">{formatDate(report.modified_at, t)}</span>
                 <span className="muted-inline">{report.path}</span>
               </button>
@@ -270,7 +270,7 @@ export function ReportsPage({ selectedTarget, focus }: ReportsPageProps) {
 
       <ReportPreviewDialog
         open={previewOpen && Boolean(selectedReport)}
-        title={selectedReport?.name ?? "Report preview"}
+        title={selectedReport?.name ?? t("reports.preview")}
         path={selectedReport?.path}
         content={previewContent}
         kind={previewKind}
@@ -316,7 +316,7 @@ function formatDate(value: string | undefined, t: TFunction): string {
 }
 
 function formatSize(value: number, t: TFunction): string {
-  if (!value) return `0 B`;
+  if (!value) return t("reports.size_b", { size: "0" });
   if (value < 1024) return t("reports.size_b", { size: String(value) });
   if (value < 1024 * 1024) return t("reports.size_kb", { size: (value / 1024).toFixed(1) });
   return t("reports.size_mb", { size: (value / 1024 / 1024).toFixed(1) });

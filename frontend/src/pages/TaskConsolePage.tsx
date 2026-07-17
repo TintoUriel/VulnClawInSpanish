@@ -83,8 +83,8 @@ export function TaskConsolePage({
   function renderEventText(item: TaskEvent): string {
     const payload = item.payload;
     const parts: string[] = [];
-    if (typeof payload.cycle === "number") parts.push(`cycle ${payload.cycle}`);
-    if (typeof payload.round === "number") parts.push(`round ${payload.round}`);
+    if (typeof payload.cycle === "number") parts.push(t("console.event_cycle", { cycle: String(payload.cycle) }));
+    if (typeof payload.round === "number") parts.push(t("console.event_round", { round: String(payload.round) }));
     if (typeof payload.phase === "string") parts.push(formatPhaseLabel(payload.phase));
     const text = typeof payload.text === "string" ? payload.text : "";
     const message = typeof payload.message === "string" ? payload.message : "";
@@ -307,7 +307,7 @@ export function TaskConsolePage({
         title={t("console.confirm_stop_title")}
         copy={t("console.confirm_stop_copy", {
           target: activeTask?.target ?? t("boundary.unknown"),
-          task: activeTask ? formatTaskTitle(activeTask.command, activeTask.target) : "None",
+          task: activeTask ? formatTaskTitle(activeTask.command, activeTask.target) : t("home.confirm_not_set"),
         })}
         tone="danger"
         confirmLabel={t("console.stop")}

@@ -105,7 +105,7 @@ export function ActiveTaskBanner({ task, latestEvent, onOpenAdvanced, onOpenBoun
           )}
         </div>
       </div>
-      <div className="task-progress" aria-label={`Task progress ${progress}%`}>
+      <div className="task-progress" aria-label={t("banner.progress_aria", { progress: String(progress) })}>
         <span style={{ width: `${progress}%` }} />
       </div>
     </section>

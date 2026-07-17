@@ -108,7 +108,7 @@ export function AppShell<T extends string>({
         />
         <div className="view-mount">{children}</div>
       </main>
-      <aside className="quick-rail" aria-label="quick actions">
+      <aside className="quick-rail" aria-label={t("shell.quick_actions_aria")}>
         <div className="quick-rail-main">
           {quickActions.map((item) => (
             <button

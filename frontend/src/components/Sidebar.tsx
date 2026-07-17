@@ -39,7 +39,7 @@ export function Sidebar<T extends string>({ activeView, activeNavView = activeVi
         </div>
       </div>
 
-      <nav className="nav-list" aria-label="main navigation">
+      <nav className="nav-list" aria-label={t("shell.main_navigation_aria")}>
         {nav.map((item) => (
           <button
             key={item.key}

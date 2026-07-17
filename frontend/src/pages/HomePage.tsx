@@ -316,7 +316,7 @@ export function HomePage({ selectedTarget, activeTask, latestEvent, taskEvents, 
             </label>
           </div>
 
-          <div className="scan-mode-row" aria-label="Scan mode">
+          <div className="scan-mode-row" aria-label={t("home.scan_mode_aria")}>
             {MODES.map((item) => (
               <button
                 key={item.key}
@@ -411,7 +411,7 @@ export function HomePage({ selectedTarget, activeTask, latestEvent, taskEvents, 
                     className={`action-choice action-choice-block ${blockActions.includes(action.value) ? "selected-item" : ""}`}
                     onClick={() => toggleAction(action.value, blockActions, setBlockActions, allowActions, setAllowActions)}
                   >
-                    <strong>Block {formatActionLabel(action.value)}</strong>
+                    <strong>{t("home.block")} {formatActionLabel(action.value)}</strong>
                   </button>
                 ))}
               </div>

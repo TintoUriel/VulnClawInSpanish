@@ -68,7 +68,7 @@ export function ReportPreview({ content, kind, loading, expanded = false }: Repo
     <div className={`report-preview ${expanded ? "report-preview-expanded" : ""}`}>
       {content ? (
         kind === "html" ? (
-          <iframe className="report-frame" sandbox="" srcDoc={content} title="HTML report preview" />
+          <iframe className="report-frame" sandbox="" srcDoc={content} title={t("dialog.html_preview_title")} />
         ) : (
           <pre>{content}</pre>
         )

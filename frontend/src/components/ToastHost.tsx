@@ -1,3 +1,5 @@
+import { useT } from "../i18n";
+
 export type ToastTone = "success" | "error" | "info";
 
 export interface ToastItem {
@@ -15,6 +17,7 @@ interface ToastHostProps {
 }
 
 export function ToastHost({ toasts, onDismiss }: ToastHostProps) {
+  const { t } = useT();
   if (!toasts.length) return null;
 
   return (
@@ -37,7 +40,7 @@ export function ToastHost({ toasts, onDismiss }: ToastHostProps) {
               </button>
             )}
           </div>
-          <button type="button" className="toast-close-btn" aria-label="Close notification" onClick={() => onDismiss(toast.id)}>
+          <button type="button" className="toast-close-btn" aria-label={t("toast.close_notification")} onClick={() => onDismiss(toast.id)}>
             x
           </button>
         </article>

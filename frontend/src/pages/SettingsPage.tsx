@@ -450,9 +450,9 @@ export function SettingsPage({ initialSection = "basic", onOpenAdvanced }: Setti
                 </div>
               </div>
               <div className="scope-summary field-wide">
-                <strong>Allow</strong>
+                <strong>{t("settings.allow_label")}</strong>
                 <span>{formatActionList(defaultAllowActions)}</span>
-                <strong>Block</strong>
+                <strong>{t("settings.block_label")}</strong>
                 <span>{formatActionList(defaultBlockActions)}</span>
               </div>
             </div>
@@ -529,9 +529,9 @@ export function SettingsPage({ initialSection = "basic", onOpenAdvanced }: Setti
                 {mcpQuery.data?.services.map((service) => (
                   <div key={service.name} className="list-item">
                     <strong>{service.name}</strong>
-                    <span>Status: {formatMcpHealth(service.health_status)} - Mode: {formatMcpExecutionMode(service.execution_mode)} - Tools: {service.tool_count}</span>
+                    <span>{t("settings.mcp_status_line", { status: formatMcpHealth(service.health_status), mode: formatMcpExecutionMode(service.execution_mode), tools: String(service.tool_count) })}</span>
                     <span className="muted-inline">
-                      Calls {service.call_count} - Success {service.success_count} - Failed {service.failure_count}
+                      {t("settings.mcp_calls_line", { calls: String(service.call_count), success: String(service.success_count), failed: String(service.failure_count) })}
                     </span>
                     {service.error && <span className="danger-inline">{service.error}</span>}
                   </div>

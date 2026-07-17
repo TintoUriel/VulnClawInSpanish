@@ -344,7 +344,7 @@ export function SafetyBoundaryPage({ selectedTarget, activeTask, onOpenHome, onO
                   <div className="boundary-event-meta">
                     <span>{t("home.target")}: {event.target || t("boundary.unknown")}</span>
                     <span>{t("boundary.allow_actions")}: {formatActionList(event.action ? [event.action] : undefined, t("boundary.unrecorded"))}</span>
-                    <span>Tool: {event.tool_name || t("boundary.unrecorded")}</span>
+                    <span>{t("boundary.tool_label")}: {event.tool_name || t("boundary.unrecorded")}</span>
                     <span>{t("phase.none")}: {formatPhaseLabel(event.phase)}</span>
                   </div>
                 </div>

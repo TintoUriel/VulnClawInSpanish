@@ -17,6 +17,7 @@ import type {
   TaskOptions,
   TaskRecord,
 } from "../types/api";
+import { t } from "../i18n";
 
 async function requestJson<T>(input: string, init?: RequestInit): Promise<T> {
   let response: Response;
@@ -30,22 +31,22 @@ async function requestJson<T>(input: string, init?: RequestInit): Promise<T> {
       ...init,
     });
   } catch {
-    throw new Error("Unable to reach the VulnClaw backend API. Start `vulnclaw web` and reconnect.");
+    throw new Error(t("error.unreachable"));
   }
 
   if (!response.ok) {
     const detail = await readErrorDetail(response);
     throw new Error(
       detail
-        ? `Request failed (${response.status}): ${detail}`
-        : `Request failed (${response.status}). Try again or open advanced diagnostics.`,
+        ? t("error.request_failed", { status: String(response.status), detail })
+        : t("error.request_failed_simple", { status: String(response.status) }),
     );
   }
 
   try {
     return await response.json() as T;
   } catch {
-    throw new Error("The backend API returned non-JSON content. Confirm the backend was started with `vulnclaw web`.");
+    throw new Error(t("error.non_json"));
   }
 }
 
@@ -66,9 +67,9 @@ async function readErrorDetail(response: Response): Promise<string> {
     if (text) {
       return summarizeErrorDetail(text);
     }
-    return `Request failed with status ${response.status}`;
+    return t("error.request_failed_status", { status: String(response.status) });
   } catch {
-    return `Request failed with status ${response.status}`;
+    return t("error.request_failed_status", { status: String(response.status) });
   }
 }
 
