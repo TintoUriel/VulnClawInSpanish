@@ -1,123 +1,107 @@
-# AI模型安全 - 应用阶段 - 幻觉风险
+# Seguridad de Modelos de IA - Fase de Aplicación - Riesgo de Alucinación
 
-> 来源: AISS绿盟大模型安全智链社区 | 拆自 ai-model-app.md
-> 风险类别: 幻觉（GAARM.0028.x + 0064 跨模态幻觉）
+> Fuente: Comunidad AISS NSFOCUS de Seguridad de Grandes Modelos | Extraído de ai-model-app.md
+> Categoría de riesgo: Alucinación (GAARM.0028.x + 0064 Alucinación transmodal)
 
 ---
 
-### 事实性幻觉
+### Alucinación Fáctica
 
-> 风险编号: GAARM.0028.001
-> 生命周期: 应用阶段
+> Número de riesgo: GAARM.0028.001
+> Ciclo de vida: Fase de aplicación
 
-**攻击概述**
+**Resumen del ataque**
 
-该风险涉及模型输出内容与现实世界中可验证的事实不符或捏造信息。这种风险来源有很多种可能，在大模型从训练到应用的各个方面都可能带来幻觉风险。此外，攻击者可以通过特意构造的攻击手段来让大模型产生幻觉，例如随机喂给大模型一段乱码，则会影响它输出内容的真实性。最终可能导致助长虚假新闻和阴谋论的传播，从而对社会产生深远的负面影响，包括但不限于误导公众、破坏信息真实性和扰乱社会秩序
-事实性幻觉可分为以下几类:
+Este riesgo se refiere a que el contenido generado por el modelo no coincide con hechos verificables del mundo real o contiene información fabricada. Este riesgo puede originarse de muchas formas posibles, y puede introducirse en cualquier etapa del ciclo de vida del modelo, desde el entrenamiento hasta la aplicación. Además, un atacante puede construir deliberadamente un vector de ataque para provocar que el modelo alucine; por ejemplo, alimentar al modelo con una cadena de caracteres aleatoria sin sentido puede afectar la veracidad de su salida. Esto puede acabar favoreciendo la propagación de noticias falsas y teorías de la conspiración, produciendo un impacto negativo profundo en la sociedad, incluyendo entre otros: desinformar al público, erosionar la veracidad de la información y perturbar el orden social.
+La alucinación fáctica puede clasificarse en las siguientes categorías:
 
-事实不一致：模型的输出与现实世界中已知的信息相矛盾；
-事实捏造：指模型生成的内容完全基于虚构，而无法通过任何现实世界的信息来验证其准确性；
+Inconsistencia fáctica: la salida del modelo contradice información ya conocida del mundo real.
+Fabricación fáctica: el contenido generado por el modelo se basa completamente en invención, sin que su exactitud pueda verificarse con ninguna información del mundo real.
 
-**攻击案例**
+**Casos de ataque**
 
-案例一：模型被问到第一个登上月球的人时，模型编造出虚假人物
+Caso 1: al preguntarle al modelo quién fue la primera persona en pisar la Luna, el modelo inventó un personaje ficticio.
 
 
   
-事实性幻觉案例
+Caso de alucinación fáctica
 
-**攻击风险**
+**Riesgos del ataque**
 
-传播虚假信息：事实性幻觉可能导致虚假信息的传播，尤其是在社交媒体和其他在线平台上。这不仅会误导公众，还可能加剧假新闻、阴谋论等社会问题。
-法律和合规风险：生成包含不准确事实的内容可能违反特定行业的法律和合规要求，比如医疗信息的准确性、金融建议的可靠性等，从而导致法律诉讼或罚款。
-伦理和社会责任：事实性幻觉可能违背伦理和社会责任原则，尤其是当错误信息影响到敏感话题（如政治、健康、安全等）时，可能对社会造成负面影响。
-用户信任下降：频繁的事实性错误可能导致用户对AI系统的信任下降，从而影响其使用意愿和技术的普及 。
+Propagación de información falsa: la alucinación fáctica puede provocar la difusión de información falsa, especialmente en redes sociales y otras plataformas en línea. Esto no solo desinforma al público, sino que también puede agravar problemas sociales como las noticias falsas y las teorías de la conspiración.
+Riesgo legal y de cumplimiento: generar contenido con hechos inexactos puede infringir requisitos legales y de cumplimiento específicos de ciertos sectores, como la exactitud de la información médica o la fiabilidad del asesoramiento financiero, lo que puede derivar en demandas legales o sanciones.
+Ética y responsabilidad social: la alucinación fáctica puede ir en contra de los principios éticos y de responsabilidad social, especialmente cuando la información errónea afecta temas sensibles (como política, salud, seguridad, etc.), pudiendo producir un impacto negativo en la sociedad.
+Disminución de la confianza del usuario: los errores fácticos frecuentes pueden reducir la confianza de los usuarios en el sistema de IA, afectando así su disposición a usarlo y la adopción de la tecnología.
 
-**缓解措施**
+**Medidas de mitigación**
 
-缓解方式
-描述
+Medida de mitigación
+Descripción
 
+Revisión humana y mecanismo de retroalimentación
+Someter la salida del modelo a revisión humana y a un mecanismo de retroalimentación, para detectar y corregir oportunamente los errores en la salida del modelo y optimizarlo continuamente.
 
+Aprendizaje por conjuntos (ensemble) y fusión multi-modelo
+Mediante aprendizaje por conjuntos o fusión de múltiples modelos, combinar las ventajas de varios modelos para mejorar el rendimiento predictivo global y reducir el fenómeno de alucinación.
 
+Aplicación de técnicas de regularización
+Aplicar técnicas de regularización (como la regularización L1, L2) puede evitar el sobreajuste del modelo y mejorar su capacidad de generalización.
 
-人工审核和反馈机制
-对模型的输出进行人工审核和反馈机制，及时发现和纠正模型输出的错误，不断优化模型
-
-
-集成学习与多模型融合
-通过集成学习或多模型融合的方式，结合多个模型的优势，可以提高整体的预测性能和减少幻觉现象
-
-
-正则化技术应用
-应用正则化技术（如L1、L2正则化）可以防止模型过拟合，提高模型的泛化能力
-
-**参考**
+**Referencias**
 
 https://www.lakera.ai/blog/guide-to-hallucinations-in-large-language-models
 https://arxiv.org/pdf/2305.13534.pdf
 
 ---
-### 攻击案例
+### Alucinación de Fidelidad
 
-> 风险编号: GAARM.0028.002
-> 生命周期: 应用阶段
+> Número de riesgo: GAARM.0028.002
+> Ciclo de vida: Fase de aplicación
 
-**攻击概述**
+**Resumen del ataque**
 
-忠实幻觉性指的是生成的内容与用户所提供的指令或上下文信息之间存在不一致。有很多攻击手段可以让大模型产生忠实性幻觉。例如，通过对输入数据进行微小的扰动，使模型产生错误预测或生成虚假信息，影响大模型的逻辑；通过多次查询模型，推断其内部逻辑，进而设计输入使模型产生幻觉；利用生成对抗网络生成虚假的数据样本，诱使其他模型产生错误输出等。
-忠实性幻觉分为以下三种类型:
+La alucinación de fidelidad se refiere a la existencia de inconsistencias entre el contenido generado y las instrucciones o la información de contexto proporcionadas por el usuario. Existen muchos vectores de ataque que pueden provocar que un gran modelo produzca alucinaciones de fidelidad. Por ejemplo: aplicar pequeñas perturbaciones a los datos de entrada para que el modelo genere predicciones erróneas o información falsa, afectando la lógica del modelo; consultar el modelo repetidamente para inferir su lógica interna y así diseñar entradas que induzcan alucinaciones; o utilizar redes generativas antagónicas (GAN) para generar muestras de datos falsas que induzcan a otros modelos a producir salidas erróneas.
+La alucinación de fidelidad se divide en los siguientes tres tipos:
 
-指令不一致：LLM忽略了用户提供的具体指令。例如，按照指示将一个问题翻译成西班牙语，但模型却以英语提供了答案；
-上下文不一致：模型输出的内容包含了未在提供的上下文中出现或与之相矛盾的信息。例如，LLM声称尼罗河起源于山脉，而不是用户输入中提到的大湖地区；
-逻辑不一致：模型的输出包含了逻辑错误，尽管开始时是正确的。例如，在一道分步数学解题中，LLM可能会在执行算术运算时出现错误，尽管开始时是正确的；
+Inconsistencia de instrucciones: el LLM ignora las instrucciones específicas proporcionadas por el usuario. Por ejemplo, se le indica traducir una pregunta al español, pero el modelo responde en inglés.
+Inconsistencia de contexto: el contenido generado por el modelo incluye información que no aparece en el contexto proporcionado o que lo contradice. Por ejemplo, el LLM afirma que el Nilo nace en una cordillera montañosa, en lugar de la región de los Grandes Lagos mencionada en la entrada del usuario.
+Inconsistencia lógica: la salida del modelo contiene errores lógicos, aunque haya comenzado de forma correcta. Por ejemplo, al resolver un problema matemático paso a paso, el LLM puede cometer errores al ejecutar operaciones aritméticas, aunque el planteamiento inicial fuera correcto.
 
-**攻击案例**
+**Casos de ataque**
 
-案例一：模型总结新闻文章，该模型错误地生成实际事件日期
+Caso 1: un modelo resume un artículo de noticias y genera erróneamente la fecha real del evento.
 
 
   
-Fidelity Hallucination
+Alucinación de fidelidad
 
+Caso
+Descripción
 
+Caso 2
+Un LLM, al implementar la detección de software de escaneo TCP SYN, generó código incorrecto.
 
+**Riesgos del ataque**
 
-案例
-描述
+Decisiones erróneas del usuario: cuando la salida del modelo es inconsistente con el contenido original, puede inducir a error al usuario, especialmente cuando este depende de la información proporcionada por el sistema de IA para tomar decisiones.
+Disminución de la satisfacción del usuario: cuando el usuario descubre que el contenido generado no coincide con su solicitud o presenta errores lógicos evidentes, puede sentirse confundido o decepcionado, lo que afecta directamente su satisfacción y confianza en el sistema.
+**Errores en procesos automatizados:** en procesos automatizados, la alucinación de fidelidad puede provocar errores o interrupciones en el flujo, requiriendo intervención humana para corregirlos, lo que reduce la eficiencia y el rendimiento general.
 
+**Medidas de mitigación**
 
+Medida de mitigación
+Descripción
 
+Revisión humana y mecanismo de retroalimentación
+Someter la salida del modelo a revisión humana y a un mecanismo de retroalimentación, para detectar y corregir oportunamente los errores en la salida del modelo y optimizarlo continuamente.
 
-案例二
-LLM在实现检测TCP SYN扫描软件时输出了错误的代码
+Aprendizaje por conjuntos (ensemble) y fusión multi-modelo
+Mediante aprendizaje por conjuntos o fusión de múltiples modelos, combinar las ventajas de varios modelos para mejorar el rendimiento predictivo global y reducir el fenómeno de alucinación.
 
-**攻击风险**
+Aplicación de técnicas de regularización
+Aplicar técnicas de regularización (como la regularización L1, L2) puede evitar el sobreajuste del modelo y mejorar su capacidad de generalización.
 
-用户决策误导：模型的输出与原始内容不一致，可能会误导用户，尤其是当用户依赖AI系统提供的信息进行决策时。
-用户满意度下降：当用户发现生成的内容与其请求不匹配或逻辑上存在明显错误时，可能会感到困惑或失望，这会直接影响到用户对系统的满意度和信任度。
-**自动化流程出错：**在自动化流程中，忠实性幻觉可能导致自动化流程出错或中断，需要人工介入纠正，从而降低整体效率和产出。
-
-**缓解措施**
-
-缓解方式
-描述
-
-
-
-
-人工审核和反馈机制
-对模型的输出进行人工审核和反馈机制，及时发现和纠正模型输出的错误，不断优化模型
-
-
-集成学习与多模型融合
-通过集成学习或多模型融合的方式，结合多个模型的优势，可以提高整体的预测性能和减少幻觉现象
-
-
-正则化技术应用
-应用正则化技术（如L1、L2正则化）可以防止模型过拟合，提高模型的泛化能力
-
-**参考**
+**Referencias**
 
 https://arxiv.org/pdf/2311.05232.pdf
 https://mp.weixin.qq.com/s/qFAQQJ_FuhY2iaLzkoWynA
@@ -125,128 +109,114 @@ https://www.lakera.ai/blog/guide-to-hallucinations-in-large-language-models
 https://www.appendata.com/blogs/ai-hallucinations
 
 ---
-### 模型幻觉风险
+### Riesgo de Alucinación del Modelo
 
-> 风险编号: GAARM.0028
-> 生命周期: 应用阶段
+> Número de riesgo: GAARM.0028
+> Ciclo de vida: Fase de aplicación
 
-**攻击概述**
+**Resumen del ataque**
 
-模型幻觉风险是指大型语言模型在生成文本或其他类型的输出时，可能会产生与现实不符或完全虚构的信息，这些信息可能被当作真实信息使用，从而导致误导或错误决策。针对该风险的攻击会诱导大模型产生幻觉，生成虚假的输出，从而误导决策。
-以下是常见的模型幻觉攻击手段：
-- 随机噪声攻击（OoD Attack）：即让无意义的随机字符串诱导大模型产生预定义的幻觉输出。
-- 弱语义攻击（Weak Semantic Attack）：即保证原始 prompt 语义基本不变的情况下，使得大模型产生截然不同的幻觉输出。
+El riesgo de alucinación del modelo se refiere a que, al generar texto u otro tipo de salida, un gran modelo de lenguaje puede producir información que no coincide con la realidad o que es completamente ficticia; esta información puede tomarse como verdadera, provocando así decisiones erróneas o engañosas. Los ataques dirigidos a este riesgo inducen al modelo a alucinar, generando salidas falsas que engañan la toma de decisiones.
+A continuación se listan los vectores de ataque de alucinación de modelo más comunes:
+- Ataque de ruido aleatorio (OoD Attack): consiste en usar cadenas aleatorias sin sentido para inducir al modelo a producir una salida de alucinación predefinida.
+- Ataque de semántica débil (Weak Semantic Attack): consiste en mantener básicamente sin cambios la semántica del prompt original, mientras se logra que el modelo produzca una salida de alucinación completamente distinta.
 
-**攻击案例**
+**Casos de ataque**
 
-案例一：攻击者通过添加无意义的字符串让模型输出错误言论。
-案例链接
+Caso 1: el atacante logra que el modelo emita declaraciones erróneas añadiendo una cadena de caracteres sin sentido.
+Enlace del caso
 
 
   
 OoD
 
-案例二：攻击者在保持原Prompt不变的情况下重构Prompt，使得模型输出与原来不同的语句。
+Caso 2: el atacante reconstruye el prompt manteniendo el prompt original sin cambios, logrando que el modelo genere una sentencia distinta a la original.
 
 
   
-Weak Semantic Attack
+Ataque de semántica débil
 
-案例三：2023年6月，律师 Steven A. Schwartz 和 Peter LoDuca 因提交 ChatGPT 生成的法律简报而被罚款 5000 美元，其中包括对不存在案件的引用。
+Caso 3: en junio de 2023, los abogados Steven A. Schwartz y Peter LoDuca fueron multados con 5000 dólares por presentar un escrito legal generado por ChatGPT que incluía referencias a casos judiciales inexistentes.
 
 
   
-律师使用 ChatGPT 生成的法律简报被处罚
+Escrito legal generado con ChatGPT usado por abogados fue sancionado
 
-**攻击风险**
+**Riesgos del ataque**
 
-误导决策：模型可能产生误导性的输出，影响依赖模型输出的决策过程。
-语义混淆：即使输入的语义内容保持不变，模型也可能产生与预期完全不同的输出，导致混淆。
-信任度下降：频繁的幻觉输出会降低用户和组织对模型可靠性的信任。
+Decisiones erróneas: el modelo puede producir salidas engañosas, afectando los procesos de decisión que dependen de la salida del modelo.
+Confusión semántica: incluso si el contenido semántico de la entrada permanece sin cambios, el modelo puede producir una salida completamente distinta a la esperada, generando confusión.
+Disminución de la confianza: las salidas alucinatorias frecuentes reducen la confianza de usuarios y organizaciones en la fiabilidad del modelo.
 
-**缓解措施**
+**Medidas de mitigación**
 
-缓解方式
-描述
+Medida de mitigación
+Descripción
 
+Validación y filtrado de entradas
+Realizar una validación y un preprocesamiento estrictos de los datos de entrada para filtrar datos anómalos o con ruido.
 
+Entrenamiento de robustez del modelo
+Mejorar la resistencia del modelo frente a este tipo de ataques incorporando ruido aleatorio y muestras adversarias durante el entrenamiento.
 
+Integración de múltiples modelos
+Usar métodos de conjunto de múltiples modelos, mediante votación mayoritaria o aprendizaje por conjuntos, para reducir el impacto del error de un solo modelo.
 
-输入验证和过滤
-对输入数据进行严格的验证和预处理，以过滤掉异常或噪声数据
-
-
-模型鲁棒性训练
-通过在训练过程中加入随机噪声和对抗性样本，提高模型对这类攻击的抵抗力
-
-
-多模型集成
-使用多个模型的集成方法，通过多数投票或集成学习来减少单一模型出错的影响
-
-**参考**
+**Referencias**
 
 https://github.com/PKU-YuanGroup/Hallucination-Attack
 https://zhuanlan.zhihu.com/p/661444210
 https://arxiv.org/pdf/2310.01469.pdf
 
 ---
-### 跨模态幻觉
+### Alucinación Transmodal
 
-> 风险编号: GAARM.0064
-> 生命周期: 应用阶段
+> Número de riesgo: GAARM.0064
+> Ciclo de vida: Fase de aplicación
 
-**攻击概述**
+**Resumen del ataque**
 
-跨模态幻觉是指多模态模型在不同模态间产生矛盾、不一致或完全虚构的内容，导致模型输出与输入现实不符的错误信息。这种风险的核心在于多模态模型在处理和融合文本、图像、音频、视频等多种信息时，由于模态间语义映射错误、跨模态注意力机制缺陷或多模态融合过程中的信息丢失或扭曲，产生了严重的逻辑错误和事实错误。跨模态幻觉不仅影响模型的可靠性，还可能导致错误的决策、误导性的信息传播和严重的应用后果。
+La alucinación transmodal se refiere a que los modelos multimodales producen contenido contradictorio, inconsistente o completamente ficticio entre las distintas modalidades, provocando que la salida del modelo no coincida con la realidad de la entrada. El núcleo de este riesgo radica en que, al procesar y fusionar múltiples tipos de información como texto, imagen, audio y video, los modelos multimodales pueden producir errores lógicos y fácticos graves debido a mapeos semánticos incorrectos entre modalidades, defectos en el mecanismo de atención transmodal, o pérdida/distorsión de información durante el proceso de fusión multimodal. La alucinación transmodal no solo afecta la fiabilidad del modelo, sino que también puede provocar decisiones erróneas, propagación de información engañosa y consecuencias graves en la aplicación.
 
-**攻击案例**
+**Casos de ataque**
 
-案例
-描述
+Caso
+Descripción
 
-
-
-
-案例一
-在针对医学影像（如 CT、X 光片）进行诊断推理时，GPT-4V 经常生成与图像实际内容不一致的诊断结论，即模型输出的诊断信息与影像内容本身存在明显逻辑和事实错误。具体表现包括错误识别病灶、错误定位结构、甚至错误判断病理改变，这些都不是图像所显示的，从诊断角度看属于幻觉性输出。 这类错误由真实影像数据测试得出，不能简单归结为模型训练设想，而是模型在融合视觉与语言信息时产生的错误解释。
+Caso 1
+Al realizar razonamiento diagnóstico sobre imágenes médicas (como TC o radiografías), GPT-4V genera con frecuencia conclusiones diagnósticas inconsistentes con el contenido real de la imagen; es decir, la información diagnóstica que produce el modelo presenta errores lógicos y fácticos evidentes respecto al contenido de la propia imagen. Las manifestaciones concretas incluyen: identificación errónea de la lesión, localización incorrecta de estructuras e incluso juicios erróneos sobre cambios patológicos que no están presentes en la imagen, lo cual constituye, desde una perspectiva diagnóstica, una salida alucinatoria. Este tipo de error se obtiene mediante pruebas con datos de imágenes reales, por lo que no puede atribuirse simplemente a un supuesto de entrenamiento del modelo, sino que es una interpretación errónea que surge cuando el modelo fusiona información visual y lingüística.
 
 
 
-风险表现
+Manifestaciones del riesgo
 
-图文描述不一致：图像内容和文本描述存在明显矛盾
-音视频理解偏差：音频和视频内容的理解产生严重偏差
-多模态推理逻辑错误：跨模态推理过程出现逻辑错误
-模态间信息冲突：不同模态的信息相互冲突
-虚构跨模态关联：创造不存在的模态间关联关系
+Inconsistencia entre imagen y texto: existe una contradicción evidente entre el contenido de la imagen y la descripción textual.
+Desviación en la comprensión audiovisual: se produce una desviación grave en la comprensión del contenido de audio y video.
+Errores lógicos en el razonamiento multimodal: aparecen errores lógicos en el proceso de razonamiento transmodal.
+Conflicto de información entre modalidades: la información de las distintas modalidades entra en conflicto entre sí.
+Asociaciones transmodales ficticias: se crean relaciones de asociación entre modalidades que no existen.
 
-**缓解措施**
+**Medidas de mitigación**
 
-缓解方式
-描述
+Medida de mitigación
+Descripción
 
+Verificación de consistencia transmodal
+Establecer un mecanismo de verificación de consistencia entre modalidades, implementar validación cruzada de contenido multimodal y detectar contradicciones lógicas entre modalidades.
 
+Optimización del mecanismo de atención
+Mejorar el algoritmo de asignación de atención transmodal, implementar un mecanismo de atención multinivel y establecer verificación de los pesos de atención.
 
+Refuerzo de la fusión de información
+Optimizar el algoritmo de fusión de información multimodal, implementar un mecanismo de preservación de información y establecer monitoreo del proceso de fusión.
 
-跨模态一致性检查
-建立模态间一致性验证机制，实施多模态内容交叉验证，检测模态间的逻辑矛盾
+Verificación de veracidad
+Establecer un sistema de verificación de veracidad transmodal, implementar comparación con bases de conocimiento externas y detectar información ficticia o contradictoria.
 
+**Referencias**
 
-注意力机制优化
-改进跨模态注意力分配算法，实施多级注意力机制，建立注意力权重验证
-
-
-信息融合增强
-优化多模态信息融合算法，实施信息保留机制，建立融合过程监控
-
-
-事实性验证
-建立跨模态事实性验证系统，实施外部知识库比对，检测虚构和矛盾信息
-
-**参考**
-
-基于注意力汇聚的多模态大语言模型幻觉攻击
-GPT-4V能否服务于医疗应用？GPT-4V在多模态医学诊断中的案例研究
-从“律师因AI编造案例被罚”谈起：大模型幻觉的根源与最新研究进展
+Ataque de alucinación en grandes modelos multimodales de lenguaje basado en agregación de atención
+¿Puede GPT-4V servir en aplicaciones médicas? Estudio de caso de GPT-4V en diagnóstico médico multimodal
+A partir de "abogado sancionado por casos inventados por IA": el origen de la alucinación en grandes modelos y los avances recientes en la investigación
 
 ---
