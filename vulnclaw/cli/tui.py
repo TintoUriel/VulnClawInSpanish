@@ -1631,21 +1631,21 @@ def build_runtime_diagnostic_panel(config) -> Panel:
     table.add_row("npx", diagnostic.npx_status)
     table.add_row("uvx", diagnostic.uvx_status)
     table.add_row("nmap", diagnostic.nmap_status)
-    table.add_row("LLM Provider", diagnostic.provider)
-    table.add_row("LLM Model", diagnostic.model)
-    table.add_row("API Key", _("tui.model_key_configured") if diagnostic.api_key_configured else _("tui.model_key_not_configured"))
+    table.add_row("Proveedor LLM", diagnostic.provider)
+    table.add_row("Modelo LLM", diagnostic.model)
+    table.add_row("Clave API", _("tui.model_key_configured") if diagnostic.api_key_configured else _("tui.model_key_not_configured"))
     table.add_row(
-        "MCP Services",
+        "Servicios MCP",
         (
-            f"{diagnostic.mcp_total_services} registered / "
-            f"{diagnostic.mcp_running_services} running / "
-            f"{diagnostic.mcp_local_services} local / "
-            f"{diagnostic.mcp_placeholder_services} placeholder"
+            f"{diagnostic.mcp_total_services} registrados / "
+            f"{diagnostic.mcp_running_services} en ejecución / "
+            f"{diagnostic.mcp_local_services} locales / "
+            f"{diagnostic.mcp_placeholder_services} de relleno"
         ),
     )
-    table.add_row("MCP Tools", str(diagnostic.mcp_tool_count))
+    table.add_row("Herramientas MCP", str(diagnostic.mcp_tool_count))
     if diagnostic.mcp_error:
-        table.add_row("MCP Error", diagnostic.mcp_error)
+        table.add_row("Error MCP", diagnostic.mcp_error)
 
     footer = _("tui.diagnostic_footer")
     return Panel(
@@ -1670,8 +1670,8 @@ def _command_version(command: str, *args: str) -> str:
             check=False,
         )
     except Exception:
-        return "check failed"
-    return (result.stdout or result.stderr).strip() or "installed"
+        return "falló la verificación"
+    return (result.stdout or result.stderr).strip() or "instalado"
 
 
 def _metric_panel(label: str, value: str, style: str) -> Panel:
@@ -1940,7 +1940,7 @@ def _config_prompt_ask(
             raise _ConfigTuiExit
         if not choices or value in choices:
             return value
-        screen.print(f"[{C_ERROR}]Choose one of: {', '.join(choices)}[/]")
+        screen.print(f"[{C_ERROR}]Elija una de estas opciones: {', '.join(choices)}[/]")
 
 
 def _config_confirm_ask(screen: Console, label: str, *, default: bool = False) -> bool:
@@ -1952,7 +1952,7 @@ def _config_confirm_ask(screen: Console, label: str, *, default: bool = False) -
             return True
         if value in ("n", "no"):
             return False
-        screen.print(f"[{C_ERROR}]Enter y or n.[/]")
+        screen.print(f"[{C_ERROR}]Ingrese y o n.[/]")
 
 
 def _split_csv_items(raw: str) -> list[str]:
@@ -1964,7 +1964,7 @@ def _mask_secret(value: str) -> str:
     """Mask a secret so only a hint of it reaches the terminal."""
     value = (value or "").strip()
     if not value:
-        return "(not set)"
+        return "(no establecido)"
     if len(value) <= 8:
         return "…" + value[-2:]
     return f"{value[:2]}…{value[-4:]}"
@@ -1974,7 +1974,7 @@ def _mask_key_list(keys: list[str]) -> str:
     """Summarise a list of API keys without printing any in the clear."""
     usable = [k for k in keys if k and k.strip()]
     if not usable:
-        return "(none)"
+        return "(ninguna)"
     return f"{_mask_secret(usable[0])} ({len(usable)} key{'s' if len(usable) != 1 else ''})"
 
 
@@ -2006,7 +2006,7 @@ def _prompt_int_value(screen: Console, label: str, current: int) -> int:
         try:
             return int(raw)
         except ValueError:
-            screen.print(f"[{C_ERROR}]Enter a whole number.[/]")
+            screen.print(f"[{C_ERROR}]Ingrese un número entero.[/]")
 
 
 def _prompt_float_value(screen: Console, label: str, current: float) -> float:
@@ -2018,7 +2018,7 @@ def _prompt_float_value(screen: Console, label: str, current: float) -> float:
         try:
             return float(raw)
         except ValueError:
-            screen.print(f"[{C_ERROR}]Enter a number.[/]")
+            screen.print(f"[{C_ERROR}]Ingrese un número.[/]")
 
 
 def _prompt_list_value(screen: Console, label: str, current: list[str]) -> list[str]:
@@ -2045,11 +2045,11 @@ def _prompt_env_value(
     result: dict[str, str] = {}
     for item in _split_csv_items(raw):
         if "=" not in item:
-            raise ValueError("Environment entries must look like KEY=value")
+            raise ValueError("Las entradas de entorno deben tener el formato CLAVE=valor")
         key, value = item.split("=", 1)
         key = key.strip()
         if not key:
-            raise ValueError("Environment keys cannot be blank")
+            raise ValueError("Las claves de entorno no pueden estar vacías")
         result[key] = value.strip()
     return result
 
@@ -2075,9 +2075,9 @@ def _prompt_secret_list_value(screen: Console, label: str, current: list[str]) -
 
 
 def _render_model_choices(screen: Console, models: list[str], current: str) -> None:
-    table = Table(title="Available Models", box=box.ROUNDED, border_style=C_BORDER_SUBTLE)
+    table = Table(title="Modelos disponibles", box=box.ROUNDED, border_style=C_BORDER_SUBTLE)
     table.add_column("#", style=f"bold {C_PRIMARY}", width=4)
-    table.add_column("Model", style=C_TEXT)
+    table.add_column("Modelo", style=C_TEXT)
     for idx, model in enumerate(models, 1):
         marker = " *" if model == current else ""
         table.add_row(str(idx), f"{model}{marker}")
@@ -2097,19 +2097,19 @@ def _prompt_model_value(screen: Console, config) -> str:
 
     if models:
         _render_model_choices(screen, models, current)
-        raw = _config_prompt_ask(screen, f"Model [current: {current}]", default="")
+        raw = _config_prompt_ask(screen, f"Modelo [actual: {current}]", default="")
         if not raw:
             return current
         if raw.isdigit():
             idx = int(raw)
             if 1 <= idx <= len(models):
                 return models[idx - 1]
-            screen.print(f"[{C_WARNING}]Model number out of range; using '{raw}' as a custom model id.[/]")
+            screen.print(f"[{C_WARNING}]Número de modelo fuera de rango; se usará '{raw}' como id de modelo personalizado.[/]")
         return raw
 
     if base_url and api_key:
-        screen.print(f"[{C_WARNING}]No models returned; enter a model id manually.[/]")
-    raw = _config_prompt_ask(screen, f"Model [current: {current}]", default="")
+        screen.print(f"[{C_WARNING}]No se devolvieron modelos; ingrese un id de modelo manualmente.[/]")
+    raw = _config_prompt_ask(screen, f"Modelo [actual: {current}]", default="")
     if raw == "!clear":
         return ""
     return current if raw == "" else raw
@@ -2118,55 +2118,55 @@ def _prompt_model_value(screen: Console, config) -> str:
 def _render_config_summary(screen: Console, config) -> None:
     """Render a compact summary of the editable config sections."""
     llm = Table(title="LLM", box=box.ROUNDED, border_style=C_BORDER_SUBTLE)
-    llm.add_column("Field", style=f"bold {C_PRIMARY}")
-    llm.add_column("Value", style=C_TEXT)
-    llm.add_row("Provider", config.llm.provider)
-    llm.add_row("Model", config.llm.model)
-    llm.add_row("Base URL", config.llm.base_url)
-    llm.add_row("Auth mode", config.llm.auth_mode)
-    llm.add_row("API key", _mask_secret(config.llm.api_key))
-    llm.add_row("API keys", _mask_key_list(config.llm.api_keys))
-    llm.add_row("ChatGPT auto-proxy", "yes" if config.llm.chatgpt_auto_proxy else "no")
-    llm.add_row("OAuth token URL", config.llm.oauth_token_url or "(login-managed)")
-    llm.add_row("OAuth client id", config.llm.oauth_client_id or "(login-managed)")
-    llm.add_row("Reasoning", config.llm.reasoning_effort)
+    llm.add_column("Campo", style=f"bold {C_PRIMARY}")
+    llm.add_column("Valor", style=C_TEXT)
+    llm.add_row("Proveedor", config.llm.provider)
+    llm.add_row("Modelo", config.llm.model)
+    llm.add_row("URL base", config.llm.base_url)
+    llm.add_row("Modo de autenticación", config.llm.auth_mode)
+    llm.add_row("Clave API", _mask_secret(config.llm.api_key))
+    llm.add_row("Claves API", _mask_key_list(config.llm.api_keys))
+    llm.add_row("Auto-proxy de ChatGPT", "Sí" if config.llm.chatgpt_auto_proxy else "No")
+    llm.add_row("URL del token OAuth", config.llm.oauth_token_url or "(gestionado por login)")
+    llm.add_row("ID de cliente OAuth", config.llm.oauth_client_id or "(gestionado por login)")
+    llm.add_row("Razonamiento", config.llm.reasoning_effort)
 
-    session = Table(title="Session", box=box.ROUNDED, border_style=C_BORDER_SUBTLE)
-    session.add_column("Field", style=f"bold {C_SECONDARY}")
-    session.add_column("Value", style=C_TEXT)
-    session.add_row("Output dir", str(config.session.output_dir))
-    session.add_row("Engine", config.session.engine)
-    session.add_row("Max rounds", str(config.session.max_rounds))
-    session.add_row("Report format", config.session.report_format)
-    session.add_row("PoC language", config.session.poc_language)
-    session.add_row("Language", config.session.language)
-    session.add_row("Show thinking", "yes" if config.session.show_thinking else "no")
-    session.add_row("Persistent cycles", str(config.session.persistent_max_cycles))
+    session = Table(title="Sesión", box=box.ROUNDED, border_style=C_BORDER_SUBTLE)
+    session.add_column("Campo", style=f"bold {C_SECONDARY}")
+    session.add_column("Valor", style=C_TEXT)
+    session.add_row("Directorio de salida", str(config.session.output_dir))
+    session.add_row("Motor", config.session.engine)
+    session.add_row("Rondas máximas", str(config.session.max_rounds))
+    session.add_row("Formato de informe", config.session.report_format)
+    session.add_row("Idioma de PoC", config.session.poc_language)
+    session.add_row("Idioma", config.session.language)
+    session.add_row("Mostrar razonamiento", "Sí" if config.session.show_thinking else "No")
+    session.add_row("Ciclos persistentes", str(config.session.persistent_max_cycles))
 
-    safety = Table(title="Safety", box=box.ROUNDED, border_style=C_BORDER_SUBTLE)
-    safety.add_column("Field", style=f"bold {C_ACCENT}")
-    safety.add_column("Value", style=C_TEXT)
-    safety.add_row("Python execute", "yes" if config.safety.enable_python_execute else "no")
-    safety.add_row("Restricted", "yes" if config.safety.python_execute_restricted else "no")
-    safety.add_row("Mode", config.safety.python_execute_mode)
-    safety.add_row("Parallel tools", "yes" if config.safety.tool_parallel else "no")
+    safety = Table(title="Seguridad", box=box.ROUNDED, border_style=C_BORDER_SUBTLE)
+    safety.add_column("Campo", style=f"bold {C_ACCENT}")
+    safety.add_column("Valor", style=C_TEXT)
+    safety.add_row("Ejecución de Python", "Sí" if config.safety.enable_python_execute else "No")
+    safety.add_row("Restringido", "Sí" if config.safety.python_execute_restricted else "No")
+    safety.add_row("Modo", config.safety.python_execute_mode)
+    safety.add_row("Herramientas en paralelo", "Sí" if config.safety.tool_parallel else "No")
 
-    recon = Table(title="Recon", box=box.ROUNDED, border_style=C_BORDER_SUBTLE)
-    recon.add_column("Field", style=f"bold {C_PRIMARY}")
-    recon.add_column("Value", style=C_TEXT)
-    recon.add_row("FOFA email", config.recon.fofa_email or "(not set)")
-    recon.add_row("FOFA key", _mask_secret(config.recon.fofa_key))
-    recon.add_row("Hunter key", _mask_secret(config.recon.hunter_key))
-    recon.add_row("Quake key", _mask_secret(config.recon.quake_key))
-    recon.add_row("ZoomEye key", _mask_secret(config.recon.zoomeye_key))
-    recon.add_row("Shodan key", _mask_secret(config.recon.shodan_key))
-    recon.add_row("0.zone key", _mask_secret(config.recon.zerozone_key))
-    recon.add_row("Max concurrency", str(config.recon.max_concurrency))
+    recon = Table(title="Reconocimiento", box=box.ROUNDED, border_style=C_BORDER_SUBTLE)
+    recon.add_column("Campo", style=f"bold {C_PRIMARY}")
+    recon.add_column("Valor", style=C_TEXT)
+    recon.add_row("Correo FOFA", config.recon.fofa_email or "(no establecido)")
+    recon.add_row("Clave FOFA", _mask_secret(config.recon.fofa_key))
+    recon.add_row("Clave Hunter", _mask_secret(config.recon.hunter_key))
+    recon.add_row("Clave Quake", _mask_secret(config.recon.quake_key))
+    recon.add_row("Clave ZoomEye", _mask_secret(config.recon.zoomeye_key))
+    recon.add_row("Clave Shodan", _mask_secret(config.recon.shodan_key))
+    recon.add_row("Clave 0.zone", _mask_secret(config.recon.zerozone_key))
+    recon.add_row("Concurrencia máxima", str(config.recon.max_concurrency))
 
-    mcp = Table(title="MCP Servers", box=box.ROUNDED, border_style=C_BORDER_SUBTLE)
-    mcp.add_column("Name", style=f"bold {C_PRIMARY}")
-    mcp.add_column("Status", style=C_TEXT)
-    mcp.add_column("Transport", style=C_MUTED)
+    mcp = Table(title="Servidores MCP", box=box.ROUNDED, border_style=C_BORDER_SUBTLE)
+    mcp.add_column("Nombre", style=f"bold {C_PRIMARY}")
+    mcp.add_column("Estado", style=C_TEXT)
+    mcp.add_column("Transporte", style=C_MUTED)
     for name, server in config.mcp.servers.items():
         transport = server.transport
         if transport.type == "stdio":
@@ -2176,15 +2176,15 @@ def _render_config_summary(screen: Console, config) -> None:
             summary = f"stdio {details}".strip()
         else:
             summary = f"{transport.type} {transport.url or ''}".strip()
-        status = "enabled" if server.enabled else "disabled"
+        status = "habilitado" if server.enabled else "deshabilitado"
         if name in BUILTIN_MCP_SERVERS:
-            status += ", builtin"
+            status += ", integrado"
         mcp.add_row(name, status, summary)
 
     screen.print(
         Panel(
             Group(llm, session, safety, recon, mcp),
-            title="Config Draft",
+            title="Borrador de configuración",
             border_style=C_BORDER,
             box=box.ROUNDED,
         )
@@ -2193,40 +2193,40 @@ def _render_config_summary(screen: Console, config) -> None:
 
 def _edit_llm_config(screen: Console, config):
     """Edit LLM configuration fields in-place."""
-    screen.print(Panel("Edit LLM settings", border_style=C_BORDER_SUBTLE, box=box.ROUNDED))
+    screen.print(Panel("Editar configuración de LLM", border_style=C_BORDER_SUBTLE, box=box.ROUNDED))
     providers = [item["provider"] for item in list_providers()]
-    provider = _prompt_choice_value(screen, "Provider", providers, config.llm.provider)
+    provider = _prompt_choice_value(screen, "Proveedor", providers, config.llm.provider)
     if provider != config.llm.provider:
         config = apply_provider_preset(config, provider)
 
-    config.llm.base_url = _prompt_text_value(screen, "Base URL", config.llm.base_url)
+    config.llm.base_url = _prompt_text_value(screen, "URL base", config.llm.base_url)
     config.llm.auth_mode = _prompt_choice_value(
-        screen, "Auth mode", ["static", "oauth"], config.llm.auth_mode
+        screen, "Modo de autenticación", ["static", "oauth"], config.llm.auth_mode
     )
     config.llm.api_keys = _prompt_secret_list_value(
         screen,
-        "API keys (comma-separated, !clear to empty)",
+        "Claves API (separadas por comas, !clear para vaciar)",
         config.llm.api_keys,
     )
     config.llm.api_key = _prompt_secret_text_value(
         screen,
-        "Single API key fallback (!clear to empty)",
+        "Clave API de respaldo única (!clear para vaciar)",
         config.llm.api_key,
     )
     config.llm.model = _prompt_model_value(screen, config)
     config.llm.chatgpt_auto_proxy = _prompt_bool_value(
-        screen, "ChatGPT auto-proxy", config.llm.chatgpt_auto_proxy
+        screen, "Auto-proxy de ChatGPT", config.llm.chatgpt_auto_proxy
     )
-    config.llm.max_tokens = _prompt_int_value(screen, "Max tokens", config.llm.max_tokens)
+    config.llm.max_tokens = _prompt_int_value(screen, "Tokens máximos", config.llm.max_tokens)
     config.llm.max_context_tokens = _prompt_int_value(
-        screen, "Max context tokens", config.llm.max_context_tokens
+        screen, "Tokens de contexto máximos", config.llm.max_context_tokens
     )
-    config.llm.temperature = _prompt_float_value(screen, "Temperature", config.llm.temperature)
+    config.llm.temperature = _prompt_float_value(screen, "Temperatura", config.llm.temperature)
     config.llm.reasoning_effort = _prompt_text_value(
-        screen, "Reasoning effort", config.llm.reasoning_effort
+        screen, "Esfuerzo de razonamiento", config.llm.reasoning_effort
     )
     screen.print(
-        f"[{C_MUTED}]OAuth endpoints are managed by `vulnclaw login` and are not edited here.[/]"
+        f"[{C_MUTED}]Los endpoints de OAuth se gestionan con `vulnclaw login` y no se editan aquí.[/]"
     )
     return config
 
@@ -2236,118 +2236,118 @@ def _edit_session_config(screen: Console, config):
 
     Deep engine/reflexion/plugin knobs are left to `vulnclaw config set`.
     """
-    screen.print(Panel("Edit session settings", border_style=C_BORDER_SUBTLE, box=box.ROUNDED))
+    screen.print(Panel("Editar configuración de sesión", border_style=C_BORDER_SUBTLE, box=box.ROUNDED))
     config.session.output_dir = Path(
-        _prompt_text_value(screen, "Output directory", str(config.session.output_dir))
+        _prompt_text_value(screen, "Directorio de salida", str(config.session.output_dir))
     )
-    config.session.auto_save = _prompt_bool_value(screen, "Auto save", config.session.auto_save)
+    config.session.auto_save = _prompt_bool_value(screen, "Guardado automático", config.session.auto_save)
     config.session.report_format = _prompt_choice_value(
-        screen, "Report format", ["markdown", "html"], config.session.report_format
+        screen, "Formato de informe", ["markdown", "html"], config.session.report_format
     )
     config.session.poc_language = _prompt_choice_value(
-        screen, "PoC language", ["python", "bash"], config.session.poc_language
+        screen, "Idioma de PoC", ["python", "bash"], config.session.poc_language
     )
     config.session.engine = _prompt_choice_value(
-        screen, "Autonomous engine", ["solve", "team", "rounds"], config.session.engine
+        screen, "Motor autónomo", ["solve", "team", "rounds"], config.session.engine
     )
-    config.session.max_rounds = _prompt_int_value(screen, "Max rounds", config.session.max_rounds)
+    config.session.max_rounds = _prompt_int_value(screen, "Rondas máximas", config.session.max_rounds)
     config.session.show_thinking = _prompt_bool_value(
-        screen, "Show thinking", config.session.show_thinking
+        screen, "Mostrar razonamiento", config.session.show_thinking
     )
     config.session.persistent_rounds_per_cycle = _prompt_int_value(
-        screen, "Persistent rounds per cycle", config.session.persistent_rounds_per_cycle
+        screen, "Rondas persistentes por ciclo", config.session.persistent_rounds_per_cycle
     )
     config.session.persistent_max_cycles = _prompt_int_value(
-        screen, "Persistent max cycles", config.session.persistent_max_cycles
+        screen, "Ciclos máximos persistentes", config.session.persistent_max_cycles
     )
     config.session.persistent_auto_report = _prompt_bool_value(
-        screen, "Persistent auto report", config.session.persistent_auto_report
+        screen, "Informe automático persistente", config.session.persistent_auto_report
     )
     config.session.language = _prompt_choice_value(
-        screen, "Language", ["auto", "en", "es"], config.session.language
+        screen, "Idioma", ["auto", "en", "es"], config.session.language
     )
     return config
 
 
 def _edit_safety_config(screen: Console, config):
     """Edit safety configuration fields in-place."""
-    screen.print(Panel("Edit safety settings", border_style=C_BORDER_SUBTLE, box=box.ROUNDED))
+    screen.print(Panel("Editar configuración de seguridad", border_style=C_BORDER_SUBTLE, box=box.ROUNDED))
     config.safety.enable_python_execute = _prompt_bool_value(
-        screen, "Enable python execute", config.safety.enable_python_execute
+        screen, "Habilitar ejecución de Python", config.safety.enable_python_execute
     )
     config.safety.python_execute_restricted = _prompt_bool_value(
-        screen, "Python execute restricted", config.safety.python_execute_restricted
+        screen, "Ejecución de Python restringida", config.safety.python_execute_restricted
     )
     config.safety.python_execute_mode = _prompt_choice_value(
         screen,
-        "Python execute mode",
+        "Modo de ejecución de Python",
         ["safe", "lab", "trusted-local"],
         config.safety.python_execute_mode,
     )
     config.safety.python_execute_max_lines = _prompt_int_value(
-        screen, "Python execute max lines", config.safety.python_execute_max_lines
+        screen, "Máximo de líneas de ejecución de Python", config.safety.python_execute_max_lines
     )
     config.safety.python_execute_show_warning = _prompt_bool_value(
-        screen, "Show python execute warning", config.safety.python_execute_show_warning
+        screen, "Mostrar advertencia de ejecución de Python", config.safety.python_execute_show_warning
     )
     config.safety.python_execute_max_output_chars = _prompt_int_value(
         screen,
-        "Python execute max output chars",
+        "Máximo de caracteres de salida de ejecución de Python",
         config.safety.python_execute_max_output_chars,
     )
     config.safety.python_execute_audit_enabled = _prompt_bool_value(
-        screen, "Python execute audit enabled", config.safety.python_execute_audit_enabled
+        screen, "Auditoría de ejecución de Python habilitada", config.safety.python_execute_audit_enabled
     )
     config.safety.tool_parallel = _prompt_bool_value(
-        screen, "Parallel tool calls", config.safety.tool_parallel
+        screen, "Llamadas a herramientas en paralelo", config.safety.tool_parallel
     )
     config.safety.tool_max_concurrent = _prompt_int_value(
-        screen, "Max concurrent tools", config.safety.tool_max_concurrent
+        screen, "Máximo de herramientas concurrentes", config.safety.tool_max_concurrent
     )
     return config
 
 
 def _edit_recon_config(screen: Console, config):
     """Edit recon / space-mapping configuration fields in-place."""
-    screen.print(Panel("Edit recon settings", border_style=C_BORDER_SUBTLE, box=box.ROUNDED))
+    screen.print(Panel("Editar configuración de reconocimiento", border_style=C_BORDER_SUBTLE, box=box.ROUNDED))
     config.recon.fofa_email = _prompt_text_value(
-        screen, "FOFA email", config.recon.fofa_email
+        screen, "Correo FOFA", config.recon.fofa_email
     )
     config.recon.fofa_key = _prompt_text_value(
-        screen, "FOFA key (!clear to empty)", config.recon.fofa_key
+        screen, "Clave FOFA (!clear para vaciar)", config.recon.fofa_key
     )
     config.recon.hunter_key = _prompt_text_value(
-        screen, "Hunter key (!clear to empty)", config.recon.hunter_key
+        screen, "Clave Hunter (!clear para vaciar)", config.recon.hunter_key
     )
     config.recon.quake_key = _prompt_text_value(
-        screen, "Quake key (!clear to empty)", config.recon.quake_key
+        screen, "Clave Quake (!clear para vaciar)", config.recon.quake_key
     )
     config.recon.zoomeye_key = _prompt_text_value(
-        screen, "ZoomEye key (!clear to empty)", config.recon.zoomeye_key
+        screen, "Clave ZoomEye (!clear para vaciar)", config.recon.zoomeye_key
     )
     config.recon.shodan_key = _prompt_text_value(
-        screen, "Shodan key (!clear to empty)", config.recon.shodan_key
+        screen, "Clave Shodan (!clear para vaciar)", config.recon.shodan_key
     )
     config.recon.zerozone_key = _prompt_text_value(
-        screen, "0.zone key (!clear to empty)", config.recon.zerozone_key
+        screen, "Clave 0.zone (!clear para vaciar)", config.recon.zerozone_key
     )
     config.recon.http_timeout = _prompt_float_value(
-        screen, "HTTP timeout (s)", config.recon.http_timeout
+        screen, "Tiempo de espera HTTP (s)", config.recon.http_timeout
     )
     config.recon.max_concurrency = _prompt_int_value(
-        screen, "Max concurrency", config.recon.max_concurrency
+        screen, "Concurrencia máxima", config.recon.max_concurrency
     )
     config.recon.space_size = _prompt_int_value(
-        screen, "Space-mapping result size", config.recon.space_size
+        screen, "Tamaño de resultados de mapeo de espacio", config.recon.space_size
     )
     config.recon.dir_wordlist_path = _prompt_text_value(
-        screen, "Directory wordlist path (!clear to empty)", config.recon.dir_wordlist_path
+        screen, "Ruta de wordlist de directorios (!clear para vaciar)", config.recon.dir_wordlist_path
     )
     config.recon.dir_max_requests = _prompt_int_value(
-        screen, "Directory enumeration max requests", config.recon.dir_max_requests
+        screen, "Máximo de solicitudes de enumeración de directorios", config.recon.dir_max_requests
     )
     config.recon.js_max_files = _prompt_int_value(
-        screen, "Max JS files per js_recon", config.recon.js_max_files
+        screen, "Máximo de archivos JS por js_recon", config.recon.js_max_files
     )
     return config
 
@@ -2355,23 +2355,23 @@ def _edit_recon_config(screen: Console, config):
 def _prompt_mcp_transport(screen: Console, transport: MCPTransportConfig) -> MCPTransportConfig:
     """Edit transport settings for an MCP server."""
     transport.type = _prompt_choice_value(
-        screen, "Transport type", ["stdio", "sse", "streamable-http"], transport.type
+        screen, "Tipo de transporte", ["stdio", "sse", "streamable-http"], transport.type
     )
-    transport.command = _prompt_text_value(screen, "Transport command", transport.command or "")
+    transport.command = _prompt_text_value(screen, "Comando de transporte", transport.command or "")
     transport.args = _prompt_list_value(
         screen,
-        "Transport args (comma-separated, !clear to empty)",
+        "Argumentos de transporte (separados por comas, !clear para vaciar)",
         transport.args or [],
     )
-    transport.url = _prompt_text_value(screen, "Transport URL", transport.url or "")
+    transport.url = _prompt_text_value(screen, "URL de transporte", transport.url or "")
     transport.env = _prompt_env_value(
-        screen, "Transport env / headers (KEY=value, !clear to empty)", transport.env
+        screen, "Entorno/encabezados de transporte (CLAVE=valor, !clear para vaciar)", transport.env
     )
     transport.startup_timeout = _prompt_int_value(
-        screen, "Transport startup timeout", transport.startup_timeout
+        screen, "Tiempo de espera de inicio del transporte", transport.startup_timeout
     )
     transport.tool_timeout = _prompt_int_value(
-        screen, "Transport tool timeout", transport.tool_timeout
+        screen, "Tiempo de espera de herramienta del transporte", transport.tool_timeout
     )
     return transport
 
@@ -2384,12 +2384,12 @@ def _prompt_mcp_server(
     current_name = server.name if server else ""
     while True:
         if is_new:
-            name = _prompt_text_value(screen, "Server name", current_name)
+            name = _prompt_text_value(screen, "Nombre del servidor", current_name)
             if not name:
-                screen.print(f"[{C_ERROR}]Server name cannot be blank.[/]")
+                screen.print(f"[{C_ERROR}]El nombre del servidor no puede estar vacío.[/]")
                 continue
             if name in config.mcp.servers:
-                screen.print(f"[{C_ERROR}]Server '{name}' already exists.[/]")
+                screen.print(f"[{C_ERROR}]El servidor '{name}' ya existe.[/]")
                 continue
         else:
             name = current_name
@@ -2402,9 +2402,9 @@ def _prompt_mcp_server(
         transport=MCPTransportConfig(type="stdio"),
     )
     current.name = name
-    current.enabled = _prompt_bool_value(screen, f"Enabled [{name}]", current.enabled)
-    current.priority = _prompt_int_value(screen, f"Priority [{name}]", current.priority)
-    current.description = _prompt_text_value(screen, f"Description [{name}]", current.description)
+    current.enabled = _prompt_bool_value(screen, f"Habilitado [{name}]", current.enabled)
+    current.priority = _prompt_int_value(screen, f"Prioridad [{name}]", current.priority)
+    current.description = _prompt_text_value(screen, f"Descripción [{name}]", current.description)
     current.transport = _prompt_mcp_transport(screen, current.transport)
     return name, current
 
@@ -2412,17 +2412,17 @@ def _prompt_mcp_server(
 def _edit_mcp_config(screen: Console, config):
     """Edit MCP server configuration."""
     while True:
-        screen.print(Panel("Edit MCP servers", border_style=C_BORDER_SUBTLE, box=box.ROUNDED))
+        screen.print(Panel("Editar servidores MCP", border_style=C_BORDER_SUBTLE, box=box.ROUNDED))
         table = Table(box=box.SIMPLE, border_style=C_BORDER_SUBTLE)
-        table.add_column("Server", style=f"bold {C_PRIMARY}")
-        table.add_column("Enabled", style=C_TEXT)
-        table.add_column("Priority", style=C_TEXT)
-        table.add_column("Transport", style=C_MUTED)
+        table.add_column("Servidor", style=f"bold {C_PRIMARY}")
+        table.add_column("Habilitado", style=C_TEXT)
+        table.add_column("Prioridad", style=C_TEXT)
+        table.add_column("Transporte", style=C_MUTED)
         for name, server in config.mcp.servers.items():
-            marker = "builtin" if name in BUILTIN_MCP_SERVERS else "custom"
+            marker = "integrado" if name in BUILTIN_MCP_SERVERS else "personalizado"
             table.add_row(
                 name,
-                "yes" if server.enabled else "no",
+                "Sí" if server.enabled else "No",
                 str(server.priority),
                 f"{server.transport.type} / {marker}",
             )
@@ -2430,7 +2430,7 @@ def _edit_mcp_config(screen: Console, config):
 
         action = _prompt_choice_value(
             screen,
-            "Action",
+            "Acción",
             ["add", "edit", "delete", "back"],
             "back",
         )
@@ -2443,11 +2443,11 @@ def _edit_mcp_config(screen: Console, config):
             continue
         if action == "edit":
             if not config.mcp.servers:
-                screen.print(f"[{C_WARNING}]No MCP servers to edit.[/]")
+                screen.print(f"[{C_WARNING}]No hay servidores MCP para editar.[/]")
                 continue
             name = _prompt_choice_value(
                 screen,
-                "Server to edit",
+                "Servidor a editar",
                 list(config.mcp.servers.keys()),
                 next(iter(config.mcp.servers)),
             )
@@ -2457,20 +2457,20 @@ def _edit_mcp_config(screen: Console, config):
             continue
         if action == "delete":
             if not config.mcp.servers:
-                screen.print(f"[{C_WARNING}]No MCP servers to delete.[/]")
+                screen.print(f"[{C_WARNING}]No hay servidores MCP para eliminar.[/]")
                 continue
             name = _prompt_choice_value(
                 screen,
-                "Server to delete",
+                "Servidor a eliminar",
                 list(config.mcp.servers.keys()),
                 next(iter(config.mcp.servers)),
             )
             if name in BUILTIN_MCP_SERVERS:
                 screen.print(
-                    f"[{C_WARNING}]Built-in servers are seeded defaults and cannot be deleted here.[/]"
+                    f"[{C_WARNING}]Los servidores integrados son valores predeterminados y no se pueden eliminar aquí.[/]"
                 )
                 continue
-            if _prompt_bool_value(screen, f"Delete MCP server '{name}'?", False):
+            if _prompt_bool_value(screen, f"¿Eliminar el servidor MCP '{name}'?", False):
                 config.mcp.servers.pop(name, None)
             continue
 
@@ -2483,11 +2483,11 @@ def run_config_tui() -> None:
     try:
         while True:
             screen.print()
-            screen.print(Panel("VulnClaw Config", border_style=C_BORDER, box=box.ROUNDED))
+            screen.print(Panel("Configuración de VulnClaw", border_style=C_BORDER, box=box.ROUNDED))
             _render_config_summary(screen, config)
             action = _prompt_choice_value(
                 screen,
-                "Section",
+                "Sección",
                 ["llm", "session", "safety", "recon", "mcp", "save", "quit"],
                 "save",
             )
@@ -2504,12 +2504,12 @@ def run_config_tui() -> None:
                 config = _edit_mcp_config(screen, config)
             elif action == "save":
                 save_config(config)
-                screen.print(Panel("Config saved.", border_style=C_SUCCESS, box=box.ROUNDED))
+                screen.print(Panel("Configuración guardada.", border_style=C_SUCCESS, box=box.ROUNDED))
                 return
             elif action == "quit":
-                screen.print(Panel("Discarded changes.", border_style=C_WARNING, box=box.ROUNDED))
+                screen.print(Panel("Cambios descartados.", border_style=C_WARNING, box=box.ROUNDED))
                 return
     except _ConfigTuiExit:
         screen.print()
-        screen.print(Panel("Discarded changes.", border_style=C_WARNING, box=box.ROUNDED))
+        screen.print(Panel("Cambios descartados.", border_style=C_WARNING, box=box.ROUNDED))
         return
