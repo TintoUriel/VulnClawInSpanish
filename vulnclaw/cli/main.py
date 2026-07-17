@@ -99,7 +99,7 @@ def _prepare_repl_target(
 
     if current_target and current_target != target:
         console.print(
-            f"[dim][*] Target switch: {current_target} -> {target}, resetting session context[/]"
+            f"[dim][*] Cambio de objetivo: {current_target} -> {target}, reiniciando contexto de sesión[/]"
         )
         agent.reset_context()
         current_phase = agent.session_state.phase.value
@@ -149,7 +149,7 @@ def _make_repl_prompt_session() -> Any:
     try:
         if not sys.stdin.isatty():
             if debug:
-                console.print("[dim](slash palette off: stdin is not a TTY)[/]")
+                console.print("[dim](paleta de comandos desactivada: stdin no es una TTY)[/]")
             return None
         from prompt_toolkit import PromptSession
 
@@ -171,13 +171,13 @@ def _make_repl_prompt_session() -> Any:
         session.default_buffer.on_text_changed += _reopen_palette_on_edit
 
         if debug:
-            console.print("[dim](slash palette on)[/]")
+            console.print("[dim](paleta de comandos activada)[/]")
         return session
     except Exception as exc:
         # Surface the reason instead of silently dropping to plain input.
         from rich.markup import escape as _esc
 
-        console.print(f"[yellow](slash palette unavailable: {_esc(str(exc))})[/]")
+        console.print(f"[yellow](paleta de comandos no disponible: {_esc(str(exc))})[/]")
         return None
 
 
@@ -227,7 +227,7 @@ def _run_repl_command(name: str, args: str, agent: Any, config: Any) -> Any:
         new_config = load_config()
         agent.apply_config(new_config)
         console.print(
-            f"[green]✓[/] Config reloaded: "
+            f"[green]✓[/] Configuración recargada: "
             f"{new_config.llm.provider}/{new_config.llm.model}"
         )
         return new_config
@@ -246,9 +246,9 @@ def _repl_switch_language(args: str, agent: Any, config: Any) -> Any:
     lang = args.strip().lower()
     if lang not in _SUPPORTED_LANGUAGES:
         console.print(
-            "[yellow]Usage:[/] /language <"
+            "[yellow]Uso:[/] /language <"
             + " | ".join(_SUPPORTED_LANGUAGES)
-            + f">  (current: {config.session.language})"
+            + f">  (actual: {config.session.language})"
         )
         return config
 
@@ -257,7 +257,7 @@ def _repl_switch_language(args: str, agent: Any, config: Any) -> Any:
     init_i18n(lang=lang if lang != "auto" else None, config=config)
     rebuild_translations()
     agent.apply_config(config)
-    console.print(f"[green]✓[/] Language set to [bold]{lang}[/].")
+    console.print(f"[green]✓[/] Idioma configurado a [bold]{lang}[/].")
     return config
 
 
@@ -315,7 +315,7 @@ def _run_repl() -> None:
             if not user_input:
                 if last_auto_input:
                     user_input = last_auto_input
-                    console.print(f"[dim]↻ Resuming auto pentest: {last_auto_input[:60]}...[/]")
+                    console.print(f"[dim]↻ Reanudando pentest automático: {last_auto_input[:60]}...[/]")
                 else:
                     continue
 
@@ -408,7 +408,7 @@ def _run_repl() -> None:
                 persistent_target = explicit_target or current_target
                 if not persistent_target:
                     console.print(
-                        "[!] Set a target first with [bold]target <host>[/] or run [bold]persistent <host>[/]."
+                        "[!] Primero define un objetivo con [bold]target <host>[/] o ejecuta [bold]persistent <host>[/]."
                     )
                     continue
 
@@ -430,24 +430,24 @@ def _run_repl() -> None:
 
                 console.print(
                     Panel(
-                        f"Target: [bold]{persistent_target}[/]\n"
-                        f"Rounds per cycle: [bold]{rounds_per_cycle}[/]\n"
-                        f"Max cycles: [bold]{max_cycles}[/]\n"
-                        f"Auto report: {'[green]on[/]' if auto_report else '[yellow]off[/]'}",
-                        title="Persistent Pentest",
+                        f"Objetivo: [bold]{persistent_target}[/]\n"
+                        f"Rondas por ciclo: [bold]{rounds_per_cycle}[/]\n"
+                        f"Ciclos máximos: [bold]{max_cycles}[/]\n"
+                        f"Informe automático: {'[green]activado[/]' if auto_report else '[yellow]desactivado[/]'}",
+                        title="Pentest persistente",
                         border_style="cyan",
                     )
                 )
 
                 persistent_prompt = (
-                    f"Perform an authorized persistent penetration test against {persistent_target}. "
-                    "This target is in scope and explicitly authorized."
+                    f"Realizar una prueba de penetración persistente autorizada contra {persistent_target}. "
+                    "Este objetivo está dentro del alcance y explícitamente autorizado."
                 )
 
                 all_cycle_results: list[PersistentCycleResult] = []
 
                 def _on_persistent_step(round_num: int, cycle_num: int, result) -> None:
-                    console.print(f"[dim]-- Cycle {cycle_num} | Round {round_num} --[/]")
+                    console.print(f"[dim]-- Ciclo {cycle_num} | Ronda {round_num} --[/]")
                     # TerminalStreamSink ya se muestra en streaming en tiempo real; el callback no vuelve a imprimir
                     console.print()
                     nonlocal current_target, current_phase
@@ -462,11 +462,11 @@ def _run_repl() -> None:
                     all_cycle_results.append(cycle_result)
                     console.print(
                         Panel(
-                            f"Cycle {cycle_num} completed\n"
-                            f"   Total findings: {cycle_result.total_findings}\n"
-                            f"   New findings: {cycle_result.new_findings}\n"
-                            f"   Report: {cycle_result.report_path or 'not generated'}",
-                            title=f"Cycle {cycle_num}",
+                            f"Ciclo {cycle_num} completado\n"
+                            f"   Hallazgos totales: {cycle_result.total_findings}\n"
+                            f"   Hallazgos nuevos: {cycle_result.new_findings}\n"
+                            f"   Informe: {cycle_result.report_path or 'no generado'}",
+                            title=f"Ciclo {cycle_num}",
                             border_style="green" if cycle_result.new_findings == 0 else "red",
                         )
                     )
@@ -520,9 +520,9 @@ def _run_repl() -> None:
                 # Toggle think tag display
                 config.session.show_thinking = not config.session.show_thinking
                 state_str = (
-                    "[green]shown[/]" if config.session.show_thinking else "[yellow]hidden[/]"
+                    "[green]visible[/]" if config.session.show_thinking else "[yellow]oculto[/]"
                 )
-                console.print(f"[*] Thinking visibility: {state_str}")
+                console.print(f"[*] Visibilidad del razonamiento: {state_str}")
                 console.print(_("cli.thinking_toggle_hint"))
                 continue
 
@@ -615,7 +615,7 @@ def _run_repl() -> None:
                         async def call():
                             def on_step(round_num, result):
                                 nonlocal current_target, current_phase
-                                console.print(f"[dim]-- Round {round_num} --[/]")
+                                console.print(f"[dim]-- Ronda {round_num} --[/]")
                                 console.print()
                                 if result.target:
                                     current_target = result.target
@@ -719,7 +719,7 @@ def _run_repl() -> None:
 
     signal.signal(signal.SIGINT, signal.SIG_IGN)
     mcp_manager.stop_all()
-    console.print("[dim]MCP services stopped.[/]")
+    console.print("[dim]Servicios MCP detenidos.[/]")
 
 
 def _print_help() -> None:
@@ -761,7 +761,7 @@ def _print_help() -> None:
 
 def _print_status(agent, mcp_manager, target, phase, config) -> None:
     """Print current session status."""
-    think_state = "[green]shown[/]" if config.session.show_thinking else "[yellow]hidden[/]"
+    think_state = "[green]visible[/]" if config.session.show_thinking else "[yellow]oculto[/]"
     phase_label = _localized_phase_label(phase)
     console.print(
         Panel(
@@ -781,11 +781,11 @@ def _validate_headless_choices(
 ) -> Optional[str]:
     """Return an error message for a bad headless choice, else ``None``."""
     if scan_mode not in headless.SCAN_MODES:
-        return f"--scan-mode must be one of: {', '.join(headless.SCAN_MODES)}"
+        return f"--scan-mode debe ser uno de: {', '.join(headless.SCAN_MODES)}"
     if fail_on not in headless.FAIL_ON_MODES:
-        return f"--fail-on must be one of: {', '.join(headless.FAIL_ON_MODES)}"
+        return f"--fail-on debe ser uno de: {', '.join(headless.FAIL_ON_MODES)}"
     if scope_mode not in headless.SCOPE_MODES:
-        return f"--scope-mode must be one of: {', '.join(headless.SCOPE_MODES)}"
+        return f"--scope-mode debe ser uno de: {', '.join(headless.SCOPE_MODES)}"
     return None
 
 
@@ -813,7 +813,7 @@ def _run_non_interactive(
     except typer.Exit:
         raise
     except BaseException as exc:  # noqa: BLE001 - CI must see a nonzero exit, not a traceback
-        err_console.print(f"[!] Scan did not complete: {type(exc).__name__}: {exc}")
+        err_console.print(f"[!] El escaneo no se completó: {type(exc).__name__}: {exc}")
         raise typer.Exit(headless.EXIT_ERROR) from exc
 
     classification = classification_holder.get("classification") or headless.FindingClassification(
@@ -842,11 +842,11 @@ def _run_non_interactive(
     summary_path = headless.write_run_artifacts(run_dir, summary)
 
     console.print(
-        f"[*] findings: verified={classification.verified} "
-        f"candidates={classification.candidates} | "
-        f"exit={exit_code} ({headless.exit_code_meaning(exit_code)})"
+        f"[*] hallazgos: verificados={classification.verified} "
+        f"candidatos={classification.candidates} | "
+        f"salida={exit_code} ({headless.exit_code_meaning(exit_code)})"
     )
-    console.print(f"[*] run artifacts: {summary_path}")
+    console.print(f"[*] artefactos de la ejecución: {summary_path}")
     console.print(_("cli.report_generated", path=report_path))
     raise typer.Exit(exit_code)
 
@@ -893,17 +893,17 @@ def _print_run_completion_summary(summary: dict[str, Any]) -> None:
     artifacts = summary.get("artifact_locations", {})
     console.print(
         Panel(
-            f"Run: [bold]{run_name}[/]\n"
-            f"Directory: [bold]{run_dir}[/]\n"
-            f"Findings: [bold]{summary.get('verified_count', 0)} verified / "
-            f"{summary.get('pending_count', 0)} pending / "
-            f"{summary.get('candidate_count', 0)} candidate[/]\n"
-            f"Artifacts: findings={artifacts.get('findings', '')} "
-            f"reports={artifacts.get('reports', '')} evidence={artifacts.get('evidence', '')}\n"
-            f"Resume: [bold]{summary.get('resume_command', '')}[/]\n"
-            f"Exit: [bold]{summary.get('exit_code', 0)}[/] "
-            f"({summary.get('exit_meaning', 'completed')})",
-            title="Run Summary",
+            f"Ejecución: [bold]{run_name}[/]\n"
+            f"Directorio: [bold]{run_dir}[/]\n"
+            f"Hallazgos: [bold]{summary.get('verified_count', 0)} verificados / "
+            f"{summary.get('pending_count', 0)} pendientes / "
+            f"{summary.get('candidate_count', 0)} candidatos[/]\n"
+            f"Artefactos: hallazgos={artifacts.get('findings', '')} "
+            f"informes={artifacts.get('reports', '')} evidencia={artifacts.get('evidence', '')}\n"
+            f"Reanudar: [bold]{summary.get('resume_command', '')}[/]\n"
+            f"Salida: [bold]{summary.get('exit_code', 0)}[/] "
+            f"({summary.get('exit_meaning', 'completado')})",
+            title="Resumen de la ejecución",
             border_style="green" if summary.get("exit_code", 0) == 0 else "yellow",
         )
     )
@@ -914,7 +914,7 @@ def _print_run_completion_summary(summary: dict[str, Any]) -> None:
 
 app = typer.Typer(
     name="vulnclaw",
-    help="VulnClaw - AI-powered penetration testing CLI (run 'vulnclaw tui' for the TUI workbench)",
+    help="VulnClaw - CLI de pentesting con IA (ejecuta 'vulnclaw tui' para el entorno TUI)",
     no_args_is_help=False,
     add_completion=False,
 )
@@ -922,135 +922,137 @@ app = typer.Typer(
 
 @app.command()
 def run(
-    target: str = typer.Argument(..., help="Target host/IP/URL"),
-    scope: str = typer.Option("full", help="Test scope: full, web, api, mobile"),
-    output: Optional[str] = typer.Option(None, help="Output report file path"),
+    target: str = typer.Argument(..., help="Host/IP/URL objetivo"),
+    scope: str = typer.Option("full", help="Alcance de la prueba: full, web, api, mobile"),
+    output: Optional[str] = typer.Option(None, help="Ruta del archivo de informe de salida"),
     # [Añadido] 2026-06-10 Nyaecho - TUI impulsado por lenguaje natural: permite
     #   pasar un prompt personalizado vía --prompt que sobrescribe el prompt generado automáticamente
     prompt: Optional[str] = typer.Option(
-        None, "--prompt", help="Custom natural language prompt (overrides auto-generated prompt)"
+        None, "--prompt", help="Prompt personalizado en lenguaje natural (sobrescribe el prompt generado automáticamente)"
     ),
     engine: Optional[str] = typer.Option(
         None,
         "--engine",
-        help="Autonomous engine for this run: solve, team, or rounds",
+        help="Motor autónomo para esta ejecución: solve, team o rounds",
     ),
     only_port: Optional[int] = typer.Option(
-        None, "--only-port", help="Restrict testing to a single port"
+        None, "--only-port", help="Restringe las pruebas a un único puerto"
     ),
     only_host: Optional[str] = typer.Option(
-        None, "--only-host", help="Restrict testing to a single host"
+        None, "--only-host", help="Restringe las pruebas a un único host"
     ),
     only_path: Optional[str] = typer.Option(
-        None, "--only-path", help="Restrict testing to a single path"
+        None, "--only-path", help="Restringe las pruebas a una única ruta"
     ),
     blocked_host: Optional[str] = typer.Option(
-        None, "--blocked-host", help="Explicitly blocked host"
+        None, "--blocked-host", help="Host explícitamente bloqueado"
     ),
     blocked_path: Optional[str] = typer.Option(
-        None, "--blocked-path", help="Explicitly blocked path"
+        None, "--blocked-path", help="Ruta explícitamente bloqueada"
     ),
     allow_actions: Optional[str] = typer.Option(
-        None, "--allow-actions", help="Comma-separated allowed actions"
+        None, "--allow-actions", help="Acciones permitidas, separadas por comas"
     ),
     block_actions: Optional[str] = typer.Option(
-        None, "--block-actions", help="Comma-separated blocked actions"
+        None, "--block-actions", help="Acciones bloqueadas, separadas por comas"
     ),
-    resume: bool = typer.Option(True, "--resume/--no-resume", help="Resume previous target state"),
+    resume: bool = typer.Option(True, "--resume/--no-resume", help="Reanuda el estado previo del objetivo"),
     snapshot: Optional[str] = typer.Option(
-        None, "--snapshot", help="Resume from a specific target snapshot id"
+        None, "--snapshot", help="Reanuda desde un id de snapshot específico del objetivo"
     ),
     # ── Headless / CI knobs ────────────────────────────────────────────
     non_interactive: bool = typer.Option(
         False,
         "--non-interactive",
-        help="Headless mode: zero prompts, structured output to the run directory, "
-        "and a distinct exit code (see --fail-on). Intended for CI.",
+        help="Modo headless: sin preguntas, salida estructurada en el directorio de la "
+        "ejecución y un código de salida distintivo (ver --fail-on). Pensado para CI.",
     ),
     scan_mode: str = typer.Option(
         headless.DEFAULT_SCAN_MODE,
         "--scan-mode",
-        help="Depth preset over the effort knobs: quick | standard | deep. "
-        "Explicit --max-* flags override the preset.",
+        help="Preajuste de profundidad sobre los parámetros de esfuerzo: quick | standard | deep. "
+        "Las flags --max-* explícitas sobrescriben el preajuste.",
     ),
     fail_on: str = typer.Option(
         headless.DEFAULT_FAIL_ON,
         "--fail-on",
-        help="Which finding class trips a nonzero exit: verified | any | never.",
+        help="Qué clase de hallazgo dispara una salida distinta de cero: verified | any | never.",
     ),
     scope_mode: str = typer.Option(
         headless.DEFAULT_SCOPE_MODE,
         "--scope-mode",
-        help="Scope selection recorded for the run: full (whole surface, current "
-        "behaviour) | auto (diff-scope to changed code — consumed by the Target "
-        "diff-scope model, #35; falls back to full until that lands).",
+        help="Selección de alcance registrada para la ejecución: full (superficie completa, "
+        "comportamiento actual) | auto (alcance por diferencias sobre el código modificado — "
+        "consumido por el modelo de diff-scope del Target, #35; usa full como respaldo hasta "
+        "que eso se implemente).",
     ),
     max_steps: Optional[int] = typer.Option(
-        None, "--max-steps", help="Override the scan-mode explore-step cap"
+        None, "--max-steps", help="Sobrescribe el límite de pasos de exploración del scan-mode"
     ),
     max_intents: Optional[int] = typer.Option(
-        None, "--max-intents", help="Override the scan-mode max-intents-per-step"
+        None, "--max-intents", help="Sobrescribe el máximo de intents por paso del scan-mode"
     ),
     max_tool_rounds: Optional[int] = typer.Option(
-        None, "--max-tool-rounds", help="Override the scan-mode tool-rounds-per-intent"
+        None, "--max-tool-rounds", help="Sobrescribe las rondas de herramientas por intent del scan-mode"
     ),
     max_parallel: Optional[int] = typer.Option(
-        None, "--max-parallel", help="Override the scan-mode fan-out cap (1 = single agent)"
+        None, "--max-parallel", help="Sobrescribe el límite de paralelismo del scan-mode (1 = un solo agente)"
     ),
     max_rounds: Optional[int] = typer.Option(
-        None, "--max-rounds", help="Override the scan-mode legacy-engine round cap"
+        None, "--max-rounds", help="Sobrescribe el límite de rondas del motor legacy del scan-mode"
     ),
     run_name: Optional[str] = typer.Option(
-        None, "--run-name", help="Explicit name for a new run directory"
+        None, "--run-name", help="Nombre explícito para un nuevo directorio de ejecución"
     ),
     resume_run: Optional[str] = typer.Option(
-        None, "--resume-run", help="Resume an exact run by run name"
+        None, "--resume-run", help="Reanuda una ejecución exacta por su nombre"
     ),
     runs_dir: Optional[str] = typer.Option(
-        None, "--runs-dir", help="Run-directory root (overrides VULNCLAW_RUNS_DIR)"
+        None, "--runs-dir", help="Raíz del directorio de ejecuciones (sobrescribe VULNCLAW_RUNS_DIR)"
     ),
     additional_targets: Optional[list[str]] = typer.Option(
-        None, "--target", help="Additional target to include in this run"
+        None, "--target", help="Objetivo adicional para incluir en esta ejecución"
     ),
     target_type: Optional[str] = typer.Option(
-        None, "--target-type", help="Override target type: local_repo, repo_url, web_url, domain, ip"
+        None, "--target-type", help="Sobrescribe el tipo de objetivo: local_repo, repo_url, web_url, domain, ip"
     ),
     mount: bool = typer.Option(
-        False, "--mount", help="Use mount ingress mode for local repository targets"
+        False, "--mount", help="Usa el modo de ingreso por montaje para objetivos de repositorio local"
     ),
     repair: bool = typer.Option(
-        False, "--repair", help="Repair a corrupt run by rolling back to the last valid snapshot"
+        False, "--repair", help="Repara una ejecución corrupta revirtiendo al último snapshot válido"
     ),
     force_fresh: bool = typer.Option(
-        False, "--force-fresh", help="Start a fresh run without overwriting a corrupt one"
+        False, "--force-fresh", help="Inicia una ejecución nueva sin sobrescribir una corrupta"
     ),
     no_import: bool = typer.Option(
-        False, "--no-import", help="Read legacy target state without importing it into a run"
+        False, "--no-import", help="Lee el estado legacy del objetivo sin importarlo a una ejecución"
     ),
 ) -> None:
-    """Run a full authorized pentest workflow.
+    """Ejecuta un flujo completo de pentest autorizado.
 
-    Interactive by default. Pass ``--non-interactive`` for a headless CI run: no
-    prompts, a machine-readable ``summary.json`` in the run directory, and an
-    exit code that lets a pipeline tell a clean scan (0) from a broken one (1)
-    from one that confirmed a verified finding (2) or only candidates (3).
+    Interactivo por defecto. Pasa ``--non-interactive`` para una ejecución
+    headless en CI: sin preguntas, un ``summary.json`` legible por máquina en
+    el directorio de la ejecución, y un código de salida que permite a un
+    pipeline distinguir un escaneo limpio (0) de uno roto (1), de uno que
+    confirmó un hallazgo verificado (2) o solo candidatos (3).
     """
     config = load_config()
 
     # A bad target / scan-mode / fail-on / scope-mode is a misconfiguration:
     # exit 1 (never a silent green run).
     if not target or not target.strip():
-        err_console.print("[!] A non-empty target is required.")
+        err_console.print("[!] Se requiere un objetivo no vacío.")
         raise typer.Exit(headless.EXIT_ERROR)
     bad_choice = _validate_headless_choices(scan_mode, fail_on, scope_mode)
     if bad_choice is not None:
         err_console.print(f"[!] {bad_choice}")
         raise typer.Exit(headless.EXIT_ERROR)
     if not has_llm_credentials(config.llm):
-        err_console.print("[!] Configure LLM credentials first (api_key or auth_mode).")
+        err_console.print("[!] Configura primero las credenciales del LLM (api_key o auth_mode).")
         raise typer.Exit(headless.EXIT_ERROR)
     if engine is not None and engine not in {"solve", "team", "rounds"}:
-        err_console.print("[!] --engine must be one of: solve, team, rounds")
+        err_console.print("[!] --engine debe ser uno de: solve, team, rounds")
         raise typer.Exit(headless.EXIT_ERROR)
 
     profile = headless.resolve_scan_profile(
@@ -1064,14 +1066,14 @@ def run(
     )
 
     console.print(
-        f"[*] Target: [bold]{target}[/] | Scope: [bold]{scope}[/] | "
-        f"Mode: [bold]{profile.scan_mode}[/]"
-        + (" | [bold]non-interactive[/]" if non_interactive else "")
+        f"[*] Objetivo: [bold]{target}[/] | Alcance: [bold]{scope}[/] | "
+        f"Modo: [bold]{profile.scan_mode}[/]"
+        + (" | [bold]no interactivo[/]" if non_interactive else "")
     )
 
     task_prompt = prompt if prompt else (
-        f"Perform an authorized {scope} pentest against {target}. "
-        "This target is in scope and explicitly authorized."
+        f"Realizar una prueba de penetración autorizada de tipo {scope} contra {target}. "
+        "Este objetivo está dentro del alcance y explícitamente autorizado."
     )
     task_prompt = _append_cli_constraints_compat(
         task_prompt, only_port, only_host, only_path, blocked_host, blocked_path
@@ -1139,7 +1141,7 @@ def run(
                     max_rounds=profile.max_rounds,
                     on_step=lambda r, res: (
                         _print_agent_output(
-                            f"[dim]Round {r}[/]: {res.output[:200]}...", shared_config
+                            f"[dim]Ronda {r}[/]: {res.output[:200]}...", shared_config
                         )
                         if res.output and not non_interactive
                         else None
@@ -1205,46 +1207,47 @@ def run(
 
 @app.command()
 def solve(
-    target: str = typer.Argument(..., help="Target host/IP/URL"),
+    target: str = typer.Argument(..., help="Host/IP/URL objetivo"),
     goal: Optional[str] = typer.Option(
-        None, "--goal", help="Success condition, e.g. 'capture the flag' / 'get a shell'"
+        None, "--goal", help="Condición de éxito, ej. 'capturar la flag' / 'obtener una shell'"
     ),
     prompt: Optional[str] = typer.Option(
-        None, "--prompt", help="Custom task description (overrides auto-generated)"
+        None, "--prompt", help="Descripción de tarea personalizada (sobrescribe la generada automáticamente)"
     ),
     max_steps: int = typer.Option(
-        40, "--max-steps", help="Safety cap on explore steps (NOT a fixed workflow length)"
+        40, "--max-steps", help="Límite de seguridad en pasos de exploración (NO es una longitud fija de flujo)"
     ),
-    max_intents: int = typer.Option(3, "--max-intents", help="Max new intents per reason step"),
+    max_intents: int = typer.Option(3, "--max-intents", help="Máximo de nuevos intents por paso de razonamiento"),
     max_tool_rounds: int = typer.Option(
-        4, "--max-tool-rounds", help="Max tool-calling rounds per intent exploration"
+        4, "--max-tool-rounds", help="Máximo de rondas de uso de herramientas por exploración de intent"
     ),
-    resume: bool = typer.Option(True, "--resume/--no-resume", help="Resume previous target state"),
-    snapshot: Optional[str] = typer.Option(None, "--snapshot", help="Resume from a snapshot id"),
+    resume: bool = typer.Option(True, "--resume/--no-resume", help="Reanuda el estado previo del objetivo"),
+    snapshot: Optional[str] = typer.Option(None, "--snapshot", help="Reanuda desde un id de snapshot"),
     run_name: Optional[str] = typer.Option(
-        None, "--run-name", help="Explicit name for a new run directory"
+        None, "--run-name", help="Nombre explícito para un nuevo directorio de ejecución"
     ),
     resume_run: Optional[str] = typer.Option(
-        None, "--resume-run", help="Resume an exact run by run name"
+        None, "--resume-run", help="Reanuda una ejecución exacta por su nombre"
     ),
-    runs_dir: Optional[str] = typer.Option(None, "--runs-dir", help="Run-directory root"),
+    runs_dir: Optional[str] = typer.Option(None, "--runs-dir", help="Raíz del directorio de ejecuciones"),
     additional_targets: Optional[list[str]] = typer.Option(
-        None, "--target", help="Additional target to include in this run"
+        None, "--target", help="Objetivo adicional para incluir en esta ejecución"
     ),
-    target_type: Optional[str] = typer.Option(None, "--target-type", help="Override target type"),
-    mount: bool = typer.Option(False, "--mount", help="Use mount ingress mode"),
-    repair: bool = typer.Option(False, "--repair", help="Repair a corrupt run"),
-    force_fresh: bool = typer.Option(False, "--force-fresh", help="Start a fresh run"),
-    no_import: bool = typer.Option(False, "--no-import", help="Do not import legacy state"),
+    target_type: Optional[str] = typer.Option(None, "--target-type", help="Sobrescribe el tipo de objetivo"),
+    mount: bool = typer.Option(False, "--mount", help="Usa el modo de ingreso por montaje"),
+    repair: bool = typer.Option(False, "--repair", help="Repara una ejecución corrupta"),
+    force_fresh: bool = typer.Option(False, "--force-fresh", help="Inicia una ejecución nueva"),
+    no_import: bool = typer.Option(False, "--no-import", help="No importa el estado legacy"),
 ) -> None:
-    """Goal-driven solve loop — runs until the goal is met or the exploration frontier is exhausted.
+    """Bucle solve dirigido por objetivo — se ejecuta hasta cumplir la meta o agotar la frontera de exploración.
 
-    Unlike `run`, this has no fixed round count. It searches a Fact/Intent graph
-    from the target toward the goal and stops on success or when no path remains.
+    A diferencia de `run`, no tiene un número fijo de rondas. Busca en un grafo
+    de Facts/Intents desde el objetivo hacia la meta y se detiene al lograrlo
+    o cuando no queda ningún camino.
     """
     config = load_config()
     if not has_llm_credentials(config.llm):
-        err_console.print("[!] Configure LLM credentials first (api_key or auth_mode).")
+        err_console.print("[!] Configura primero las credenciales del LLM (api_key o auth_mode).")
         raise typer.Exit(1)
 
     resolved_goal = goal or "encontrar flag / obtener shell / confirmar y verificar vulnerabilidades de alto valor"
@@ -1252,7 +1255,7 @@ def solve(
         f"Realizar una prueba de penetración autorizada contra {target}. Este es un objetivo "
         f"explícitamente autorizado y dentro del alcance. Objetivo (goal): {resolved_goal}."
     )
-    console.print(f"[*] Target: [bold]{target}[/] | Goal: [bold]{resolved_goal}[/]")
+    console.print(f"[*] Objetivo: [bold]{target}[/] | Meta: [bold]{resolved_goal}[/]")
 
     on_event = _make_solve_event_printer(console)
     holder: dict = {}
@@ -1303,66 +1306,66 @@ def solve(
 
 @app.command()
 def persistent(
-    target: str = typer.Argument(..., help="Target host/IP/URL"),
+    target: str = typer.Argument(..., help="Host/IP/URL objetivo"),
     rounds: int = typer.Option(
-        0, "--rounds", "-r", help="Rounds per cycle (0=use config, default 100)"
+        0, "--rounds", "-r", help="Rondas por ciclo (0=usar config, por defecto 100)"
     ),
-    cycles: int = typer.Option(0, "--cycles", "-c", help="Max cycles (0=use config, default 10)"),
+    cycles: int = typer.Option(0, "--cycles", "-c", help="Ciclos máximos (0=usar config, por defecto 10)"),
     no_report: bool = typer.Option(
-        False, "--no-report", help="Disable auto report after each cycle"
+        False, "--no-report", help="Desactiva el informe automático después de cada ciclo"
     ),
     # [Añadido] 2026-06-10 Nyaecho - TUI impulsado por lenguaje natural: permite
     #   pasar un prompt personalizado vía --prompt que sobrescribe el prompt generado automáticamente
     prompt: Optional[str] = typer.Option(
-        None, "--prompt", help="Custom natural language prompt (overrides auto-generated prompt)"
+        None, "--prompt", help="Prompt personalizado en lenguaje natural (sobrescribe el prompt generado automáticamente)"
     ),
     only_port: Optional[int] = typer.Option(
-        None, "--only-port", help="Restrict testing to a single port"
+        None, "--only-port", help="Restringe las pruebas a un único puerto"
     ),
     only_host: Optional[str] = typer.Option(
-        None, "--only-host", help="Restrict testing to a single host"
+        None, "--only-host", help="Restringe las pruebas a un único host"
     ),
     only_path: Optional[str] = typer.Option(
-        None, "--only-path", help="Restrict testing to a single path"
+        None, "--only-path", help="Restringe las pruebas a una única ruta"
     ),
     blocked_host: Optional[str] = typer.Option(
-        None, "--blocked-host", help="Explicitly blocked host"
+        None, "--blocked-host", help="Host explícitamente bloqueado"
     ),
     blocked_path: Optional[str] = typer.Option(
-        None, "--blocked-path", help="Explicitly blocked path"
+        None, "--blocked-path", help="Ruta explícitamente bloqueada"
     ),
     allow_actions: Optional[str] = typer.Option(
-        None, "--allow-actions", help="Comma-separated allowed actions"
+        None, "--allow-actions", help="Acciones permitidas, separadas por comas"
     ),
     block_actions: Optional[str] = typer.Option(
-        None, "--block-actions", help="Comma-separated blocked actions"
+        None, "--block-actions", help="Acciones bloqueadas, separadas por comas"
     ),
-    resume: bool = typer.Option(True, "--resume/--no-resume", help="Resume previous target state"),
+    resume: bool = typer.Option(True, "--resume/--no-resume", help="Reanuda el estado previo del objetivo"),
     snapshot: Optional[str] = typer.Option(
-        None, "--snapshot", help="Resume from a specific target snapshot id"
+        None, "--snapshot", help="Reanuda desde un id de snapshot específico del objetivo"
     ),
     run_name: Optional[str] = typer.Option(
-        None, "--run-name", help="Explicit name for a new run directory"
+        None, "--run-name", help="Nombre explícito para un nuevo directorio de ejecución"
     ),
     resume_run: Optional[str] = typer.Option(
-        None, "--resume-run", help="Resume an exact run by run name"
+        None, "--resume-run", help="Reanuda una ejecución exacta por su nombre"
     ),
-    runs_dir: Optional[str] = typer.Option(None, "--runs-dir", help="Run-directory root"),
+    runs_dir: Optional[str] = typer.Option(None, "--runs-dir", help="Raíz del directorio de ejecuciones"),
     additional_targets: Optional[list[str]] = typer.Option(
-        None, "--target", help="Additional target to include in this run"
+        None, "--target", help="Objetivo adicional para incluir en esta ejecución"
     ),
-    target_type: Optional[str] = typer.Option(None, "--target-type", help="Override target type"),
-    mount: bool = typer.Option(False, "--mount", help="Use mount ingress mode"),
-    repair: bool = typer.Option(False, "--repair", help="Repair a corrupt run"),
-    force_fresh: bool = typer.Option(False, "--force-fresh", help="Start a fresh run"),
-    no_import: bool = typer.Option(False, "--no-import", help="Do not import legacy state"),
+    target_type: Optional[str] = typer.Option(None, "--target-type", help="Sobrescribe el tipo de objetivo"),
+    mount: bool = typer.Option(False, "--mount", help="Usa el modo de ingreso por montaje"),
+    repair: bool = typer.Option(False, "--repair", help="Repara una ejecución corrupta"),
+    force_fresh: bool = typer.Option(False, "--force-fresh", help="Inicia una ejecución nueva"),
+    no_import: bool = typer.Option(False, "--no-import", help="No importa el estado legacy"),
 ) -> None:
-    """Run a persistent authorized pentest across multiple cycles."""
+    """Ejecuta un pentest persistente autorizado a través de múltiples ciclos."""
     from vulnclaw.agent.core import PersistentCycleResult
 
     config = load_config()
     if not has_llm_credentials(config.llm):
-        err_console.print("[!] Configure LLM credentials first (api_key or auth_mode).")
+        err_console.print("[!] Configura primero las credenciales del LLM (api_key o auth_mode).")
         raise typer.Exit(1)
 
     # Resolve parameters (CLI override -> config defaults)
@@ -1372,19 +1375,19 @@ def persistent(
 
     console.print(
         Panel(
-            f"Target: [bold]{target}[/]\n"
-            f"Rounds per cycle: [bold]{rounds_per_cycle}[/]\n"
-            f"Max cycles: [bold]{max_cycles}[/] {'(unlimited)' if max_cycles == 0 else ''}\n"
-            f"Auto report: {'[green]on[/]' if auto_report else '[yellow]off[/]'}\n"
-            f"Max total rounds: [bold]{rounds_per_cycle * max_cycles if max_cycles > 0 else 'unlimited'}[/]",
-            title="Persistent Pentest",
+            f"Objetivo: [bold]{target}[/]\n"
+            f"Rondas por ciclo: [bold]{rounds_per_cycle}[/]\n"
+            f"Ciclos máximos: [bold]{max_cycles}[/] {'(sin límite)' if max_cycles == 0 else ''}\n"
+            f"Informe automático: {'[green]activado[/]' if auto_report else '[yellow]desactivado[/]'}\n"
+            f"Rondas totales máximas: [bold]{rounds_per_cycle * max_cycles if max_cycles > 0 else 'sin límite'}[/]",
+            title="Pentest persistente",
             border_style="cyan",
         )
     )
 
     task_prompt = prompt if prompt else (
-        f"Perform an authorized persistent penetration test against {target}. "
-        "This target is in scope and explicitly authorized."
+        f"Realizar una prueba de penetración persistente autorizada contra {target}. "
+        "Este objetivo está dentro del alcance y explícitamente autorizado."
     )
     task_prompt = _append_cli_constraints_compat(
         task_prompt, only_port, only_host, only_path, blocked_host, blocked_path
@@ -1401,7 +1404,7 @@ def persistent(
 
     def _on_cycle_step(round_num: int, cycle_num: int, result) -> None:
         """Real-time output for each step within a cycle."""
-        console.print(f"[dim]-- Cycle {cycle_num} | Round {round_num} --[/]")
+        console.print(f"[dim]-- Ciclo {cycle_num} | Ronda {round_num} --[/]")
         # TerminalStreamSink ya se muestra en streaming en tiempo real; el callback no vuelve a imprimir
         console.print()
 
@@ -1410,12 +1413,12 @@ def persistent(
         all_cycle_results.append(cycle_result)
         console.print(
             Panel(
-                f"Cycle {cycle_num} completed\n"
-                f"   Steps executed: {cycle_result.total_steps}\n"
-                f"   Total findings: {cycle_result.total_findings}\n"
-                f"   New findings: {cycle_result.new_findings}\n"
-                f"   Report: {cycle_result.report_path or 'not generated'}",
-                title=f"Cycle {cycle_num} Result",
+                f"Ciclo {cycle_num} completado\n"
+                f"   Pasos ejecutados: {cycle_result.total_steps}\n"
+                f"   Hallazgos totales: {cycle_result.total_findings}\n"
+                f"   Hallazgos nuevos: {cycle_result.new_findings}\n"
+                f"   Informe: {cycle_result.report_path or 'no generado'}",
+                title=f"Resultado del ciclo {cycle_num}",
                 border_style="green" if cycle_result.new_findings == 0 else "red",
             )
         )
@@ -1458,7 +1461,7 @@ def persistent(
         orchestrated = asyncio.run(_run())
     except KeyboardInterrupt:
         interrupted = True
-        console.print("\n[!] User interrupted persistent pentest")
+        console.print("\n[!] El usuario interrumpió el pentest persistente")
         orchestrated = None
 
     summary = (
@@ -1476,73 +1479,73 @@ def persistent(
     console.print()
     console.print(
         Panel(
-            f"{'Interrupted by user' if interrupted else 'Testing completed'}\n\n"
-            f"  Completed cycles: [bold]{completed_cycles}[/]\n"
-            f"  Steps executed: [bold]{total_steps}[/]\n"
-            f"  Findings: [bold]{total_findings}[/]",
-            title="Persistent Pentest Summary",
+            f"{'Interrumpido por el usuario' if interrupted else 'Prueba completada'}\n\n"
+            f"  Ciclos completados: [bold]{completed_cycles}[/]\n"
+            f"  Pasos ejecutados: [bold]{total_steps}[/]\n"
+            f"  Hallazgos: [bold]{total_findings}[/]",
+            title="Resumen del pentest persistente",
             border_style="red" if total_findings > 0 else "green",
         )
     )
 
     if auto_report and all_cycle_results:
-        console.print("\n[bold]Cycle Reports[/]:")
+        console.print("\n[bold]Informes por ciclo[/]:")
         for cr in all_cycle_results:
             if cr.report_path and "failed" not in str(cr.report_path).lower():
-                console.print(f"  Cycle {cr.cycle_num}: {cr.report_path}")
+                console.print(f"  Ciclo {cr.cycle_num}: {cr.report_path}")
 
 
 @app.command()
 def recon(
-    target: str = typer.Argument(..., help="Target host/IP/URL"),
+    target: str = typer.Argument(..., help="Host/IP/URL objetivo"),
     # [Añadido] 2026-06-10 Nyaecho - TUI impulsado por lenguaje natural: permite
     #   pasar un prompt personalizado vía --prompt que sobrescribe el prompt generado automáticamente
     prompt: Optional[str] = typer.Option(
-        None, "--prompt", help="Custom natural language prompt (overrides auto-generated prompt)"
+        None, "--prompt", help="Prompt personalizado en lenguaje natural (sobrescribe el prompt generado automáticamente)"
     ),
     only_port: Optional[int] = typer.Option(
-        None, "--only-port", help="Restrict testing to a single port"
+        None, "--only-port", help="Restringe las pruebas a un único puerto"
     ),
     only_host: Optional[str] = typer.Option(
-        None, "--only-host", help="Restrict testing to a single host"
+        None, "--only-host", help="Restringe las pruebas a un único host"
     ),
     only_path: Optional[str] = typer.Option(
-        None, "--only-path", help="Restrict testing to a single path"
+        None, "--only-path", help="Restringe las pruebas a una única ruta"
     ),
     blocked_host: Optional[str] = typer.Option(
-        None, "--blocked-host", help="Explicitly blocked host"
+        None, "--blocked-host", help="Host explícitamente bloqueado"
     ),
     blocked_path: Optional[str] = typer.Option(
-        None, "--blocked-path", help="Explicitly blocked path"
+        None, "--blocked-path", help="Ruta explícitamente bloqueada"
     ),
     allow_actions: Optional[str] = typer.Option(
-        None, "--allow-actions", help="Comma-separated allowed actions"
+        None, "--allow-actions", help="Acciones permitidas, separadas por comas"
     ),
     block_actions: Optional[str] = typer.Option(
-        None, "--block-actions", help="Comma-separated blocked actions"
+        None, "--block-actions", help="Acciones bloqueadas, separadas por comas"
     ),
-    resume: bool = typer.Option(True, "--resume/--no-resume", help="Resume previous target state"),
+    resume: bool = typer.Option(True, "--resume/--no-resume", help="Reanuda el estado previo del objetivo"),
     snapshot: Optional[str] = typer.Option(
-        None, "--snapshot", help="Resume from a specific target snapshot id"
+        None, "--snapshot", help="Reanuda desde un id de snapshot específico del objetivo"
     ),
     run_name: Optional[str] = typer.Option(
-        None, "--run-name", help="Explicit name for a new run directory"
+        None, "--run-name", help="Nombre explícito para un nuevo directorio de ejecución"
     ),
     resume_run: Optional[str] = typer.Option(
-        None, "--resume-run", help="Resume an exact run by run name"
+        None, "--resume-run", help="Reanuda una ejecución exacta por su nombre"
     ),
-    runs_dir: Optional[str] = typer.Option(None, "--runs-dir", help="Run-directory root"),
+    runs_dir: Optional[str] = typer.Option(None, "--runs-dir", help="Raíz del directorio de ejecuciones"),
     additional_targets: Optional[list[str]] = typer.Option(
-        None, "--target", help="Additional target to include in this run"
+        None, "--target", help="Objetivo adicional para incluir en esta ejecución"
     ),
-    target_type: Optional[str] = typer.Option(None, "--target-type", help="Override target type"),
-    mount: bool = typer.Option(False, "--mount", help="Use mount ingress mode"),
-    repair: bool = typer.Option(False, "--repair", help="Repair a corrupt run"),
-    force_fresh: bool = typer.Option(False, "--force-fresh", help="Start a fresh run"),
-    no_import: bool = typer.Option(False, "--no-import", help="Do not import legacy state"),
+    target_type: Optional[str] = typer.Option(None, "--target-type", help="Sobrescribe el tipo de objetivo"),
+    mount: bool = typer.Option(False, "--mount", help="Usa el modo de ingreso por montaje"),
+    repair: bool = typer.Option(False, "--repair", help="Repara una ejecución corrupta"),
+    force_fresh: bool = typer.Option(False, "--force-fresh", help="Inicia una ejecución nueva"),
+    no_import: bool = typer.Option(False, "--no-import", help="No importa el estado legacy"),
 ) -> None:
-    """Run reconnaissance only."""
-    task_prompt = prompt if prompt else f"Perform authorized reconnaissance against {target} without exploitation."
+    """Ejecuta solo la fase de reconocimiento."""
+    task_prompt = prompt if prompt else f"Realizar un reconocimiento autorizado contra {target} sin explotación."
     task_prompt = _append_cli_constraints_compat(
         task_prompt, only_port, only_host, only_path, blocked_host, blocked_path
     )
@@ -1582,57 +1585,57 @@ def recon(
 
 @app.command()
 def scan(
-    target: str = typer.Argument(..., help="Target host/IP/URL"),
-    ports: Optional[str] = typer.Option(None, help="Port range, e.g. 80,443,8080"),
+    target: str = typer.Argument(..., help="Host/IP/URL objetivo"),
+    ports: Optional[str] = typer.Option(None, help="Rango de puertos, ej. 80,443,8080"),
     # [Añadido] 2026-06-10 Nyaecho - TUI impulsado por lenguaje natural: permite
     #   pasar un prompt personalizado vía --prompt que sobrescribe el prompt generado automáticamente
     prompt: Optional[str] = typer.Option(
-        None, "--prompt", help="Custom natural language prompt (overrides auto-generated prompt)"
+        None, "--prompt", help="Prompt personalizado en lenguaje natural (sobrescribe el prompt generado automáticamente)"
     ),
     only_port: Optional[int] = typer.Option(
-        None, "--only-port", help="Restrict testing to a single port"
+        None, "--only-port", help="Restringe las pruebas a un único puerto"
     ),
     only_host: Optional[str] = typer.Option(
-        None, "--only-host", help="Restrict testing to a single host"
+        None, "--only-host", help="Restringe las pruebas a un único host"
     ),
     only_path: Optional[str] = typer.Option(
-        None, "--only-path", help="Restrict testing to a single path"
+        None, "--only-path", help="Restringe las pruebas a una única ruta"
     ),
     blocked_host: Optional[str] = typer.Option(
-        None, "--blocked-host", help="Explicitly blocked host"
+        None, "--blocked-host", help="Host explícitamente bloqueado"
     ),
     blocked_path: Optional[str] = typer.Option(
-        None, "--blocked-path", help="Explicitly blocked path"
+        None, "--blocked-path", help="Ruta explícitamente bloqueada"
     ),
     allow_actions: Optional[str] = typer.Option(
-        None, "--allow-actions", help="Comma-separated allowed actions"
+        None, "--allow-actions", help="Acciones permitidas, separadas por comas"
     ),
     block_actions: Optional[str] = typer.Option(
-        None, "--block-actions", help="Comma-separated blocked actions"
+        None, "--block-actions", help="Acciones bloqueadas, separadas por comas"
     ),
-    resume: bool = typer.Option(True, "--resume/--no-resume", help="Resume previous target state"),
+    resume: bool = typer.Option(True, "--resume/--no-resume", help="Reanuda el estado previo del objetivo"),
     snapshot: Optional[str] = typer.Option(
-        None, "--snapshot", help="Resume from a specific target snapshot id"
+        None, "--snapshot", help="Reanuda desde un id de snapshot específico del objetivo"
     ),
     run_name: Optional[str] = typer.Option(
-        None, "--run-name", help="Explicit name for a new run directory"
+        None, "--run-name", help="Nombre explícito para un nuevo directorio de ejecución"
     ),
     resume_run: Optional[str] = typer.Option(
-        None, "--resume-run", help="Resume an exact run by run name"
+        None, "--resume-run", help="Reanuda una ejecución exacta por su nombre"
     ),
-    runs_dir: Optional[str] = typer.Option(None, "--runs-dir", help="Run-directory root"),
+    runs_dir: Optional[str] = typer.Option(None, "--runs-dir", help="Raíz del directorio de ejecuciones"),
     additional_targets: Optional[list[str]] = typer.Option(
-        None, "--target", help="Additional target to include in this run"
+        None, "--target", help="Objetivo adicional para incluir en esta ejecución"
     ),
-    target_type: Optional[str] = typer.Option(None, "--target-type", help="Override target type"),
-    mount: bool = typer.Option(False, "--mount", help="Use mount ingress mode"),
-    repair: bool = typer.Option(False, "--repair", help="Repair a corrupt run"),
-    force_fresh: bool = typer.Option(False, "--force-fresh", help="Start a fresh run"),
-    no_import: bool = typer.Option(False, "--no-import", help="Do not import legacy state"),
+    target_type: Optional[str] = typer.Option(None, "--target-type", help="Sobrescribe el tipo de objetivo"),
+    mount: bool = typer.Option(False, "--mount", help="Usa el modo de ingreso por montaje"),
+    repair: bool = typer.Option(False, "--repair", help="Repara una ejecución corrupta"),
+    force_fresh: bool = typer.Option(False, "--force-fresh", help="Inicia una ejecución nueva"),
+    no_import: bool = typer.Option(False, "--no-import", help="No importa el estado legacy"),
 ) -> None:
-    """Run vulnerability scanning only."""
-    port_hint = f", focusing on ports {ports}" if ports else ""
-    task_prompt = prompt if prompt else f"Perform authorized vulnerability scanning against {target}{port_hint} without exploitation."
+    """Ejecuta solo el escaneo de vulnerabilidades."""
+    port_hint = f", enfocado en los puertos {ports}" if ports else ""
+    task_prompt = prompt if prompt else f"Realizar un escaneo de vulnerabilidades autorizado contra {target}{port_hint} sin explotación."
     task_prompt = _append_cli_constraints_compat(
         task_prompt, only_port, only_host, only_path, blocked_host, blocked_path
     )
