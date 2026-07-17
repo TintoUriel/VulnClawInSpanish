@@ -1,68 +1,68 @@
-# VulnClaw CTF/SRC Routing Guide
+# Guía de enrutamiento CTF/SRC de VulnClaw
 
-This reference connects `secknowledge-skill` to VulnClaw's CTF and SRC workflows.
+Esta referencia conecta `secknowledge-skill` con los flujos de trabajo de CTF y SRC de VulnClaw.
 
-## When To Use This Skill
+## Cuándo usar esta skill
 
-Use `secknowledge-skill` when the user is doing authorized practical testing with a concrete target, especially:
+Usa `secknowledge-skill` cuando el usuario esté realizando pruebas prácticas autorizadas con un objetivo concreto, especialmente:
 
-- SRC/bug bounty/vulnerability research with Web or AI attack surface.
-- CTF tasks that look like real Web, AI, MCP, Agent, sandbox, SSRF, upload, deserialization, XXE, logic, or auth vulnerabilities.
-- Mixed CTF/SRC questions where the user needs both exploit ideas and a checklist for evidence, risk, and reportability.
-- AI/LLM security tasks that need GAARM, OWASP LLM/ASI, prompt injection, MCP, Agent, RAG, or sandbox escape mapping.
+- Investigación de vulnerabilidades SRC/bug bounty con superficie de ataque Web o de IA.
+- Retos de CTF que se asemejen a vulnerabilidades reales de Web, IA, MCP, Agente, sandbox, SSRF, subida de archivos, deserialización, XXE, lógica o autenticación.
+- Preguntas mixtas de CTF/SRC donde el usuario necesita tanto ideas de explotación como una checklist para evidencia, riesgo y reportabilidad.
+- Tareas de seguridad de IA/LLM que requieran GAARM, OWASP LLM/ASI, inyección de prompts, MCP, Agente, RAG, o mapeo de escape de sandbox.
 
-Keep VulnClaw's existing specialist skills in the loop:
+Mantén en el circuito las skills especializadas existentes de VulnClaw:
 
-- Use `ctf-web` for short CTF Web tricks such as PHP weak comparison, preg_match bypass, eval/RCE, SSTI, and file upload chains.
-- Use `ctf-crypto` for pure crypto problems.
-- Use `ctf-misc` for pyjail, bash jail, encoding chains, stego, and platform tasks.
-- Use `web-security-advanced` when the user asks for a focused Web playbook without SRC/bug-bounty context.
-- Use `ai-mcp-security` when the wording is a general AI/MCP assessment and does not need the broader secknowledge knowledge base.
+- Usa `ctf-web` para trucos cortos de CTF Web como comparación débil de PHP, bypass de preg_match, eval/RCE, SSTI y cadenas de subida de archivos.
+- Usa `ctf-crypto` para problemas de criptografía pura.
+- Usa `ctf-misc` para pyjail, bash jail, cadenas de codificación, esteganografía y tareas de plataforma.
+- Usa `web-security-advanced` cuando el usuario pida un playbook enfocado en Web sin contexto de SRC/bug-bounty.
+- Usa `ai-mcp-security` cuando la solicitud sea una evaluación general de IA/MCP y no necesite la base de conocimiento más amplia de secknowledge.
 
-## Fast Reference Map
+## Mapa de referencia rápida
 
-| Scenario | Load These References First |
+| Escenario | Referencias a cargar primero |
 | --- | --- |
-| SRC initial triage | `testing-methodology.md`, `web-deployment-security.md` |
-| SQL injection | `web-sqli.md`, `testing-methodology.md` |
-| XSS or DOM sink testing | `web-xss.md`, `testing-methodology.md` |
-| RCE or command injection | `web-rce.md`, `web-upload.md` |
-| File upload / traversal / leak | `web-upload.md`, `web-traversal.md`, `web-leak.md` |
-| SSRF, XXE, deserialization | `web-ssrf-misc.md`, `web-xxe.md`, `web-deser.md` |
-| Auth, logic, IDOR, payment risk | `web-logic-auth.md`, `testing-methodology.md` |
-| GraphQL, WebSocket, OAuth, protocol edge cases | `web-modern-protocols.md` |
-| AI prompt injection or jailbreak | `ai-app-prompt.md`, `ai-model-jailbreak.md` |
-| MCP / Agent / tool abuse | `ai-app-mcp.md`, `ai-app-agent-cot.md`, `ai-app-frontier.md` |
-| RAG / data poisoning / leakage | `ai-data-app.md`, `ai-data-deploy.md`, `ai-model-extraction.md` |
-| AI risk rating | `gaarm-risk-matrix.md`, `testing-methodology.md` |
+| Triaje inicial de SRC | `testing-methodology.md`, `web-deployment-security.md` |
+| Inyección SQL | `web-sqli.md`, `testing-methodology.md` |
+| XSS o pruebas de sink DOM | `web-xss.md`, `testing-methodology.md` |
+| RCE o inyección de comandos | `web-rce.md`, `web-upload.md` |
+| Subida de archivos / traversal / fuga de información | `web-upload.md`, `web-traversal.md`, `web-leak.md` |
+| SSRF, XXE, deserialización | `web-ssrf-misc.md`, `web-xxe.md`, `web-deser.md` |
+| Autenticación, lógica, IDOR, riesgo de pagos | `web-logic-auth.md`, `testing-methodology.md` |
+| GraphQL, WebSocket, OAuth, casos límite de protocolo | `web-modern-protocols.md` |
+| Inyección de prompts o jailbreak de IA | `ai-app-prompt.md`, `ai-model-jailbreak.md` |
+| Abuso de MCP / Agente / herramienta | `ai-app-mcp.md`, `ai-app-agent-cot.md`, `ai-app-frontier.md` |
+| RAG / envenenamiento de datos / fuga | `ai-data-app.md`, `ai-data-deploy.md`, `ai-model-extraction.md` |
+| Calificación de riesgo de IA | `gaarm-risk-matrix.md`, `testing-methodology.md` |
 
-## CTF Workflow
+## Flujo de trabajo de CTF
 
-1. Classify the challenge into Web, AI/MCP/Agent, sandbox, crypto, or misc.
-2. If it is a narrow CTF trick, route to the matching VulnClaw CTF skill and use this skill only for broader vulnerability families or evidence discipline.
-3. If it resembles a real vulnerability, load the matching `web-*` or `ai-*` reference and keep each exploit hypothesis separate from confirmed behavior.
-4. Keep payload output small and cite the specific reference file when possible.
+1. Clasifica el reto en Web, IA/MCP/Agente, sandbox, criptografía o misceláneo.
+2. Si es un truco específico de CTF, enrútalo a la skill de CTF de VulnClaw correspondiente y usa esta skill solo para familias de vulnerabilidades más amplias o disciplina de evidencia.
+3. Si se asemeja a una vulnerabilidad real, carga la referencia `web-*` o `ai-*` correspondiente y mantén cada hipótesis de explotación separada del comportamiento confirmado.
+4. Mantén la salida de payloads reducida y cita el archivo de referencia específico cuando sea posible.
 
-## SRC Workflow
+## Flujo de trabajo de SRC
 
-1. Confirm authorization scope, target, and test objective.
-2. Start with `testing-methodology.md` for coverage and `web-deployment-security.md` for exposure checks.
-3. Load the most relevant vulnerability-family reference only after an observable clue appears.
-4. Track each item as `hypothesis`, `needs validation`, or `confirmed`, with evidence such as request/response, impact boundary, affected user role, and reproducibility.
-5. For AI targets, map observed behavior to `gaarm-risk-matrix.md` before writing severity or report language.
+1. Confirma el alcance de autorización, el objetivo y el objetivo de la prueba.
+2. Comienza con `testing-methodology.md` para cobertura y `web-deployment-security.md` para verificaciones de exposición.
+3. Carga la referencia de familia de vulnerabilidad más relevante solo después de que aparezca una pista observable.
+4. Registra cada elemento como `hipótesis`, `necesita validación` o `confirmado`, con evidencia como solicitud/respuesta, límite de impacto, rol de usuario afectado y reproducibilidad.
+5. Para objetivos de IA, mapea el comportamiento observado a `gaarm-risk-matrix.md` antes de escribir el lenguaje de severidad o del informe.
 
-## Output Discipline
+## Disciplina de salida
 
-- Do not present a payload, CVE, OWASP ID, or GAARM ID as verified unless it is supported by a reference file or live evidence.
-- For SRC reports, separate impact from exploitation steps, and avoid expanding beyond authorized scope.
-- For CTF writeups, keep solution steps reproducible but do not overstate real-world impact unless the reference supports it.
+- No presentes un payload, CVE, ID de OWASP o ID de GAARM como verificado a menos que esté respaldado por un archivo de referencia o evidencia en vivo.
+- Para informes de SRC, separa el impacto de los pasos de explotación y evita expandirte más allá del alcance autorizado.
+- Para writeups de CTF, mantén los pasos de solución reproducibles pero no exageres el impacto en el mundo real a menos que la referencia lo respalde.
 
-## Upstream Attribution
+## Atribución ascendente (upstream)
 
-Integrated from `Pa55w0rd/secknowledge-skill`: https://github.com/Pa55w0rd/secknowledge-skill
+Integrado desde `Pa55w0rd/secknowledge-skill`: https://github.com/Pa55w0rd/secknowledge-skill
 
-Upstream author: Pa55w0rd
+Autor original (upstream): Pa55w0rd
 
-Upstream version noted in README at integration time: v2.0, 2026-05-18
+Versión upstream indicada en el README al momento de la integración: v2.0, 2026-05-18
 
-Upstream license declaration: MIT License
+Declaración de licencia upstream: Licencia MIT

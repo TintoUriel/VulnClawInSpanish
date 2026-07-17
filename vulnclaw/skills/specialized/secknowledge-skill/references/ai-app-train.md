@@ -1,56 +1,48 @@
-# AI应用安全 - 训练阶段
+# Seguridad de Aplicaciones de IA - Fase de Entrenamiento
 
-> 来源: AISS绿盟大模型安全智链社区 | 拆自 ai-app-security.md
-> 阶段: 训练阶段（GAARM.0034-0036 第三方组件/插件/不安全代码）
+> Fuente: Comunidad AISS NSFOCUS de Seguridad de Grandes Modelos | Extraído de ai-app-security.md
+> Fase: Fase de entrenamiento (GAARM.0034-0036 Componentes de terceros/Complementos/Código inseguro)
 
-## 训练阶段
+## Fase de entrenamiento
 
-### LLMs应用不安全输出处理
+### Manejo Inseguro de Salidas en Aplicaciones LLM
 
-> 风险编号: GAARM.0035.003
-> 生命周期: 训练阶段
+> Número de riesgo: GAARM.0035.003
+> Ciclo de vida: Fase de entrenamiento
 
-**攻击概述**
+**Resumen del ataque**
 
-该风险是指当下游组件在接受大型语言模型 (LLM) 输出却未进行适当审查时，导致出现出现的一种安全风险。模型下游组件中包括各种功能的Agent，当缺乏相关的输出处理，会导致攻击者通过模型滥用Agent实现攻击行为，例如，攻击者可以通过输入特定的文本，诱导LLM输出包含敏感信息的响应，从而窃取用户数据，或者直接输出非预期的攻击Payload，导致下游出现RCE、SSRF等漏洞。
+Este riesgo se refiere a un tipo de riesgo de seguridad que surge cuando un componente aguas abajo acepta la salida de un modelo de lenguaje grande (LLM) sin realizar una revisión adecuada. Los componentes aguas abajo del modelo incluyen Agentes con diversas funcionalidades; cuando falta el procesamiento adecuado de la salida, el atacante puede abusar del Agente a través del modelo para lograr un comportamiento de ataque. Por ejemplo, el atacante puede, mediante la introducción de texto específico, inducir al LLM a generar una respuesta que contenga información sensible, robando así datos del usuario, o generar directamente un payload de ataque no previsto, provocando vulnerabilidades aguas abajo como RCE o SSRF.
 
-**攻击案例**
+**Casos de ataque**
 
-案例
-描述
+Caso
+Descripción
 
+Caso 1
+CVE-2023-29374 es una vulnerabilidad de ejecución arbitraria de código en Langchain: los programas que usan Langchain en su versión 0.0.131 o anterior e invocan la cadena LLMMathChain de Langchain presentan un riesgo de seguridad que incluye ejecución arbitraria de comandos, lo cual puede provocar la filtración de información sensible como claves de OpenAI, o el control del servidor de Langchain.
 
+Caso 2
+Auto-GPT presenta una vulnerabilidad de path traversal en versiones anteriores a la v0.4.3; esta vulnerabilidad permite la ejecución de código arbitrario fuera del entorno docker en la máquina donde se ejecuta Auto-GPT. El atacante puede aprovechar esta vulnerabilidad para lanzar ataques dirigidos contra el objetivo, comprometiendo la seguridad del sistema del sitio.
 
+**Riesgos del ataque**
 
-案例一
-CVE-2023-29374 是 Langchain 的一个任意代码执行漏洞，使用 0.0.131 及之前版本的 Langchain，并调用 Langchain LLMMathChain 链的程序，存在包含任意命令执行的安全风险，可能导致 OpenAI key 等敏感信息泄漏、Langchain 服务端被控等问题。
+Filtración de información sensible: los LLM a veces no sanitizan el JavaScript en sus respuestas. En este caso, el atacante puede usar un prompt cuidadosamente diseñado para que el LLM devuelva un payload de JavaScript; cuando el navegador de la víctima procesa este payload, sufre un ataque que provoca la filtración de información sensible, como la filtración del historial de conversación.
+Ejecución arbitraria de código: el atacante puede ejecutar código arbitrario mediante la vulnerabilidad. Esto puede provocar que el atacante realice operaciones maliciosas en el servidor, como implantar puertas traseras, extraer datos sensibles o interrumpir el servicio.
+Dirigido
 
+**Medidas de mitigación**
 
-案例二
-Auto-GPT在v0.4.3之前版本中存在路径遍历漏洞，这个漏洞会导致运行Auto-GPT的主机上任意代码在docker环境之外执行。攻击者可利用该漏洞对目标有针对性的发起攻击，危害站点系统安全
+Medida de mitigación
+Descripción
 
-**攻击风险**
+Framework de confianza cero (Zero Trust)
+En este framework, toda solicitud de acceso a un recurso se considera proveniente de una red no confiable, y el sistema la revisa, autentica y verifica, aportando así seguridad al sistema.
 
-敏感信息泄露：LLM 有时不会在其响应中清理 JavaScript。在这种情况下，攻击者可能会使用精心设计的Prompt导致 LLM 返回 JavaScript 有效负载，当受害者的浏览器解析该有效负载时，会受到攻击导致敏感信息泄露，如对话历史泄露等。
-任意代码执行：攻击者可以通过漏洞执行任意代码。这可能导致攻击者在服务器上执行恶意操作，例如植入后门、提取敏感数据或中断服务。
-定向
+Entorno de sandbox
+Intentar aprovechar un entorno de sandbox para ejecutar código, con el fin de garantizar una mayor seguridad del sistema. Por ejemplo, ejecutar el código únicamente dentro de un contenedor Docker temporal y dedicado puede limitar significativamente el impacto potencial del código malicioso.
 
-**缓解措施**
-
-缓解方式
-描述
-
-
-
-
-零信任框架
-在此框架中，每个访问资源的请求都被视为来自不受信任的网络，系统会对其进行检查、身份验证和核实，以此带来系统安全
-
-
-沙盒环境
-尝试利用沙盒环境来执行代码，以确保更大的系统安全。例如，仅在专用的临时 Docker 容器内执行代码可以显著限制恶意代码的潜在影响
-
-**参考**
+**Referencias**
 
 https://genai.owasp.org/wp-content/uploads/2024/05/OWASP-Top-10-for-LLM-Applications-v1_1_Chinese.pdf
 https://cloud.baidu.com/article/3253170
@@ -59,365 +51,306 @@ https://journal.hexmos.com/insecure-output-handling/
 https://systemweakness.com/new-prompt-injection-attack-on-chatgpt-web-version-ef717492c5c2
 
 ---
-### LLMs应用传统漏洞风险
+### Riesgo de Vulnerabilidades Tradicionales en Aplicaciones LLM
 
-> 风险编号: GAARM.0035.002
-> 生命周期: 训练阶段
+> Número de riesgo: GAARM.0035.002
+> Ciclo de vida: Fase de entrenamiento
 
-**攻击概述**
+**Resumen del ataque**
 
-传统的应用安全漏洞不仅存在于传统软件系统中，也可能存在于LLM应用程序当中。例如，常见API接口攻击，账户接管，代码执行等，传统的风险漏洞仍然在LLM中存在，因此在训练阶段必须严格遵循安全最佳实践，以确保系统在应对传统风险的时候有足够的防护能力，否则可能会导致服务中断、账户接管、数据篡改等一系列危险。
+Las vulnerabilidades tradicionales de seguridad de aplicaciones no solo existen en los sistemas de software tradicionales, sino que también pueden estar presentes en las aplicaciones LLM. Por ejemplo, ataques comunes a interfaces de API, toma de control de cuentas, ejecución de código, etc.: los riesgos y vulnerabilidades tradicionales siguen existiendo en los LLM, por lo que durante la fase de entrenamiento es imprescindible seguir estrictamente las mejores prácticas de seguridad, para garantizar que el sistema tenga suficiente capacidad de protección frente a riesgos tradicionales; de lo contrario, puede provocar una serie de peligros como interrupción del servicio, toma de control de cuentas o manipulación de datos.
 
-**攻击案例**
+**Casos de ataque**
 
-案例
-描述
+Caso
+Descripción
 
+Caso 1
+Un caso reportó indicios de que ChatGPT sufrió un ataque DDoS (denegación de servicio distribuida), en el cual atacantes externos intentaron sobrecargar y colapsar la red o el servidor mediante el envío repetido de solicitudes Ping.
 
+Caso 2
+La aplicación ChatGPT-Next-Web presenta una vulnerabilidad SSRF (CVE-2023-49785), que puede usarse para explorar recursos de la red interna.
 
+**Riesgos del ataque**
 
-案例一
-案例报导了ChatGPT受到DDoS（分布式拒绝服务）攻击的迹象，外部攻击者试图通过反复发送Ping请求，从而使网络或服务器超载而崩溃
+Interrupción del servicio: un ataque de denegación de servicio (DoS) o el agotamiento de recursos puede provocar que la aplicación LLM no pueda responder a las solicitudes del usuario, afectando la continuidad del negocio.
+Control del sistema: una vulnerabilidad de ejecución remota de código o de ejecución de scripts puede permitir que el atacante tome control del servidor, implante software malicioso o ejecute operaciones destructivas.
 
+**Medidas de mitigación**
 
-案例二
-ChatGPT-Next-Web应用程序存在SSRF漏洞(CVE-2023-49785),可以使用此漏洞探测内网网络资源
+Medida de mitigación
+Descripción
 
-**攻击风险**
+Reforzar la seguridad de la API
+Garantizar que todas las interfaces de API pasen por una autenticación y un control de autorización estrictos, restringiendo los permisos de acceso.
 
-服务中断：拒绝服务攻击（DoS）或资源耗尽会导致LLM应用无法响应用户请求，影响业务连续性。
-系统控制：远程代码执行或脚本执行漏洞可能使攻击者接管服务器，植入恶意软件或执行破坏性操作。
+Principio de privilegio mínimo
+Restringir o deshabilitar funciones de ejecución de comandos innecesarias en la aplicación LLM, reduciendo la superficie de ataque potencial.
 
-**缓解措施**
+Evaluación de seguridad periódica
+Realizar periódicamente escaneos de vulnerabilidades de seguridad sobre la aplicación LLM, corrigiendo oportunamente los problemas de seguridad detectados.
 
-缓解方式
-描述
-
-
-
-
-强化API安全
-确保所有API接口都经过严格的身份验证和授权控制，限制访问权限。
-
-
-最小权限原则
-限制或禁用LLM应用中不必要的命令执行功能，减少潜在攻击面。
-
-
-定期安全评估
-定期对LLM应用进行安全漏洞扫描，及时修补发现的安全问题。
-
-**参考**
+**Referencias**
 
 https://sec.cafe/handbook/security_research/ai_security/llm_security/attack/
 
 ---
-### LLMs插件：不安全输入处理
+### Complementos LLM: Manejo Inseguro de Entradas
 
-> 风险编号: GAARM.0035.001
-> 生命周期: 训练阶段
+> Número de riesgo: GAARM.0035.001
+> Ciclo de vida: Fase de entrenamiento
 
-**攻击概述**
+**Resumen del ataque**
 
-该风险是指由于LLMs的插件存在不安全输入处理，将风险引入到大模型中。例如，插件很可能会从模型中实现来自模型的自由文本输入，而不进行验证或类型检查以处理上下文大小限制，使得潜在攻击者可以构造一个恶意请求发送给插件，可能导致各种不希望发生的行为，甚至包括远程代码执行。
+Este riesgo se refiere a que, debido a que los complementos (plugins) de los LLM presentan un manejo inseguro de las entradas, se introduce riesgo en el gran modelo. Por ejemplo, es muy probable que un complemento acepte texto libre proveniente del modelo sin realizar validación o verificación de tipo para manejar los límites del tamaño de contexto, lo que permite que un atacante potencial construya una solicitud maliciosa que se envía al complemento, pudiendo provocar diversos comportamientos indeseados, incluso ejecución remota de código.
 
-**攻击案例**
+**Casos de ataque**
 
-案例
-描述
+Caso
+Descripción
 
+Caso 1
+Se descubrió que PALChain, dentro de LangChain, presenta un riesgo de ejecución de código.
 
+**Riesgos del ataque**
 
+Ejecución de solicitudes no autorizadas: el atacante puede explotar directamente una vulnerabilidad de la aplicación LLM, o manipular el prompt de entrada, para que la aplicación LLM ejecute solicitudes inesperadas, accediendo u operando sobre recursos restringidos.
+Filtración de información sensible: el acceso a recursos restringidos a través de los LLM puede provocar la obtención y filtración no autorizada de información sensible.
 
-案例一
-LangChains中的PALChain被发现存在代码执行风险
+**Medidas de mitigación**
 
-**攻击风险**
+Medida de mitigación
+Descripción
 
-未经授权的请求执行：攻击者可以直接利用LLMs应用漏洞或者通过操纵输入提示，使LLMs应用执行意外的请求，访问或操作受限制的资源。
-敏感信息泄露：通过LLMs访问受限资源可能导致敏感信息的未经授权的获取和泄露。
+Validación y filtrado de entradas
+Implementar estrategias estrictas de validación y sanitización de entradas, garantizando que todos los datos de entrada sean revisados y depurados antes de ser procesados por el LLM.
 
-**缓解措施**
+Principio de privilegio mínimo
+Seguir el principio de privilegio mínimo, otorgando al LLM únicamente el acceso mínimo necesario para completar su tarea, evitando la autorización excesiva.
 
-缓解方式
-描述
-
-
-
-
-输入验证和过滤
-实施严格的输入验证和净化策略，以确保所有输入数据在被LLMs处理前都经过检查和清理
-
-
-最小权限原则
-遵循最小权限原则，只为LLMs提供完成其任务所必需的最小访问权限，避免过度授权
-
-**参考**
+**Referencias**
 
 https://owasp.org/www-project-top-10-for-large-language-model-applications/Archive/0_1_vulns/SSRF.html
 https://www.horizon3.ai/attack-research/attack-blogs/nextchat-an-ai-chatbot-that-lets-you-talk-to-anyone-you-want-to/
 https://genai.owasp.org/wp-content/uploads/2024/05/OWASP-Top-10-for-LLM-Applications-v1_1_Chinese.pdf
 
 ---
-### LLMs插件：业务过度代理
+### Complementos LLM: Exceso de Agencia de Negocio
 
-> 风险编号: GAARM.0036
-> 生命周期: 训练阶段
+> Número de riesgo: GAARM.0036
+> Ciclo de vida: Fase de entrenamiento
 
-**攻击概述**
+**Resumen del ataque**
 
-基于LLM的系统通常由开发人员授予一定程度的业务代理能力，即与其他系统进行交互并在响应提示时执行操作的能力。而过度代理是设计开发阶段安全风险，该风险导致在LLM出现意外/模糊输出时执行破坏性操作，根本原因通常是：功能过多或自主权过多。过度代理可以导致涉及机密性、完整性和可用性等方面的一系列影响，这取决于LLM应用程序能够与哪些系统进行交互。例如，赋予了LLM系统过度自主权，导致LLM基于应用程序或插件未能独立验证和批准高影响操作时，允许删除用户文档的插件执行删除操作时，无需用户的任何确认。
+Los sistemas basados en LLM normalmente reciben del desarrollador cierto grado de capacidad de agencia de negocio, es decir, la capacidad de interactuar con otros sistemas y ejecutar acciones al responder a un prompt. El exceso de agencia es un riesgo de seguridad de la fase de diseño y desarrollo; este riesgo provoca que se ejecuten operaciones destructivas cuando el LLM produce una salida inesperada o ambigua, y su causa raíz suele ser: demasiadas funciones o demasiada autonomía. El exceso de agencia puede provocar una serie de impactos relacionados con la confidencialidad, integridad y disponibilidad, dependiendo de con qué sistemas pueda interactuar la aplicación LLM. Por ejemplo, otorgar al sistema LLM una autonomía excesiva puede provocar que, cuando la aplicación o complemento basado en LLM no verifique ni apruebe de forma independiente operaciones de alto impacto, un complemento que permite eliminar documentos del usuario ejecute la operación de eliminación sin requerir ninguna confirmación del usuario.
 
-**攻击案例**
+**Casos de ataque**
 
-案例
-描述
+Caso
+Descripción
 
+Caso 1
+El video muestra cómo, aprovechando una vulnerabilidad de exceso de agencia, se puede realizar un restablecimiento ilegítimo de la contraseña de un usuario.
 
+**Riesgos del ataque**
 
+Filtración de información sensible: cuando el exceso de agencia de negocio provoca que el LLM sea manipulado de forma maliciosa, puede filtrarse información sensible y privada.
 
-案例一
-该视频展示了如何通过利用过度代理的漏洞进行对用户密码的非法重置
+**Medidas de mitigación**
 
-**攻击风险**
+Medida de mitigación
+Descripción
 
-敏感信息泄露：业务过度代理导致LLM被恶意操控时可能泄露敏感信息以及隐私。
+Principio de privilegio mínimo
+Restringir los complementos/herramientas que el Agente LLM tiene permitido invocar, limitándolos únicamente a la funcionalidad mínima necesaria. Por ejemplo, si el sistema base del LLM no necesita la capacidad de obtener el contenido de una URL, no se le debería proporcionar al Agente LLM un complemento de ese tipo.
 
-**缓解措施**
+Evitar funciones de propósito abierto
+En la medida de lo posible, evitar funciones de propósito abierto (como ejecutar comandos de shell, obtener URLs, etc.) y usar complementos/herramientas de granularidad más fina. Por ejemplo, una aplicación base de LLM puede necesitar escribir cierta salida en un archivo. Si se usa un complemento que ejecuta funciones de shell para lograrlo, el alcance de las operaciones indeseadas será muy amplio (podría ejecutar cualquier otro comando de shell). Una alternativa más segura es construir un complemento de escritura de archivos que solo admita una función específica.
 
-缓解方式
-描述
-
-
-
-
-最小权限原则
-限制LLM代理被允许调用的插件/工具，仅限于所需的最小功能。例如，如果LLM基础系统不需要获取URL内容的能力，那么不应该向LLM代理提供这样的插件
-
-
-避免开放式功能
-在可能的情况下避免开放式功能（例如运行shell命令、获取URL等），并使用更细粒度功能的插件/工具。例如，LLM基础应用程序可能需要将某些输出写入文件。如果使用插件运行shell功能来实现这一点，那么不希望的操作的范围就会非常大（可以执行任何其他shell命令）。更安全的替代方案是构建一个只支持特定功能的文件写入插件。
-
-**参考**
+**Referencias**
 
 https://genai.owasp.org/wp-content/uploads/2024/05/OWASP-Top-10-for-LLM-Applications-v1_1_Chinese.pdf
 
 ---
-### RAG开发框架漏洞
+### Vulnerabilidades del Framework de Desarrollo RAG
 
-> 风险编号: GAARM.0034.002
-> 生命周期: 训练阶段
+> Número de riesgo: GAARM.0034.002
+> Ciclo de vida: Fase de entrenamiento
 
-**攻击概述**
+**Resumen del ataque**
 
-RAG（Retrieval-Augmented Generation）是结合信息检索和生成的框架，在大型语言模型（LLM）的开发中用于增强模型的生成能力。由于RAG框架依赖于检索模块从外部数据源获取信息，如果检索模块的源数据不准确或不可靠，可能导致生成的回答包含错误或误导性信息；并且框架本身引入的各种Agent，也可能存在相关的安全风险。RAG框架相关的安全风险主要集中于RAG的生成模块、信息检索模块、集成插件和外部接口等方面，由于对RAG设计的不安全，导致可能引入其中的安全漏洞到LLM应用。例如，如果RAG检索模块的设计允许服务器发起不受限制的请求，可能会导致SSRF漏洞的利用。
+RAG (Retrieval-Augmented Generation, generación aumentada por recuperación) es un framework que combina la recuperación de información con la generación, utilizado en el desarrollo de grandes modelos de lenguaje (LLM) para reforzar la capacidad de generación del modelo. Dado que el framework RAG depende de un módulo de recuperación para obtener información de fuentes de datos externas, si los datos de origen del módulo de recuperación son inexactos o poco fiables, la respuesta generada puede contener información errónea o engañosa; además, los diversos Agentes que introduce el propio framework también pueden presentar riesgos de seguridad asociados. Los riesgos de seguridad relacionados con el framework RAG se concentran principalmente en el módulo de generación, el módulo de recuperación de información, los complementos integrados y las interfaces externas de RAG; un diseño inseguro de RAG puede provocar que se introduzcan vulnerabilidades de seguridad en la aplicación LLM. Por ejemplo, si el diseño del módulo de recuperación de RAG permite que el servidor realice solicitudes sin restricciones, puede provocar la explotación de una vulnerabilidad SSRF.
 
-**攻击案例**
+**Casos de ataque**
 
-案例
-描述
+Caso
+Descripción
 
+Caso 1
+Las vulnerabilidades SSRF y de RCE en PALChain presentes en el framework LangChain suponen un riesgo de seguridad para las aplicaciones LLM que usan dicho framework.
 
+**Riesgos del ataque**
 
+Filtración de información: el atacante puede, mediante una vulnerabilidad de path traversal, acceder a archivos sensibles o archivos de configuración del sistema, filtrando información interna del sistema.
+Control del sistema: si los archivos del sistema contienen información de configuración sensible o scripts, el atacante puede aprovechar aún más esta información para tomar control del sistema.
+Ejecución de comandos: los Agentes del framework, como el motor de evaluación de expresiones de datos o el intérprete de Python, pueden ser aprovechados para provocar un ataque RCE.
 
-案例一
-由于LangChain框架中存在的SSRF以及PALChain的RCE漏洞，给使用框架的LLM应用带来了安全风险
+**Medidas de mitigación**
 
-**攻击风险**
+Medida de mitigación
+Descripción
 
-信息泄露：攻击者可能通过路径遍历漏洞访问敏感文件或系统配置文件，泄露系统内部信息。
-系统控制：如果系统文件包含敏感的配置信息或脚本，攻击者可能进一步利用这些信息来控制系统。
-命令执行：框架中的数据表达式运算、Python解释器等Agent，可能被利用造成RCE攻击。
+Validación de entradas
+Validar y depurar estrictamente todas las entradas del usuario, evitando ataques de path traversal.
 
-**缓解措施**
+Gestión de permisos
+Establecer permisos de archivo adecuados, evitando el acceso no autorizado a archivos.
 
-缓解方式
-描述
+Actualización y corrección
+Garantizar el uso de la última versión de la aplicación y sus dependencias, aplicando oportunamente los parches de seguridad para corregir vulnerabilidades conocidas.
 
-
-
-
-输入验证
-严格验证和清理所有用户输入，防止路径遍历攻击。
-
-
-权限管理
-在设置适当的文件权限，防止未授权的文件访问。
-
-
-更新和修复
-确保应用程序和相关依赖的最新版本，及时应用安全补丁以修复已知漏洞。
-
-**参考**
+**Referencias**
 
 https://www.wehelpwin.com/article/5063
 https://medium.com/nfactor-technologies/rag-poisoning-an-emerging-threat-in-ai-systems-660f9ff279f9
 https://ironcorelabs.com/security-risks-rag/
 
 ---
-### 不安全的代码实践
+### Prácticas de Código Inseguras
 
-> 风险编号: GAARM.0035
-> 生命周期: 训练阶段
+> Número de riesgo: GAARM.0035
+> Ciclo de vida: Fase de entrenamiento
 
-**攻击概述**
+**Resumen del ataque**
 
-不安全的代码实践是指基于大模型集成框架，开发LLMs应用过程中由于设计缺陷导致的安全问题。在LLMs应用程序开发过程中采用的代码逻辑，可能会带来安全风险，给LLMs应用程序引入可被利用的安全漏洞。其中的安全漏洞可能包含两大类：
+Las prácticas de código inseguras se refieren a problemas de seguridad originados en defectos de diseño durante el proceso de desarrollo de aplicaciones LLM basadas en un framework de integración de grandes modelos. La lógica de código adoptada durante el desarrollo de aplicaciones LLM puede introducir riesgos de seguridad, generando vulnerabilidades explotables en la aplicación LLM. Las vulnerabilidades de seguridad resultantes pueden agruparse en dos grandes categorías:
 
-LLMs应用程序服务存在传统的漏洞，例如对外服务的Chat系统服务存在越权查看他人对话记录等风险；
-LLMs集成框架中的新型Tools、Agents、Chains中包含安全风险，导致攻击者可以基于LLMs间接利用相关漏洞；
+El servicio de la aplicación LLM presenta vulnerabilidades tradicionales; por ejemplo, un servicio de chat orientado al exterior puede presentar el riesgo de ver de forma no autorizada los registros de conversación de otros usuarios.
+Las nuevas herramientas (Tools), Agentes (Agents) y cadenas (Chains) del framework de integración de LLM contienen riesgos de seguridad, permitiendo que el atacante explote de forma indirecta las vulnerabilidades relacionadas a través del LLM.
 
-**攻击案例**
+**Casos de ataque**
 
-案例
-描述
+Caso
+Descripción
 
+Caso 1
+Se descubrió que PALChain, dentro de LangChain, presenta un riesgo de ejecución de código.
 
+Caso 2
+Se descubrieron múltiples vulnerabilidades RCE de alto riesgo en LangChain.
 
+**Riesgos del ataque**
 
-案例一
-LangChains中的PALChain被发现存在代码执行风险
+Prácticas de codificación inseguras: al generar código, los LLM pueden seguir prácticas de codificación inseguras, provocando que el código generado contenga vulnerabilidades de seguridad.
+Ejecución de solicitudes no autorizadas: el atacante puede explotar directamente una vulnerabilidad de la aplicación LLM, o manipular el prompt de entrada, para que la aplicación LLM ejecute solicitudes inesperadas, accediendo u operando sobre recursos restringidos.
 
+**Medidas de mitigación**
 
-案例二
-LangChains中被挖掘出多个RCE高危漏洞
+Medida de mitigación
+Descripción
 
-**攻击风险**
+Detección y evaluación automatizada
+Utilizar herramientas de análisis estático para detectar patrones inseguros en el código, mejorando la seguridad del código.
 
-不安全的编码实践：LLMs 在生成代码时可能会遵循不安全的编码实践，导致生成的代码含有安全漏洞。
-未经授权的请求执行：攻击者可以直接利用LLMs应用漏洞或者通过操纵输入提示，使LLMs应用执行意外的请求，访问或操作受限制的资源。
+Principio de privilegio mínimo
+Seguir el principio de privilegio mínimo, otorgando al LLM únicamente el acceso mínimo necesario para completar su tarea, evitando la autorización excesiva de agencia.
 
-**缓解措施**
+Validación y filtrado de entradas
+Implementar estrategias estrictas de validación y sanitización de entradas, garantizando que todos los datos de entrada sean revisados y depurados antes de ser procesados por el LLM.
 
-缓解方式
-描述
-
-
-
-
-自动化检测评估
-利用静态分析工具检测代码中的不安全模式，以提高代码安全性
-
-
-最小权限原则
-遵循最小权限原则，只为LLMs提供完成其任务所必需的最小访问权限，避免过度代理授权
-
-
-输入验证和过滤
-实施严格的输入验证和净化策略，以确保所有输入数据在被LLMs处理前都经过检查和清理
-
-**参考**
+**Referencias**
 
 https://arxiv.org/html/2312.04724v1
 
 ---
-### 数据处理组件漏洞
+### Vulnerabilidades en Componentes de Procesamiento de Datos
 
-> 风险编号: GAARM.0034.001
-> 生命周期: 训练阶段
+> Número de riesgo: GAARM.0034.001
+> Ciclo de vida: Fase de entrenamiento
 
-**攻击概述**
+**Resumen del ataque**
 
-在人工智能（AI）模型的开发过程中，数据集的安全性是一个不容忽视的重要方面。在Hugging Face、GitHub等平台可能存在一些带有恶意后门的数据集，而这些数据集可以通过LLMs数据处理组件的特性或者漏洞，对AI模型的安全性构成威胁。当开发者使用这些受污染的数据集进行模型训练时，数据集中隐藏的恶意代码可能会被执行，从而导致一系列安全问题，如AI模型、数据集和代码的泄露或篡改。
+En el proceso de desarrollo de modelos de inteligencia artificial (IA), la seguridad de los conjuntos de datos es un aspecto que no se puede pasar por alto. En plataformas como Hugging Face o GitHub pueden existir conjuntos de datos con puertas traseras maliciosas, y estos conjuntos de datos pueden, a través de características o vulnerabilidades de los componentes de procesamiento de datos de los LLM, constituir una amenaza para la seguridad del modelo de IA. Cuando un desarrollador utiliza estos conjuntos de datos contaminados para entrenar un modelo, el código malicioso oculto en el conjunto de datos puede ejecutarse, provocando una serie de problemas de seguridad, como la filtración o manipulación del modelo de IA, el conjunto de datos y el código.
 
-**攻击案例**
+**Casos de ataque**
 
-案例
-描述
+Caso
+Descripción
 
+Caso 1
+Se descubrió que el componente datasets de Hugging Face presenta características inseguras; al usar este componente para cargar un conjunto de datos malicioso, puede provocar riesgos como la ejecución de comandos.
 
+**Riesgos del ataque**
 
+Intrusión del sistema: un script malicioso construido por el atacante puede conectarse al servidor del atacante y ejecutar comandos del sistema, tomando así control del servidor de la víctima.
+Filtración de datos: un script malicioso puede robar datos sensibles almacenados en el servidor, como los datos de entrenamiento o el código del modelo, provocando la filtración de propiedad intelectual y de la privacidad de los usuarios.
+Manipulación de parámetros del modelo: los parámetros del gran modelo pueden ser manipulados de forma maliciosa, afectando la exactitud y fiabilidad del modelo.
 
-案例一
-Hugging Face的datasets组件被发现存在不安全特性，使用该组件加载恶意数据集时，可能导致命令执行等风险
+**Medidas de mitigación**
 
-**攻击风险**
+Medida de mitigación
+Descripción
 
-系统入侵：攻击者构造的恶意脚本可以连接到攻击者服务器，执行系统命令，从而控制受害者的服务器。
-数据泄露：恶意脚本可以窃取服务器上的训练数据、模型代码等敏感数据，导致知识产权和用户隐私的泄露。
-模型参数篡改：大模型的参数可能被恶意篡改，影响模型的准确性和可靠性。
+Fuentes confiables para los conjuntos de datos de entrenamiento/ajuste fino
+Garantizar que los conjuntos de datos de origen sean confiables, verificar si existe código Python malicioso en los scripts del conjunto de datos, y usar con precaución los conjuntos de datos en Hugging Face que hayan sido señalados con riesgos de seguridad.
 
-**缓解措施**
+Protección de la cadena de suministro de componentes de grandes modelos
+Dar seguimiento continuo a las últimas novedades y recomendaciones sobre la seguridad de la cadena de suministro en áreas como la seguridad nativa de los grandes modelos, la seguridad básica y la seguridad del desarrollo habilitado por grandes modelos.
 
-缓解方式
-描述
-
-
-
-
-训练/微调数据集的可信来源
-确保来源数据集可信，检查数据集脚本中是否存在恶意Python代码，谨慎使用在Hugging Face上被提示存在安全风险的数据集
-
-
-大模型组件供应链安全防护
-持续跟进关注大模型原生安全、基础安全及大模型赋能研发安全等领域的最新供应链安全动态和建议
-
-**参考**
+**Referencias**
 
 https://security.tencent.com/index.php/blog/msg/209
 
 ---
-### 第三方组件漏洞
+### Vulnerabilidades de Componentes de Terceros
 
-> 风险编号: GAARM.0034
-> 生命周期: 训练阶段
+> Número de riesgo: GAARM.0034
+> Ciclo de vida: Fase de entrenamiento
 
-**攻击概述**
+**Resumen del ataque**
 
-该攻击是指LLMs应用开发者在模型训练阶段可能会使用第三方商业或者开源库组件，在这些第三方组件中有可能包含恶意代码、组件漏洞等，可能导致开发机、服务器受到入侵，属于AI环境下的供应链安全风险。
+Este ataque se refiere a que los desarrolladores de aplicaciones LLM pueden, durante la fase de entrenamiento del modelo, usar bibliotecas o componentes comerciales o de código abierto de terceros; estos componentes de terceros pueden contener código malicioso o vulnerabilidades propias del componente, lo que puede provocar la intrusión de la máquina de desarrollo o del servidor, constituyendo un riesgo de seguridad de la cadena de suministro en el entorno de IA.
 
-**攻击案例**
+**Casos de ataque**
 
-案例
-描述
+Caso
+Descripción
 
+Caso 1
+redis-py, el cliente Python de la base de datos Redis, utiliza una interfaz asíncrona; al cancelar un comando, puede provocar una lectura desordenada de los datos de negocio del usuario (CVE-2023-28858).
 
+Caso 2
+TorchServe puede provocar un acceso no autorizado al servidor, y lograr ejecución remota de código en instancias vulnerables.
 
+Caso 3
+El componente datasets de Hugging Face presenta una vulnerabilidad que permite realizar ataques mediante conjuntos de datos maliciosos, pudiendo provocar la intrusión del dispositivo del usuario y el robo o manipulación de los parámetros del gran modelo.
 
-案例一
-Redis数据库Python客户端redis-py使用异步接口，取消命令时可能导致用户业务数据读取出现错乱(CVE-2023-28858)
+Caso 4
+Este artículo estudia el impacto de los ataques de puerta trasera sobre modelos preentrenados. El atacante puede, mediante la implantación de una puerta trasera, manipular los resultados de recomendación del modelo, logrando así fines de marketing malicioso u otros objetivos.
 
+Caso 5
+ChatGPT-Next-Web presenta vulnerabilidades de SSRF y de XSS reflejado.
 
-案例二
-TorchServe可导致越权服务器访问，并在易受攻击的实例上实现远程代码执行
+**Riesgos del ataque**
 
+Ataque de envenenamiento de puerta trasera en la cadena de suministro: cuando un desarrollador de IA carga un conjunto de datos usando una biblioteca de código abierto de terceros, si el conjunto de datos tiene implantado código malicioso, puede provocar que el PC o el servidor sufran un ataque.
+Filtración o manipulación de parámetros del modelo: provoca que los parámetros del modelo sean robados o manipulados, afectando la seguridad y fiabilidad del modelo.
 
-案例三
-Hugging Face的datasets组件存在漏洞，允许通过恶意数据集实施攻击，可能导致用户设备被侵入和大模型参数被窃取或篡改
+**Medidas de mitigación**
 
+Medida de mitigación
+Descripción
 
-案例四
-本文研究了后门攻击对预训练好的模型的影响。攻击者可以通过植入后门，操纵模型的推荐结果，从而达到恶意营销或其他目的
+Protección de la cadena de suministro de componentes de grandes modelos
+Para vulnerabilidades de seguridad conocidas, como la CVE-2023-43654 de TorchServe, se debe actualizar oportunamente a una versión segura.
 
+Fuentes confiables para los conjuntos de datos de entrenamiento/ajuste fino
+Garantizar que la fuente de los conjuntos de datos sea confiable, verificar si existe código Python malicioso en los scripts del conjunto de datos, y evitar el uso de conjuntos de datos en Hugging Face que hayan sido señalados con riesgos de seguridad.
 
-案例五
-ChatGPT-Next-Web存在SSRF和反射性XSS漏洞
+Control estricto de la incorporación de componentes de código abierto
+Establecer un sistema interno de gobernanza de código abierto en la empresa, controlando estrictamente la incorporación de componentes de código abierto, e implementando monitoreo y seguimiento automatizados mediante herramientas.
 
-**攻击风险**
-
-供应链后门投毒攻击：AI开发者在使用第三方开源库加载数据集时，若数据集被植入恶意代码，可能会使PC或服务器遭受攻击。
-模型参数泄露或篡改：导致模型参数被窃取或篡改，影响模型的安全性和可靠性。
-
-**缓解措施**
-
-缓解方式
-描述
-
-
-
-
-大模型组件供应链安全防护
-对于已知的安全漏洞，如TorchServe的CVE-2023-43654，应及时更新到安全的版本
-
-
-训练/微调数据集的可信来源
-确保数据集来源可信，检查数据集脚本中是否存在恶意Python代码，避免使用在Hugging Face上被提示存在安全风险的数据集
-
-
-严格控制开源组件引入
-建立企业内部的开源治理体系，严格控制开源组件的引入，并通过工具实现自动化监测和跟踪
-
-**参考**
+**Referencias**
 
 https://hiddenlayer.com/research/insane-in-the-supply-chain/
 
