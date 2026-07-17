@@ -1,6 +1,6 @@
-# Tool Selection Map
+# Mapa de Selección de Herramientas
 
-## Reverse Layer
+## Capa de Ingeniería Inversa
 
 - `jadx`
 - `ida_pro_mcp`
@@ -12,27 +12,27 @@
 - `chrome_devtools`
 - `burp`
 
-## Platform Sequences
+## Secuencias por Plataforma
 
-### Browser JS sign or anti-bot
+### Firma o anti-bot de JS de navegador
 
-- boundary and request proof: `chrome_devtools` -> `js_reverse`
-- browser/local divergence: `js_reverse`
-- replay confirmation: `burp`
+- prueba de límite y solicitud: `chrome_devtools` -> `js_reverse`
+- divergencia navegador/local: `js_reverse`
+- confirmación de repetición (replay): `burp`
 
-### Android external URL or sign/encrypt
+### URL externa en Android o firma/cifrado
 
-- proxy or capture readiness first: `burp` / `charles`
-- runtime-first visibility and packet check: `scrcpy_vision` -> `adb_mcp`
-- Java recovery when blocked: `jadx`
-- UI-state steering and screenshot-guided next actions: `scrcpy_vision`
-- device state and runtime context: `adb_mcp`
-- narrow Java or JNI hooks: `frida_mcp`
-- dumped `.so` analysis when required: `ida_pro_mcp`
-- wire validation or Charles-assisted observation: `charles`
-- replay confirmation: `burp`
+- preparación de proxy o captura primero: `burp` / `charles`
+- visibilidad centrada en runtime y verificación de paquetes: `scrcpy_vision` -> `adb_mcp`
+- recuperación de Java cuando esté bloqueado: `jadx`
+- dirección de estado de UI y siguientes acciones guiadas por captura de pantalla: `scrcpy_vision`
+- estado del dispositivo y contexto de runtime: `adb_mcp`
+- hooks acotados de Java o JNI: `frida_mcp`
+- análisis de `.so` volcado cuando sea necesario: `ida_pro_mcp`
+- validación en el cable u observación asistida por Charles: `charles`
+- confirmación de repetición (replay): `burp`
 
-## Support Layer
+## Capa de Soporte
 
 - `everything_search`
 - `context7`
@@ -40,8 +40,8 @@
 - `memory`
 - `sequential_thinking`
 
-## Rule
+## Regla
 
-Do not start payload testing in Burp when the request is still opaque.
-For Android external URL testing, do not reverse first when screenshots, logs, and packet visibility can answer the problem.
-Do not choose browser references by clue words before the current stage is known.
+No comiences las pruebas de payload en Burp cuando la solicitud todavía sea opaca.
+Para pruebas de URL externa en Android, no hagas ingeniería inversa primero cuando las capturas de pantalla, los logs, y la visibilidad de paquetes puedan responder el problema.
+No elijas referencias de navegador por palabras clave antes de conocer la etapa actual.

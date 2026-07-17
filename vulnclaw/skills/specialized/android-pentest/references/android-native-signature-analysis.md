@@ -1,43 +1,43 @@
-# Android Native Signature Analysis
+# Análisis de Firmas Nativas en Android
 
-Use this file when Android sign or crypto logic crosses from Java into JNI or `.so`.
-Only enter this branch after runtime packet checks, Java triage, or hooks show that native analysis is actually needed.
+Usa este archivo cuando la lógica de firma (sign) o criptografía de Android cruce de Java a JNI o `.so`.
+Entra en esta rama únicamente después de que las verificaciones de paquetes en runtime, la triage de Java, o los hooks demuestren que el análisis nativo realmente es necesario.
 
-## Owns
+## Responsabilidades
 
-- Java-to-native boundary proof
-- SO identification
-- JNI style classification
-- native sign-input and sign-output assessment
-- decision on whether deeper native reversing is justified
+- prueba del límite Java-a-nativo
+- identificación del SO
+- clasificación del estilo JNI
+- evaluación de la entrada y salida de firma nativa
+- decisión sobre si un análisis nativo más profundo está justificado
 
-## First Pass
+## Primera Pasada
 
-Prove:
+Demuestra:
 
-- which Java method declares `native`
-- which `System.loadLibrary` or `System.load` call loads the target library
-- whether JNI is static export or dynamic registration
-- which parameters cross the boundary
-- whether the return value is the final sign or an intermediate token
+- qué método Java declara `native`
+- qué llamada `System.loadLibrary` o `System.load` carga la biblioteca objetivo
+- si el JNI es de exportación estática o de registro dinámico
+- qué parámetros cruzan el límite
+- si el valor de retorno es la firma final o un token intermedio
 
-## Do Not Escalate Yet When
+## No Escalar Todavía Cuando
 
-- Java still exposes the needed request values
-- replay can reuse the app or hook point
-- the user does not need offline execution
+- Java todavía expone los valores de solicitud necesarios
+- la repetición (replay) puede reutilizar la app o el punto de hook
+- el usuario no necesita ejecución fuera de línea (offline)
 
-## Escalate Further Only When
+## Escalar Más Solo Cuando
 
-- offline generation is required
-- deeper algorithm recovery is required
-- unidbg or SO-level execution is explicitly needed
+- se requiere generación fuera de línea
+- se requiere una recuperación de algoritmo más profunda
+- se necesita explícitamente unidbg o ejecución a nivel de SO
 
-## Output
+## Salida
 
-- Java entrypoint
-- SO name
-- JNI style
-- input tuple
-- output role
-- recommended next step
+- punto de entrada Java
+- nombre del SO
+- estilo JNI
+- tupla de entrada
+- rol de la salida
+- siguiente paso recomendado

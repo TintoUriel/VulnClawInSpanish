@@ -1,186 +1,186 @@
-# Browser JS Signing Workflow
+# Flujo de Trabajo de Firma JS en Navegador
 
-Use this file when the target request is produced in the browser and the current blocker is sign generation, token flow, cookie hops, worker or wasm indirection, anti-bot logic, or browser versus local divergence.
+Usa este archivo cuando la solicitud objetivo se produzca en el navegador y el bloqueo actual sea la generación de firma (sign), el flujo de token, saltos de cookie, indirección de worker o wasm, lógica anti-bot, o divergencia entre navegador y local.
 
-## Mission
+## Misión
 
-Keep browser JS reverse on a staged spine:
+Mantén la ingeniería inversa de JS en navegador sobre un eje por etapas:
 
-`intake -> evidence -> locate -> recover -> runtime -> validation -> replay`
+`recepción (intake) -> evidencia -> localizar -> recuperar -> runtime -> validación -> repetición (replay)`
 
-Do not pick the next step from clue words alone. Pick it from engineering state.
+No elijas el siguiente paso solo a partir de palabras clave. Elígelo a partir del estado de la ingeniería.
 
-## Intake Contract
+## Contrato de Recepción (Intake)
 
-Start from this block:
+Comienza desde este bloque:
 
 ```text
-URL or target page:
-Target request / field / cookie / message:
-Trigger action:
-Current symptom:
-Known evidence:
-Goal:
-Constraints:
+URL o página objetivo:
+Solicitud / campo / cookie / mensaje objetivo:
+Acción disparadora:
+Síntoma actual:
+Evidencia conocida:
+Objetivo:
+Restricciones:
 ```
 
-Then answer:
+Luego responde:
 
-- is the target request real or still guessed
-- is the write boundary proven, partial, or unknown
-- is the blocker shell reduction, runtime divergence, or checkpoint proof
-- what artifact must be updated next
+- si la solicitud objetivo es real o todavía es una suposición
+- si el límite de escritura está probado, parcial, o desconocido
+- si el bloqueo es reducción de shell, divergencia en runtime, o prueba de checkpoint
+- qué artefacto debe actualizarse a continuación
 
-## Evidence Rule
+## Regla de Evidencia
 
-Do not enter stage work if the real request chain is still guessed. First capture a real sample and prove:
+No entres en el trabajo por etapas si la cadena de solicitud real todavía es una suposición. Primero captura una muestra real y demuestra:
 
-- the target request or message
-- the trigger action
-- the first dependent upstream request or response when state is involved
-- whether the current sample is normal state, risk state, or still mixed
+- la solicitud o mensaje objetivo
+- la acción disparadora
+- la primera solicitud o respuesta upstream dependiente cuando hay estado involucrado
+- si la muestra actual es estado normal, estado de riesgo, o todavía mixto
 
-Keep a persistent request-chain record. At minimum, preserve:
+Mantén un registro persistente de la cadena de solicitud. Como mínimo, conserva:
 
-- request sample
-- sink or write boundary
-- upstream hops
-- runtime notes
-- replay prerequisites
+- muestra de solicitud
+- sink o límite de escritura
+- saltos upstream
+- notas de runtime
+- prerrequisitos de repetición (replay)
 
-## Stage Selection
+## Selección de Etapa
 
 ### `locate`
 
-Enter when the request, sink, write boundary, or upstream dependency chain is still unproven.
+Entra cuando la solicitud, el sink, el límite de escritura, o la cadena de dependencias upstream todavía no estén probados.
 
-Own these questions:
+Responsabilízate de estas preguntas:
 
-- where the target value is finally written
-- which action, callback, or response triggers the write
-- what upstream state feeds the write
-- where normal and risk paths fork
+- dónde se escribe finalmente el valor objetivo
+- qué acción, callback, o respuesta dispara la escritura
+- qué estado upstream alimenta la escritura
+- dónde se bifurcan las rutas normal y de riesgo
 
-Default boundary model:
+Modelo de límite por defecto:
 
 ```text
 writer <- builder <- entry <- source
 ```
 
-Stop when the next blocker is no longer request discovery.
+Detente cuando el siguiente bloqueo ya no sea el descubrimiento de la solicitud.
 
-Detailed reference: `references/browser-locate-and-request-chain.md`
+Referencia detallada: `references/browser-locate-and-request-chain.md`
 
 ### `recover`
 
-Enter only after the boundary is real enough and the next blocker is shell opacity.
+Entra solo después de que el límite sea lo suficientemente real y el siguiente bloqueo sea la opacidad del shell.
 
-Typical blockers:
+Bloqueos típicos:
 
-- webpack bootstrap
-- worker bridge
-- wasm loader
-- dispatcher flattening
-- string tables
-- helper indirection
-- JSVMP-style shells
+- bootstrap de webpack
+- puente de worker
+- cargador de wasm
+- aplanamiento de dispatcher
+- tablas de strings
+- indirección de helpers
+- shells estilo JSVMP
 
-Reduce only the layer that blocks progress. Stop as soon as you have a readable or callable logic contract.
+Reduce solo la capa que bloquea el progreso. Detente tan pronto tengas un contrato de lógica legible o invocable.
 
-Detailed reference: `references/browser-recover-and-shell-reduction.md`
+Referencia detallada: `references/browser-recover-and-shell-reduction.md`
 
 ### `runtime`
 
-Enter when the boundary and shell are already clear but browser execution and local execution diverge.
+Entra cuando el límite y el shell ya sean claros pero la ejecución en el navegador y la ejecución local diverjan.
 
-Classify the first meaningful divergence before patching:
+Clasifica la primera divergencia significativa antes de parchear:
 
-- missing object
-- missing state
+- objeto faltante
+- estado faltante
 - anti-debugging
-- unstable source
-- risk branch
+- fuente inestable
+- rama de riesgo
 
-Use a first-divergence comparison table and keep the runtime dependency set minimal.
+Usa una tabla de comparación de primera divergencia y mantén el conjunto de dependencias de runtime al mínimo.
 
-Detailed reference: `references/browser-runtime-fit-and-risk.md`
+Referencia detallada: `references/browser-runtime-fit-and-risk.md`
 
 ### `validation`
 
-Enter when the remaining work is equivalence proof.
+Entra cuando el trabajo restante sea la prueba de equivalencia.
 
-Compare checkpoints, not just the final output:
+Compara checkpoints, no solo la salida final:
 
-- request body before sign
-- sign input tuple
-- sign output
-- encrypted payload
-- header set
-- cookie or storage mutation
+- cuerpo de la solicitud antes de la firma
+- tupla de entrada de firma
+- salida de firma
+- payload cifrado
+- conjunto de headers
+- mutación de cookie o storage
 
-The result must state what is proven, what is still open, and which evidence supports each claim.
+El resultado debe indicar qué está probado, qué sigue abierto, y qué evidencia respalda cada afirmación.
 
-Detailed reference: `references/browser-validation-and-handoff.md`
+Referencia detallada: `references/browser-validation-and-handoff.md`
 
-## Topic Routing Inside The Browser Branch
+## Enrutamiento de Temas Dentro de la Rama de Navegador
 
-After the stage is selected, apply the matching topic lens:
+Después de seleccionar la etapa, aplica el lente de tema correspondiente:
 
-| Current blocker | Use inside the stage |
+| Bloqueo actual | Usar dentro de la etapa |
 | --- | --- |
-| `sign`, `token`, dynamic headers, encrypted fields | crypto entry locating and boundary observation |
-| `worker`, `wasm`, `webpack/runtime`, loader callbacks | bridge and shell reduction |
-| `hasDebug`, endless `debugger`, branch flips | anti-debug and runtime diagnosis |
-| `cookie` hops, WebSocket, protobuf, SSE, ack or renewal | protocol and state-chain expansion |
-| `basearr`, browser/local mismatch, missing browser state | minimal environment fit |
+| `sign`, `token`, headers dinámicos, campos cifrados | localización de entrada criptográfica y observación de límites |
+| `worker`, `wasm`, `webpack/runtime`, callbacks de cargador | puente y reducción de shell |
+| `hasDebug`, `debugger` infinito, cambios de rama | anti-debug y diagnóstico de runtime |
+| saltos de `cookie`, WebSocket, protobuf, SSE, ack o renovación | expansión de protocolo y cadena de estado |
+| `basearr`, discrepancia navegador/local, estado de navegador faltante | ajuste de entorno mínimo |
 
-## Browser Tool Order
+## Orden de Herramientas de Navegador
 
-1. `chrome_devtools` to capture the real request and initiator
-2. `js_reverse` to trace boundary, shell, runtime, or checkpoints
-3. `burp` only after one replay path is stable
+1. `chrome_devtools` para capturar la solicitud real y el iniciador
+2. `js_reverse` para trazar el límite, shell, runtime, o checkpoints
+3. `burp` solo después de que una ruta de repetición (replay) sea estable
 
-## Handoff Discipline
+## Disciplina de Traspaso
 
-Whenever the stage changes, output a compact handoff card:
+Cada vez que cambie la etapa, emite una tarjeta de traspaso compacta:
 
 ```text
---- Stage Handoff ---
-From: {previous stage}
-To: {next stage}
-Proven: {request, boundary, upstream chain, runtime or recovery facts}
-Open: {questions the next stage must answer}
-Invalidated: {stale assumptions or "none"}
+--- Traspaso de Etapa ---
+Desde: {etapa anterior}
+Hacia: {siguiente etapa}
+Probado: {solicitud, límite, cadena upstream, hechos de runtime o recuperación}
+Abierto: {preguntas que la siguiente etapa debe responder}
+Invalidado: {supuestos obsoletos o "ninguno"}
 ```
 
-Do not carry guesses forward as facts.
+No lleves suposiciones adelante como si fueran hechos.
 
-## Replay Exit Criteria
+## Criterios de Salida de Repetición (Replay)
 
-Do not move into Burp fuzzing until you can explain:
+No pases al fuzzing en Burp hasta que puedas explicar:
 
-- where the target field is written
-- which inputs are stable constants
-- which inputs come from cookies, storage, upstream responses, or browser lifecycle
-- whether request order or navigation state matters
-- which fields are safe to mutate
+- dónde se escribe el campo objetivo
+- qué entradas son constantes estables
+- qué entradas provienen de cookies, storage, respuestas upstream, o del ciclo de vida del navegador
+- si el orden de la solicitud o el estado de navegación importan
+- qué campos son seguros de mutar
 
-## Output Contract
+## Contrato de Salida
 
-Deliver:
+Entrega:
 
-- current stage and why it is the correct stage
-- request-chain proof
-- sink or write boundary
-- recovered shell or runtime conclusions when applicable
-- a Burp-ready baseline request or a precise statement of the remaining blocker
+- la etapa actual y por qué es la etapa correcta
+- prueba de la cadena de solicitud
+- el sink o límite de escritura
+- las conclusiones de shell o runtime recuperadas cuando aplique
+- una solicitud de línea base lista para Burp o una declaración precisa del bloqueo restante
 
-Record template: `references/browser-request-chain-template.md`
+Plantilla de registro: `references/browser-request-chain-template.md`
 
-## Recommended Read Order Inside This Branch
+## Orden de Lectura Recomendado Dentro de Esta Rama
 
-1. `browser-locate-and-request-chain.md` when the boundary is not real yet
-2. `browser-recover-and-shell-reduction.md` when shell opacity is the blocker
-3. `browser-runtime-fit-and-risk.md` when browser/local execution diverges
-4. `browser-validation-and-handoff.md` when the remaining work is proof or stage transfer
-5. `browser-request-chain-template.md` when you need a persistent record or handoff artifact
+1. `browser-locate-and-request-chain.md` cuando el límite todavía no sea real
+2. `browser-recover-and-shell-reduction.md` cuando la opacidad del shell sea el bloqueo
+3. `browser-runtime-fit-and-risk.md` cuando la ejecución navegador/local diverja
+4. `browser-validation-and-handoff.md` cuando el trabajo restante sea prueba o traspaso de etapa
+5. `browser-request-chain-template.md` cuando necesites un registro persistente o un artefacto de traspaso

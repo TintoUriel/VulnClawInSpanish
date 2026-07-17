@@ -1,6 +1,6 @@
-# Android Signature Reverse Template
+# Plantilla de Ingeniería Inversa de Firmas Android
 
-Use this template for Android sign, token, encrypt, decrypt, JNI, interceptor, and replay tasks.
+Usa esta plantilla para tareas de firma (sign), token, cifrado, descifrado, JNI, interceptor, y repetición (replay) en Android.
 
 ## Template
 
@@ -101,15 +101,15 @@ Activity / Fragment / Service
 - Sugerencia de siguiente paso：
 ```
 
-## Minimum Required Fields
+## Campos Mínimos Requeridos
 
-Even in a compact record, keep:
+Incluso en un registro compacto, conserva:
 
-- APK or package
-- target request
-- real call-flow summary
-- network stack
-- sign or crypto location
-- Java versus JNI conclusion
-- one runtime hook or explicit reason why runtime is not needed
-- Burp replay baseline or explicit blocker
+- APK o paquete
+- solicitud objetivo
+- resumen real de la cadena de llamadas
+- pila de red
+- ubicación de firma (sign) o cifrado
+- conclusión de Java versus JNI
+- un hook en runtime o una razón explícita de por qué el runtime no es necesario
+- línea base de reenvío en Burp o bloqueo explícito

@@ -1,25 +1,25 @@
-# Android Static Triage And Call Flow
+# Triage Estático y Flujo de Llamadas en Android
 
-Use this file first for Android request, sign, and crypto tasks after runtime-first Android pentest work has shown that network-layer testing alone is not enough.
-It is not the default entrypoint for a general authorized Android app pentest.
+Usa este archivo primero para tareas de solicitud, firma, y criptografía en Android después de que el trabajo de pentest de Android centrado en runtime haya demostrado que las pruebas de capa de red por sí solas no son suficientes.
+No es el punto de entrada por defecto para un pentest general de app Android autorizada.
 
-## Owns
+## Responsabilidades
 
-- manifest and entry-component reading
-- package and architecture survey
-- network stack identification
-- call-flow tracing from UI or component to request execution
-- sign-path and encrypt-path location in Java
+- lectura del manifest y de los componentes de entrada
+- relevamiento de paquetes y arquitectura
+- identificación de la pila de red
+- trazado del flujo de llamadas desde la UI o componente hasta la ejecución de la solicitud
+- localización de la ruta de firma y de cifrado en Java
 
-## Static Order
+## Orden Estático
 
-1. read `AndroidManifest.xml`
-2. identify application class and entry components
-3. find package areas around `api`, `network`, `data`, `repository`, `service`, `retrofit`, `http`
-4. identify the network framework
-5. trace the request chain down to builder, interceptor, signer, encryptor, or serializer
+1. lee `AndroidManifest.xml`
+2. identifica la clase de aplicación y los componentes de entrada
+3. encuentra las áreas de paquetes alrededor de `api`, `network`, `data`, `repository`, `service`, `retrofit`, `http`
+4. identifica el framework de red
+5. traza la cadena de solicitud hasta el builder, interceptor, firmador (signer), cifrador, o serializador
 
-## Common Call Flow
+## Flujo de Llamadas Común
 
 ```text
 Activity / Fragment / Service
@@ -29,20 +29,20 @@ Activity / Fragment / Service
 -> Signer / Encryptor / Serializer
 ```
 
-## Strong Anchors
+## Anclas Fuertes
 
-- Retrofit annotations
-- `Request.Builder`, `HttpUrl`, interceptor classes
-- hardcoded URLs, headers, and token names
+- anotaciones de Retrofit
+- `Request.Builder`, `HttpUrl`, clases interceptoras
+- URLs, headers, y nombres de token codificados
 - `sign`, `token`, `encrypt`, `decrypt`, `cipher`, `sha`, `hmac`, `md5`
 - `native`, `System.loadLibrary`, `System.load`
 
-## Completion Standard
+## Estándar de Finalización
 
-Stop static triage when you can state:
+Detén el triage estático cuando puedas indicar:
 
-- the network stack
-- the request method and path
-- where headers and body are written
-- where sign inputs converge
-- whether the path is Java-only, mixed Java/JNI, or mostly native
+- la pila de red
+- el método y ruta de la solicitud
+- dónde se escriben los headers y el cuerpo
+- dónde convergen las entradas de firma
+- si la ruta es exclusivamente Java, mixta Java/JNI, o mayormente nativa

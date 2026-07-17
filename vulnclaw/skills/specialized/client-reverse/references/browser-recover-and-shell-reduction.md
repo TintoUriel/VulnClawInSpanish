@@ -1,49 +1,49 @@
-# Browser Recover And Shell Reduction
+# Recuperación y Reducción de Shell en Navegador
 
-Use this file only after the browser request boundary is already real and the next blocker is shell opacity.
+Usa este archivo únicamente después de que el límite de la solicitud en el navegador ya sea real y el siguiente bloqueo sea la opacidad del shell.
 
-## Owns
+## Responsabilidades
 
-- choosing the smallest layer to open
-- deciding whether the task needs semantic explanation, key-operator extraction, or a minimal rebuild
-- preserving black-box reuse when deeper deobfuscation is unnecessary
+- elegir la capa más pequeña a abrir
+- decidir si la tarea necesita explicación semántica, extracción de operador clave, o una reconstrucción mínima
+- preservar la reutilización de caja negra cuando la deofuscación más profunda sea innecesaria
 
-## First Layer Selection
+## Selección de la Primera Capa
 
-| Symptom | First layer to open |
+| Síntoma | Primera capa a abrir |
 | --- | --- |
-| callable path still hidden | outer container |
-| large dispatcher or VM flow | dispatcher layer |
-| parameters visible but state carrier opaque | state carrier |
-| logic appears after `worker` or `wasm` bridge | bridge layer |
-| write-back point known but algorithm opaque | core operator |
+| ruta invocable todavía oculta | contenedor externo |
+| flujo grande de dispatcher o VM | capa de dispatcher |
+| parámetros visibles pero portador de estado opaco | portador de estado |
+| la lógica aparece después de un puente `worker` o `wasm` | capa de puente |
+| punto de escritura conocido pero algoritmo opaco | operador central |
 
-## Recovery Levels
+## Niveles de Recuperación
 
-### Level A
+### Nivel A
 
-Recover only the critical operator or helper needed to explain the target field.
+Recupera solo el operador o helper crítico necesario para explicar el campo objetivo.
 
-### Level B
+### Nivel B
 
-Recover dispatcher flow plus critical state carriers when operator meaning depends on state flow.
+Recupera el flujo del dispatcher más los portadores de estado críticos cuando el significado del operador depende del flujo de estado.
 
-### Level C
+### Nivel C
 
-Build the smallest verifiable fragment or interpreter only when levels A and B cannot support the next stage.
+Construye el fragmento o intérprete verificable más pequeño solo cuando los niveles A y B no puedan sostener la siguiente etapa.
 
-## Prefer Black-Box Reuse When
+## Prefiere la Reutilización de Caja Negra Cuando
 
-- input and output boundaries are already known
-- the target module or bridge entry is found
-- the blocker is container logic, not business logic
+- los límites de entrada y salida ya se conocen
+- se encuentra el módulo objetivo o el punto de entrada del puente
+- el bloqueo es lógica de contenedor, no lógica de negocio
 
-## Escalate Deeper When
+## Escala Más Profundo Cuando
 
-- replay is unstable because of hidden shared state
-- the bridge contract itself is opaque
-- the module contains another VM or protocol shell that still blocks progress
+- la repetición (replay) es inestable debido a estado compartido oculto
+- el contrato del puente en sí es opaco
+- el módulo contiene otra VM o shell de protocolo que todavía bloquea el progreso
 
-## Completion Standard
+## Estándar de Finalización
 
-Stop recover when the current reduction depth is already enough for runtime fit or validation.
+Detén la recuperación cuando la profundidad de reducción actual ya sea suficiente para el ajuste en runtime o la validación.

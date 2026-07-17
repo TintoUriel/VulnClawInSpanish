@@ -1,44 +1,44 @@
-# Complex Client Reverse Workflow
+# Flujo de Trabajo Complejo de Ingeniería Inversa de Cliente
 
-## Goal
+## Objetivo
 
-Recover the real request-production chain so the interface can be reproduced outside the client.
+Recuperar la cadena real de producción de la solicitud para que la interfaz pueda reproducirse fuera del cliente.
 
-## Stages
+## Etapas
 
-1. classify the client
-2. choose the smallest platform branch that can prove the request chain
-3. statically find request and crypto code
-4. dynamically confirm signer, serializer, and state values only when static proof is no longer enough
-5. rebuild the request recipe
-6. replay in Burp
-7. move into Web or AI attack testing only after replay is stable
+1. clasificar el cliente
+2. elegir la rama de plataforma más pequeña que pueda probar la cadena de solicitud
+3. encontrar estáticamente el código de solicitud y criptografía
+4. confirmar dinámicamente el firmador (signer), serializador, y valores de estado solo cuando la prueba estática ya no sea suficiente
+5. reconstruir la receta de la solicitud
+6. repetir (replay) en Burp
+7. pasar a pruebas de ataque Web o de IA solo después de que la repetición (replay) sea estable
 
 ## Android
 
-- start in `jadx`
-- finish manifest, package, network stack, request-builder, signer, and JNI triage first
-- use `scrcpy_vision` to steer UI-dependent runtime paths when the next packet depends on what is visible on screen
-- verify on-wire behavior with `adb_mcp` and `charles`
-- hook signer or builder with `frida_mcp` only after the static target is narrow enough
-- move to `burp`
+- comienza en `jadx`
+- termina primero el triage de manifest, paquete, pila de red, builder de solicitud, firmador (signer), y JNI
+- usa `scrcpy_vision` para dirigir rutas de runtime dependientes de la UI cuando el siguiente paquete dependa de lo que sea visible en pantalla
+- verifica el comportamiento en el cable (on-wire) con `adb_mcp` y `charles`
+- engancha (hook) el firmador o builder con `frida_mcp` solo después de que el objetivo estático sea lo suficientemente acotado
+- pasa a `burp`
 
-## Native desktop
+## Escritorio nativo
 
-- locate files with `everything_search`
-- reverse code with `ida_pro_mcp`
-- capture runtime values with `frida_mcp`
-- move to `burp`
+- localiza archivos con `everything_search`
+- haz ingeniería inversa de código con `ida_pro_mcp`
+- captura valores de runtime con `frida_mcp`
+- pasa a `burp`
 
-## Browser JS
+## JS de Navegador
 
-- inspect live requests with `chrome_devtools`
-- choose the current stage from `locate`, `recover`, `runtime`, or `validation`
-- trace initiators and signer functions with `js_reverse`
-- replay with `burp`
+- inspecciona solicitudes en vivo con `chrome_devtools`
+- elige la etapa actual entre `locate`, `recover`, `runtime`, o `validation`
+- traza los iniciadores y las funciones de firma con `js_reverse`
+- repite (replay) con `burp`
 
-## Detailed Branches
+## Ramas Detalladas
 
-- browser JS staged flow: `browser-js-signing-workflow.md`
-- Android sign and crypto flow: `android-signing-and-crypto-workflow.md`
-- Android UI-driven packet trigger flow: `android-ui-driven-observation-and-packet-loop.md`
+- flujo por etapas de JS de navegador: `browser-js-signing-workflow.md`
+- flujo de firma y criptografía en Android: `android-signing-and-crypto-workflow.md`
+- flujo de disparador de paquete guiado por UI en Android: `android-ui-driven-observation-and-packet-loop.md`

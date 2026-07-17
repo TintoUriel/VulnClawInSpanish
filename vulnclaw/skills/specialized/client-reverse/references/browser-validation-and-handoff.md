@@ -1,48 +1,48 @@
-# Browser Validation And Handoff
+# Validación y Traspaso en Navegador
 
-Use this file when the remaining browser-side work is checkpoint proof, equivalence proof, or stage handoff.
+Usa este archivo cuando el trabajo restante del lado del navegador sea la prueba de checkpoint, la prueba de equivalencia, o el traspaso de etapa.
 
-## Checkpoints To Compare
+## Checkpoints a Comparar
 
-Do not compare only the final output. Compare:
+No compares solo la salida final. Compara:
 
-- pre-sign payload
-- sign input tuple
-- sign output
-- encrypted payload
-- final request body
-- final headers
-- cookie or storage mutation when it affects later requests
+- payload previo a la firma (pre-sign)
+- tupla de entrada de firma
+- salida de firma
+- payload cifrado
+- cuerpo final de la solicitud
+- headers finales
+- mutación de cookie o storage cuando afecte solicitudes posteriores
 
-## Proof Rules
+## Reglas de Prueba
 
-Each checkpoint must state:
+Cada checkpoint debe indicar:
 
-- fixed input sample
-- browser-side value
-- local or recovered-side value
-- whether the checkpoint matches
-- what evidence supports the comparison
-- what gap remains if it does not match
+- muestra de entrada fija
+- valor del lado del navegador
+- valor del lado local o recuperado
+- si el checkpoint coincide
+- qué evidencia respalda la comparación
+- qué brecha permanece si no coincide
 
-## Handoff Card
+## Tarjeta de Traspaso
 
-When the stage changes, emit:
+Cuando la etapa cambie, emite:
 
 ```text
---- Stage Handoff ---
-From: {previous stage}
-To: {next stage}
-Proven: {request, boundary, upstream chain, recovery or runtime facts}
-Open: {questions for the next stage}
-Invalidated: {stale assumptions or "none"}
+--- Traspaso de Etapa ---
+Desde: {etapa anterior}
+Hacia: {siguiente etapa}
+Probado: {solicitud, límite, cadena upstream, hechos de recuperación o runtime}
+Abierto: {preguntas para la siguiente etapa}
+Invalidado: {supuestos obsoletos o "ninguno"}
 ```
 
-## Completion Standard
+## Estándar de Finalización
 
-Validation is complete only when the next operator can see:
+La validación está completa solo cuando el siguiente operador puede ver:
 
-- what is equivalent
-- what is not equivalent
-- what evidence supports each statement
-- what remains open
+- qué es equivalente
+- qué no es equivalente
+- qué evidencia respalda cada afirmación
+- qué permanece abierto
