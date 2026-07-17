@@ -1,75 +1,75 @@
-# 密码学攻击分类路由
+# Enrutamiento de clasificación de ataques criptográficos
 
-根据题目给出的已知信息，快速判断应该使用哪种攻击方法。
+Determina rápidamente qué método de ataque usar según la información conocida proporcionada por el reto.
 
-## 决策树
+## Árbol de decisión
 
 ```
-已知条件
-├── 知道明文 + 密文?
-│   ├── 同一密钥加密多次? → XOR/流密码分析
-│   └── 单次加密? → 分析加密模式
-├── 知道密文 + 密钥?
-│   ├── 对称加密 → 直接解密
-│   └── 非对称加密 → RSA/ECC 攻击
-├── 已知 n, e, c (RSA)?
-│   ├── e 很小 → 小指数攻击
-│   ├── 多组共 n → 共模攻击
-│   ├── d 很小 → Wiener 攻击
-│   ├── p-1 光滑 → Pollard p-1
-│   └── 尝试在线分解 (factordb)
-├── 椭圆曲线参数?
-│   ├── 阶光滑 → Pohlig-Hellman
-│   ├── 异常曲线 → Smart 攻击
-│   └── ECDSA nonce 重用 → 私钥恢复
-├── 已知 PRNG 输出序列?
-│   ├── MT19937 → 状态恢复
-│   ├── LCG → 参数恢复
+Condiciones conocidas
+├── ¿Se conoce el texto plano + el texto cifrado?
+│   ├── ¿La misma clave cifrada varias veces? → análisis XOR/cifrado de flujo
+│   └── ¿Cifrado único? → analizar el modo de cifrado
+├── ¿Se conoce el texto cifrado + la clave?
+│   ├── Cifrado simétrico → descifrar directamente
+│   └── Cifrado asimétrico → ataques RSA/ECC
+├── ¿Se conocen n, e, c (RSA)?
+│   ├── e muy pequeño → ataque de exponente pequeño
+│   ├── varios grupos con n común → ataque de módulo común
+│   ├── d muy pequeño → ataque de Wiener
+│   ├── p-1 suave (smooth) → Pollard p-1
+│   └── probar factorización online (factordb)
+├── ¿Parámetros de curva elíptica?
+│   ├── orden suave → Pohlig-Hellman
+│   ├── curva anómala → ataque de Smart
+│   └── nonce de ECDSA reutilizado → recuperación de clave privada
+├── ¿Se conoce la secuencia de salida del PRNG?
+│   ├── MT19937 → recuperación de estado
+│   ├── LCG → recuperación de parámetros
 │   └── LFSR → Berlekamp-Massey
-└── 古典密码?
-    ├── 凯撒/ROT13 → 暴力
-    ├── Vigenere → Kasiski + 频率
-    └── One-Time Pad 重用 → 统计攻击
+└── ¿Cifrado clásico?
+    ├── César/ROT13 → fuerza bruta
+    ├── Vigenère → Kasiski + análisis de frecuencias
+    └── One-Time Pad reutilizado → ataque estadístico
 ```
 
-## RSA 攻击快速选择
+## Selección rápida de ataques a RSA
 
-| 已知 | 攻击 |
+| Conocido | Ataque |
 |------|------|
-| n, e, c, e=3 | 小指数开根 |
-| 多组 (n, c), e 相同, 明文相同 | Håstad 广播 |
-| 多组 (n, c), n 相同, e 不同 | 共模攻击 |
-| n, e, d 很小的近似 | Wiener 攻击 |
-| n 可分解, p≈q | Fermat 分解 |
-| n 可分解, p-1 光滑 | Pollard p-1 |
-| 已知部分明文 | Coppersmith |
-| factordb 可查 | 在线分解 |
+| n, e, c, e=3 | Raíz de exponente pequeño |
+| Varios grupos (n, c), mismo e, mismo texto plano | Difusión de Håstad |
+| Varios grupos (n, c), mismo n, distinto e | Ataque de módulo común |
+| n, e, aproximación de d muy pequeña | Ataque de Wiener |
+| n factorizable, p≈q | Factorización de Fermat |
+| n factorizable, p-1 suave | Pollard p-1 |
+| Se conoce parte del texto plano | Coppersmith |
+| Consultable en factordb | Factorización online |
 
-## AES/分组密码攻击快速选择
+## Selección rápida de ataques a AES/cifrados de bloque
 
-| 场景 | 攻击 |
+| Escenario | Ataque |
 |------|------|
-| ECB 模式 | 模式分析 + 块重排 |
-| CBC 模式, 可控 IV | IV 翻转攻击 |
-| CBC 模式, Padding Oracle | Padding Oracle 攻击 |
-| CTR/GCM, nonce 重用 | 密钥流恢复 |
-| 已知部分明文 | XOR 恢复密钥流 |
+| Modo ECB | Análisis de patrones + reordenamiento de bloques |
+| Modo CBC, IV controlable | Ataque de volteo de IV |
+| Modo CBC, Padding Oracle | Ataque Padding Oracle |
+| CTR/GCM, nonce reutilizado | Recuperación del keystream |
+| Se conoce parte del texto plano | Recuperación del keystream mediante XOR |
 
-## PRNG 攻击快速选择
+## Selección rápida de ataques a PRNG
 
-| 场景 | 攻击 |
+| Escenario | Ataque |
 |------|------|
-| Python random(), 624 个输出 | MT19937 状态恢复 |
-| 连续 3 个 LCG 输出 | 参数恢复 |
-| LFSR 输出序列 | Berlekamp-Massey |
-| RC4 (丢弃前 3072 字节后) | RC4 Drop 攻击 |
+| Python random(), 624 salidas | Recuperación de estado de MT19937 |
+| 3 salidas consecutivas de LCG | Recuperación de parámetros |
+| Secuencia de salida de LFSR | Berlekamp-Massey |
+| RC4 (tras descartar los primeros 3072 bytes) | Ataque RC4 Drop |
 
-## 古典密码快速选择
+## Selección rápida de cifrados clásicos
 
-| 密文特征 | 攻击 |
+| Característica del texto cifrado | Ataque |
 |---------|------|
-| 单字符替换 | 频率分析 |
-| 多字符位移 | 凯撒暴力 |
-| 多表替换 | Vigenere Kasiski |
-| 二进制 XOR 多字节 | 频率分析 + 密钥长度估算 |
-| 一次性密码本重用 | XOR 对比攻击 |
+| Sustitución de un solo carácter | Análisis de frecuencias |
+| Desplazamiento de múltiples caracteres | Fuerza bruta César |
+| Sustitución polialfabética | Vigenère Kasiski |
+| XOR binario multibyte | Análisis de frecuencias + estimación de longitud de clave |
+| One-Time Pad reutilizado | Ataque de comparación XOR |

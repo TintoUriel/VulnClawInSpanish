@@ -1,84 +1,84 @@
-# 编码识别速查表
+# Chuleta de identificación de codificaciones
 
-## 快速识别流程
+## Flujo de identificación rápida
 
 ```
-输入字符串
-  ├─ 包含 %XX → URL 编码 → url_decode
-  ├─ 包含 &# 或 &#x → HTML 实体 → html_decode
-  ├─ 包含 \uXXXX → Unicode 转义 → unicode_decode
-  ├─ 包含 .- 且只有点划空格 → Morse → morse_decode
-  ├─ 三段 base64 用 . 连接 → JWT → jwt_decode
-  ├─ 末尾有 = 填充 + A-Za-z0-9+/ → Base64 → base64_decode
-  ├─ 末尾有 = 填充 + A-Z2-7 → Base32 → base32_decode
-  ├─ 纯 hex 字符(0-9a-f) 偶数长度 → Hex → hex_decode
-  ├─ 纯大写字母 + 数字，无填充 → 可能 Base58 → base58_decode
-  ├─ 字母位移特征(如 E→M, A→I) → Caesar → caesar_decode
-  └─ 无法确定 → auto_decode
+Cadena de entrada
+  ├─ Contiene %XX → codificación URL → url_decode
+  ├─ Contiene &# o &#x → entidad HTML → html_decode
+  ├─ Contiene \uXXXX → escape Unicode → unicode_decode
+  ├─ Contiene .- y solo puntos/rayas/espacios → Morse → morse_decode
+  ├─ Tres segmentos base64 unidos por . → JWT → jwt_decode
+  ├─ Relleno = al final + A-Za-z0-9+/ → Base64 → base64_decode
+  ├─ Relleno = al final + A-Z2-7 → Base32 → base32_decode
+  ├─ Solo caracteres hex (0-9a-f), longitud par → Hex → hex_decode
+  ├─ Solo mayúsculas + números, sin relleno → posible Base58 → base58_decode
+  ├─ Patrón de desplazamiento de letras (p. ej. E→M, A→I) → Caesar → caesar_decode
+  └─ No se puede determinar → auto_decode
 ```
 
-## Base64 变体
+## Variantes de Base64
 
-| 变体 | 字符集 | 用途 |
+| Variante | Conjunto de caracteres | Uso |
 |------|--------|------|
-| 标准 Base64 | `A-Za-z0-9+/=` | 通用 |
-| URL-safe Base64 | `A-Za-z0-9-_` | URL 参数 |
-| Base64url (JWT) | `A-Za-z0-9_-` 无填充 | JWT |
+| Base64 estándar | `A-Za-z0-9+/=` | General |
+| Base64 URL-safe | `A-Za-z0-9-_` | Parámetros URL |
+| Base64url (JWT) | `A-Za-z0-9_-` sin relleno | JWT |
 
 ## Base58
 
-| 变体 | 排除字符 | 用途 |
+| Variante | Caracteres excluidos | Uso |
 |------|---------|------|
-| Bitcoin | `0OIl` | 地址编码 |
-| Flickr | `0OIl` | 短URL |
-| Ripple | `0OIl` | 地址编码 |
+| Bitcoin | `0OIl` | Codificación de direcciones |
+| Flickr | `0OIl` | URLs cortas |
+| Ripple | `0OIl` | Codificación de direcciones |
 
-## 常见混淆模式
+## Patrones de ofuscación comunes
 
-### 双重编码
+### Doble codificación
 ```
-原始: admin
-→ URL编码: %61%64%6D%69%6E
-→ 双重URL编码: %2561%2564%256D%2569%256E
+Original: admin
+→ Codificación URL: %61%64%6D%69%6E
+→ Doble codificación URL: %2561%2564%256D%2569%256E
 ```
 
-### Base64 + Hex 链
+### Cadena Base64 + Hex
 ```
-原始: NsScTf.php
+Original: NsScTf.php
 → Hex: 4e73536354662e706870
 → Base64: TnNTY1RmLnBocA==
 ```
 
-### ROT13 嵌套
+### ROT13 anidado
 ```
-原始: password
+Original: password
 → ROT13: cnffjbeq
-→ ROT13 again: password (ROT13 自逆)
+→ ROT13 de nuevo: password (ROT13 es autoinverso)
 ```
 
-## 长度与编码对照
+## Correspondencia entre longitudes y codificaciones
 
-| 原文长度 | Base64 长度 | Hex 长度 | Base32 长度 |
+| Longitud del original | Longitud Base64 | Longitud Hex | Longitud Base32 |
 |---------|------------|---------|------------|
-| 1 byte | 4 chars | 2 chars | 8 chars |
-| 4 bytes | 8 chars | 8 chars | 8 chars |
-| 8 bytes | 12 chars | 16 chars | 16 chars |
-| 16 bytes | 24 chars | 32 chars | 28 chars |
+| 1 byte | 4 caracteres | 2 caracteres | 8 caracteres |
+| 4 bytes | 8 caracteres | 8 caracteres | 8 caracteres |
+| 8 bytes | 12 caracteres | 16 caracteres | 16 caracteres |
+| 16 bytes | 24 caracteres | 32 caracteres | 28 caracteres |
 
-## CTF 常见编码链
+## Cadenas de codificación comunes en CTF
 
-1. **Base64 → 明文** — 最常见
-2. **Base64 → Hex → 明文** — 双重编码
-3. **Base64 → Base64 → 明文** — 嵌套 Base64
-4. **Hex → Base64 → ROT13 → 明文** — 三层编码
-5. **URL编码 → Base64 → 明文** — Web 场景常见
-6. **Morse → Base64 → Hex → 明文** — Crypto 题目
+1. **Base64 → texto plano** — la más común
+2. **Base64 → Hex → texto plano** — doble codificación
+3. **Base64 → Base64 → texto plano** — Base64 anidado
+4. **Hex → Base64 → ROT13 → texto plano** — codificación en tres capas
+5. **Codificación URL → Base64 → texto plano** — común en escenarios Web
+6. **Morse → Base64 → Hex → texto plano** — retos de criptografía
 
-## 解码后验证
+## Verificación tras decodificar
 
-解码后检查结果是否：
-- [ ] 可读 ASCII/UTF-8 文本
-- [ ] 看起来像路径（/xxx/yyy.php）
-- [ ] 看起来像 URL（http://...）
-- [ ] 包含 flag 格式（flag{...}, NSSCTF{...}）
-- [ ] 仍然是编码（需要继续解码）
+Tras decodificar, comprobar si el resultado:
+- [ ] Es texto legible ASCII/UTF-8
+- [ ] Parece una ruta (/xxx/yyy.php)
+- [ ] Parece una URL (http://...)
+- [ ] Contiene un formato de flag (flag{...}, NSSCTF{...})
+- [ ] Sigue estando codificado (requiere seguir decodificando)
